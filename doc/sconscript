@@ -1,0 +1,22 @@
+Import( 'env' )
+import os.path
+
+if 'doxygen' in env['TOOLS']:
+    doc_topdir = env['ROOTBUILD_DIR']
+    doxyfile = env.SubstInFile( '#doc/doxyfile', 'doxyfile.in',
+                                SUBST_DICT = {
+                                    '%JSONCPP_VERSION%' : env['JSONCPP_VERSION'],
+                                    '%TOPDIR%' : env.Dir('#').abspath,
+                                    '%DOC_TOPDIR%' : str(doc_topdir) } )
+    doc_cmd = env.Doxygen( doxyfile )
+    alias_doc_cmd = env.Alias('doc', doc_cmd )
+    env.AlwaysBuild(alias_doc_cmd)
+
+    for dir in doc_cmd:
+        env.Alias('doc', env.Install( '#' + dir.path, '#README.txt' ) )
+        filename = os.path.split(dir.path)[1]
+        targz_path = os.path.join( env['DIST_DIR'], '%s.tar.gz' % filename )
+        zip_doc_cmd = env.TarGz( targz_path, [env.Dir(dir)],
+                                 TARGZ_BASEDIR = doc_topdir )
+        env.Depends( zip_doc_cmd, alias_doc_cmd )
+        env.Alias( 'doc-dist', zip_doc_cmd )
