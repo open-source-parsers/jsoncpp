@@ -9,21 +9,37 @@ namespace Json {
 
    class Value;
 
+   /** \brief Abstract class for writers.
+    */
+   class JSON_API Writer
+   {
+   public:
+      virtual ~Writer();
+
+      virtual std::string write( const Value &root ) = 0;
+   };
+
    /** \brief Outputs a Value in <a HREF="http://www.json.org">JSON</a> format without formatting (not human friendly).
     *
     * The JSON document is written in a single line. It is not intended for 'human' consumption,
     * but may be usefull to support feature such as RPC where bandwith is limited.
     * \sa Reader, Value
     */
-   class JSON_API FastWriter
+   class JSON_API FastWriter : public Writer
    {
    public:
-      std::string write( const Value &root );
+      FastWriter();
+
+      void enableYAMLCompatibility();
+
+   public: // overridden from Writer
+      virtual std::string write( const Value &root );
 
    private:
       void writeValue( const Value &value );
 
       std::string document_;
+      bool yamlCompatiblityEnabled_;
    };
 
    /** \brief Writes a Value in <a HREF="http://www.json.org">JSON</a> format in a human friendly way.
@@ -49,11 +65,12 @@ namespace Json {
    public:
       StyledWriter();
 
+   public: // overridden from Writer
       /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
        * \param root Value to serialize.
        * \return String containing the JSON document that represent the root value.
        */
-      std::string write( const Value &root );
+      virtual std::string write( const Value &root );
 
    private:
       void writeValue( const Value &value );

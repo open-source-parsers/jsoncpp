@@ -83,7 +83,7 @@ if __name__ == '__main__':
         sys.exit( 1 )
 
     jsontest_executable_path = os.path.normpath( os.path.abspath( sys.argv[1] ) )
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
         input_path = os.path.normpath( os.path.abspath( sys.argv[2] ) )
     else:
         input_path = None

@@ -115,7 +115,8 @@ rewriteValueTree( const std::string &rewritePath,
                   const Json::Value &root, 
                   std::string &rewrite )
 {
-//   Json::FastWriter writer;
+   //Json::FastWriter writer;
+   //writer.enableYAMLCompatibility();
    Json::StyledWriter writer;
    rewrite = writer.write( root );
    FILE *fout = fopen( rewritePath.c_str(), "wt" );

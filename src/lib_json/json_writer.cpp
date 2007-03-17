@@ -67,9 +67,28 @@ std::string valueToQuotedString( const char *value )
    return std::string("\"") + value + "\"";
 }
 
+// Class Writer
+// //////////////////////////////////////////////////////////////////
+Writer::~Writer()
+{
+}
+
 
 // Class FastWriter
 // //////////////////////////////////////////////////////////////////
+
+FastWriter::FastWriter()
+   : yamlCompatiblityEnabled_( false )
+{
+}
+
+
+void 
+FastWriter::enableYAMLCompatibility()
+{
+   yamlCompatiblityEnabled_ = true;
+}
+
 
 std::string 
 FastWriter::write( const Value &root )
@@ -106,33 +125,34 @@ FastWriter::writeValue( const Value &value )
       break;
    case arrayValue:
       {
-         document_ += "[ ";
+         document_ += "[";
          int size = value.size();
          for ( int index =0; index < size; ++index )
          {
             if ( index > 0 )
-               document_ += ", ";
+               document_ += ",";
             writeValue( value[index] );
          }
-         document_ += " ]";
+         document_ += "]";
       }
       break;
    case objectValue:
       {
          Value::Members members( value.getMemberNames() );
-         document_ += "{ ";
+         document_ += "{";
          for ( Value::Members::iterator it = members.begin(); 
                it != members.end(); 
                ++it )
          {
             const std::string &name = *it;
             if ( it != members.begin() )
-               document_ += ", ";
+               document_ += ",";
             document_ += valueToQuotedString( name.c_str() );
-            document_ += " : ";
+            document_ += yamlCompatiblityEnabled_ ? ": " 
+                                                  : ":";
             writeValue( value[name] );
          }
-         document_ += " }";
+         document_ += "}";
       }
       break;
    }
