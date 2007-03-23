@@ -605,7 +605,12 @@ Value::operator >( const Value &other ) const
 bool 
 Value::operator ==( const Value &other ) const
 {
-   if ( type_ != other.type_ )
+   //if ( type_ != other.type_ )
+   // GCC 2.95.3 says:
+   // attempt to take address of bit-field structure member `Json::Value::type_'
+   // Beats me, but a temp solves the problem.
+   int temp = other.type_;
+   if ( type_ != temp )
       return false;
    switch ( type_ )
    {
