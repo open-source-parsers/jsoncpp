@@ -166,6 +166,13 @@ namespace Json {
 #endif // ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
 
    public:
+      /** \brief Create a default Value of the given type.
+        This is a very useful constructor.
+        To create an empty array, pass arrayValue.
+        To create an empty object, pass objectValue.
+        Another Value can then be set to this one by assignment.
+	This is useful since clear() and resize() will not alter types.
+      */
       Value( ValueType type = nullValue );
       Value( Int value );
       Value( UInt value );
@@ -230,11 +237,15 @@ namespace Json {
       UInt size() const;
 
       /// Removes all object members and array elements.
+      /// @pre type() is arrayValue, objectValue, or nullValue
+      /// @post type() is unchanged
       void clear();
 
       /// Resize the array to size elements. 
       /// New elements are initialized to null.
       /// May only be called on nullValue or arrayValue.
+      /// @pre type() is arrayValue or nullValue
+      /// @post type() is arrayValue
       void resize( UInt size );
 
       /// Access an array element (zero based index ).
