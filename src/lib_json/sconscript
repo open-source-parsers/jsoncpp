@@ -1,6 +1,6 @@
-Import( 'env buildLibary' )
+Import( 'env buildLibrary' )
 
-buildLibary( env, Split( """
+buildLibrary( env, Split( """
     json_reader.cpp 
     json_value.cpp 
     json_writer.cpp

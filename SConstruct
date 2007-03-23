@@ -125,14 +125,17 @@ def buildJSONTests( env, target_sources, target_name ):
     check_alias_target = env.Alias( 'check', jsontests_node, RunJSONTests( jsontests_node, jsontests_node ) )
     env.AlwaysBuild( check_alias_target )
 
-def buildLibary( env, target_sources, target_name ):
+def buildLibrary( env, target_sources, target_name ):
     static_lib = env.StaticLibrary( target=target_name + '_${LIB_NAME_SUFFIX}',
+                                    source=target_sources )
+    shared_lib = env.SharedLibrary( target=target_name + '_${LIB_NAME_SUFFIX}',
                                     source=target_sources )
     global lib_dir
     env.Install( lib_dir, static_lib )
+    env.Install( lib_dir, shared_lib )
     env['SRCDIST_ADD']( source=[target_sources] )
 
-Export( 'env env_testing buildJSONExample buildLibary buildJSONTests' )
+Export( 'env env_testing buildJSONExample buildLibrary buildJSONTests' )
 
 def buildProjectInDirectory( target_directory ):
     global build_dir
