@@ -888,6 +888,23 @@ Value::size() const
 }
 
 
+bool 
+Value::empty() const
+{
+   if ( isNull() || isArray() || isObject() )
+      return size() == 0u;
+   else
+      return false;
+}
+
+
+bool
+Value::operator!() const
+{
+   return isNull();
+}
+
+
 void 
 Value::clear()
 {
@@ -1215,6 +1232,13 @@ Value::getMemberNames() const
 //}
 //
 //# endif
+
+
+bool
+Value::isNull() const
+{
+   return type_ == nullValue;
+}
 
 
 bool 

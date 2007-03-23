@@ -233,6 +233,7 @@ namespace Json {
       double asDouble() const;
       bool asBool() const;
 
+      bool isNull() const;
       bool isBool() const;
       bool isInt() const;
       bool isUInt() const;
@@ -248,7 +249,14 @@ namespace Json {
       /// Number of values in array or object
       UInt size() const;
 
-      /// Removes all object members and array elements.
+      /// \brief Return true if empty array, empty object, or null;
+      /// otherwise, false.
+      bool empty() const;
+
+      /// Return isNull()
+      bool operator!() const;
+
+      /// Remove all object members and array elements.
       /// \pre type() is arrayValue, objectValue, or nullValue
       /// \post type() is unchanged
       void clear();
