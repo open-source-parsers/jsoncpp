@@ -317,8 +317,10 @@ namespace Json {
 //      EnumValues enumValues() const;
 //# endif
 
+      /// Comments must be //... or /* ... */
       void setComment( const char *comment,
                        CommentPlacement placement );
+      /// Comments must be //... or /* ... */
       void setComment( const std::string &comment,
                        CommentPlacement placement );
       bool hasComment( CommentPlacement placement ) const;
