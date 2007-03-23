@@ -395,12 +395,17 @@ Reader::readObject( Token &tokenStart )
       Token comma;
       if ( !readToken( comma )
             ||  ( comma.type_ != tokenObjectEnd  &&  
-                  comma.type_ != tokenArraySeparator ) )
+                  comma.type_ != tokenArraySeparator &&
+		  comma.type_ != tokenComment ) )
       {
          return addErrorAndRecover( "Missing ',' or '}' in object declaration", 
                                     comma, 
                                     tokenObjectEnd );
       }
+      bool finalizeTokenOk = true;
+      while ( comma.type_ == tokenComment &&
+              finalizeTokenOk )
+         finalizeTokenOk = readToken( comma );
       if ( comma.type_ == tokenObjectEnd )
          return true;
    }
