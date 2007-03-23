@@ -1103,6 +1103,37 @@ Value::get( const std::string &key,
    return get( key.c_str(), defaultValue );
 }
 
+Value
+Value::removeMember( const char* key )
+{
+   JSON_ASSERT( type_ == nullValue  ||  type_ == objectValue );
+   if ( type_ == nullValue )
+      return null;
+#ifndef JSON_VALUE_USE_INTERNAL_MAP
+   CZString actualKey( key, CZString::noDuplication );
+   ObjectValues::iterator it = value_.map_->find( actualKey );
+   if ( it == value_.map_->end() )
+      return null;
+   Value old(it->second);
+   value_.map_->erase(it);
+   return old;
+#else
+   Value *value = value_.map_->find( key );
+   if (value){
+      Value old(*value);
+      value_.map_.remove( key );
+      return old;
+   } else {
+      return null;
+   }
+#endif
+}
+
+Value
+Value::removeMember( const std::string &key )
+{
+   return removeMember( key.c_str() );
+}
 
 # ifdef JSON_USE_CPPTL
 Value 
@@ -1140,6 +1171,8 @@ Value::Members
 Value::getMemberNames() const
 {
    JSON_ASSERT( type_ == nullValue  ||  type_ == objectValue );
+   if ( type_ == nullValue )
+       return Value::Members();
    Members members;
    members.reserve( value_.map_->size() );
 #ifndef JSON_VALUE_USE_INTERNAL_MAP

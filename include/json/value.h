@@ -270,9 +270,10 @@ namespace Json {
       /// otherwise returns defaultValue.
       Value get( UInt index, 
                  const Value &defaultValue ) const;
-      /// Returns true if index < size().
+      /// Return true if index < size().
       bool isValidIndex( UInt index ) const;
-      /// Append value to array at the end.
+      /// \brief Append value to array at the end.
+      ///
       /// Equivalent to jsonvalue[jsonvalue.size()] = value;
       Value &append( const Value &value );
 
@@ -302,27 +303,41 @@ namespace Json {
       /// Access an object value by name, returns null if there is no member with that name.
       const Value &operator[]( const CppTL::ConstString &key ) const;
 # endif
-      /// Returns the member named key if it exist, defaultValue otherwise.
+      /// Return the member named key if it exist, defaultValue otherwise.
       Value get( const char *key, 
                  const Value &defaultValue ) const;
-      /// Returns the member named key if it exist, defaultValue otherwise.
+      /// Return the member named key if it exist, defaultValue otherwise.
       Value get( const std::string &key,
                  const Value &defaultValue ) const;
 # ifdef JSON_USE_CPPTL
-      /// Returns the member named key if it exist, defaultValue otherwise.
+      /// Return the member named key if it exist, defaultValue otherwise.
       Value get( const CppTL::ConstString &key,
                  const Value &defaultValue ) const;
 # endif
-      /// Returns true if the object has a member named key.
+      /// \brief Remove and return the named member.  
+      ///
+      /// Do nothing if it did not exist.
+      /// \return the removed Value, or null.
+      /// \pre type() is objectValue or nullValue
+      /// \post type() is unchanged
+      Value removeMember( const char* key );
+      /// Same as removeMember(const char*)
+      Value removeMember( const std::string &key );
+
+      /// Return true if the object has a member named key.
       bool isMember( const char *key ) const;
-      /// Returns true if the object has a member named key.
+      /// Return true if the object has a member named key.
       bool isMember( const std::string &key ) const;
 # ifdef JSON_USE_CPPTL
-      /// Returns true if the object has a member named key.
+      /// Return true if the object has a member named key.
       bool isMember( const CppTL::ConstString &key ) const;
 # endif
 
-      // Returns a list of the member names.
+      /// \brief Return a list of the member names.
+      ///
+      /// If null, return an empty list.
+      /// \pre type() is objectValue or nullValue
+      /// \post if type() was nullValue, it remains nullValue
       Members getMemberNames() const;
 
 //# ifdef JSON_USE_CPPTL
@@ -337,6 +352,7 @@ namespace Json {
       void setComment( const std::string &comment,
                        CommentPlacement placement );
       bool hasComment( CommentPlacement placement ) const;
+      /// Include delimiters and embedded newlines.
       std::string getComment( CommentPlacement placement ) const;
 
       std::string toStyledString() const;
@@ -864,13 +880,13 @@ public: // overridden from ValueArrayAllocator
          return computeDistance( other );
       }
 
-      /// Returns either the index or the member name of the referenced value as a Value.
+      /// Return either the index or the member name of the referenced value as a Value.
       Value key() const;
 
-      /// Returns the index of the referenced Value. -1 if it is not an arrayValue.
+      /// Return the index of the referenced Value. -1 if it is not an arrayValue.
       Value::UInt index() const;
 
-      /// Returns the member name of the referenced Value. "" if it is not an objectValue.
+      /// Return the member name of the referenced Value. "" if it is not an objectValue.
       const char *memberName() const;
 
    protected:
