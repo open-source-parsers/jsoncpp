@@ -560,6 +560,7 @@ Reader::decodeString( Token &token, std::string &decoded )
                if ( !decodeUnicodeEscapeSequence( token, current, end, unicode ) )
                   return false;
                // @todo encode unicode as utf8.
+	       // @todo remember to alter the writer too.
             }
             break;
          default:
