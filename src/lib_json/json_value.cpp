@@ -151,7 +151,7 @@ Value::CommentInfo::setComment( const char *text )
    if ( comment_ )
       valueAllocator()->releaseStringValue( comment_ );
    JSON_ASSERT( text );
-   JSON_ASSERT_MESSAGE( text[0]==NULL || text[0]=='/', "Comments must start with /");
+   JSON_ASSERT_MESSAGE( text[0]=='\0' || text[0]=='/', "Comments must start with /");
    // It seems that /**/ style comments are acceptable as well.
    comment_ = valueAllocator()->duplicateStringValue( text );
 }
