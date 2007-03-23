@@ -3,7 +3,7 @@
 #include <utility>
 #include <stdio.h>
 #include <assert.h>
-#include <istream>
+#include <iostream>
 #include <stdexcept>
 
 #if _MSC_VER >= 1400 // VC++ 8.0

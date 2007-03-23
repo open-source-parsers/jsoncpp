@@ -6,7 +6,7 @@
 # include <deque>
 # include <stack>
 # include <string>
-# include <istream>
+# include <iostream>
 
 namespace Json {
 
