@@ -6,6 +6,7 @@
 # include <deque>
 # include <stack>
 # include <string>
+# include <istream>
 
 namespace Json {
 
@@ -44,6 +45,12 @@ namespace Json {
        * \return \c true if the document was successfully parsed, \c false if an error occurred.
        */
       bool parse( const char *beginDoc, const char *endDoc, 
+                  Value &root,
+                  bool collectComments = true );
+
+      /// \brief Parse from input stream.
+      /// \see Json::operator>>(std::istream&, Json::Value&).
+      bool parse( std::istream&,
                   Value &root,
                   bool collectComments = true );
 
@@ -144,6 +151,31 @@ namespace Json {
       bool collectComments_;
    };
 
+   /** \brief Read from 'sin' into 'root'.
+
+    Always keep comments from the input JSON.
+
+    This can be used to read a file into a particular sub-object.
+    For example:
+    \code
+    Json::Value root;
+    cin >> root["dir"]["file"];
+    cout << root;
+    \endcode
+    Result:
+    \verbatim
+    {
+	"dir": {
+	    "file": {
+		// The input stream JSON would be nested here.
+	    }
+	}
+    }
+    \endverbatim
+    \throw std::exception on parse error.
+    \see Json::operator<<()
+   */
+   std::istream& operator>>( std::istream&, Value& );
 
 } // namespace Json
 

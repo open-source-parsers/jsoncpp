@@ -3,6 +3,8 @@
 #include <utility>
 #include <stdio.h>
 #include <assert.h>
+#include <istream>
+#include <stdexcept>
 
 #if _MSC_VER >= 1400 // VC++ 8.0
 #pragma warning( disable : 4996 )   // disable warning about strdup being deprecated.
@@ -50,6 +52,23 @@ Reader::parse( const std::string &document,
    const char *begin = document_.c_str();
    const char *end = begin + document_.length();
    return parse( begin, end, root, collectComments );
+}
+
+bool
+Reader::parse( std::istream& sin,
+               Value &root,
+               bool collectComments )
+{
+   //std::istream_iterator<char> begin(sin);
+   //std::istream_iterator<char> end;
+   // Those would allow streamed input from a file, if parse() were a
+   // template function.
+
+   // Since std::string is reference-counted, this at least does not
+   // create an extra copy.
+   std::string doc;
+   std::getline(sin, doc, (char)EOF);
+   return parse( doc, root, collectComments );
 }
 
 bool 
@@ -715,6 +734,16 @@ Reader::getFormatedErrorMessages() const
          formattedMessage += "See " + getLocationLineAndColumn( error.extra_ ) + " for detail.\n";
    }
    return formattedMessage;
+}
+
+
+std::istream& operator>>( std::istream &sin, Value &root )
+{
+    Json::Reader reader;
+    bool ok = reader.parse(sin, root, true);
+    //JSON_ASSERT( ok );
+    if (!ok) throw std::runtime_error(reader.getFormatedErrorMessages());
+    return sin;
 }
 
 

@@ -2,6 +2,7 @@
 #include <utility>
 #include <assert.h>
 #include <stdio.h>
+#include <ostream>
 
 #if _MSC_VER >= 1400 // VC++ 8.0
 #pragma warning( disable : 4996 )   // disable warning about strdup being deprecated.
@@ -473,6 +474,13 @@ StyledWriter::normalizeEOL( const std::string &text )
          normalized += c;
    }
    return normalized;
+}
+
+std::ostream& operator<<( std::ostream &sout, const Value &root )
+{
+   Json::StyledWriter writer;
+   sout << writer.write(root);
+   return sout;
 }
 
 

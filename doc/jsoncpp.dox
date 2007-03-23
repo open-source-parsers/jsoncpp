@@ -65,6 +65,13 @@ root["indent"]["use_space"] = getCurrentIndentUseSpace();
 Json::StyledWriter writer;
 // Make a new JSON document for the configuration. Preserve original comments.
 std::string outputConfig = writer.write( root );
+
+// You can also use streams.  This will put the contents of any JSON
+// stream at a particular sub-value, if you'd like.
+std::cin >> root["subtree"];
+
+// And you can write to a stream, using the StyledWriter automatically.
+std::cout << root;
 \endcode
 
 \section _plinks Build instructions

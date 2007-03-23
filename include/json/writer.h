@@ -4,6 +4,7 @@
 # include "value.h"
 # include <vector>
 # include <string>
+# include <ostream>
 
 namespace Json {
 
@@ -68,7 +69,7 @@ namespace Json {
    public: // overridden from Writer
       /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
        * \param root Value to serialize.
-       * \return String containing the JSON document that represent the root value.
+       * \return String containing the JSON document that represents the root value.
        */
       virtual std::string write( const Value &root );
 
@@ -101,6 +102,10 @@ namespace Json {
    std::string JSON_API valueToString( double value );
    std::string JSON_API valueToString( bool value );
    std::string JSON_API valueToQuotedString( const char *value );
+
+   /// \brief Output using the StyledWriter.
+   /// \see Json::operator>>()
+   std::ostream& operator<<( std::ostream&, const Value &root );
 
 } // namespace Json
 
