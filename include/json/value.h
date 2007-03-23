@@ -167,11 +167,19 @@ namespace Json {
 
    public:
       /** \brief Create a default Value of the given type.
+
         This is a very useful constructor.
         To create an empty array, pass arrayValue.
         To create an empty object, pass objectValue.
         Another Value can then be set to this one by assignment.
 	This is useful since clear() and resize() will not alter types.
+
+        Examples:
+	\code
+	Json::Value null_value; // null
+	Json::Value arr_value(Json::arrayValue); // []
+	Json::Value obj_value(Json::objectValue); // {}
+	\endcode
       */
       Value( ValueType type = nullValue );
       Value( Int value );
@@ -179,6 +187,7 @@ namespace Json {
       Value( double value );
       Value( const char *value );
       /** \brief Constructs a value from a static string.
+
        * Like other value string constructor but do not duplicate the string for
        * internal storage. The given string must remain alive after the call to this
        * constructor.
@@ -197,6 +206,9 @@ namespace Json {
       ~Value();
 
       Value &operator=( const Value &other );
+      /// Swap values.
+      /// \note Currently, comments are intentionally not swapped, for
+      /// both logic and efficiency.
       void swap( Value &other );
 
       ValueType type() const;
@@ -237,15 +249,15 @@ namespace Json {
       UInt size() const;
 
       /// Removes all object members and array elements.
-      /// @pre type() is arrayValue, objectValue, or nullValue
-      /// @post type() is unchanged
+      /// \pre type() is arrayValue, objectValue, or nullValue
+      /// \post type() is unchanged
       void clear();
 
       /// Resize the array to size elements. 
       /// New elements are initialized to null.
       /// May only be called on nullValue or arrayValue.
-      /// @pre type() is arrayValue or nullValue
-      /// @post type() is arrayValue
+      /// \pre type() is arrayValue or nullValue
+      /// \post type() is arrayValue
       void resize( UInt size );
 
       /// Access an array element (zero based index ).
@@ -273,6 +285,7 @@ namespace Json {
       /// Access an object value by name, returns null if there is no member with that name.
       const Value &operator[]( const std::string &key ) const;
       /** \brief Access an object value by name, create a null member if it does not exist.
+
        * If the object as no entry for that name, then the member name used to store
        * the new entry is not duplicated.
        * Example of use:
