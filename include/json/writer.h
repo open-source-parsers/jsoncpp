@@ -65,6 +65,7 @@ namespace Json {
    {
    public:
       StyledWriter();
+      virtual ~StyledWriter(){}
 
    public: // overridden from Writer
       /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
