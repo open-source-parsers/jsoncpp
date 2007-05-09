@@ -290,7 +290,7 @@ StyledWriter::writeValue( const Value &value )
 void 
 StyledWriter::writeArrayValue( const Value &value )
 {
-   int size = value.size();
+   unsigned size = value.size();
    if ( size == 0 )
       pushValue( "[]" );
    else
@@ -301,7 +301,7 @@ StyledWriter::writeArrayValue( const Value &value )
          writeWithIndent( "[" );
          indent();
          bool hasChildValue = !childValues_.empty();
-         int index =0;
+         unsigned index =0;
          while ( true )
          {
             const Value &childValue = value[index];
@@ -328,7 +328,7 @@ StyledWriter::writeArrayValue( const Value &value )
       {
          assert( childValues_.size() == size );
          document_ += "[ ";
-         for ( int index =0; index < size; ++index )
+         for ( unsigned index =0; index < size; ++index )
          {
             if ( index > 0 )
                document_ += ", ";

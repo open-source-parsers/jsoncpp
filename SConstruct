@@ -76,7 +76,7 @@ elif platform == 'mingw':
     env.Append( CPPDEFINES=[ "WIN32", "NDEBUG", "_MT" ] )
 elif platform == 'linux-gcc':
     env.Tool( 'default' )
-    env.Append( LIBS = ['pthread'] )
+    env.Append( LIBS = ['pthread'], CCFLAGS = "-Wall" )
 else:
     print "UNSUPPORTED PLATFORM."
     env.Exit(1)

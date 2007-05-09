@@ -13,12 +13,12 @@ readInputTestFile( const char *path )
    if ( !file )
       return std::string("");
    fseek( file, 0, SEEK_END );
-   int size = ftell( file );
+   long size = ftell( file );
    fseek( file, 0, SEEK_SET );
    std::string text;
    char *buffer = new char[size+1];
    buffer[size] = 0;
-   if ( fread( buffer, 1, size, file ) == size )
+   if ( fread( buffer, 1, size, file ) == (unsigned long)size )
       text = buffer;
    fclose( file );
    delete[] buffer;
