@@ -672,7 +672,7 @@ StyledStreamWriter::writeIndent()
          *document_ << '\n';
    }
   */
-   *document_ << indentString_;
+   *document_ << '\n' << indentString_;
 }
 
 
