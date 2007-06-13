@@ -271,8 +271,12 @@ namespace Json {
       /// Access an array element (zero based index ).
       /// If the array contains less than index element, then null value are inserted
       /// in the array so that its size is index+1.
+      /// (You may need to say 'value[0u]' to get your compiler to distinguish
+      ///  this from the operator[] which takes a string.)
       Value &operator[]( UInt index );
       /// Access an array element (zero based index )
+      /// (You may need to say 'value[0u]' to get your compiler to distinguish
+      ///  this from the operator[] which takes a string.)
       const Value &operator[]( UInt index ) const;
       /// If the array contains at least index+1 elements, returns the element value, 
       /// otherwise returns defaultValue.
