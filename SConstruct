@@ -77,6 +77,8 @@ elif platform == 'mingw':
 elif platform == 'linux-gcc':
     env.Tool( 'default' )
     env.Append( LIBS = ['pthread'], CCFLAGS = "-Wall" )
+    LD_LIBRARY_PATH = os.environ.get('LD_LIBRARY_PATH', '')
+    os.environ['LD_LIBRARY_PATH'] = "%s:libs/linux-gcc" %LD_LIBRARY_PATH
 else:
     print "UNSUPPORTED PLATFORM."
     env.Exit(1)
