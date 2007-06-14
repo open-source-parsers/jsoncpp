@@ -14,6 +14,16 @@ options.Add( EnumOption('platform',
 
 try:
     platform = ARGUMENTS['platform']
+    if platform == 'linux-gcc':
+	CXX = 'g++' # not quite right, but env is not yet available.
+	import commands
+	version = commands.getoutput('%s -dumpversion' %CXX)
+	platform = 'linux-gcc-%s' %version
+	print "Using platform '%s'" %platform
+	LD_LIBRARY_PATH = os.environ.get('LD_LIBRARY_PATH', '')
+	LD_LIBRARY_PATH = "%s:libs/%s" %(LD_LIBRARY_PATH, platform)
+	os.environ['LD_LIBRARY_PATH'] = LD_LIBRARY_PATH
+	print "LD_LIBRARY_PATH =", LD_LIBRARY_PATH
 except KeyError:
     print 'You must specify a "platform"'
     sys.exit(2)
@@ -74,11 +84,9 @@ elif platform == 'msvc80':
 elif platform == 'mingw':
     env.Tool( 'mingw' )
     env.Append( CPPDEFINES=[ "WIN32", "NDEBUG", "_MT" ] )
-elif platform == 'linux-gcc':
+elif platform.startswith('linux-gcc'):
     env.Tool( 'default' )
     env.Append( LIBS = ['pthread'], CCFLAGS = "-Wall" )
-    LD_LIBRARY_PATH = os.environ.get('LD_LIBRARY_PATH', '')
-    os.environ['LD_LIBRARY_PATH'] = "%s:libs/linux-gcc" %LD_LIBRARY_PATH
 else:
     print "UNSUPPORTED PLATFORM."
     env.Exit(1)
@@ -174,3 +182,9 @@ env.Alias( 'src-dist', srcdist_cmd )
 buildProjectInDirectory( 'src/jsontestrunner' )
 buildProjectInDirectory( 'src/lib_json' )
 buildProjectInDirectory( 'doc' )
+
+# libs was happening before bin by chance, I think.  When I added
+# the compiler version to linux-gcc, the order changed.  This
+# fixes it (I believe).
+env.Depends('bin', 'libs')
+env.Depends('check', 'bin')
