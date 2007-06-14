@@ -20,3 +20,7 @@ if 'doxygen' in env['TOOLS']:
                                  TARGZ_BASEDIR = doc_topdir )
         env.Depends( zip_doc_cmd, alias_doc_cmd )
         env.Alias( 'doc-dist', zip_doc_cmd )
+
+    # When doxyfile gets updated, I get errors on the first pass.
+    # I have to run scons twice.  Something is wrong with the dependencies
+    # here, but I avoid it by running "scons doc/doxyfile" first.
