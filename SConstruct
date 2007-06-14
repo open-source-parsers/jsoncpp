@@ -183,8 +183,3 @@ buildProjectInDirectory( 'src/jsontestrunner' )
 buildProjectInDirectory( 'src/lib_json' )
 buildProjectInDirectory( 'doc' )
 
-# libs was happening before bin by chance, I think.  When I added
-# the compiler version to linux-gcc, the order changed.  This
-# fixes it (I believe).
-env.Depends('bin', 'libs')
-env.Depends('check', 'bin')
