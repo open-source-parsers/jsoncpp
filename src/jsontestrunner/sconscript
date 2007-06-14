@@ -4,3 +4,6 @@ buildJSONTests( env_testing, Split( """
     main.cpp
      """ ),
     'jsontestrunner' )
+
+# For 'check' to work, 'libs' must be built first.
+env_testing.Depends('jsontestrunner', '#libs')
