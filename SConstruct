@@ -15,15 +15,15 @@ options.Add( EnumOption('platform',
 try:
     platform = ARGUMENTS['platform']
     if platform == 'linux-gcc':
-	CXX = 'g++' # not quite right, but env is not yet available.
-	import commands
-	version = commands.getoutput('%s -dumpversion' %CXX)
-	platform = 'linux-gcc-%s' %version
-	print "Using platform '%s'" %platform
-	LD_LIBRARY_PATH = os.environ.get('LD_LIBRARY_PATH', '')
-	LD_LIBRARY_PATH = "%s:libs/%s" %(LD_LIBRARY_PATH, platform)
-	os.environ['LD_LIBRARY_PATH'] = LD_LIBRARY_PATH
-	print "LD_LIBRARY_PATH =", LD_LIBRARY_PATH
+        CXX = 'g++' # not quite right, but env is not yet available.
+        import commands
+        version = commands.getoutput('%s -dumpversion' %CXX)
+        platform = 'linux-gcc-%s' %version
+        print "Using platform '%s'" %platform
+        LD_LIBRARY_PATH = os.environ.get('LD_LIBRARY_PATH', '')
+        LD_LIBRARY_PATH = "%s:libs/%s" %(LD_LIBRARY_PATH, platform)
+        os.environ['LD_LIBRARY_PATH'] = LD_LIBRARY_PATH
+        print "LD_LIBRARY_PATH =", LD_LIBRARY_PATH
 except KeyError:
     print 'You must specify a "platform"'
     sys.exit(2)
@@ -95,6 +95,7 @@ env.Tool('doxygen')
 env.Tool('substinfile')
 env.Tool('targz')
 env.Tool('srcdist')
+env.Tool('glob')
 
 env.Append( CPPPATH = ['#include'],
             LIBPATH = lib_dir )
@@ -165,9 +166,6 @@ def runJSONTests_action( target, source = None, env = None ):
 def runJSONTests_string( target, source = None, env = None ):
     return 'RunJSONTests("%s")' % source
 
-##def buildDoc( doxyfile_path ):
-##    doc_cmd = env.Doxygen( doxyfile_path )
-
 import SCons.Action
 ActionFactory = SCons.Action.ActionFactory
 RunJSONTests = ActionFactory(runJSONTests_action, runJSONTests_string )
@@ -182,4 +180,5 @@ env.Alias( 'src-dist', srcdist_cmd )
 buildProjectInDirectory( 'src/jsontestrunner' )
 buildProjectInDirectory( 'src/lib_json' )
 buildProjectInDirectory( 'doc' )
+#print env.Dump()
 

@@ -2,201 +2,112 @@
 # emitter depends on doxyfile which is generated from doxyfile.in.
 # build fails after cleaning and relaunching the build.
 
+# Todo:
+# Add helper function to environment like for glob
+# Easier passage of header/footer
+# Automatic deduction of index.html path based on custom parameters passed to doxyfile
+
 import os
 import os.path
 import glob
 from fnmatch import fnmatch
+import SCons
 
-def DoxyfileParse(file_contents):
+def Doxyfile_emitter(target, source, env):
    """
-   Parse a Doxygen source file and return a dictionary of all the values.
-   Values will be strings and lists of strings.
+   Modify the target and source lists to use the defaults if nothing
+   else has been specified.
+
+   Dependencies on external HTML documentation references are also
+   appended to the source list.
    """
-   data = {}
+   doxyfile_template = env.File(env['DOXYFILE_FILE'])
+   source.insert(0, doxyfile_template)
 
-   import shlex
-   lex = shlex.shlex(instream = file_contents, posix = True)
-   lex.wordchars += "*+./-:"
-   lex.whitespace = lex.whitespace.replace("\n", "")
-   lex.escape = ""
+   return target, source 
 
-   lineno = lex.lineno
-   last_backslash_lineno = lineno
-   token = lex.get_token()
-   key = token   # the first token should be a key
-   last_token = ""
-   key_token = False
-   next_key = False
-   new_data = True
+def Doxyfile_Builder(target, source, env):
+   """Input:
+   DOXYFILE_FILE
+   Path of the template file for the output doxyfile
 
-   def append_data(data, key, new_data, token):
-      if new_data or len(data[key]) == 0:
-         data[key].append(token)
-      else:
-         data[key][-1] += token
-
-   while token:
-      if token in ['\n']:
-         if last_token not in ['\\']:
-            key_token = True
-      elif token in ['\\']:
-         pass
-      elif key_token:
-         key = token
-         key_token = False
-      else:
-         if token == "+=":
-            if not data.has_key(key):
-               data[key] = list()
-         elif token == "=":
-            data[key] = list()
-         else:
-            append_data( data, key, new_data, token )
-            new_data = True
-
-      last_token = token
-      token = lex.get_token()
-      
-      if last_token == '\\' and token != '\n':
-         new_data = False
-         append_data( data, key, new_data, '\\' )
-
-   # compress lists of len 1 into single strings
-   for (k, v) in data.items():
-      if len(v) == 0:
-         data.pop(k)
-
-      # items in the following list will be kept as lists and not converted to strings
-      if k in ["INPUT", "FILE_PATTERNS", "EXCLUDE_PATTERNS"]:
-         continue
-
-      if len(v) == 1:
-         data[k] = v[0]
-
-   return data
-
-def DoxySourceScan(node, env, path):
+   DOXYFILE_DICT
+   A dictionnary of parameter to append to the generated doxyfile
    """
-   Doxygen Doxyfile source scanner.  This should scan the Doxygen file and add
-   any files used to generate docs to the list of source files.
-   """
-   default_file_patterns = [
-      '*.c', '*.cc', '*.cxx', '*.cpp', '*.c++', '*.java', '*.ii', '*.ixx',
-      '*.ipp', '*.i++', '*.inl', '*.h', '*.hh ', '*.hxx', '*.hpp', '*.h++',
-      '*.idl', '*.odl', '*.cs', '*.php', '*.php3', '*.inc', '*.m', '*.mm',
-      '*.py',
-   ]
-
-   default_exclude_patterns = [
-      '*~',
-   ]
-
-   sources = []
-
-   data = DoxyfileParse(node.get_contents())
-
-   if data.get("RECURSIVE", "NO") == "YES":
-      recursive = True
-   else:
-      recursive = False
-
-   file_patterns = data.get("FILE_PATTERNS", default_file_patterns)
-   exclude_patterns = data.get("EXCLUDE_PATTERNS", default_exclude_patterns)
-
-   doxyfile_dir = str( node.dir )
-
-##   print 'running from', os.getcwd()
-   for node in data.get("INPUT", []):
-      node_real_path = os.path.normpath( os.path.join( doxyfile_dir, node ) )
-      if os.path.isfile(node_real_path):
-##         print str(node), 'is a file'
-         sources.append(node)
-      elif os.path.isdir(node_real_path):
-##         print str(node), 'is a directory'
-         if recursive:
-            for root, dirs, files in os.walk(node):
-               for f in files:
-                  filename = os.path.join(root, f)
-
-                  pattern_check = reduce(lambda x, y: x or bool(fnmatch(filename, y)), file_patterns, False)
-                  exclude_check = reduce(lambda x, y: x and fnmatch(filename, y), exclude_patterns, True)
-
-                  if pattern_check and not exclude_check:
-                     sources.append(filename)
-##                     print '  adding source', os.path.abspath( filename )
-         else:
-            for pattern in file_patterns:
-               sources.extend(glob.glob(os.path.join( node, pattern)))
-##      else:
-##         print str(node), 'is neither a file nor a directory'
-   sources = map( lambda path: env.File(path), sources )
-   return sources
-
-
-def DoxySourceScanCheck(node, env):
-   """Check if we should scan this file"""
-   return os.path.isfile(node.path)
-
-def DoxyEmitter(source, target, env):
-   """Doxygen Doxyfile emitter"""
-   # possible output formats and their default values and output locations
-   output_formats = {
-      "HTML": ("YES", "html"),
-      "LATEX": ("YES", "latex"),
-      "RTF": ("NO", "rtf"),
-      "MAN": ("YES", "man"),
-      "XML": ("NO", "xml"),
-   }
-
-##   print '#### DoxyEmitter:', source[0].abspath, os.path.exists( source[0].abspath )
-   data = DoxyfileParse(source[0].get_contents())
-
-   targets = []
-   out_dir = data.get("OUTPUT_DIRECTORY", ".")
-
-   # add our output locations
-   for (k, v) in output_formats.items():
-      if data.get("GENERATE_" + k, v[0]) == "YES":
-         targets.append(env.Dir( os.path.join(out_dir, data.get(k + "_OUTPUT", v[1]))) )
-
-   # don't clobber targets
-   for node in targets:
-      env.Precious(node)
-
-   # set up cleaning stuff
-   for node in targets:
-      clean_cmd = env.Clean(node, node)
-      env.Depends( clean_cmd, source )
-
-   return (targets, source)
+   subdir = os.path.split(source[0].abspath)[0]
+   doc_top_dir = os.path.split(target[0].abspath)[0]
+   doxyfile_path = source[0].abspath
+   doxy_file = file( target[0].abspath, 'wt' )
+   try:
+      # First, output the template file
+      try:
+         f = file(doxyfile_path, 'rt')
+         doxy_file.write( f.read() )
+         f.close()
+         doxy_file.write( '\n' )
+         doxy_file.write( '# Generated content:\n' )
+      except:
+         raise SCons.Errors.UserError, "Can't read doxygen template file '%s'" % doxyfile_path
+      # Then, the input files
+      doxy_file.write( 'INPUT                  = \\\n' )
+      for source in source:
+         if source.abspath != doxyfile_path: # skip doxyfile path, which is the first source
+            doxy_file.write( '"%s" \\\n' % source.abspath )
+      doxy_file.write( '\n' )
+      # Dot...
+      values_dict = { 'HAVE_DOT': env.get('DOT') and 'YES' or 'NO',
+                      'DOT_PATH': env.get('DOT') and os.path.split(env['DOT'])[0] or '',
+                      'OUTPUT_DIRECTORY': doc_top_dir,
+                      'WARN_LOGFILE': target[0].abspath + '-warning.log'}
+      values_dict.update( env['DOXYFILE_DICT'] )
+      # Finally, output user dictionary values which override any of the previously set parameters.
+      for key, value in values_dict.iteritems():
+         doxy_file.write ('%s = "%s"\n' % (key, str(value))) 
+   finally:
+      doxy_file.close()
 
 def generate(env):
    """
    Add builders and construction variables for the
-   Doxygen tool.  This is currently for Doxygen 1.4.6.
+   Doxygen tool.
    """
-   doxyfile_scanner = env.Scanner(
-      DoxySourceScan,
-      "DoxySourceScan",
-      scan_check = DoxySourceScanCheck,
-   )
+   ## Doxyfile builder
+   def doxyfile_message (target, source, env):
+       return "creating Doxygen config file '%s'" % target[0]
 
-   doxyfile_builder = env.Builder(
-      action = env.Action("cd ${SOURCE.dir}  &&  ${DOXYGEN} ${SOURCE.file}",
-                          varlist=['$SOURCES']),
-      emitter = DoxyEmitter,
-      target_factory = env.fs.Entry,
-      single_source = True,
-      source_scanner =  doxyfile_scanner,
-   )
+   doxyfile_variables = [
+       'DOXYFILE_DICT',
+       'DOXYFILE_FILE'
+       ]
 
-   env.Append(BUILDERS = {
-      'Doxygen': doxyfile_builder,
-   })
+   doxyfile_action = SCons.Action.Action( Doxyfile_Builder, doxyfile_message,
+                                          doxyfile_variables )
 
-   env.AppendUnique(
-      DOXYGEN = 'doxygen',
-   )
+   doxyfile_builder = SCons.Builder.Builder( action = doxyfile_action,
+                                             emitter = Doxyfile_emitter )
+
+   env['BUILDERS']['Doxyfile'] = doxyfile_builder
+   env['DOXYFILE_DICT'] = {}
+   env['DOXYFILE_FILE'] = 'doxyfile.in'
+
+   ## Doxygen builder
+   def Doxygen_emitter(target, source, env):
+      output_dir = str( source[0].dir )
+      if str(target[0]) == str(source[0]):
+         target = env.File( os.path.join( output_dir, 'html', 'index.html' ) )
+      return target, source
+
+   doxygen_action = SCons.Action.Action( [ '$DOXYGEN_COM'] )
+   doxygen_builder = SCons.Builder.Builder( action = doxygen_action,
+                                            emitter = Doxygen_emitter )
+   env['BUILDERS']['Doxygen'] = doxygen_builder
+   env['DOXYGEN_COM'] = '$DOXYGEN $DOXYGEN_FLAGS $SOURCE'
+   env['DOXYGEN_FLAGS'] = ''
+   env['DOXYGEN'] = 'doxygen'
+    
+   dot_path = env.WhereIs("dot")
+   if dot_path:
+      env['DOT'] = dot_path
 
 def exists(env):
    """

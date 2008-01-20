@@ -21,6 +21,8 @@
 	- look into iconv, icu and windows API
   \section ms_strict Adds a strict mode to reader/parser
 	Strict JSON support as specific in RFC 4627 (http://www.ietf.org/rfc/rfc4627.txt?number=4627).
+	- Enforce only object or array as root element
+	- Disable comment support
   \section ms_separation Expose json reader/writer API that do not impose using Json::Value.
 	Some typical use-case involve an application specific structure to/from a JSON document.
 	- Performance oriented parser/writer:
