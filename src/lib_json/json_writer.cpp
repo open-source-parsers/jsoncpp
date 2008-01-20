@@ -2,6 +2,7 @@
 #include <utility>
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 #include <iostream>
 
 #if _MSC_VER >= 1400 // VC++ 8.0
@@ -66,7 +67,7 @@ std::string valueToString( bool value )
 std::string valueToQuotedString( const char *value )
 {
    // Not sure how to handle unicode...
-   if (std::strpbrk(value, "\"\\\b\f\n\r\t") == NULL)
+   if (strpbrk(value, "\"\\\b\f\n\r\t") == NULL)
       return std::string("\"") + value + "\"";
    // We have to walk value and escape any special characters.
    // Appending to std::string is not efficient, but this should be rare.
