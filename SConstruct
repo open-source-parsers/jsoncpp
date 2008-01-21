@@ -1,3 +1,74 @@
+"""
+Build system can be clean-up by sticking to a few core production factory, with automatic dependencies resolution.
+4 basic project productions:
+- library
+- binary
+- documentation
+- tests
+
+* Library:
+  Input:
+    - dependencies (other libraries)
+    - headers: include path & files
+    - sources
+    - generated sources
+    - resources
+    - generated resources
+  Production:
+    - Static library
+    - Dynamic library
+    - Naming rule
+  Life-cycle:
+    - Library compilation
+    - Compilation as a dependencies
+    - Run-time
+    - Packaging
+  Identity:
+    - Name
+    - Version
+* Binary:
+  Input:
+    - dependencies (other libraries)
+    - headers: include path & files (usually empty)
+    - sources
+    - generated sources
+    - resources
+    - generated resources
+    - supported variant (optimized/debug, dll/static...)
+  Production:
+    - Binary executable
+    - Manifest [on some platforms]
+    - Debug symbol [on some platforms]
+  Life-cycle:
+    - Compilation
+    - Run-time
+    - Packaging
+  Identity:
+    - Name
+    - Version
+* Documentation:
+  Input:
+    - dependencies (libraries, binaries)
+    - additional sources
+    - generated sources
+    - resources
+    - generated resources
+    - supported variant (public/internal)
+  Production:
+    - HTML documentation
+    - PDF documentation
+    - CHM documentation
+  Life-cycle:
+    - Documentation
+    - Packaging
+    - Test
+  Identity:
+    - Name
+    - Version
+"""
+
+
+
 import os
 import os.path
 import sys
