@@ -3,11 +3,12 @@
 #include <json/writer.h>
 #include <utility>
 #include <stdexcept>
-#include "assert.h"
+#include <cstring>
+#include <cassert>
 #ifdef JSON_USE_CPPTL
 # include <cpptl/conststring.h>
 #endif
-#include <stddef.h>    // size_t
+#include <cstddef>    // size_t
 #ifndef JSON_USE_SIMPLE_INTERNAL_ALLOCATOR
 # include "json_batchallocator.h"
 #endif // #ifndef JSON_USE_SIMPLE_INTERNAL_ALLOCATOR

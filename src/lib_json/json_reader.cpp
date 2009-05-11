@@ -1,8 +1,9 @@
 #include <json/reader.h>
 #include <json/value.h>
 #include <utility>
-#include <stdio.h>
-#include <assert.h>
+#include <cstdio>
+#include <cassert>
+#include <cstring>
 #include <iostream>
 #include <stdexcept>
 

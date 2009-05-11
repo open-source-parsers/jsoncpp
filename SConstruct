@@ -250,6 +250,6 @@ env.Alias( 'src-dist', srcdist_cmd )
 
 buildProjectInDirectory( 'src/jsontestrunner' )
 buildProjectInDirectory( 'src/lib_json' )
-buildProjectInDirectory( 'doc' )
+#buildProjectInDirectory( 'doc' ) # THIS IS BROKEN.
 #print env.Dump()
 
