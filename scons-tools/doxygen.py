@@ -80,8 +80,9 @@ def generate(env):
        'DOXYFILE_FILE'
        ]
 
-   doxyfile_action = SCons.Action.Action( Doxyfile_Builder, doxyfile_message,
-                                          doxyfile_variables )
+   #doxyfile_action = SCons.Action.Action( Doxyfile_Builder, doxyfile_message,
+   #                                       doxyfile_variables )
+   doxyfile_action = SCons.Action.Action( Doxyfile_Builder, doxyfile_message)
 
    doxyfile_builder = SCons.Builder.Builder( action = doxyfile_action,
                                              emitter = Doxyfile_emitter )

@@ -76,8 +76,8 @@ import sys
 JSONCPP_VERSION = '0.1'
 DIST_DIR = '#dist'
 
-options = Options()
-options.Add( EnumOption('platform',
+options = Variables()
+options.Add( EnumVariable('platform',
                         'Platform (compiler/stl) used to build the project',
                         'msvc71',
                         allowed_values='suncc vacpp mingw msvc6 msvc7 msvc71 msvc80 linux-gcc'.split(),
@@ -190,11 +190,11 @@ env['SRCDIST_ADD'] = SrcDistAdder( env )
 env['SRCDIST_TARGET'] = os.path.join( DIST_DIR, 'jsoncpp-src-%s.tar.gz' % env['JSONCPP_VERSION'] )
 env['SRCDIST_BUILDER'] = env.TarGz
                       
-env_testing = env.Copy( )
+env_testing = env.Clone( )
 env_testing.Append( LIBS = ['json_${LIB_NAME_SUFFIX}'] )
 
 def buildJSONExample( env, target_sources, target_name ):
-    env = env.Copy()
+    env = env.Clone()
     env.Append( CPPPATH = ['#'] )
     exe = env.Program( target=target_name,
                        source=target_sources )
@@ -250,6 +250,6 @@ env.Alias( 'src-dist', srcdist_cmd )
 
 buildProjectInDirectory( 'src/jsontestrunner' )
 buildProjectInDirectory( 'src/lib_json' )
-#buildProjectInDirectory( 'doc' ) # THIS IS BROKEN.
+buildProjectInDirectory( 'doc' )
 #print env.Dump()
 
