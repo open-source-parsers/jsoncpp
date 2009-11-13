@@ -36,6 +36,42 @@ containsNewLine( Reader::Location begin,
    return false;
 }
 
+static std::string codePointToUTF8(unsigned int cp)
+{
+   std::string result;
+   
+   // based on description from http://en.wikipedia.org/wiki/UTF-8
+
+   if (cp <= 0x7f) 
+   {
+      result.resize(1);
+      result[0] = static_cast<char>(cp);
+   } 
+   else if (cp <= 0x7FF) 
+   {
+      result.resize(2);
+      result[1] = static_cast<char>(0x80 | (0x3f & cp));
+      result[0] = static_cast<char>(0xC0 | (0x1f & (cp >> 6)));
+   } 
+   else if (cp <= 0xFFFF) 
+   {
+      result.resize(3);
+      result[2] = static_cast<char>(0x80 | (0x3f & cp));
+      result[1] = 0x80 | static_cast<char>((0x3f & (cp >> 6)));
+      result[0] = 0xE0 | static_cast<char>((0xf & (cp >> 12)));
+   }
+   else if (cp <= 0x10FFFF) 
+   {
+      result.resize(4);
+      result[3] = static_cast<char>(0x80 | (0x3f & cp));
+      result[2] = static_cast<char>(0x80 | (0x3f & (cp >> 6)));
+      result[1] = static_cast<char>(0x80 | (0x3f & (cp >> 12)));
+      result[0] = static_cast<char>(0xF0 | (0x7 & (cp >> 18)));
+   }
+
+   return result;
+}
+
 
 // Class Reader
 // //////////////////////////////////////////////////////////////////
@@ -577,10 +613,9 @@ Reader::decodeString( Token &token, std::string &decoded )
          case 'u':
             {
                unsigned int unicode;
-               if ( !decodeUnicodeEscapeSequence( token, current, end, unicode ) )
+               if ( !decodeUnicodeCodePoint( token, current, end, unicode ) )
                   return false;
-               // @todo encode unicode as utf8.
-	       // @todo remember to alter the writer too.
+               decoded += codePointToUTF8(unicode);
             }
             break;
          default:
@@ -595,6 +630,35 @@ Reader::decodeString( Token &token, std::string &decoded )
    return true;
 }
 
+bool
+Reader::decodeUnicodeCodePoint( Token &token, 
+                                     Location &current, 
+                                     Location end, 
+                                     unsigned int &unicode )
+{
+
+   if ( !decodeUnicodeEscapeSequence( token, current, end, unicode ) )
+      return false;
+   if (unicode >= 0xD800 && unicode <= 0xDBFF)
+   {
+      // surrogate pairs
+      if (end - current < 6)
+         return addError( "additional six characters expected to parse unicode surrogate pair.", token, current );
+      unsigned int surrogatePair;
+      if (*(current++) == '\\' && *(current++)== 'u')
+      {
+         if (decodeUnicodeEscapeSequence( token, current, end, surrogatePair ))
+         {
+            unicode = 0x10000 + ((unicode & 0x3FF) << 10) + (surrogatePair & 0x3FF);
+         } 
+         else
+            return false;
+      } 
+      else
+         return addError( "expecting another \\u token to begin the second half of a unicode surrogate pair", token, current );
+   }
+   return true;
+}
 
 bool 
 Reader::decodeUnicodeEscapeSequence( Token &token, 

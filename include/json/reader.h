@@ -115,6 +115,10 @@ namespace Json {
       bool decodeString( Token &token );
       bool decodeString( Token &token, std::string &decoded );
       bool decodeDouble( Token &token );
+      bool decodeUnicodeCodePoint( Token &token, 
+                                   Location &current, 
+                                   Location end, 
+                                   unsigned int &unicode );
       bool decodeUnicodeEscapeSequence( Token &token, 
                                         Location &current, 
                                         Location end, 

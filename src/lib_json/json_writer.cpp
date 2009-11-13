@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 
 #if _MSC_VER >= 1400 // VC++ 8.0
 #pragma warning( disable : 4996 )   // disable warning about strdup being deprecated.
@@ -11,6 +13,20 @@
 
 namespace Json {
 
+static bool isControlCharacter(char ch)
+{
+   return ch > 0 && ch <= 0x1F;
+}
+
+static bool containsControlCharacter( const char* str )
+{
+   while ( str ) 
+   {
+      if ( isControlCharacter( *(str++) ) )
+         return true;
+   }
+   return false;
+}
 static void uintToString( unsigned int value, 
                           char *&current )
 {
@@ -95,7 +111,7 @@ std::string valueToString( bool value )
 std::string valueToQuotedString( const char *value )
 {
    // Not sure how to handle unicode...
-   if (strpbrk(value, "\"\\\b\f\n\r\t") == NULL)
+   if (strpbrk(value, "\"\\\b\f\n\r\t") == NULL && !containsControlCharacter( value ))
       return std::string("\"") + value + "\"";
    // We have to walk value and escape any special characters.
    // Appending to std::string is not efficient, but this should be rare.
@@ -132,8 +148,16 @@ std::string valueToQuotedString( const char *value )
 	 // slash is also legal, so I see no reason to escape it.
 	 // (I hope I am not misunderstanding something.)
 	 default:
-	    result += *c;
+	    if ( isControlCharacter( *c ) )
+       {
+          std::ostringstream oss;
+          oss << "\\u" << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << static_cast<int>(*c);
+          result += oss.str();
+       }
+       else
+         result += *c;
       }
+      break;
    }
    result += "\"";
    return result;
