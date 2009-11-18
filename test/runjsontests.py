@@ -1,7 +1,7 @@
 import sys
 import os
 import os.path
-import glob
+from glob import glob
 
 
 def compareOutputs( expected, actual, message ):
@@ -38,30 +38,49 @@ def safeReadFile( path ):
 def runAllTests( jsontest_executable_path, input_dir = None ):
     if not input_dir:
         input_dir = os.getcwd()
-    tests = glob.glob( os.path.join( input_dir, '*.json' ) )
+    tests = glob( os.path.join( input_dir, '*.json' ) )
+    test_jsonchecker = glob( os.path.join( input_dir, 'jsonchecker', '*.json' ) )
     failed_tests = []
-    for input_path in tests:
+    for input_path in tests + test_jsonchecker:
+        is_json_checker_test = input_path in test_jsonchecker
         print 'TESTING:', input_path,
-        pipe = os.popen( "%s %s" % (jsontest_executable_path, input_path) )
+        options = is_json_checker_test and '--json-checker' or ''
+        pipe = os.popen( "%s %s %s" % (jsontest_executable_path, options,
+                                       input_path) )
         process_output = pipe.read()
         status = pipe.close()
-        base_path = os.path.splitext(input_path)[0]
-        actual_output = safeReadFile( base_path + '.actual' )
-        actual_rewrite_output = safeReadFile( base_path + '.actual-rewrite' )
-        file(base_path + '.process-output','wt').write( process_output )
-        if status:
-            print 'parsing failed'
-            failed_tests.append( (input_path, 'Parsing failed:\n' + process_output) )
-        else:
-            expected_output_path = os.path.splitext(input_path)[0] + '.expected'
-            expected_output = file( expected_output_path, 'rt' ).read()
-            detail = ( compareOutputs( expected_output, actual_output, 'input' )
-                        or compareOutputs( expected_output, actual_rewrite_output, 'rewrite' ) )
-            if detail:
-                print 'FAILED'
-                failed_tests.append( (input_path, detail) )
+        if is_json_checker_test:
+            expect_failure = os.path.basename( input_path ).startswith( 'fail' )
+            if expect_failure:
+                if status is None:
+                    print 'FAILED'
+                    failed_tests.append( (input_path, 'Parsing should have failed') )
+                else:
+                    print 'OK'
             else:
-                print 'OK'
+                if status is not None:
+                    print 'FAILED'
+                    failed_tests.append( (input_path, 'Parsing failed:\n' + process_output) )
+                else:
+                    print 'OK'
+        else:
+            base_path = os.path.splitext(input_path)[0]
+            actual_output = safeReadFile( base_path + '.actual' )
+            actual_rewrite_output = safeReadFile( base_path + '.actual-rewrite' )
+            file(base_path + '.process-output','wt').write( process_output )
+            if status:
+                print 'parsing failed'
+                failed_tests.append( (input_path, 'Parsing failed:\n' + process_output) )
+            else:
+                expected_output_path = os.path.splitext(input_path)[0] + '.expected'
+                expected_output = file( expected_output_path, 'rt' ).read()
+                detail = ( compareOutputs( expected_output, actual_output, 'input' )
+                            or compareOutputs( expected_output, actual_rewrite_output, 'rewrite' ) )
+                if detail:
+                    print 'FAILED'
+                    failed_tests.append( (input_path, detail) )
+                else:
+                    print 'OK'
 
     if failed_tests:
         print

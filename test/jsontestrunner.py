@@ -44,15 +44,15 @@ def valueTreeToString( fout, value, path = '.' ):
         assert False and "Unexpected value type"
         
 def parseAndSaveValueTree( input, actual_path ):
-    root = json.read( input )
+    root = json.loads( input )
     fout = file( actual_path, 'wt' )
     valueTreeToString( fout, root )
     fout.close()
     return root
 
 def rewriteValueTree( value, rewrite_path ):
-    rewrite = json.write( value )
-    rewrite = rewrite[1:-1]  # Somehow the string is quoted ! jsonpy bug ?
+    rewrite = json.dumps( value )
+    #rewrite = rewrite[1:-1]  # Somehow the string is quoted ! jsonpy bug ?
     file( rewrite_path, 'wt').write( rewrite + '\n' )
     return rewrite
     

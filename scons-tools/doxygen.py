@@ -9,7 +9,6 @@
 
 import os
 import os.path
-import glob
 from fnmatch import fnmatch
 import SCons
 

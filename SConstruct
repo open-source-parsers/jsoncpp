@@ -137,24 +137,29 @@ elif platform == 'msvc6':
     for tool in ['msvc', 'msvs', 'mslink', 'masm', 'mslib']:
         env.Tool( tool )
     env['CXXFLAGS']='-GR -GX /nologo /MT'
+    env['SHARED_LIB_ENABLED'] = False
 elif platform == 'msvc70':
     env['MSVS_VERSION']='7.0'
     for tool in ['msvc', 'msvs', 'mslink', 'masm', 'mslib']:
         env.Tool( tool )
     env['CXXFLAGS']='-GR -GX /nologo /MT'
+    env['SHARED_LIB_ENABLED'] = False
 elif platform == 'msvc71':
     env['MSVS_VERSION']='7.1'
     for tool in ['msvc', 'msvs', 'mslink', 'masm', 'mslib']:
         env.Tool( tool )
     env['CXXFLAGS']='-GR -GX /nologo /MT'
+    env['SHARED_LIB_ENABLED'] = False
 elif platform == 'msvc80':
     env['MSVS_VERSION']='8.0'
     for tool in ['msvc', 'msvs', 'mslink', 'masm', 'mslib']:
         env.Tool( tool )
     env['CXXFLAGS']='-GR -EHsc /nologo /MT'
+    env['SHARED_LIB_ENABLED'] = False
 elif platform == 'mingw':
     env.Tool( 'mingw' )
     env.Append( CPPDEFINES=[ "WIN32", "NDEBUG", "_MT" ] )
+    env['SHARED_LIB_ENABLED'] = False
 elif platform.startswith('linux-gcc'):
     env.Tool( 'default' )
     env.Append( LIBS = ['pthread'], CCFLAGS = "-Wall" )
@@ -166,13 +171,16 @@ env.Tool('doxygen')
 env.Tool('substinfile')
 env.Tool('targz')
 env.Tool('srcdist')
-env.Tool('glob')
+env.Tool('globtool')
 
 env.Append( CPPPATH = ['#include'],
             LIBPATH = lib_dir )
 short_platform = platform
 if short_platform.startswith('msvc'):
     short_platform = short_platform[2:]
+# Notes: on Windows you need to rebuild the source for each variant
+# Build script does not support that yet so we only build static libraries.
+env['SHARED_LIB_ENABLED'] = env.get('SHARED_LIB_ENABLED', True)
 env['LIB_PLATFORM'] = short_platform
 env['LIB_LINK_TYPE'] = 'lib'    # static
 env['LIB_CRUNTIME'] = 'mt'
@@ -210,11 +218,12 @@ def buildJSONTests( env, target_sources, target_name ):
 def buildLibrary( env, target_sources, target_name ):
     static_lib = env.StaticLibrary( target=target_name + '_${LIB_NAME_SUFFIX}',
                                     source=target_sources )
-    shared_lib = env.SharedLibrary( target=target_name + '_${LIB_NAME_SUFFIX}',
-                                    source=target_sources )
     global lib_dir
     env.Install( lib_dir, static_lib )
-    env.Install( lib_dir, shared_lib )
+    if env['SHARED_LIB_ENABLED']:
+        shared_lib = env.SharedLibrary( target=target_name + '_${LIB_NAME_SUFFIX}',
+                                        source=target_sources )
+        env.Install( lib_dir, shared_lib )
     env['SRCDIST_ADD']( source=[target_sources] )
 
 Export( 'env env_testing buildJSONExample buildLibrary buildJSONTests' )
@@ -232,10 +241,10 @@ def runJSONTests_action( target, source = None, env = None ):
     jsontest_path = Dir( '#test' ).abspath
     sys.path.insert( 0, jsontest_path )
     import runjsontests
-    return runjsontests.runAllTests( os.path.abspath(source), jsontest_path )
+    return runjsontests.runAllTests( os.path.abspath(source[0].path), jsontest_path )
 
 def runJSONTests_string( target, source = None, env = None ):
-    return 'RunJSONTests("%s")' % source
+    return 'RunJSONTests("%s")' % source[0]
 
 import SCons.Action
 ActionFactory = SCons.Action.ActionFactory
