@@ -9,6 +9,9 @@ namespace Json {
    class Reader;
    class StyledWriter;
 
+   // features.h
+   class Features;
+
    // value.h
    class StaticString;
    class Path;

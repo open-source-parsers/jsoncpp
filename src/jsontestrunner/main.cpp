@@ -86,9 +86,11 @@ static int
 parseAndSaveValueTree( const std::string &input, 
                        const std::string &actual,
                        const std::string &kind,
-                       Json::Value &root )
+                       Json::Value &root,
+                       const Json::Features &features,
+                       bool parseOnly )
 {
-   Json::Reader reader;
+   Json::Reader reader( features );
    bool parsingSuccessful = reader.parse( input, root );
    if ( !parsingSuccessful )
    {
@@ -98,14 +100,17 @@ parseAndSaveValueTree( const std::string &input,
       return 1;
    }
 
-   FILE *factual = fopen( actual.c_str(), "wt" );
-   if ( !factual )
+   if ( !parseOnly )
    {
-      printf( "Failed to create %s actual file.\n", kind.c_str() );
-      return 2;
+      FILE *factual = fopen( actual.c_str(), "wt" );
+      if ( !factual )
+      {
+         printf( "Failed to create %s actual file.\n", kind.c_str() );
+         return 2;
+      }
+      printValueTree( factual, root );
+      fclose( factual );
    }
-   printValueTree( factual, root );
-   fclose( factual );
    return 0;
 }
 
@@ -143,25 +148,65 @@ removeSuffix( const std::string &path,
    return path.substr( 0, path.length() - extension.length() );
 }
 
-int main( int argc, const char *argv[] )
+static int 
+printUsage( const char *argv[] )
 {
-   if ( argc != 2 )
+   printf( "Usage: %s [--strict] input-json-file", argv[0] );
+   return 3;
+}
+
+
+int
+parseCommandLine( int argc, const char *argv[], 
+                  Json::Features &features, std::string &path,
+                  bool &parseOnly )
+{
+   parseOnly = false;
+   if ( argc < 2 )
    {
-      printf( "Usage: %s input-json-file", argv[0] );
-      return 3;
+      return printUsage( argv );
    }
 
-   std::string input = readInputTestFile( argv[1] );
+   int index = 1;
+   if ( std::string(argv[1]) == "--json-checker" )
+   {
+      features = Json::Features::strictMode();
+      parseOnly = true;
+      ++index;
+   }
+
+   if ( index == argc  ||  index + 1 < argc )
+   {
+      return printUsage( argv );
+   }
+
+   path = argv[index];
+   return 0;
+}
+
+
+int main( int argc, const char *argv[] )
+{
+   std::string path;
+   Json::Features features;
+   bool parseOnly;
+   int exitCode = parseCommandLine( argc, argv, features, path, parseOnly );
+   if ( exitCode != 0 )
+   {
+      return exitCode;
+   }
+
+   std::string input = readInputTestFile( path.c_str() );
    if ( input.empty() )
    {
-      printf( "Failed to read input or empty input: %s\n", argv[1] );
+      printf( "Failed to read input or empty input: %s\n", path.c_str() );
       return 3;
    }
 
    std::string basePath = removeSuffix( argv[1], ".json" );
-   if ( basePath.empty() )
+   if ( !parseOnly  &&  basePath.empty() )
    {
-      printf( "Bad input path. Path does not end with '.expected':\n%s\n", argv[1] );
+      printf( "Bad input path. Path does not end with '.expected':\n%s\n", path.c_str() );
       return 3;
    }
 
@@ -170,15 +215,16 @@ int main( int argc, const char *argv[] )
    std::string rewriteActualPath = basePath + ".actual-rewrite";
 
    Json::Value root;
-   int exitCode = parseAndSaveValueTree( input, actualPath, "input", root );
-   if ( exitCode == 0 )
+   exitCode = parseAndSaveValueTree( input, actualPath, "input", root, features, parseOnly );
+   if ( exitCode == 0  &&  !parseOnly )
    {
       std::string rewrite;
       exitCode = rewriteValueTree( rewritePath, root, rewrite );
       if ( exitCode == 0 )
       {
          Json::Value rewriteRoot;
-         exitCode = parseAndSaveValueTree( rewrite, rewriteActualPath, "rewrite", rewriteRoot );
+         exitCode = parseAndSaveValueTree( rewrite, rewriteActualPath, 
+            "rewrite", rewriteRoot, features, parseOnly );
       }
    }
 

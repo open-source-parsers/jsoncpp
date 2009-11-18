@@ -170,6 +170,9 @@
 			RelativePath="..\..\include\json\config.h">
 		</File>
 		<File
+			RelativePath="..\..\include\json\features.h">
+		</File>
+		<File
 			RelativePath="..\..\include\json\forwards.h">
 		</File>
 		<File

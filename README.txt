@@ -42,3 +42,6 @@ and TARGET may be:
 	doc: build documentation
 	doc-dist: build documentation tarball
 
+To run the test manually:
+cd test
+python runjsontests.py "path to jsontest.exe"

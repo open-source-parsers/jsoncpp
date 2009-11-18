@@ -13,6 +13,36 @@
 
 namespace Json {
 
+// Implementation of class Features
+// ////////////////////////////////
+
+Features::Features()
+   : allowComments_( true )
+   , strictRoot_( false )
+{
+}
+
+
+Features 
+Features::all()
+{
+   return Features();
+}
+
+
+Features 
+Features::strictMode()
+{
+   Features features;
+   features.allowComments_ = false;
+   features.strictRoot_ = true;
+   return features;
+}
+
+// Implementation of class Reader
+// ////////////////////////////////
+
+
 static inline bool 
 in( Reader::Char c, Reader::Char c1, Reader::Char c2, Reader::Char c3, Reader::Char c4 )
 {
@@ -77,8 +107,16 @@ static std::string codePointToUTF8(unsigned int cp)
 // //////////////////////////////////////////////////////////////////
 
 Reader::Reader()
+   : features_( Features::all() )
 {
 }
+
+
+Reader::Reader( const Features &features )
+   : features_( features )
+{
+}
+
 
 bool
 Reader::parse( const std::string &document, 
@@ -90,6 +128,7 @@ Reader::parse( const std::string &document,
    const char *end = begin + document_.length();
    return parse( begin, end, root, collectComments );
 }
+
 
 bool
 Reader::parse( std::istream& sin,
@@ -113,6 +152,11 @@ Reader::parse( const char *beginDoc, const char *endDoc,
                Value &root,
                bool collectComments )
 {
+   if ( !features_.allowComments_ )
+   {
+      collectComments = false;
+   }
+
    begin_ = beginDoc;
    end_ = endDoc;
    collectComments_ = collectComments;
@@ -130,6 +174,19 @@ Reader::parse( const char *beginDoc, const char *endDoc,
    skipCommentTokens( token );
    if ( collectComments_  &&  !commentsBefore_.empty() )
       root.setComment( commentsBefore_, commentAfter );
+   if ( features_.strictRoot_ )
+   {
+      if ( !root.isArray()  &&  !root.isObject() )
+      {
+         // Set error location to start of doc, ideally should be first token found in doc
+         token.type_ = tokenError;
+         token.start_ = beginDoc;
+         token.end_ = endDoc;
+         addError( "A valid JSON document must be either an array or an object value.",
+                   token );
+         return false;
+      }
+   }
    return successful;
 }
 
@@ -188,11 +245,18 @@ Reader::readValue()
 void 
 Reader::skipCommentTokens( Token &token )
 {
-   do
+   if ( features_.allowComments_ )
+   {
+      do
+      {
+         readToken( token );
+      }
+      while ( token.type_ == tokenComment );
+   }
+   else
    {
       readToken( token );
    }
-   while ( token.type_ == tokenComment );
 }
 
 

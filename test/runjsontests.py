@@ -3,6 +3,7 @@ import os
 import os.path
 from glob import glob
 
+RUN_JSONCHECKER = True
 
 def compareOutputs( expected, actual, message ):
     expected = expected.strip().replace('\r','').split('\n')
@@ -39,7 +40,10 @@ def runAllTests( jsontest_executable_path, input_dir = None ):
     if not input_dir:
         input_dir = os.getcwd()
     tests = glob( os.path.join( input_dir, '*.json' ) )
-    test_jsonchecker = glob( os.path.join( input_dir, 'jsonchecker', '*.json' ) )
+    if RUN_JSONCHECKER:
+        test_jsonchecker = glob( os.path.join( input_dir, 'jsonchecker', '*.json' ) )
+    else:
+        test_jsonchecker = []
     failed_tests = []
     for input_path in tests + test_jsonchecker:
         is_json_checker_test = input_path in test_jsonchecker
@@ -54,7 +58,8 @@ def runAllTests( jsontest_executable_path, input_dir = None ):
             if expect_failure:
                 if status is None:
                     print 'FAILED'
-                    failed_tests.append( (input_path, 'Parsing should have failed') )
+                    failed_tests.append( (input_path, 'Parsing should have failed:\n%s' %
+                                          safeReadFile(input_path)) )
                 else:
                     print 'OK'
             else:

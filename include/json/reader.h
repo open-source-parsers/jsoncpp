@@ -1,7 +1,7 @@
 #ifndef CPPTL_JSON_READER_H_INCLUDED
 # define CPPTL_JSON_READER_H_INCLUDED
 
-# include "forwards.h"
+# include "features.h"
 # include "value.h"
 # include <deque>
 # include <stack>
@@ -10,10 +10,7 @@
 
 namespace Json {
 
-   class Value;
-
    /** \brief Unserialize a <a HREF="http://www.json.org">JSON</a> document into a Value.
-    *
     *
     */
    class JSON_API Reader
@@ -22,7 +19,15 @@ namespace Json {
       typedef char Char;
       typedef const Char *Location;
 
+      /** \brief Constructs a Reader allowing all features
+       * for parsing.
+       */
       Reader();
+
+      /** \brief Constructs a Reader allowing the specified feature set
+       * for parsing.
+       */
+      Reader( const Features &features );
 
       /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a> document.
        * \param document UTF-8 encoded string containing the document to read.
@@ -30,6 +35,8 @@ namespace Json {
        *             successfully parsed.
        * \param collectComments \c true to collect comment and allow writing them back during
        *                        serialization, \c false to discard comments.
+       *                        This parameter is ignored if Features::allowComments_
+       *                        is \c false.
        * \return \c true if the document was successfully parsed, \c false if an error occurred.
        */
       bool parse( const std::string &document, 
@@ -42,6 +49,8 @@ namespace Json {
        *             successfully parsed.
        * \param collectComments \c true to collect comment and allow writing them back during
        *                        serialization, \c false to discard comments.
+       *                        This parameter is ignored if Features::allowComments_
+       *                        is \c false.
        * \return \c true if the document was successfully parsed, \c false if an error occurred.
        */
       bool parse( const char *beginDoc, const char *endDoc, 
@@ -50,7 +59,7 @@ namespace Json {
 
       /// \brief Parse from input stream.
       /// \see Json::operator>>(std::istream&, Json::Value&).
-      bool parse( std::istream&,
+      bool parse( std::istream &is,
                   Value &root,
                   bool collectComments = true );
 
@@ -152,6 +161,7 @@ namespace Json {
       Location lastValueEnd_;
       Value *lastValue_;
       std::string commentsBefore_;
+      Features features_;
       bool collectComments_;
    };
 
