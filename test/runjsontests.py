@@ -3,7 +3,7 @@ import os
 import os.path
 from glob import glob
 
-RUN_JSONCHECKER = True
+RUN_JSONCHECKER = False
 
 def compareOutputs( expected, actual, message ):
     expected = expected.strip().replace('\r','').split('\n')
