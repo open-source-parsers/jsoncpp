@@ -11,6 +11,11 @@
 // //////////////////////////////////////////////////////////////////
 
 ValueIteratorBase::ValueIteratorBase()
+#ifndef JSON_VALUE_USE_INTERNAL_MAP
+   : current_( 0 )
+#else
+# error fix me // Need to handle uninitialized iterator comparison for experimental maps
+#endif
 {
 }
 
