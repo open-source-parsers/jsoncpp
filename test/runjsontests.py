@@ -2,8 +2,10 @@ import sys
 import os
 import os.path
 from glob import glob
+import optparse
 
 RUN_JSONCHECKER = False
+VALGRIND_CMD = 'valgrind --tool=memcheck --leak-check=yes --undef-value-errors=yes '
 
 def compareOutputs( expected, actual, message ):
     expected = expected.strip().replace('\r','').split('\n')
@@ -36,7 +38,8 @@ def safeReadFile( path ):
     except IOError, e:
         return '<File "%s" is missing: %s>' % (path,e)
 
-def runAllTests( jsontest_executable_path, input_dir = None ):
+def runAllTests( jsontest_executable_path, input_dir = None,
+                 use_valgrind=False ):
     if not input_dir:
         input_dir = os.getcwd()
     tests = glob( os.path.join( input_dir, '*.json' ) )
@@ -45,12 +48,14 @@ def runAllTests( jsontest_executable_path, input_dir = None ):
     else:
         test_jsonchecker = []
     failed_tests = []
+    valgrind_path = use_valgrind and VALGRIND_CMD or ''
     for input_path in tests + test_jsonchecker:
         is_json_checker_test = input_path in test_jsonchecker
         print 'TESTING:', input_path,
         options = is_json_checker_test and '--json-checker' or ''
-        pipe = os.popen( "%s %s %s" % (jsontest_executable_path, options,
-                                       input_path) )
+        pipe = os.popen( "%s%s %s %s" % (
+            valgrind_path, jsontest_executable_path, options,
+            input_path) )
         process_output = pipe.read()
         status = pipe.close()
         if is_json_checker_test:
@@ -101,15 +106,27 @@ def runAllTests( jsontest_executable_path, input_dir = None ):
         print 'All %d tests passed.' % len(tests)
         return 0
 
-if __name__ == '__main__':
-    if len(sys.argv) < 1 or len(sys.argv) > 2:
-        print "Usage: %s jsontest-executable-path [input-testcase-directory]" % sys.argv[0]
+def main():
+    from optparse import OptionParser
+    parser = OptionParser( usage="%prog [options] <path to jsontestrunner.exe> [test case directory]" )
+    parser.add_option("--valgrind",
+                  action="store_true", dest="valgrind", default=False,
+                  help="run all the tests using valgrind to detect memory leaks")
+    parser.enable_interspersed_args()
+    options, args = parser.parse_args()
+
+    if len(args) < 1 or len(args) > 2:
+        options.error( 'Must provides at least path to jsontestrunner executable.' )
         sys.exit( 1 )
 
-    jsontest_executable_path = os.path.normpath( os.path.abspath( sys.argv[1] ) )
-    if len(sys.argv) > 2:
-        input_path = os.path.normpath( os.path.abspath( sys.argv[2] ) )
+    jsontest_executable_path = os.path.normpath( os.path.abspath( args[0] ) )
+    if len(args) > 1:
+        input_path = os.path.normpath( os.path.abspath( args[1] ) )
     else:
         input_path = None
-    status = runAllTests( jsontest_executable_path, input_path )
+    status = runAllTests( jsontest_executable_path, input_path,
+                          use_valgrind=options.valgrind )
     sys.exit( status )
+
+if __name__ == '__main__':
+    main()
