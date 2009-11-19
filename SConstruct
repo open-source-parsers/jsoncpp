@@ -115,7 +115,18 @@ if not os.path.exists( sconsign_dir_path ):
 # Store all dependencies signature in a database
 SConsignFile( sconsign_path )
 
-env = Environment( ENV = {'PATH' : os.environ['PATH']},
+def make_environ_vars():
+	"""Returns a dictionnary with environment variable to use when compiling."""
+	# PATH is required to find the compiler
+	# TEMP is required for at least mingw
+	vars = {}
+	for name in ('PATH', 'TEMP', 'TMP'):
+		if name in os.environ:
+			vars[name] = os.environ[name]
+	return vars
+	
+
+env = Environment( ENV = make_environ_vars(),
                    toolpath = ['scons-tools'],
                    tools=[] ) #, tools=['default'] )
 
