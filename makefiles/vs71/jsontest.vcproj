@@ -111,7 +111,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\main.cpp">
+			RelativePath="..\..\src\jsontestrunner\main.cpp">
 		</File>
 	</Files>
 	<Globals>
