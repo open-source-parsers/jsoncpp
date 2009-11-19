@@ -51,28 +51,32 @@ if internal_targz:
                 tar.add(source_path, archive_name(source_path) )      # filename, arcname
         tar.close()
 
-targzAction = SCons.Action.Action(targz, varlist=['TARGZ_COMPRESSION_LEVEL','TARGZ_BASEDIR'])
+    targzAction = SCons.Action.Action(targz, varlist=['TARGZ_COMPRESSION_LEVEL','TARGZ_BASEDIR'])
 
-def makeBuilder( emitter = None ):
-   return SCons.Builder.Builder(action = SCons.Action.Action('$TARGZ_COM', '$TARGZ_COMSTR'),
-                                source_factory = SCons.Node.FS.Entry,
-                                source_scanner = SCons.Defaults.DirScanner,
-                                suffix = '$TARGZ_SUFFIX',
-                                multi = 1)
-TarGzBuilder = makeBuilder()
+    def makeBuilder( emitter = None ):
+        return SCons.Builder.Builder(action = SCons.Action.Action('$TARGZ_COM', '$TARGZ_COMSTR'),
+                                     source_factory = SCons.Node.FS.Entry,
+                                     source_scanner = SCons.Defaults.DirScanner,
+                                     suffix = '$TARGZ_SUFFIX',
+                                     multi = 1)
+    TarGzBuilder = makeBuilder()
 
-def generate(env):
-    """Add Builders and construction variables for zip to an Environment.
-       The following environnement variables may be set:
-       TARGZ_COMPRESSION_LEVEL: integer, [0-9]. 0: no compression, 9: best compression (same as gzip compression level).
-       TARGZ_BASEDIR: base-directory used to determine archive name (this allow archive name to be relative
-                      to something other than top-dir).
-    """
-    env['BUILDERS']['TarGz'] = TarGzBuilder
-    env['TARGZ_COM'] = targzAction
-    env['TARGZ_COMPRESSION_LEVEL'] = TARGZ_DEFAULT_COMPRESSION_LEVEL # range 0-9
-    env['TARGZ_SUFFIX']  = '.tar.gz'
-    env['TARGZ_BASEDIR'] = env.Dir('.')     # Sources archive name are made relative to that directory.
+    def generate(env):
+        """Add Builders and construction variables for zip to an Environment.
+           The following environnement variables may be set:
+           TARGZ_COMPRESSION_LEVEL: integer, [0-9]. 0: no compression, 9: best compression (same as gzip compression level).
+           TARGZ_BASEDIR: base-directory used to determine archive name (this allow archive name to be relative
+                          to something other than top-dir).
+        """
+        env['BUILDERS']['TarGz'] = TarGzBuilder
+        env['TARGZ_COM'] = targzAction
+        env['TARGZ_COMPRESSION_LEVEL'] = TARGZ_DEFAULT_COMPRESSION_LEVEL # range 0-9
+        env['TARGZ_SUFFIX']  = '.tar.gz'
+        env['TARGZ_BASEDIR'] = env.Dir('.')     # Sources archive name are made relative to that directory.
+else:
+    def generate(env):
+        pass
+
 
 def exists(env):
     return internal_targz

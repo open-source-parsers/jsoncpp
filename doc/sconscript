@@ -31,11 +31,12 @@ if 'doxygen' in env['TOOLS']:
                              target = os.path.join( html_doc_path, 'index.html' ) )
     alias_doc_cmd = env.Alias('doc', doc_nodes )
     env.Alias('doc', env.Install( html_doc_path, '#README.txt' ) )
-    targz_path = os.path.join( env['DIST_DIR'], '%s.tar.gz' % html_dir )
-    zip_doc_cmd = env.TarGz( targz_path, [env.Dir(html_doc_path)],
-                             TARGZ_BASEDIR = env['ROOTBUILD_DIR'] )
-    env.Depends( zip_doc_cmd, alias_doc_cmd )
-    env.Alias( 'doc-dist', zip_doc_cmd )
+    if 'TarGz' in env['BUILDERS']:
+		targz_path = os.path.join( env['DIST_DIR'], '%s.tar.gz' % html_dir )
+		zip_doc_cmd = env.TarGz( targz_path, [env.Dir(html_doc_path)],
+								 TARGZ_BASEDIR = env['ROOTBUILD_DIR'] )
+		env.Depends( zip_doc_cmd, alias_doc_cmd )
+		env.Alias( 'doc-dist', zip_doc_cmd )
 ##    
 ##    doxyfile = env.SubstInFile( '#doc/doxyfile', 'doxyfile.in',
 ##                                SUBST_DICT = {

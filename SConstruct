@@ -134,7 +134,7 @@ if platform == 'suncc':
     env.Tool( 'sunc++' )
     env.Tool( 'sunlink' )
     env.Tool( 'sunar' )
-    env.Append( LIBS = ['pthreads'] )
+    env.Append( CCFLAGS = ['-mt'] )
 elif platform == 'vacpp':
     env.Tool( 'default' )
     env.Tool( 'aixcc' )
@@ -198,14 +198,21 @@ env['JSONCPP_VERSION'] = JSONCPP_VERSION
 env['BUILD_DIR'] = env.Dir(build_dir)
 env['ROOTBUILD_DIR'] = env.Dir(rootbuild_dir)
 env['DIST_DIR'] = DIST_DIR
-class SrcDistAdder:
-    def __init__( self, env ):
-        self.env = env
-    def __call__( self, *args, **kw ):
-        apply( self.env.SrcDist, (self.env['SRCDIST_TARGET'],) + args, kw )
+if 'TarGz' in env['BUILDERS']:
+	class SrcDistAdder:
+		def __init__( self, env ):
+			self.env = env
+		def __call__( self, *args, **kw ):
+			apply( self.env.SrcDist, (self.env['SRCDIST_TARGET'],) + args, kw )
+	env['SRCDIST_BUILDER'] = env.TarGz
+else: # If tarfile module is missing
+	class SrcDistAdder:
+		def __init__( self, env ):
+			pass
+		def __call__( self, *args, **kw ):
+			pass
 env['SRCDIST_ADD'] = SrcDistAdder( env )
 env['SRCDIST_TARGET'] = os.path.join( DIST_DIR, 'jsoncpp-src-%s.tar.gz' % env['JSONCPP_VERSION'] )
-env['SRCDIST_BUILDER'] = env.TarGz
                       
 env_testing = env.Clone( )
 env_testing.Append( LIBS = ['json_${LIB_NAME_SUFFIX}'] )

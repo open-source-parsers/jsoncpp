@@ -167,12 +167,13 @@ def generate(env):
 ##      scan_check = DoxySourceScanCheck,
 ##   )
 
-   srcdist_builder = targz.makeBuilder( srcDistEmitter )
+   if targz.exists(env):
+      srcdist_builder = targz.makeBuilder( srcDistEmitter )
 
-   env['BUILDERS']['SrcDist'] = srcdist_builder
+      env['BUILDERS']['SrcDist'] = srcdist_builder
 
 def exists(env):
    """
    Make sure srcdist exists.
    """
-   return True
+   return targz.exists(env)
