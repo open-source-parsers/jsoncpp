@@ -73,7 +73,7 @@ import os
 import os.path
 import sys
 
-JSONCPP_VERSION = '0.1'
+JSONCPP_VERSION = '0.2'
 DIST_DIR = '#dist'
 
 options = Variables()

@@ -22,7 +22,7 @@ Here is an example of JSON data:
         ],
         
     // Tab indent size
-    indent : { length : 3, use_space = true }
+    "indent" : { "length" : 3, "use_space" = true }
 }
 \endverbatim
 
