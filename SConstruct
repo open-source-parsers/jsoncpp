@@ -262,8 +262,9 @@ def runJSONTests_action( target, source = None, env = None ):
     # Add test scripts to python path
     jsontest_path = Dir( '#test' ).abspath
     sys.path.insert( 0, jsontest_path )
+    data_path = os.path.join( jsontest_path, 'data' )
     import runjsontests
-    return runjsontests.runAllTests( os.path.abspath(source[0].path), jsontest_path )
+    return runjsontests.runAllTests( os.path.abspath(source[0].path), data_path )
 
 def runJSONTests_string( target, source = None, env = None ):
     return 'RunJSONTests("%s")' % source[0]

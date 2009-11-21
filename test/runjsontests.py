@@ -41,7 +41,7 @@ def safeReadFile( path ):
 def runAllTests( jsontest_executable_path, input_dir = None,
                  use_valgrind=False ):
     if not input_dir:
-        input_dir = os.getcwd()
+        input_dir = os.path.join( os.getcwd(), 'data' )
     tests = glob( os.path.join( input_dir, '*.json' ) )
     if RUN_JSONCHECKER:
         test_jsonchecker = glob( os.path.join( input_dir, 'jsonchecker', '*.json' ) )
