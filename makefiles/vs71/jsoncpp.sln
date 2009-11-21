@@ -8,6 +8,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jsontest", "jsontest.vcproj
 		{B84F7231-16CE-41D8-8C08-7B523FF4225B} = {B84F7231-16CE-41D8-8C08-7B523FF4225B}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_lib_json", "test_lib_json.vcproj", "{B7A96B78-2782-40D2-8F37-A2DEF2B9C26D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B84F7231-16CE-41D8-8C08-7B523FF4225B} = {B84F7231-16CE-41D8-8C08-7B523FF4225B}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -27,6 +32,12 @@ Global
 		{25AF2DD2-D396-4668-B188-488C33B8E620}.dummy.Build.0 = Debug|Win32
 		{25AF2DD2-D396-4668-B188-488C33B8E620}.Release.ActiveCfg = Release|Win32
 		{25AF2DD2-D396-4668-B188-488C33B8E620}.Release.Build.0 = Release|Win32
+		{B7A96B78-2782-40D2-8F37-A2DEF2B9C26D}.Debug.ActiveCfg = Debug|Win32
+		{B7A96B78-2782-40D2-8F37-A2DEF2B9C26D}.Debug.Build.0 = Debug|Win32
+		{B7A96B78-2782-40D2-8F37-A2DEF2B9C26D}.dummy.ActiveCfg = Debug|Win32
+		{B7A96B78-2782-40D2-8F37-A2DEF2B9C26D}.dummy.Build.0 = Debug|Win32
+		{B7A96B78-2782-40D2-8F37-A2DEF2B9C26D}.Release.ActiveCfg = Release|Win32
+		{B7A96B78-2782-40D2-8F37-A2DEF2B9C26D}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

@@ -231,6 +231,12 @@ def buildJSONTests( env, target_sources, target_name ):
     check_alias_target = env.Alias( 'check', jsontests_node, RunJSONTests( jsontests_node, jsontests_node ) )
     env.AlwaysBuild( check_alias_target )
 
+def buildUnitTests( env, target_sources, target_name ):
+    jsontests_node = buildJSONExample( env, target_sources, target_name )
+    check_alias_target = env.Alias( 'check', jsontests_node, 
+                                    RunUnitTests( jsontests_node, jsontests_node ) )
+    env.AlwaysBuild( check_alias_target )
+
 def buildLibrary( env, target_sources, target_name ):
     static_lib = env.StaticLibrary( target=target_name + '_${LIB_NAME_SUFFIX}',
                                     source=target_sources )
@@ -242,7 +248,7 @@ def buildLibrary( env, target_sources, target_name ):
         env.Install( lib_dir, shared_lib )
     env['SRCDIST_ADD']( source=[target_sources] )
 
-Export( 'env env_testing buildJSONExample buildLibrary buildJSONTests' )
+Export( 'env env_testing buildJSONExample buildLibrary buildJSONTests buildUnitTests' )
 
 def buildProjectInDirectory( target_directory ):
     global build_dir
@@ -266,6 +272,18 @@ import SCons.Action
 ActionFactory = SCons.Action.ActionFactory
 RunJSONTests = ActionFactory(runJSONTests_action, runJSONTests_string )
 
+def runUnitTests_action( target, source = None, env = None ):
+    # Add test scripts to python path
+    jsontest_path = Dir( '#test' ).abspath
+    sys.path.insert( 0, jsontest_path )
+    import rununittests
+    return rununittests.runAllTests( os.path.abspath(source[0].path) )
+
+def runUnitTests_string( target, source = None, env = None ):
+    return 'RunUnitTests("%s")' % source[0]
+
+RunUnitTests = ActionFactory(runUnitTests_action, runUnitTests_string )
+
 env.Alias( 'check' )
 
 srcdist_cmd = env['SRCDIST_ADD']( source = """
@@ -275,6 +293,7 @@ env.Alias( 'src-dist', srcdist_cmd )
 
 buildProjectInDirectory( 'src/jsontestrunner' )
 buildProjectInDirectory( 'src/lib_json' )
+buildProjectInDirectory( 'src/test_lib_json' )
 buildProjectInDirectory( 'doc' )
 #print env.Dump()
 

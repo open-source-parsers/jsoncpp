@@ -19,6 +19,9 @@
 /// Only has effects if JSON_VALUE_USE_INTERNAL_MAP is defined.
 //#  define JSON_USE_SIMPLE_INTERNAL_ALLOCATOR 1
 
+/// If defined, indicates that Json use exception to report invalid type manipulation
+/// instead of C assert macro.
+# define JSON_USE_EXCEPTION 1
 
 # ifdef JSON_IN_CPPTL
 #  include <cpptl/config.h>

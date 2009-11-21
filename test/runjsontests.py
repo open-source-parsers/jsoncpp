@@ -116,7 +116,7 @@ def main():
     options, args = parser.parse_args()
 
     if len(args) < 1 or len(args) > 2:
-        options.error( 'Must provides at least path to jsontestrunner executable.' )
+        parser.error( 'Must provides at least path to jsontestrunner executable.' )
         sys.exit( 1 )
 
     jsontest_executable_path = os.path.normpath( os.path.abspath( args[0] ) )
