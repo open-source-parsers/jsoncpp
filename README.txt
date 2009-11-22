@@ -44,4 +44,10 @@ and TARGET may be:
 
 To run the test manually:
 cd test
+# This will run the Reader/Writer tests
 python runjsontests.py "path to jsontest.exe"
+# This will run the unit tests (mostly Value)
+python rununittests.py "path to test_lib_json.exe"
+
+You can run the tests using valgrind using:
+python rununittests.py --valgrind "path to test_lib_json.exe"
