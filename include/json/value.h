@@ -917,6 +917,8 @@ public: // overridden from ValueArrayAllocator
    private:
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
       Value::ObjectValues::iterator current_;
+      // Indicates that iterator is for a null value.
+      bool isNull_;
 #else
       union
       {

@@ -13,6 +13,7 @@
 ValueIteratorBase::ValueIteratorBase()
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    : current_()
+   , isNull_( true )
 #else
 # error fix me // Need to handle uninitialized iterator comparison for experimental maps
 #endif
@@ -23,6 +24,7 @@ ValueIteratorBase::ValueIteratorBase()
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
 ValueIteratorBase::ValueIteratorBase( const Value::ObjectValues::iterator &current )
    : current_( current )
+   , isNull_( false )
 {
 }
 #else
@@ -86,6 +88,15 @@ ValueIteratorBase::computeDistance( const SelfType &other ) const
 # ifdef JSON_USE_CPPTL_SMALLMAP
    return current_ - other.current_;
 # else
+   // Iterator for null value are initialized using the default
+   // constructor, which initialize current_ to the default
+   // std::map::iterator. As begin() and end() are two instance 
+   // of the default std::map::iterator, they can not be compared.
+   // To allow this, we handle this comparison specifically.
+   if ( isNull_  &&  other.isNull_ )
+   {
+      return 0;
+   }
    return difference_type( std::distance( current_, other.current_ ) );
 # endif
 #else
@@ -100,6 +111,10 @@ bool
 ValueIteratorBase::isEqual( const SelfType &other ) const
 {
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
+   if ( isNull_ )
+   {
+      return other.isNull_;
+   }
    return current_ == other.current_;
 #else
    if ( isArray_ )
