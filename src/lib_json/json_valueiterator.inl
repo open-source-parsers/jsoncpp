@@ -97,7 +97,18 @@ ValueIteratorBase::computeDistance( const SelfType &other ) const
    {
       return 0;
    }
-   return difference_type( std::distance( current_, other.current_ ) );
+
+
+   // Usage of std::distance is not portable (does not compile with Sun Studio 12 RogueWave STL,
+   // which is the one used by default).
+   // Using a portable hand-made version for non random iterator instead:
+   //   return difference_type( std::distance( current_, other.current_ ) );
+   difference_type myDistance = 0;
+   for ( Value::ObjectValues::iterator it = current_; it != other.current_; ++it )
+   {
+      ++myDistance;
+   }
+   return myDistance;
 # endif
 #else
    if ( isArray_ )
