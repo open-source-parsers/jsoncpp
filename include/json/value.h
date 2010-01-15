@@ -637,6 +637,13 @@ namespace Json {
 # ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
       struct IteratorState
       {
+         IteratorState() 
+            : map_(0)
+            , link_(0)
+            , itemIndex_(0)
+            , bucketIndex_(0) 
+         {
+         }
          ValueInternalMap *map_;
          ValueInternalLink *link_;
          BucketIndex itemIndex_;
@@ -729,6 +736,12 @@ namespace Json {
 # ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
       struct IteratorState // Must be a POD
       {
+         IteratorState() 
+            : array_(0)
+            , currentPageIndex_(0)
+            , currentItemIndex_(0) 
+         {
+         }
          ValueInternalArray *array_;
          Value **currentPageIndex_;
          unsigned int currentItemIndex_;

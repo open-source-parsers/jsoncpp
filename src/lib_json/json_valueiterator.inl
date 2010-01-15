@@ -14,11 +14,15 @@ ValueIteratorBase::ValueIteratorBase()
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    : current_()
    , isNull_( true )
-#else
-# error fix me // Need to handle uninitialized iterator comparison for experimental maps
-#endif
 {
 }
+#else
+   : isArray_( true )
+   , isNull_( true )
+{
+   iterator_.array_ = ValueInternalArray::IteratorState();
+}
+#endif
 
 
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
