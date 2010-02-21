@@ -304,6 +304,11 @@ TestCase::TestCase()
 }
 
 
+TestCase::~TestCase()
+{
+}
+
+
 void 
 TestCase::run( TestResult &result )
 {

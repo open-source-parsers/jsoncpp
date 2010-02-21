@@ -110,6 +110,8 @@ namespace JsonTest {
    public:
       TestCase();
 
+      virtual ~TestCase();
+
       void run( TestResult &result );
 
       virtual const char *testName() const = 0;
