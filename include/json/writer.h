@@ -157,8 +157,8 @@ namespace Json {
       bool addChildValues_;
    };
 
-   std::string JSON_API valueToString( Value::Int value );
-   std::string JSON_API valueToString( Value::UInt value );
+   std::string JSON_API valueToString( Int value );
+   std::string JSON_API valueToString( UInt value );
    std::string JSON_API valueToString( double value );
    std::string JSON_API valueToString( bool value );
    std::string JSON_API valueToQuotedString( const char *value );

@@ -176,7 +176,7 @@ ValueIteratorBase::key() const
 }
 
 
-Value::UInt 
+UInt 
 ValueIteratorBase::index() const
 {
 #ifndef JSON_VALUE_USE_INTERNAL_MAP

@@ -20,9 +20,9 @@
 namespace Json {
 
 const Value Value::null;
-const Value::Int Value::minInt = Value::Int( ~(Value::UInt(-1)/2) );
-const Value::Int Value::maxInt = Value::Int( Value::UInt(-1)/2 );
-const Value::UInt Value::maxUInt = Value::UInt(-1);
+const Int Value::minInt = Int( ~(UInt(-1)/2) );
+const Int Value::maxInt = Int( UInt(-1)/2 );
+const UInt Value::maxUInt = UInt(-1);
 
 // A "safe" implementation of strdup. Allow null pointer to be passed. 
 // Also avoid warning on msvc80.
@@ -350,6 +350,21 @@ Value::Value( const char *value )
 {
    value_.string_ = valueAllocator()->duplicateStringValue( value );
 }
+
+
+Value::Value( const char *beginValue, 
+              const char *endValue )
+   : type_( stringValue )
+   , allocated_( true )
+   , comments_( 0 )
+# ifdef JSON_VALUE_USE_INTERNAL_MAP
+   , itemIsUsed_( 0 )
+#endif
+{
+   value_.string_ = valueAllocator()->duplicateStringValue( beginValue, 
+                                                            UInt(endValue - beginValue) );
+}
+
 
 Value::Value( const std::string &value )
    : type_( stringValue )

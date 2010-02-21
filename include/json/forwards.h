@@ -5,14 +5,19 @@
 
 namespace Json {
 
+   // writer.h
    class FastWriter;
-   class Reader;
    class StyledWriter;
+
+   // reader.h
+   class Reader;
 
    // features.h
    class Features;
 
    // value.h
+   typedef int Int;
+   typedef unsigned int UInt;
    class StaticString;
    class Path;
    class PathArgument;

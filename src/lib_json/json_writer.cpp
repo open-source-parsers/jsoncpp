@@ -39,14 +39,14 @@ static void uintToString( unsigned int value,
    while ( value != 0 );
 }
 
-std::string valueToString( Value::Int value )
+std::string valueToString( Int value )
 {
    char buffer[32];
    char *current = buffer + sizeof(buffer);
    bool isNegative = value < 0;
    if ( isNegative )
       value = -value;
-   uintToString( Value::UInt(value), current );
+   uintToString( UInt(value), current );
    if ( isNegative )
       *--current = '-';
    assert( current >= buffer );
@@ -54,7 +54,7 @@ std::string valueToString( Value::Int value )
 }
 
 
-std::string valueToString( Value::UInt value )
+std::string valueToString( UInt value )
 {
    char buffer[32];
    char *current = buffer + sizeof(buffer);

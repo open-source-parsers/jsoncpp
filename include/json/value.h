@@ -117,10 +117,10 @@ namespace Json {
 # endif
    public:
       typedef std::vector<std::string> Members;
-      typedef int Int;
-      typedef unsigned int UInt;
       typedef ValueIterator iterator;
       typedef ValueConstIterator const_iterator;
+      typedef Json::UInt UInt;
+      typedef Json::Int Int;
       typedef UInt ArrayIndex;
 
       static const Value null;
@@ -186,6 +186,7 @@ namespace Json {
       Value( UInt value );
       Value( double value );
       Value( const char *value );
+      Value( const char *beginValue, const char *endValue );
       /** \brief Constructs a value from a static string.
 
        * Like other value string constructor but do not duplicate the string for
@@ -453,7 +454,7 @@ namespace Json {
       friend class Path;
 
       PathArgument();
-      PathArgument( Value::UInt index );
+      PathArgument( UInt index );
       PathArgument( const char *key );
       PathArgument( const std::string &key );
 
@@ -465,7 +466,7 @@ namespace Json {
          kindKey
       };
       std::string key_;
-      Value::UInt index_;
+      UInt index_;
       Kind kind_;
    };
 
@@ -909,7 +910,7 @@ public: // overridden from ValueArrayAllocator
       Value key() const;
 
       /// Return the index of the referenced Value. -1 if it is not an arrayValue.
-      Value::UInt index() const;
+      UInt index() const;
 
       /// Return the member name of the referenced Value. "" if it is not an objectValue.
       const char *memberName() const;
