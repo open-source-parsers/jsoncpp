@@ -96,7 +96,7 @@ def run_doxygen(doxygen_path, config_file, working_dir, is_silent):
     try:
         os.chdir( working_dir )
         cmd = [doxygen_path, config_file]
-        print ' '.join( cmd )
+        print 'Running:', ' '.join( cmd )
         try:
             import subprocess
         except:
@@ -155,9 +155,8 @@ def build_doc( options,  make_release=False ):
 
     do_subst_in_file( 'doc/doxyfile', 'doc/doxyfile.in', subst_keys )
     ok = run_doxygen( options.doxygen_path, 'doc/doxyfile', 'doc', is_silent=options.silent )
-    print open(os.path.join('doc', warning_log_path), 'rb').read()
-    if not ok:
-        print 'Doxygen generation failed'
+    if not options.silent:
+        print open(os.path.join('doc', warning_log_path), 'rb').read()
     index_path = os.path.abspath(os.path.join(subst_keys['%HTML_OUTPUT%'], 'index.html'))
     print 'Generated documentation can be found in:'
     print index_path
