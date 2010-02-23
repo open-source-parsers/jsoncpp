@@ -89,7 +89,7 @@ def do_subst_in_file(targetfile, sourcefile, dict):
         print "Can't write target file %s"%targetfile
         raise
 
-def run_doxygen(doxygen_path, config_file, working_dir):
+def run_doxygen(doxygen_path, config_file, working_dir, is_silent):
     config_file = os.path.abspath( config_file )
     doxygen_path = doxygen_path
     old_cwd = os.getcwd()
@@ -104,9 +104,14 @@ def run_doxygen(doxygen_path, config_file, working_dir):
                 print 'Documentation generation failed'
                 return False
         else:
-            try:
-                subprocess.check_call( cmd )
-            except subprocess.CalledProcessError:
+            if is_silent:
+                process = subprocess.Popen( cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT )
+            else:
+                process = subprocess.Popen( cmd )
+            stdout, _ = process.communicate()
+            if process.returncode:
+                print 'Documentation generation failed:'
+                print stdout
                 return False
         return True
     finally:
@@ -119,6 +124,7 @@ def build_doc( options,  make_release=False ):
         options.with_html_help = True
         options.with_uml_look = True
         options.open = False
+        options.silent = True
 
     version = open('version','rt').read().strip()
     output_dir = '../build/doxygen' # relative to doc/doxyfile location.
@@ -148,7 +154,7 @@ def build_doc( options,  make_release=False ):
         os.makedirs( full_output_dir )
 
     do_subst_in_file( 'doc/doxyfile', 'doc/doxyfile.in', subst_keys )
-    ok = run_doxygen( options.doxygen_path, 'doc/doxyfile', 'doc' )
+    ok = run_doxygen( options.doxygen_path, 'doc/doxyfile', 'doc', is_silent=options.silent )
     print open(os.path.join('doc', warning_log_path), 'rb').read()
     if not ok:
         print 'Doxygen generation failed'
@@ -192,6 +198,8 @@ def main():
         help="""Open the HTML index in the web browser after generation""")
     parser.add_option('--tarball', dest="make_tarball", action='store_true', default=False,
         help="""Generates a tarball of the documentation in dist/ directory""")
+    parser.add_option('-s', '--silent', dest="silent", action='store_true', default=False,
+        help="""Hides doxygen output""")
     parser.enable_interspersed_args()
     options, args = parser.parse_args()
     build_doc( options )
