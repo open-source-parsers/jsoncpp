@@ -14,6 +14,7 @@ import sys
 import doxybuild
 import subprocess
 import xml.etree.ElementTree as ElementTree
+import shutil
 
 SVN_ROOT = 'https://jsoncpp.svn.sourceforge.net/svnroot/jsoncpp/'
 SVN_TAG_ROOT = SVN_ROOT + 'tags/jsoncpp'
@@ -82,6 +83,15 @@ def svn_remove_tag( tag_url, message ):
     """
     svn_command( 'delete', '-m', message, tag_url )
 
+def svn_export( tag_url, export_dir ):
+    """Exports the tag_url revision to export_dir.
+       Target directory, including its parent is created if it does not exist.
+       If the directory export_dir exist, it is deleted before export proceed.
+    """
+    if os.path.isdir( export_dir ):
+        shutil.rmtree( export_dir )
+    svn_command( 'export', tag_url, export_dir )
+
 def main():
     usage = """%prog release_version next_dev_version
 Update 'version' file to release_version and commit.
@@ -119,17 +129,18 @@ Must be started in the project top directory.
         print 'Setting version to', release_version
         set_version( release_version )
         tag_url = svn_join_url( SVN_TAG_ROOT, release_version )
-        if svn_check_if_tag_exist( tag_url ):
-            if options.retag_release:
-                svn_remove_tag( tag_url, 'Overwriting previous tag' )
-            else:
-                print 'Aborting, tag %s already exist. Use --retag to overwrite it!' % tag_url
-                sys.exit( 1 )
-        svn_tag_sandbox( tag_url, 'Release ' + release_version )
-        print 'Generated doxygen document...'
-        doxybuild.build_doc( options, make_release=True )
+##        if svn_check_if_tag_exist( tag_url ):
+##            if options.retag_release:
+##                svn_remove_tag( tag_url, 'Overwriting previous tag' )
+##            else:
+##                print 'Aborting, tag %s already exist. Use --retag to overwrite it!' % tag_url
+##                sys.exit( 1 )
+##        svn_tag_sandbox( tag_url, 'Release ' + release_version )
+##        print 'Generated doxygen document...'
+##        doxybuild.build_doc( options, make_release=True )
+        svn_export( tag_url, 'dist/distcheck' )
         #@todo:
-        # svn export
+        # fix-eol
         # source tarball
         # decompress source tarball
         # ?compile & run & check
