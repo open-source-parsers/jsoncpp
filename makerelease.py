@@ -15,6 +15,7 @@ import doxybuild
 import subprocess
 import xml.etree.ElementTree as ElementTree
 import shutil
+from devtools import antglob, fixeol, tarball
 
 SVN_ROOT = 'https://jsoncpp.svn.sourceforge.net/svnroot/jsoncpp/'
 SVN_TAG_ROOT = SVN_ROOT + 'tags/jsoncpp'
@@ -92,6 +93,24 @@ def svn_export( tag_url, export_dir ):
         shutil.rmtree( export_dir )
     svn_command( 'export', tag_url, export_dir )
 
+def fix_sources_eol( dist_dir ):
+    """Set file EOL for tarball distribution.
+    """
+    print 'Preparing exported source file EOL for distribution...'
+    prune_dirs = antglob.prune_dirs + 'scons-local* ./build* ./libs ./dist'
+    win_sources = antglob.glob( dist_dir, 
+        includes = '**/*.sln **/*.vcproj',
+        prune_dirs = prune_dirs )
+    unix_sources = antglob.glob( dist_dir,
+        includes = '''**/*.h **/*.cpp **/*.inl **/*.txt **/*.dox **/*.py **/*.html **/*.in
+        sconscript *.json *.expected AUTHORS LICENSE''',
+        excludes = antglob.default_excludes + 'scons.py sconsign.py scons-*',
+        prune_dirs = prune_dirs )
+    for path in win_sources:
+        fixeol.fix_source_eol( path, is_dry_run = False, verbose = True, eol = '\r\n' )
+    for path in unix_sources:
+        fixeol.fix_source_eol( path, is_dry_run = False, verbose = True, eol = '\n' )
+
 def main():
     usage = """%prog release_version next_dev_version
 Update 'version' file to release_version and commit.
@@ -129,19 +148,26 @@ Must be started in the project top directory.
         print 'Setting version to', release_version
         set_version( release_version )
         tag_url = svn_join_url( SVN_TAG_ROOT, release_version )
-##        if svn_check_if_tag_exist( tag_url ):
-##            if options.retag_release:
-##                svn_remove_tag( tag_url, 'Overwriting previous tag' )
-##            else:
-##                print 'Aborting, tag %s already exist. Use --retag to overwrite it!' % tag_url
-##                sys.exit( 1 )
-##        svn_tag_sandbox( tag_url, 'Release ' + release_version )
-##        print 'Generated doxygen document...'
-##        doxybuild.build_doc( options, make_release=True )
-        svn_export( tag_url, 'dist/distcheck' )
+        if svn_check_if_tag_exist( tag_url ):
+            if options.retag_release:
+                svn_remove_tag( tag_url, 'Overwriting previous tag' )
+            else:
+                print 'Aborting, tag %s already exist. Use --retag to overwrite it!' % tag_url
+                sys.exit( 1 )
+        svn_tag_sandbox( tag_url, 'Release ' + release_version )
+
+        print 'Generated doxygen document...'
+        doxybuild.build_doc( options, make_release=True )
+        
+        export_dir = 'dist/export'
+        svn_export( tag_url, export_dir )
+        fix_sources_eol( export_dir )
+        
+        source_dir = 'jsoncpp-src-' + release_version
+        source_tarball_path = 'dist/%s.tar.gz' % source_dir
+        print 'Generating source tarball to', source_tarball_path
+        tarball.make_tarball( source_tarball_path, [export_dir], export_dir, prefix_dir=source_dir )
         #@todo:
-        # fix-eol
-        # source tarball
         # decompress source tarball
         # ?compile & run & check
         # ?upload documentation
