@@ -1,79 +1,17 @@
 """
-Build system can be clean-up by sticking to a few core production factory, with automatic dependencies resolution.
-4 basic project productions:
-- library
-- binary
-- documentation
-- tests
+Notes: 
+- shared library support is buggy: it assumes that a static and dynamic library can be build from the same object files. This is not true on many platforms. For this reason it is only enabled on linux-gcc at the current time.
 
-* Library:
-  Input:
-    - dependencies (other libraries)
-    - headers: include path & files
-    - sources
-    - generated sources
-    - resources
-    - generated resources
-  Production:
-    - Static library
-    - Dynamic library
-    - Naming rule
-  Life-cycle:
-    - Library compilation
-    - Compilation as a dependencies
-    - Run-time
-    - Packaging
-  Identity:
-    - Name
-    - Version
-* Binary:
-  Input:
-    - dependencies (other libraries)
-    - headers: include path & files (usually empty)
-    - sources
-    - generated sources
-    - resources
-    - generated resources
-    - supported variant (optimized/debug, dll/static...)
-  Production:
-    - Binary executable
-    - Manifest [on some platforms]
-    - Debug symbol [on some platforms]
-  Life-cycle:
-    - Compilation
-    - Run-time
-    - Packaging
-  Identity:
-    - Name
-    - Version
-* Documentation:
-  Input:
-    - dependencies (libraries, binaries)
-    - additional sources
-    - generated sources
-    - resources
-    - generated resources
-    - supported variant (public/internal)
-  Production:
-    - HTML documentation
-    - PDF documentation
-    - CHM documentation
-  Life-cycle:
-    - Documentation
-    - Packaging
-    - Test
-  Identity:
-    - Name
-    - Version
+To add a platform:
+- add its name in options allowed_values below
+- add tool initialization for this platform. Search for "if platform == 'suncc'" as an example.
 """
-
-
 
 import os
 import os.path
 import sys
 
-JSONCPP_VERSION = '0.2'
+JSONCPP_VERSION = open(File('#version').abspath,'rt').read().strip()
 DIST_DIR = '#dist'
 
 options = Variables()
@@ -174,8 +112,6 @@ else:
     print "UNSUPPORTED PLATFORM."
     env.Exit(1)
 
-env.Tool('doxygen')
-env.Tool('substinfile')
 env.Tool('targz')
 env.Tool('srcdist')
 env.Tool('globtool')
@@ -295,6 +231,5 @@ env.Alias( 'src-dist', srcdist_cmd )
 buildProjectInDirectory( 'src/jsontestrunner' )
 buildProjectInDirectory( 'src/lib_json' )
 buildProjectInDirectory( 'src/test_lib_json' )
-buildProjectInDirectory( 'doc' )
 #print env.Dump()
 
