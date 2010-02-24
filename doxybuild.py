@@ -84,7 +84,7 @@ def build_doc( options,  make_release=False ):
         options.silent = True
 
     version = open('version','rt').read().strip()
-    output_dir = 'build/doxygen' # relative to doc/doxyfile location.
+    output_dir = 'dist/doxygen' # relative to doc/doxyfile location.
     top_dir = os.path.abspath( '.' )
     html_output_dirname = 'jsoncpp-api-html-' + version
     tarball_path = os.path.join( 'dist', html_output_dirname + '.tar.gz' )
@@ -130,7 +130,7 @@ def build_doc( options,  make_release=False ):
             ]
         tarball_basedir = os.path.join( full_output_dir, html_output_dirname )
         tarball.make_tarball( tarball_path, tarball_sources, tarball_basedir, html_output_dirname )
-    return tarball_path, html_output_path
+    return tarball_path, html_output_dirname
 
 def main():
     usage = """%prog
