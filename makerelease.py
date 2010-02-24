@@ -3,7 +3,7 @@
 Requires Python 2.6
 
 Example of invocation (use to test the script):
-python makerelease.py --force --retag 0.5.0 0.6.0-dev
+python makerelease.py --force --retag --platform=msvc6,msvc71,msvc80,mingw 0.5.0 0.6.0-dev
 
 Example of invocation when doing a release:
 python makerelease.py 0.5.0 0.6.0-dev
@@ -15,14 +15,20 @@ import doxybuild
 import subprocess
 import xml.etree.ElementTree as ElementTree
 import shutil
+import urllib2
 from devtools import antglob, fixeol, tarball
 
 SVN_ROOT = 'https://jsoncpp.svn.sourceforge.net/svnroot/jsoncpp/'
 SVN_TAG_ROOT = SVN_ROOT + 'tags/jsoncpp'
+SCONS_LOCAL_URL = 'http://sourceforge.net/projects/scons/files/scons-local/1.2.0/scons-local-1.2.0.tar.gz/download'
 
 def set_version( version ):
     with open('version','wb') as f:
         f.write( version.strip() )
+
+def rmdir_if_exist( dir_path ):
+    if os.path.isdir( dir_path ):
+        shutil.rmtree( dir_path )
 
 class SVNError(Exception):
     pass
@@ -89,8 +95,7 @@ def svn_export( tag_url, export_dir ):
        Target directory, including its parent is created if it does not exist.
        If the directory export_dir exist, it is deleted before export proceed.
     """
-    if os.path.isdir( export_dir ):
-        shutil.rmtree( export_dir )
+    rmdir_if_exist( export_dir )
     svn_command( 'export', tag_url, export_dir )
 
 def fix_sources_eol( dist_dir ):
@@ -111,6 +116,37 @@ def fix_sources_eol( dist_dir ):
     for path in unix_sources:
         fixeol.fix_source_eol( path, is_dry_run = False, verbose = True, eol = '\n' )
 
+def download( url, target_path ):
+    """Download file represented by url to target_path.
+    """
+    f = urllib2.urlopen( url )
+    try:
+        data = f.read()
+    finally:
+        f.close()
+    fout = open( target_path, 'wb' )
+    try:
+        fout.write( data )
+    finally:
+        fout.close()
+
+def check_compile( distcheck_top_dir, platform ):
+    cmd = [sys.executable, 'scons.py', 'platform=%s' % platform, 'check']
+    print 'Running:', ' '.join( cmd )
+    log_path = os.path.join( distcheck_top_dir, 'build-%s.log' % platform )
+    flog = open( log_path, 'wb' )
+    try:
+        process = subprocess.Popen( cmd,
+                                    stdout=flog,
+                                    stderr=subprocess.STDOUT,
+                                    cwd=distcheck_top_dir )
+        stdout = process.communicate()[0]
+        status = (process.returncode == 0)
+    finally:
+        flog.close()
+    return (status, log_path)
+
+
 def main():
     usage = """%prog release_version next_dev_version
 Update 'version' file to release_version and commit.
@@ -120,7 +156,9 @@ Update 'version' file to next_dev_version and commit.
 
 Performs an svn export of tag release version, and build a source tarball.    
 
-Must be started in the project top directory.    
+Must be started in the project top directory.
+
+Warning: --force should only be used when developping/testing the release script.
 """
     from optparse import OptionParser
     parser = OptionParser(usage=usage)
@@ -133,12 +171,19 @@ Must be started in the project top directory.
         help="""Ignore pending commit. [Default: %default]""")
     parser.add_option('--retag', dest="retag_release", action='store_true', default=False,
         help="""Overwrite release existing tag if it exist. [Default: %default]""")
+    parser.add_option('-p', '--platforms', dest="platforms", action='store', default='',
+        help="""Comma separated list of platform passed to scons for build check.""")
+    parser.add_option('--no-test', dest="no_test", action='store', default=False,
+        help="""Skips build check.""")
     parser.enable_interspersed_args()
     options, args = parser.parse_args()
 
     if len(args) < 1:
         parser.error( 'release_version missing on command-line.' )
     release_version = args[0]
+
+    if not options.platforms and not options.no_test:
+        parser.error( 'You must specify either --platform or --no-test option.' )
 
     if options.ignore_pending_commit:
         msg = ''
@@ -168,11 +213,33 @@ Must be started in the project top directory.
         print 'Generating source tarball to', source_tarball_path
         tarball.make_tarball( source_tarball_path, [export_dir], export_dir, prefix_dir=source_dir )
 
+        # Decompress source tarball, download and install scons-local
         distcheck_dir = 'dist/distcheck'
+        distcheck_top_dir = distcheck_dir + '/' + source_dir
         print 'Decompressing source tarball to', distcheck_dir
+        rmdir_if_exist( distcheck_dir )
         tarball.decompress( source_tarball_path, distcheck_dir )
+        scons_local_path = 'dist/scons-local.tar.gz'
+        print 'Downloading scons-local to', scons_local_path
+        download( SCONS_LOCAL_URL, scons_local_path )
+        print 'Decompressing scons-local to', distcheck_top_dir
+        tarball.decompress( scons_local_path, distcheck_top_dir )
+
+        # Run compilation
+        print 'Compiling decompressed tarball'
+        all_build_status = True
+        for platform in options.platforms.split(','):
+            print 'Testing platform:', platform
+            build_status, log_path = check_compile( distcheck_top_dir, platform )
+            print 'see build log:', log_path
+            print build_status and '=> ok' or '=> FAILED'
+            all_build_status = all_build_status and build_status
+        if not build_status:
+            print 'Testing failed on at least one platform, aborting...'
+            svn_remove_tag( tag_url, 'Removing tag due to failed testing' )
+            sys.exit(1)
+        
         #@todo:
-        # ?compile & run & check
         # ?upload documentation
     else:
         sys.stderr.write( msg + '\n' )
