@@ -29,13 +29,25 @@ def make_tarball(tarball_path, sources, base_dir, prefix_dir=''):
                 path_in_tar = archive_name(path)
                 tar.add(path, path_in_tar )
     compression = TARGZ_DEFAULT_COMPRESSION_LEVEL
-    fileobj = gzip.GzipFile( tarball_path, 'wb', compression )
-    tar = tarfile.TarFile(os.path.splitext(tarball_path)[0], 'w', fileobj)
-    for source in sources:
-        source_path = source
-        if os.path.isdir( source ):
-            os.path.walk(source_path, visit, tar)
-        else:
-            path_in_tar = archive_name(source_path)
-            tar.add(source_path, path_in_tar )      # filename, arcname
-    tar.close()
+    tar = tarfile.TarFile.gzopen( tarball_path, 'w', compresslevel=compression )
+    try:
+        for source in sources:
+            source_path = source
+            if os.path.isdir( source ):
+                os.path.walk(source_path, visit, tar)
+            else:
+                path_in_tar = archive_name(source_path)
+                tar.add(source_path, path_in_tar )      # filename, arcname
+    finally:
+        tar.close()
+
+def decompress( tarball_path, base_dir ):
+    """Decompress the gzipped tarball into directory base_dir.
+    """
+    # !!! This class method is not documented in the online doc
+    # nor is bz2open!
+    tar = tarfile.TarFile.gzopen(tarball_path, mode='r')
+    try:
+        tar.extractall( base_dir )
+    finally:
+        tar.close()

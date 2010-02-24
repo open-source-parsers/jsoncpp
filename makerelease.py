@@ -167,8 +167,11 @@ Must be started in the project top directory.
         source_tarball_path = 'dist/%s.tar.gz' % source_dir
         print 'Generating source tarball to', source_tarball_path
         tarball.make_tarball( source_tarball_path, [export_dir], export_dir, prefix_dir=source_dir )
+
+        distcheck_dir = 'dist/distcheck'
+        print 'Decompressing source tarball to', distcheck_dir
+        tarball.decompress( source_tarball_path, distcheck_dir )
         #@todo:
-        # decompress source tarball
         # ?compile & run & check
         # ?upload documentation
     else:
