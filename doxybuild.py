@@ -8,22 +8,19 @@ import sys
 import shutil
 from devtools import tarball
 
-def find_program(filename):
+def find_program(*filenames):
     """find a program in folders path_lst, and sets env[var]
-    @param env: environmentA
-    @param filename: name of the program to search for
-    @param path_list: list of directories to search for filename
-    @param var: environment value to be checked for in env or os.environ
-    @return: either the value that is referenced with [var] in env or os.environ
-    or the first occurrence filename or '' if filename could not be found
+    @param filenames: a list of possible names of the program to search for
+    @return: the full path of the filename if found, or '' if filename could not be found
 """
     paths = os.environ.get('PATH', '').split(os.pathsep)
     suffixes = ('win32' in sys.platform ) and '.exe .com .bat .cmd' or ''
-    for name in [filename+ext for ext in suffixes.split()]:
-        for directory in paths:
-            full_path = os.path.join(directory, name)
-            if os.path.isfile(full_path):
-                return full_path
+    for filename in filenames:
+        for name in [filename+ext for ext in suffixes.split()]:
+            for directory in paths:
+                full_path = os.path.join(directory, name)
+                if os.path.isfile(full_path):
+                    return full_path
     return ''
 
 def do_subst_in_file(targetfile, sourcefile, dict):
@@ -87,23 +84,24 @@ def build_doc( options,  make_release=False ):
         options.silent = True
 
     version = open('version','rt').read().strip()
-    output_dir = '../build/doxygen' # relative to doc/doxyfile location.
+    output_dir = 'build/doxygen' # relative to doc/doxyfile location.
     top_dir = os.path.abspath( '.' )
     html_output_dirname = 'jsoncpp-api-html-' + version
     tarball_path = os.path.join( 'dist', html_output_dirname + '.tar.gz' )
     warning_log_path = os.path.join( output_dir, '../jsoncpp-doxygen-warning.log' )
+    html_output_path = os.path.join( output_dir, html_output_dirname )
     def yesno( bool ):
         return bool and 'YES' or 'NO'
     subst_keys = {
         '%JSONCPP_VERSION%': version,
         '%DOC_TOPDIR%': '',
         '%TOPDIR%': top_dir,
-        '%HTML_OUTPUT%': os.path.join( output_dir, html_output_dirname ),
+        '%HTML_OUTPUT%': os.path.join( '..', output_dir, html_output_dirname ),
         '%HAVE_DOT%': yesno(options.with_dot),
         '%DOT_PATH%': os.path.split(options.dot_path)[0],
         '%HTML_HELP%': yesno(options.with_html_help),
         '%UML_LOOK%': yesno(options.with_uml_look),
-        '%WARNING_LOG_PATH%': warning_log_path
+        '%WARNING_LOG_PATH%': os.path.join( '..', warning_log_path )
         }
 
     full_output_dir = os.path.join( 'doc', output_dir )
@@ -116,7 +114,7 @@ def build_doc( options,  make_release=False ):
     do_subst_in_file( 'doc/doxyfile', 'doc/doxyfile.in', subst_keys )
     ok = run_doxygen( options.doxygen_path, 'doc/doxyfile', 'doc', is_silent=options.silent )
     if not options.silent:
-        print open(os.path.join('doc', warning_log_path), 'rb').read()
+        print open(warning_log_path, 'rb').read()
     index_path = os.path.abspath(os.path.join(subst_keys['%HTML_OUTPUT%'], 'index.html'))
     print 'Generated documentation can be found in:'
     print index_path
@@ -132,6 +130,7 @@ def build_doc( options,  make_release=False ):
             ]
         tarball_basedir = os.path.join( full_output_dir, html_output_dirname )
         tarball.make_tarball( tarball_path, tarball_sources, tarball_basedir, html_output_dirname )
+    return tarball_path, html_output_path
 
 def main():
     usage = """%prog

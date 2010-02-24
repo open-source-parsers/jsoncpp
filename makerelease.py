@@ -3,7 +3,7 @@
 Requires Python 2.6
 
 Example of invocation (use to test the script):
-python makerelease.py --force --retag --platform=msvc6,msvc71,msvc80,mingw 0.5.0 0.6.0-dev
+python makerelease.py --force --retag --platform=msvc6,msvc71,msvc80,mingw -ublep 0.5.0 0.6.0-dev
 
 Example of invocation when doing a release:
 python makerelease.py 0.5.0 0.6.0-dev
@@ -16,11 +16,15 @@ import subprocess
 import xml.etree.ElementTree as ElementTree
 import shutil
 import urllib2
+import tempfile
+import os
+import time
 from devtools import antglob, fixeol, tarball
 
 SVN_ROOT = 'https://jsoncpp.svn.sourceforge.net/svnroot/jsoncpp/'
 SVN_TAG_ROOT = SVN_ROOT + 'tags/jsoncpp'
 SCONS_LOCAL_URL = 'http://sourceforge.net/projects/scons/files/scons-local/1.2.0/scons-local-1.2.0.tar.gz/download'
+SOURCEFORGE_PROJECT = 'jsoncpp'
 
 def set_version( version ):
     with open('version','wb') as f:
@@ -146,6 +150,83 @@ def check_compile( distcheck_top_dir, platform ):
         flog.close()
     return (status, log_path)
 
+def write_tempfile( content, **kwargs ):
+    fd, path = tempfile.mkstemp( **kwargs )
+    f = os.fdopen( fd, 'wt' )
+    try:
+        f.write( content )
+    finally:
+        f.close()
+    return path
+
+class SFTPError(Exception):
+    pass
+
+def run_sftp_batch( userhost, sftp, batch, retry=0 ):
+    path = write_tempfile( batch, suffix='.sftp', text=True )
+    # psftp -agent -C blep,jsoncpp@web.sourceforge.net -batch -b batch.sftp -bc
+    cmd = [sftp, '-agent', '-C', '-batch', '-b', path, '-bc', userhost]
+    error = None
+    for retry_index in xrange(0, max(1,retry)):
+        heading = retry_index == 0 and 'Running:' or 'Retrying:'
+        print heading, ' '.join( cmd )
+        process = subprocess.Popen( cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT )
+        stdout = process.communicate()[0]
+        if process.returncode != 0:
+            error = SFTPError( 'SFTP batch failed:\n' + stdout )
+        else:
+            break
+    if error:
+        raise error
+    return stdout
+
+def sourceforge_web_synchro( sourceforge_project, doc_dir,
+                             user=None, sftp='sftp' ):
+    """Notes: does not synchronize sub-directory of doc-dir.
+    """
+    userhost = '%s,%s@web.sourceforge.net' % (user, sourceforge_project)
+    stdout = run_sftp_batch( userhost, sftp, """
+cd htdocs
+dir
+exit
+""" )
+    existing_paths = set()
+    collect = 0
+    for line in stdout.split('\n'):
+        line = line.strip()
+        if not collect and line.endswith('> dir'):
+            collect = True
+        elif collect and line.endswith('> exit'):
+            break
+        elif collect == 1:
+            collect = 2
+        elif collect == 2:
+            path = line.strip().split()[-1:]
+            if path and path[0] not in ('.', '..'):
+                existing_paths.add( path[0] )
+    upload_paths = set( [os.path.basename(p) for p in antglob.glob( doc_dir )] )
+    paths_to_remove = existing_paths - upload_paths
+    if paths_to_remove:
+        print 'Removing the following file from web:'
+        print '\n'.join( paths_to_remove )
+        stdout = run_sftp_batch( userhost, sftp, """cd htdocs
+rm %s
+exit""" % ' '.join(paths_to_remove) )
+    print 'Uploading %d files:' % len(upload_paths)
+    batch_size = 10
+    upload_paths = list(upload_paths)
+    start_time = time.time()
+    for index in xrange(0,len(upload_paths),batch_size):
+        paths = upload_paths[index:index+batch_size]
+        file_per_sec = (time.time() - start_time) / (index+1)
+        remaining_files = len(upload_paths) - index
+        remaining_sec = file_per_sec * remaining_files
+        print '%d/%d, ETA=%.1fs' % (index+1, len(upload_paths), remaining_sec)
+        run_sftp_batch( userhost, sftp, """cd htdocs
+lcd %s
+mput %s
+exit""" % (doc_dir, ' '.join(paths) ), retry=3 )
+
 
 def main():
     usage = """%prog release_version next_dev_version
@@ -175,6 +256,10 @@ Warning: --force should only be used when developping/testing the release script
         help="""Comma separated list of platform passed to scons for build check.""")
     parser.add_option('--no-test', dest="no_test", action='store', default=False,
         help="""Skips build check.""")
+    parser.add_option('-u', '--upload-user', dest="user", action='store',
+                      help="""Sourceforge user for SFTP documentation upload.""")
+    parser.add_option('--sftp', dest='sftp', action='store', default=doxybuild.find_program('psftp', 'sftp'),
+                      help="""Path of the SFTP compatible binary used to upload the documentation.""")
     parser.enable_interspersed_args()
     options, args = parser.parse_args()
 
@@ -202,7 +287,12 @@ Warning: --force should only be used when developping/testing the release script
         svn_tag_sandbox( tag_url, 'Release ' + release_version )
 
         print 'Generated doxygen document...'
-        doxybuild.build_doc( options, make_release=True )
+##        doc_dirname = r'jsoncpp-api-html-0.5.0'
+##        doc_tarball_path = r'e:\prg\vc\Lib\jsoncpp-trunk\dist\jsoncpp-api-html-0.5.0.tar.gz'
+        doc_tarball_path, doc_dirname = doxybuild.build_doc( options, make_release=True )
+        doc_distcheck_dir = 'dist/doccheck'
+        tarball.decompress( doc_tarball_path, doc_distcheck_dir )
+        doc_distcheck_top_dir = os.path.join( doc_distcheck_dir, doc_dirname )
         
         export_dir = 'dist/export'
         svn_export( tag_url, export_dir )
@@ -238,9 +328,15 @@ Warning: --force should only be used when developping/testing the release script
             print 'Testing failed on at least one platform, aborting...'
             svn_remove_tag( tag_url, 'Removing tag due to failed testing' )
             sys.exit(1)
-        
+        if options.user:
+            print 'Uploading documentation using user', options.user
+            sourceforge_web_synchro( SOURCEFORGE_PROJECT, doc_distcheck_top_dir, user=options.user, sftp=options.sftp )
+            print 'Completed documentatio upload'
+        else:
+            print 'No upload user specified. Documentation was not upload.'
+            print 'Tarball can be found at:', doc_tarball_path
         #@todo:
-        # ?upload documentation
+        #upload source & doc tarballs
     else:
         sys.stderr.write( msg + '\n' )
  
