@@ -106,12 +106,11 @@ def build_doc( options,  make_release=False ):
         '%WARNING_LOG_PATH%': os.path.join( '..', warning_log_path )
         }
 
-    full_output_dir = os.path.join( 'doc', output_dir )
-    if os.path.isdir( full_output_dir ):
-        print 'Deleting directory:', full_output_dir
-        shutil.rmtree( full_output_dir )
-    if not os.path.isdir( full_output_dir ):
-        os.makedirs( full_output_dir )
+    if os.path.isdir( output_dir ):
+        print 'Deleting directory:', output_dir
+        shutil.rmtree( output_dir )
+    if not os.path.isdir( output_dir ):
+        os.makedirs( output_dir )
 
     do_subst_in_file( 'doc/doxyfile', 'doc/doxyfile.in', subst_keys )
     ok = run_doxygen( options.doxygen_path, 'doc/doxyfile', 'doc', is_silent=options.silent )
@@ -126,11 +125,11 @@ def build_doc( options,  make_release=False ):
     if options.make_tarball:
         print 'Generating doc tarball to', tarball_path
         tarball_sources = [
-            full_output_dir,
+            output_dir,
             'README.txt',
             'version'
             ]
-        tarball_basedir = os.path.join( full_output_dir, html_output_dirname )
+        tarball_basedir = os.path.join( output_dir, html_output_dirname )
         tarball.make_tarball( tarball_path, tarball_sources, tarball_basedir, html_output_dirname )
     return tarball_path, html_output_dirname
 
