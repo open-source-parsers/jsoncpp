@@ -85,6 +85,8 @@ def build_doc( options,  make_release=False ):
 
     version = open('version','rt').read().strip()
     output_dir = 'dist/doxygen' # relative to doc/doxyfile location.
+    if not os.path.isdir( output_dir ):
+        os.makedirs( output_dir )
     top_dir = os.path.abspath( '.' )
     html_output_dirname = 'jsoncpp-api-html-' + version
     tarball_path = os.path.join( 'dist', html_output_dirname + '.tar.gz' )
