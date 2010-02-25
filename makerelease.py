@@ -227,7 +227,7 @@ lcd %s
 mput %s
 exit""" % (doc_dir, ' '.join(paths) ), retry=3 )
 
-def sourceforge_release_tarball( project, paths, user=None, sftp='sftp' ):
+def sourceforge_release_tarball( sourceforge_project, paths, user=None, sftp='sftp' ):
     userhost = '%s,%s@frs.sourceforge.net' % (user, sourceforge_project)
     run_sftp_batch( userhost, sftp, """
 mput %s
