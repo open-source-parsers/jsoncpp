@@ -227,6 +227,13 @@ lcd %s
 mput %s
 exit""" % (doc_dir, ' '.join(paths) ), retry=3 )
 
+def sourceforge_release_tarball( sourceforge_project, paths, user=None, sftp='sftp' ):
+    userhost = '%s,%s@frs.sourceforge.net' % (user, sourceforge_project)
+    run_sftp_batch( userhost, sftp, """
+mput %s
+exit
+""" % (' '.join(paths),) )
+
 
 def main():
     usage = """%prog release_version next_dev_version
@@ -254,8 +261,10 @@ Warning: --force should only be used when developping/testing the release script
         help="""Overwrite release existing tag if it exist. [Default: %default]""")
     parser.add_option('-p', '--platforms', dest="platforms", action='store', default='',
         help="""Comma separated list of platform passed to scons for build check.""")
-    parser.add_option('--no-test', dest="no_test", action='store', default=False,
+    parser.add_option('--no-test', dest="no_test", action='store_true', default=False,
         help="""Skips build check.""")
+    parser.add_option('--no-web', dest="no_web", action='store_true', default=False,
+        help="""Do not update web site.""")
     parser.add_option('-u', '--upload-user', dest="user", action='store',
                       help="""Sourceforge user for SFTP documentation upload.""")
     parser.add_option('--sftp', dest='sftp', action='store', default=doxybuild.find_program('psftp', 'sftp'),
@@ -329,11 +338,17 @@ Warning: --force should only be used when developping/testing the release script
             svn_remove_tag( tag_url, 'Removing tag due to failed testing' )
             sys.exit(1)
         if options.user:
-            print 'Uploading documentation using user', options.user
-            sourceforge_web_synchro( SOURCEFORGE_PROJECT, doc_distcheck_top_dir, user=options.user, sftp=options.sftp )
-            print 'Completed documentatio upload'
+            if not options.no_web:
+                print 'Uploading documentation using user', options.user
+                sourceforge_web_synchro( SOURCEFORGE_PROJECT, doc_distcheck_top_dir, user=options.user, sftp=options.sftp )
+                print 'Completed documentation upload'
+            print 'Uploading source and documentation tarballs for release using user', options.user
+            sourceforge_release_tarball( SOURCEFORGE_PROJECT,
+                                         [source_tarball_path, doc_tarball_path],
+                                         user=options.user, sftp=options.sftp )
+            print 'Source and doc release tarballs uploaded'
         else:
-            print 'No upload user specified. Documentation was not upload.'
+            print 'No upload user specified. Web site and download tarbal were not uploaded.'
             print 'Tarball can be found at:', doc_tarball_path
         #@todo:
         #upload source & doc tarballs
