@@ -513,7 +513,7 @@ namespace Json {
       Args args_;
    };
 
-   /** \brief Allocator to customize member name and string value memory management done by Value.
+   /** \brief Experimental do not use: Allocator to customize member name and string value memory management done by Value.
     *
     * - makeMemberName() and releaseMemberName() are called to respectively duplicate and
     *   free an Json::objectValue member name.
@@ -785,7 +785,7 @@ namespace Json {
       PageIndex pageCount_;
    };
 
-   /** \brief Allocator to customize Value internal array.
+   /** \brief Experimental: do not use. Allocator to customize Value internal array.
     * Below is an example of a simple implementation (actual implementation use
     * memory pool).
       \code
@@ -873,7 +873,7 @@ public: // overridden from ValueArrayAllocator
 #endif // #ifdef JSON_VALUE_USE_INTERNAL_MAP
 
 
-   /** \brief Experimental and untested: base class for Value iterators.
+   /** \brief base class for Value iterators.
     *
     */
    class ValueIteratorBase
@@ -943,7 +943,7 @@ public: // overridden from ValueArrayAllocator
 #endif
    };
 
-   /** \brief Experimental and untested: const iterator for object and array value.
+   /** \brief const iterator for object and array value.
     *
     */
    class ValueConstIterator : public ValueIteratorBase
@@ -1002,7 +1002,7 @@ public: // overridden from ValueArrayAllocator
    };
 
 
-   /** \brief Experimental and untested: iterator for object and array value.
+   /** \brief Iterator for object and array value.
     */
    class ValueIterator : public ValueIteratorBase
    {
