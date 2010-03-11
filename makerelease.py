@@ -58,7 +58,7 @@ def check_no_pending_commit():
     for entry in etree.getiterator( 'entry' ):
         path = entry.get('path')
         status = entry.find('wc-status').get('item')
-        if status != 'unversioned':
+        if status != 'unversioned' and path != 'version':
             msg.append( 'File "%s" has pending change (status="%s")' % (path, status) )
     if msg:
         msg.insert(0, 'Pending change to commit found in sandbox. Commit them first!' )
@@ -83,6 +83,11 @@ def svn_check_if_tag_exist( tag_url ):
         # otherwise ignore error, meaning tag does not exist
         return False
     return True
+
+def svn_commit( message ):
+    """Commit the sandbox, providing the specified comment.
+    """
+    svn_command( 'ci', '-m', message )
 
 def svn_tag_sandbox( tag_url, message ):
     """Makes a tag based on the sandbox revisions.
@@ -272,9 +277,10 @@ Warning: --force should only be used when developping/testing the release script
     parser.enable_interspersed_args()
     options, args = parser.parse_args()
 
-    if len(args) < 1:
+    if len(args) != 2:
         parser.error( 'release_version missing on command-line.' )
     release_version = args[0]
+    next_version = args[1]
 
     if not options.platforms and not options.no_test:
         parser.error( 'You must specify either --platform or --no-test option.' )
@@ -286,6 +292,7 @@ Warning: --force should only be used when developping/testing the release script
     if not msg:
         print 'Setting version to', release_version
         set_version( release_version )
+        svn_commit( 'Release ' + release_version )
         tag_url = svn_join_url( SVN_TAG_ROOT, release_version )
         if svn_check_if_tag_exist( tag_url ):
             if options.retag_release:
@@ -350,8 +357,10 @@ Warning: --force should only be used when developping/testing the release script
         else:
             print 'No upload user specified. Web site and download tarbal were not uploaded.'
             print 'Tarball can be found at:', doc_tarball_path
-        #@todo:
-        #upload source & doc tarballs
+
+        # Set next version number and commit            
+        set_version( next_version )
+        svn_commit( 'Released ' + release_version )
     else:
         sys.stderr.write( msg + '\n' )
  
