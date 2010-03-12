@@ -82,7 +82,7 @@ std::cin >> root["subtree"];
 std::cout << root;
 \endcode
 
-\section _plinks Build instructions
+\section _pbuild Build instructions
 The build instructions are located in the file 
 <a HREF="README.txt">README.txt</a> in the top-directory of the project.
 
