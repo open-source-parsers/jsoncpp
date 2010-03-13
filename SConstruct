@@ -57,8 +57,9 @@ def make_environ_vars():
 	"""Returns a dictionnary with environment variable to use when compiling."""
 	# PATH is required to find the compiler
 	# TEMP is required for at least mingw
+    # LD_LIBRARY_PATH & co is required on some system for the compiler
 	vars = {}
-	for name in ('PATH', 'TEMP', 'TMP'):
+	for name in ('PATH', 'TEMP', 'TMP', 'LD_LIBRARY_PATH', 'LIBRARY_PATH'):
 		if name in os.environ:
 			vars[name] = os.environ[name]
 	return vars
