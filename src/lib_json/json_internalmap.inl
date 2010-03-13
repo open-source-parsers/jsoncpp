@@ -415,7 +415,7 @@ ValueInternalMap::setNewItem( const char *key,
                               ValueInternalLink *link, 
                               BucketIndex index )
 {
-   char *duplicatedKey = valueAllocator()->makeMemberName( key );
+   char *duplicatedKey = makeMemberName( key );
    ++itemCount_;
    link->keys_[index] = duplicatedKey;
    link->items_[index].setItemUsed();

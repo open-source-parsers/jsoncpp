@@ -24,90 +24,38 @@ const Int Value::minInt = Int( ~(UInt(-1)/2) );
 const Int Value::maxInt = Int( UInt(-1)/2 );
 const UInt Value::maxUInt = UInt(-1);
 
-// A "safe" implementation of strdup. Allow null pointer to be passed. 
-// Also avoid warning on msvc80.
-//
-//inline char *safeStringDup( const char *czstring )
-//{
-//   if ( czstring )
-//   {
-//      const size_t length = (unsigned int)( strlen(czstring) + 1 );
-//      char *newString = static_cast<char *>( malloc( length ) );
-//      memcpy( newString, czstring, length );
-//      return newString;
-//   }
-//   return 0;
-//}
-//
-//inline char *safeStringDup( const std::string &str )
-//{
-//   if ( !str.empty() )
-//   {
-//      const size_t length = str.length();
-//      char *newString = static_cast<char *>( malloc( length + 1 ) );
-//      memcpy( newString, str.c_str(), length );
-//      newString[length] = 0;
-//      return newString;
-//   }
-//   return 0;
-//}
+/// Unknown size marker
+enum { unknown = (unsigned)-1 };
 
-ValueAllocator::~ValueAllocator()
+
+/** Duplicates the specified string value.
+ * @param value Pointer to the string to duplicate. Must be zero-terminated if
+ *              length is "unknown".
+ * @param length Length of the value. if equals to unknown, then it will be
+ *               computed using strlen(value).
+ * @return Pointer on the duplicate instance of string.
+ */
+static inline char *
+duplicateStringValue( const char *value, 
+                      unsigned int length = unknown )
 {
+   if ( length == unknown )
+      length = (unsigned int)strlen(value);
+   char *newString = static_cast<char *>( malloc( length + 1 ) );
+   memcpy( newString, value, length );
+   newString[length] = 0;
+   return newString;
 }
 
-class DefaultValueAllocator : public ValueAllocator
+
+/** Free the string duplicated by duplicateStringValue().
+ */
+static inline void 
+releaseStringValue( char *value )
 {
-public:
-   virtual ~DefaultValueAllocator()
-   {
-   }
-
-   virtual char *makeMemberName( const char *memberName )
-   {
-      return duplicateStringValue( memberName );
-   }
-
-   virtual void releaseMemberName( char *memberName )
-   {
-      releaseStringValue( memberName );
-   }
-
-   virtual char *duplicateStringValue( const char *value, 
-                                       unsigned int length = unknown )
-   {
-      //@todo invesgate this old optimization
-      //if ( !value  ||  value[0] == 0 )
-      //   return 0;
-
-      if ( length == unknown )
-         length = (unsigned int)strlen(value);
-      char *newString = static_cast<char *>( malloc( length + 1 ) );
-      memcpy( newString, value, length );
-      newString[length] = 0;
-      return newString;
-   }
-
-   virtual void releaseStringValue( char *value )
-   {
-      if ( value )
-         free( value );
-   }
-};
-
-static ValueAllocator *&valueAllocator()
-{
-   static DefaultValueAllocator defaultAllocator;
-   static ValueAllocator *valueAllocator = &defaultAllocator;
-   return valueAllocator;
+   if ( value )
+      free( value );
 }
-
-static struct DummyValueAllocatorInitializer {
-   DummyValueAllocatorInitializer() 
-   {
-      valueAllocator();      // ensure valueAllocator() statics are initialized before main().
-   }
-} dummyValueAllocatorInitializer;
 
 
 
@@ -143,7 +91,7 @@ Value::CommentInfo::CommentInfo()
 Value::CommentInfo::~CommentInfo()
 {
    if ( comment_ )
-      valueAllocator()->releaseStringValue( comment_ );
+      releaseStringValue( comment_ );
 }
 
 
@@ -151,11 +99,11 @@ void
 Value::CommentInfo::setComment( const char *text )
 {
    if ( comment_ )
-      valueAllocator()->releaseStringValue( comment_ );
+      releaseStringValue( comment_ );
    JSON_ASSERT( text );
    JSON_ASSERT_MESSAGE( text[0]=='\0' || text[0]=='/', "Comments must start with /");
    // It seems that /**/ style comments are acceptable as well.
-   comment_ = valueAllocator()->duplicateStringValue( text );
+   comment_ = duplicateStringValue( text );
 }
 
 
@@ -178,7 +126,7 @@ Value::CZString::CZString( int index )
 }
 
 Value::CZString::CZString( const char *cstr, DuplicationPolicy allocate )
-   : cstr_( allocate == duplicate ? valueAllocator()->makeMemberName(cstr) 
+   : cstr_( allocate == duplicate ? duplicateStringValue(cstr) 
                                   : cstr )
    , index_( allocate )
 {
@@ -186,7 +134,7 @@ Value::CZString::CZString( const char *cstr, DuplicationPolicy allocate )
 
 Value::CZString::CZString( const CZString &other )
 : cstr_( other.index_ != noDuplication &&  other.cstr_ != 0
-                ?  valueAllocator()->makeMemberName( other.cstr_ )
+                ?  duplicateStringValue( other.cstr_ )
                 : other.cstr_ )
    , index_( other.cstr_ ? (other.index_ == noDuplication ? noDuplication : duplicate)
                          : other.index_ )
@@ -196,7 +144,7 @@ Value::CZString::CZString( const CZString &other )
 Value::CZString::~CZString()
 {
    if ( cstr_  &&  index_ == duplicate )
-      valueAllocator()->releaseMemberName( const_cast<char *>( cstr_ ) );
+      releaseStringValue( const_cast<char *>( cstr_ ) );
 }
 
 void 
@@ -348,7 +296,7 @@ Value::Value( const char *value )
    , itemIsUsed_( 0 )
 #endif
 {
-   value_.string_ = valueAllocator()->duplicateStringValue( value );
+   value_.string_ = duplicateStringValue( value );
 }
 
 
@@ -361,8 +309,8 @@ Value::Value( const char *beginValue,
    , itemIsUsed_( 0 )
 #endif
 {
-   value_.string_ = valueAllocator()->duplicateStringValue( beginValue, 
-                                                            UInt(endValue - beginValue) );
+   value_.string_ = duplicateStringValue( beginValue, 
+                                          UInt(endValue - beginValue) );
 }
 
 
@@ -374,8 +322,8 @@ Value::Value( const std::string &value )
    , itemIsUsed_( 0 )
 #endif
 {
-   value_.string_ = valueAllocator()->duplicateStringValue( value.c_str(), 
-                                                            (unsigned int)value.length() );
+   value_.string_ = duplicateStringValue( value.c_str(), 
+                                          (unsigned int)value.length() );
 
 }
 
@@ -400,7 +348,7 @@ Value::Value( const CppTL::ConstString &value )
    , itemIsUsed_( 0 )
 #endif
 {
-   value_.string_ = valueAllocator()->duplicateStringValue( value, value.length() );
+   value_.string_ = duplicateStringValue( value, value.length() );
 }
 # endif
 
@@ -434,7 +382,7 @@ Value::Value( const Value &other )
    case stringValue:
       if ( other.value_.string_ )
       {
-         value_.string_ = valueAllocator()->duplicateStringValue( other.value_.string_ );
+         value_.string_ = duplicateStringValue( other.value_.string_ );
          allocated_ = true;
       }
       else
@@ -481,7 +429,7 @@ Value::~Value()
       break;
    case stringValue:
       if ( allocated_ )
-         valueAllocator()->releaseStringValue( value_.string_ );
+         releaseStringValue( value_.string_ );
       break;
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:

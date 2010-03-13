@@ -513,26 +513,7 @@ namespace Json {
       Args args_;
    };
 
-   /** \brief Experimental do not use: Allocator to customize member name and string value memory management done by Value.
-    *
-    * - makeMemberName() and releaseMemberName() are called to respectively duplicate and
-    *   free an Json::objectValue member name.
-    * - duplicateStringValue() and releaseStringValue() are called similarly to
-    *   duplicate and free a Json::stringValue value.
-    */
-   class ValueAllocator
-   {
-   public:
-      enum { unknown = (unsigned)-1 };
 
-      virtual ~ValueAllocator();
-
-      virtual char *makeMemberName( const char *memberName ) = 0;
-      virtual void releaseMemberName( char *memberName ) = 0;
-      virtual char *duplicateStringValue( const char *value, 
-                                          unsigned int length = unknown ) = 0;
-      virtual void releaseStringValue( char *value ) = 0;
-   };
 
 #ifdef JSON_VALUE_USE_INTERNAL_MAP
    /** \brief Allocator to customize Value internal map.
