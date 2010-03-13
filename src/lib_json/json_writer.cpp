@@ -1,4 +1,5 @@
 #include <json/writer.h>
+#include "json_tool.h"
 #include <utility>
 #include <assert.h>
 #include <stdio.h>
@@ -13,11 +14,6 @@
 
 namespace Json {
 
-static bool isControlCharacter(char ch)
-{
-   return ch > 0 && ch <= 0x1F;
-}
-
 static bool containsControlCharacter( const char* str )
 {
    while ( *str ) 
@@ -26,17 +22,6 @@ static bool containsControlCharacter( const char* str )
          return true;
    }
    return false;
-}
-static void uintToString( unsigned int value, 
-                          char *&current )
-{
-   *--current = 0;
-   do
-   {
-      *--current = (value % 10) + '0';
-      value /= 10;
-   }
-   while ( value != 0 );
 }
 
 std::string valueToString( Int value )
@@ -116,7 +101,7 @@ std::string valueToQuotedString( const char *value )
    // We have to walk value and escape any special characters.
    // Appending to std::string is not efficient, but this should be rare.
    // (Note: forward slashes are *not* rare, but I am not escaping them.)
-   unsigned maxsize = strlen(value)*2 + 3; // allescaped+quotes+NULL
+   std::string::size_type maxsize = strlen(value)*2 + 3; // allescaped+quotes+NULL
    std::string result;
    result.reserve(maxsize); // to avoid lots of mallocs
    result += "\"";
