@@ -18,7 +18,7 @@ options = Variables()
 options.Add( EnumVariable('platform',
                         'Platform (compiler/stl) used to build the project',
                         'msvc71',
-                        allowed_values='suncc vacpp mingw msvc6 msvc7 msvc71 msvc80 linux-gcc'.split(),
+                        allowed_values='suncc vacpp mingw msvc6 msvc7 msvc71 msvc80 msvc90 linux-gcc'.split(),
                         ignorecase=2) )
 
 try:
@@ -99,6 +99,18 @@ elif platform == 'msvc71':
     env['CXXFLAGS']='-GR -GX /nologo /MT'
 elif platform == 'msvc80':
     env['MSVS_VERSION']='8.0'
+    for tool in ['msvc', 'msvs', 'mslink', 'masm', 'mslib']:
+        env.Tool( tool )
+    env['CXXFLAGS']='-GR -EHsc /nologo /MT'
+elif platform == 'msvc90':
+    env['MSVS_VERSION']='9.0'
+    # Scons 1.2 fails to detect the correct location of the platform SDK.
+    # So we propagate those from the environment. This requires that the
+    # user run vcvars32.bat before compiling.
+    if 'INCLUDE' in os.environ:
+        env['ENV']['INCLUDE'] = os.environ['INCLUDE']
+    if 'LIB' in os.environ:
+        env['ENV']['LIB'] = os.environ['LIB']
     for tool in ['msvc', 'msvs', 'mslink', 'masm', 'mslib']:
         env.Tool( tool )
     env['CXXFLAGS']='-GR -EHsc /nologo /MT'

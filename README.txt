@@ -35,9 +35,14 @@ where PLTFRM may be one of:
 	msvc70 Microsoft Visual Studio 2002
 	msvc71 Microsoft Visual Studio 2003
 	msvc80 Microsoft Visual Studio 2005
+	msvc90 Microsoft Visual Studio 2008
 	linux-gcc Gnu C++ (linux, also reported to work for Mac OS X)
+
+Notes: if you are building with Microsoft Visual Studio 2008, you need to 
+setup the environment by running vcvars32.bat (e.g. MSVC 2008 command prompt)
+before running scons.
 	
-adding platform is fairly simple. You need to change the Sconstruct file 
+Adding platform is fairly simple. You need to change the Sconstruct file 
 to do so.
 	
 and TARGET may be:
