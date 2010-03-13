@@ -3,7 +3,10 @@
 Requires Python 2.6
 
 Example of invocation (use to test the script):
-python makerelease.py --force --retag --platform=msvc6,msvc71,msvc80,mingw -ublep 0.5.0 0.6.0-dev
+python makerelease.py --platform=msvc6,msvc71,msvc80,mingw -ublep 0.6.0 0.7.0-dev
+
+When testing this script:
+python makerelease.py --force --retag --platform=msvc6,msvc71,msvc80,mingw -ublep test-0.5.0 test-0.6.0-dev
 
 Example of invocation when doing a release:
 python makerelease.py 0.5.0 0.6.0-dev
