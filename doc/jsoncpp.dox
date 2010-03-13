@@ -100,6 +100,13 @@ http://jsoncpp.svn.sourceforge.net/svnroot/jsoncpp/trunk/</a>
 To checkout the source, see the following 
 <a HREF="http://sourceforge.net/scm/?type=svn&group_id=144446">instructions</a>.
 
+\section _news What's New?
+The description of latest changes can be found in 
+<a HREF="NEWS.txt">NEWS.txt</a> in the top-directory of the project.
+
+Permanent link to the latest revision of the file in subversion: 
+<a HREF="http://svn.sourceforge.net/viewcvs.cgi/jsoncpp/README.txt?view=markup">latest NEWS.txt</a>
+
 \section _plinks Project links
 - <a HREF="http://jsoncpp.sourceforge.net">json-cpp home</a>
 - <a HREF="http://www.sourceforge.net/projects/jsoncpp">json-cpp sourceforge project</a>
