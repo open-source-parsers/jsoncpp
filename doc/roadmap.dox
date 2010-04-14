@@ -1,4 +1,14 @@
 /*! \page roadmap JsonCpp roadmap
+  \section ms_64bits Adds support for 64 bits integer
+    There has been many request to add support for 64 bits integer. Use case for this are:
+	- time is nowdays commonly represented with a 64 bits integer
+	- 64 bits integer are frequently used as primary key id in many systems
+	
+	Plans to add support is:
+	- must be optional, a configuration option since not all platforms provides 64 bits integer types.
+	- move definition of Int and UInt from forwards.h to config.h, with the required platform magic.
+	- C++ defines no standard to define 64 bits integer. Rely on msvc extension, and long long type that 
+	  is widely supported.
   \section ms_release Makes JsonCpp ready for release
   - Build system clean-up:
 	- Fix build on Windows (shared-library build is broken)
@@ -11,7 +21,6 @@
 	- aix/vacpp
   - Add JsonCpp version to header as numeric for use in preprocessor test
   - Remove buggy experimental hash stuff
-  - Release on sourceforge download
   \section ms_strict Adds a strict mode to reader/parser
 	Strict JSON support as specific in RFC 4627 (http://www.ietf.org/rfc/rfc4627.txt?number=4627).
 	- Enforce only object or array as root element
