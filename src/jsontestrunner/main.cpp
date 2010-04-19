@@ -35,10 +35,10 @@ printValueTree( FILE *fout, Json::Value &value, const std::string &path = "." )
       fprintf( fout, "%s=null\n", path.c_str() );
       break;
    case Json::intValue:
-      fprintf( fout, "%s=%d\n", path.c_str(), value.asInt() );
+      fprintf( fout, "%s=%s\n", path.c_str(), Json::valueToString( value.asInt() ).c_str() );
       break;
    case Json::uintValue:
-      fprintf( fout, "%s=%u\n", path.c_str(), value.asUInt() );
+      fprintf( fout, "%s=%s\n", path.c_str(), Json::valueToString( value.asUInt() ).c_str() );
       break;
    case Json::realValue:
       fprintf( fout, "%s=%.16g\n", path.c_str(), value.asDouble() );
@@ -148,6 +148,19 @@ removeSuffix( const std::string &path,
    return path.substr( 0, path.length() - extension.length() );
 }
 
+
+static void
+printConfig()
+{
+   // Print the configuration used to compile JsonCpp
+#if defined(JSON_NO_INT64)
+   printf( "JSON_NO_INT64=1\n" );
+#else
+   printf( "JSON_NO_INT64=0\n" );
+#endif
+}
+
+
 static int 
 printUsage( const char *argv[] )
 {
@@ -173,6 +186,12 @@ parseCommandLine( int argc, const char *argv[],
       features = Json::Features::strictMode();
       parseOnly = true;
       ++index;
+   }
+
+   if ( std::string(argv[1]) == "--json-config" )
+   {
+      printConfig();
+      return 3;
    }
 
    if ( index == argc  ||  index + 1 < argc )

@@ -16,8 +16,7 @@ namespace Json {
    class Features;
 
    // value.h
-   typedef int Int;
-   typedef unsigned int UInt;
+   typedef unsigned int ArrayIndex;
    class StaticString;
    class Path;
    class PathArgument;

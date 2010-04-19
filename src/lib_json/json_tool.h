@@ -56,18 +56,28 @@ isControlCharacter(char ch)
 }
 
 
+enum { 
+   /// Constant that specify the size of the buffer that must be passed to uintToString.
+   uintToStringBufferSize = 3*sizeof(UInt)+1 
+};
+
+// Defines a char buffer for use with uintToString().
+typedef char UIntToStringBuffer[uintToStringBufferSize];
+
+
 /** Converts an unsigned integer to string.
  * @param value Unsigned interger to convert to string
- * @param current Input/Output string buffer. Must have at least 10 chars free.
+ * @param current Input/Output string buffer. 
+ *        Must have at least uintToStringBufferSize chars free.
  */
 static inline void 
-uintToString( unsigned int value, 
+uintToString( UInt value, 
               char *&current )
 {
    *--current = 0;
    do
    {
-      *--current = (value % 10) + '0';
+      *--current = char(value % 10) + '0';
       value /= 10;
    }
    while ( value != 0 );

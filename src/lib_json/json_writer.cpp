@@ -26,7 +26,7 @@ static bool containsControlCharacter( const char* str )
 
 std::string valueToString( Int value )
 {
-   char buffer[32];
+   UIntToStringBuffer buffer;
    char *current = buffer + sizeof(buffer);
    bool isNegative = value < 0;
    if ( isNegative )
@@ -41,7 +41,7 @@ std::string valueToString( Int value )
 
 std::string valueToString( UInt value )
 {
-   char buffer[32];
+   UIntToStringBuffer buffer;
    char *current = buffer + sizeof(buffer);
    uintToString( value, current );
    assert( current >= buffer );

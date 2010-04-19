@@ -555,21 +555,36 @@ Reader::decodeNumber( Token &token )
    }
    if ( isDouble )
       return decodeDouble( token );
+   // Attempts to parse the number as an integer. If the number is
+   // larger than the maximum supported value of an integer then
+   // we decode the number as a double.
    Location current = token.start_;
    bool isNegative = *current == '-';
    if ( isNegative )
       ++current;
-   Value::UInt threshold = (isNegative ? Value::UInt(-Value::minInt) 
-                                       : Value::maxUInt) / 10;
+   Value::UInt maxIntegerValue = isNegative ? Value::UInt(-Value::minInt) 
+                                            : Value::maxUInt;
+   Value::UInt threshold = maxIntegerValue / 10;
+   Value::UInt lastDigitThreshold = maxIntegerValue % 10;
+   assert( lastDigitThreshold >=0  &&  lastDigitThreshold <= 9 );
    Value::UInt value = 0;
    while ( current < token.end_ )
    {
       Char c = *current++;
       if ( c < '0'  ||  c > '9' )
          return addError( "'" + std::string( token.start_, token.end_ ) + "' is not a number.", token );
+      Value::UInt digit(c - '0');
       if ( value >= threshold )
-         return decodeDouble( token );
-      value = value * 10 + Value::UInt(c - '0');
+      {
+         // If the current digit is not the last one, or if it is
+         // greater than the last digit of the maximum integer value,
+         // the parse the number as a double.
+         if ( current != token.end_  ||  digit > lastDigitThreshold )
+         {
+            return decodeDouble( token );
+         }
+      }
+      value = value * 10 + digit;
    }
    if ( isNegative )
       currentValue() = -Value::Int( value );

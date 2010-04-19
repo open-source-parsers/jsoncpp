@@ -119,7 +119,7 @@ Value::CommentInfo::setComment( const char *text )
 // Notes: index_ indicates if the string was allocated when
 // a string is stored.
 
-Value::CZString::CZString( int index )
+Value::CZString::CZString( ArrayIndex index )
    : cstr_( 0 )
    , index_( index )
 {
@@ -179,7 +179,7 @@ Value::CZString::operator==( const CZString &other ) const
 }
 
 
-int 
+ArrayIndex 
 Value::CZString::index() const
 {
    return index_;
@@ -257,6 +257,30 @@ Value::Value( ValueType type )
 }
 
 
+#if !defined(JSON_NO_INT64)
+Value::Value( ArrayIndex value )
+   : type_( uintValue )
+   , comments_( 0 )
+# ifdef JSON_VALUE_USE_INTERNAL_MAP
+   , itemIsUsed_( 0 )
+#endif
+{
+   value_.uint_ = value;
+}
+
+Value::Value( int value )
+   : type_( intValue )
+   , comments_( 0 )
+# ifdef JSON_VALUE_USE_INTERNAL_MAP
+   , itemIsUsed_( 0 )
+#endif
+{
+   value_.int_ = value;
+}
+
+#endif // if !defined(JSON_NO_INT64)
+
+
 Value::Value( Int value )
    : type_( intValue )
    , comments_( 0 )
@@ -310,7 +334,7 @@ Value::Value( const char *beginValue,
 #endif
 {
    value_.string_ = duplicateStringValue( beginValue, 
-                                          UInt(endValue - beginValue) );
+                                          (unsigned int)(endValue - beginValue) );
 }
 
 
@@ -722,9 +746,13 @@ Value::asDouble() const
    case nullValue:
       return 0.0;
    case intValue:
-      return value_.int_;
+      return static_cast<double>( value_.int_ );
    case uintValue:
-      return value_.uint_;
+#if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
+      return static_cast<double>( value_.uint_ );
+#else // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
+      return static_cast<double>( Int(value_.uint_/2) ) * 2 + Int(value_.uint_ & 1);
+#endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
    case realValue:
       return value_.real_;
    case booleanValue:
@@ -817,7 +845,7 @@ Value::isConvertibleTo( ValueType other ) const
 
 
 /// Number of values in array or object
-Value::UInt 
+ArrayIndex 
 Value::size() const
 {
    switch ( type_ )
@@ -839,7 +867,7 @@ Value::size() const
       }
       return 0;
    case objectValue:
-      return Int( value_.map_->size() );
+      return ArrayIndex( value_.map_->size() );
 #else
    case arrayValue:
       return Int( value_.array_->size() );
@@ -896,21 +924,23 @@ Value::clear()
 }
 
 void 
-Value::resize( UInt newSize )
+Value::resize( ArrayIndex newSize )
 {
    JSON_ASSERT( type_ == nullValue  ||  type_ == arrayValue );
    if ( type_ == nullValue )
       *this = Value( arrayValue );
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
-   UInt oldSize = size();
+   ArrayIndex oldSize = size();
    if ( newSize == 0 )
       clear();
    else if ( newSize > oldSize )
       (*this)[ newSize - 1 ];
    else
    {
-      for ( UInt index = newSize; index < oldSize; ++index )
+      for ( ArrayIndex index = newSize; index < oldSize; ++index )
+      {
          value_.map_->erase( index );
+      }
       assert( size() == newSize );
    }
 #else
@@ -920,7 +950,7 @@ Value::resize( UInt newSize )
 
 
 Value &
-Value::operator[]( UInt index )
+Value::operator[]( ArrayIndex index )
 {
    JSON_ASSERT( type_ == nullValue  ||  type_ == arrayValue );
    if ( type_ == nullValue )
@@ -941,7 +971,7 @@ Value::operator[]( UInt index )
 
 
 const Value &
-Value::operator[]( UInt index ) const
+Value::operator[]( ArrayIndex index ) const
 {
    JSON_ASSERT( type_ == nullValue  ||  type_ == arrayValue );
    if ( type_ == nullValue )
@@ -991,7 +1021,7 @@ Value::resolveReference( const char *key,
 
 
 Value 
-Value::get( UInt index, 
+Value::get( ArrayIndex index, 
             const Value &defaultValue ) const
 {
    const Value *value = &((*this)[index]);
@@ -1000,7 +1030,7 @@ Value::get( UInt index,
 
 
 bool 
-Value::isValidIndex( UInt index ) const
+Value::isValidIndex( ArrayIndex index ) const
 {
    return index < size();
 }
@@ -1463,7 +1493,7 @@ PathArgument::PathArgument()
 }
 
 
-PathArgument::PathArgument( Value::UInt index )
+PathArgument::PathArgument( ArrayIndex index )
    : index_( index )
    , kind_( kindIndex )
 {
@@ -1519,9 +1549,9 @@ Path::makePath( const std::string &path,
             addPathInArg( path, in, itInArg, PathArgument::kindIndex );
          else
          {
-            Value::UInt index = 0;
+            ArrayIndex index = 0;
             for ( ; current != end && *current >= '0'  &&  *current <= '9'; ++current )
-               index = index * 10 + Value::UInt(*current - '0');
+               index = index * 10 + ArrayIndex(*current - '0');
             args_.push_back( index );
          }
          if ( current == end  ||  *current++ != ']' )

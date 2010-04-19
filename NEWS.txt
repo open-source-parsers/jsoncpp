@@ -18,4 +18,17 @@
     initialization/destruction order issues (bug #2934500). 
     The DefaultValueAllocator has been inlined in code.
     
-
+  - Added support for 64 bits integer. Json::Int and Json::UInt are 
+    now 64 bits integers on system that support them (more precisely
+    they are of the size of long long, so if it is 128 bits it will
+    also work).
+    
+    Warning: Json::Value::asInt() and Json::Value::asUInt() now returns
+    long long. This changes break code that was passing the return value
+    to *printf() function.
+    
+    Notes: you can switch back to the 32 bits only behavior by defining the 
+    macro JSON_NO_INT64 (se include/json/config.h).
+    
+  - The type Json::ArrayIndex is used for indexes of a JSON value array. It
+    is an unsigned int (typically 32 bits).

@@ -121,7 +121,7 @@ namespace Json {
       typedef ValueConstIterator const_iterator;
       typedef Json::UInt UInt;
       typedef Json::Int Int;
-      typedef UInt ArrayIndex;
+      typedef Json::ArrayIndex ArrayIndex;
 
       static const Value null;
       static const Int minInt;
@@ -140,20 +140,20 @@ namespace Json {
             duplicate,
             duplicateOnCopy
          };
-         CZString( int index );
+         CZString( ArrayIndex index );
          CZString( const char *cstr, DuplicationPolicy allocate );
          CZString( const CZString &other );
          ~CZString();
          CZString &operator =( const CZString &other );
          bool operator<( const CZString &other ) const;
          bool operator==( const CZString &other ) const;
-         int index() const;
+         ArrayIndex index() const;
          const char *c_str() const;
          bool isStaticString() const;
       private:
          void swap( CZString &other );
          const char *cstr_;
-         int index_;
+         ArrayIndex index_;
       };
 
    public:
@@ -182,6 +182,10 @@ namespace Json {
 	\endcode
       */
       Value( ValueType type = nullValue );
+#if !defined(JSON_NO_INT64)
+      Value( int value );
+      Value( ArrayIndex value );
+#endif // if !defined(JSON_NO_INT64)
       Value( Int value );
       Value( UInt value );
       Value( double value );
@@ -248,7 +252,7 @@ namespace Json {
       bool isConvertibleTo( ValueType other ) const;
 
       /// Number of values in array or object
-      UInt size() const;
+      ArrayIndex size() const;
 
       /// \brief Return true if empty array, empty object, or null;
       /// otherwise, false.
@@ -267,24 +271,24 @@ namespace Json {
       /// May only be called on nullValue or arrayValue.
       /// \pre type() is arrayValue or nullValue
       /// \post type() is arrayValue
-      void resize( UInt size );
+      void resize( ArrayIndex size );
 
       /// Access an array element (zero based index ).
       /// If the array contains less than index element, then null value are inserted
       /// in the array so that its size is index+1.
       /// (You may need to say 'value[0u]' to get your compiler to distinguish
       ///  this from the operator[] which takes a string.)
-      Value &operator[]( UInt index );
+      Value &operator[]( ArrayIndex index );
       /// Access an array element (zero based index )
       /// (You may need to say 'value[0u]' to get your compiler to distinguish
       ///  this from the operator[] which takes a string.)
-      const Value &operator[]( UInt index ) const;
+      const Value &operator[]( ArrayIndex index ) const;
       /// If the array contains at least index+1 elements, returns the element value, 
       /// otherwise returns defaultValue.
-      Value get( UInt index, 
+      Value get( ArrayIndex index, 
                  const Value &defaultValue ) const;
       /// Return true if index < size().
-      bool isValidIndex( UInt index ) const;
+      bool isValidIndex( ArrayIndex index ) const;
       /// \brief Append value to array at the end.
       ///
       /// Equivalent to jsonvalue[jsonvalue.size()] = value;
@@ -454,7 +458,7 @@ namespace Json {
       friend class Path;
 
       PathArgument();
-      PathArgument( UInt index );
+      PathArgument( ArrayIndex index );
       PathArgument( const char *key );
       PathArgument( const std::string &key );
 
@@ -466,7 +470,7 @@ namespace Json {
          kindKey
       };
       std::string key_;
-      UInt index_;
+      ArrayIndex index_;
       Kind kind_;
    };
 
