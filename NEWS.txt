@@ -32,3 +32,8 @@
     
   - The type Json::ArrayIndex is used for indexes of a JSON value array. It
     is an unsigned int (typically 32 bits).
+
+* License
+  
+  - See file LICENSE for details. Basically JsonCpp is now licensed under 
+    MIT license, or public domain if desired and recognized in your jurisdiction.

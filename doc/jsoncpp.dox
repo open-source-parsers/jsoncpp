@@ -117,7 +117,10 @@ Permanent link to the latest revision of the file in subversion:
 - <a HREF="http://www.cl.cam.ac.uk/~mgk25/unicode.html">UTF-8 and Unicode FAQ</a>.
 
 \section _license License
-The json-cpp library and this documentation are in Public Domain.
+See file <a HREF="LICENSE">LICENSE</a> in the top-directory of the project.
+
+Basically JsonCpp is licensed under MIT license, or public domain if desired 
+and recognized in your jurisdiction.
 
 \author Baptiste Lepilleur <blep@users.sourceforge.net>
 */

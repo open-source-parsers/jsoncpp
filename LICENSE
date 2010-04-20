@@ -1,1 +1,57 @@
-The json-cpp library and this documentation are in Public Domain.
+This is the LICENSE file for JsonCpp, a C++ library implementing a
+JSON format reader and writer.
+
+Author: Baptiste Lepilleur
+
+The license for this library's code is as follows:
+
+   - If the code is used in a jurisdiction where Public Domain
+   property is regonized, then this code may be considered to be
+   in the Public Domain. Its author expressly disclaims copyright
+   in jurisdictions where such a disclaimer is allowed.
+
+   - If the code is used in a jurisdiction which does not recognize
+   Public Domain, the code must be used in terms with the MIT license,
+   as described clearly and concisely at:
+
+   http://en.wikipedia.org/wiki/MIT_License
+
+   and reproduced in full below.
+
+   - If the code is used in a jurisdiction which recognizes Public
+   Domain, the user may instead use the code under the terms of the
+   MIT license.
+
+   The MIT licensing terms follow:
+
+========================================================================
+Copyright (c) 2007-2010 Baptiste Lepilleur
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use, copy,
+modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+========================================================================
+(END LICENSE TEXT)
+
+The MIT license is compatible with both the GPL and commercial
+software, affording one all of the rights of Public Domain with the
+minor nuisance of being required to keep the above copyright notice
+and license text in the source code. Note also that by accepting the
+Public Domain "license" you can re-license your copy using whatever
+license you like.
