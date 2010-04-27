@@ -1,28 +1,26 @@
-This is the LICENSE file for JsonCpp, a C++ library implementing a
-JSON format reader and writer.
+The JsonCpp library's source code, including accompanying documentation, 
+tests and demonstration applications, are licensed under the following
+conditions...
 
-Author: Baptiste Lepilleur
+The author (Baptiste Lepilleur) explicitly disclaims copyright in all 
+jurisdictions which recognize such a disclaimer. In such jurisdictions, 
+this software is released into the Public Domain.
 
-The license for this library's code is as follows:
+In jurisdictions which do not recognize Public Domain property (e.g. Germany as of
+2010), this software is Copyright (c) 2007-2010 by Baptiste Lepilleur, and is
+released under the terms of the MIT License (see below).
 
-   - If the code is used in a jurisdiction where Public Domain
-   property is regonized, then this code may be considered to be
-   in the Public Domain. Its author expressly disclaims copyright
-   in jurisdictions where such a disclaimer is allowed.
+In jurisdictions which recognize Public Domain property, the user of this 
+software may choose to accept it either as 1) Public Domain, 2) under the 
+conditions of the MIT License (see below), or 3) under the terms of dual 
+Public Domain/MIT License conditions described here, as they choose.
 
-   - If the code is used in a jurisdiction which does not recognize
-   Public Domain, the code must be used in terms with the MIT license,
-   as described clearly and concisely at:
+The MIT License is about as close to Public Domain as a license can get, and is
+described in clear, concise terms at:
 
    http://en.wikipedia.org/wiki/MIT_License
-
-   and reproduced in full below.
-
-   - If the code is used in a jurisdiction which recognizes Public
-   Domain, the user may instead use the code under the terms of the
-   MIT license.
-
-   The MIT licensing terms follow:
+   
+The full text of the MIT License follows:
 
 ========================================================================
 Copyright (c) 2007-2010 Baptiste Lepilleur

@@ -79,6 +79,10 @@ python doxybuild.py --open --with-dot
 
 See doxybuild.py --help for options. 
 
+Notes that the documentation is also available for download as a tarball. 
+The documentation of the latest release is available online at:
+http://jsoncpp.sourceforge.net/
+
 
 * Adding a reader/writer test:
   ============================
