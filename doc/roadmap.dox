@@ -26,6 +26,10 @@
 	- Enforce only object or array as root element
 	- Disable comment support
     - Get jsonchecker failing tests to pass in strict mode
+  \section ms_writer Writter control
+    Provides more control to determine how specific items are serialized when JSON allow choice:
+	- Optionally allow escaping of non-ASCII characters using unicode escape sequence "\\u".
+	- Optionally allow escaping of "/" using "\/".
   \section ms_separation Expose json reader/writer API that do not impose using Json::Value.
 	Some typical use-case involve an application specific structure to/from a JSON document.
     - Event base parser to allow unserializing a Json document directly in datastructure instead of
@@ -35,7 +39,7 @@
 		- Provides an event based parser. Should allow pulling & skipping events for ease of use.
 		- Provides a JSON document builder: fast only.
   \section ms_perfo Performance tuning
-    - Provides support for static property name definition avoiding allocation
+    - Provides support for static property name definition avoiding allocation 
     - Static property dictionnary can be provided to JSON reader
     - Performance scenario & benchmarking
 */
