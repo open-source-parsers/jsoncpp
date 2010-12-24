@@ -772,6 +772,35 @@ Value::asDouble() const
    return 0; // unreachable;
 }
 
+float
+Value::asFloat() const
+{
+   switch ( type_ )
+   {
+   case nullValue:
+      return 0.0f;
+   case intValue:
+      return static_cast<float>( value_.int_ );
+   case uintValue:
+#if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
+      return static_cast<float>( value_.uint_ );
+#else // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
+      return static_cast<float>( Int(value_.uint_/2) ) * 2 + Int(value_.uint_ & 1);
+#endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
+   case realValue:
+      return static_cast<float>( value_.real_ );
+   case booleanValue:
+      return value_.bool_ ? 1.0f : 0.0f;
+   case stringValue:
+   case arrayValue:
+   case objectValue:
+      JSON_ASSERT_MESSAGE( false, "Type is not convertible to float" );
+   default:
+      JSON_ASSERT_UNREACHABLE;
+   }
+   return 0.0f; // unreachable;
+}
+
 bool 
 Value::asBool() const
 {

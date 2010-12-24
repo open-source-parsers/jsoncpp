@@ -240,6 +240,7 @@ namespace Json {
 # endif
       Int asInt() const;
       UInt asUInt() const;
+      float asFloat() const;
       double asDouble() const;
       bool asBool() const;
 

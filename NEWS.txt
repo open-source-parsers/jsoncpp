@@ -38,6 +38,10 @@
 	array.append( 1234 );
 	int value = array[0].asInt();  // did not compile previously
 
+  - Added float Json::Value::asFloat() to obtain a floating point value as a
+    float (avoid lost of precision warning caused by used of asDouble() 
+    to initialize a float).
+
 * Tests
 
   - Added test to ensure that the escape sequence "\/" is corrected handled 
