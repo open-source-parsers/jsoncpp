@@ -32,6 +32,11 @@
     
   - The type Json::ArrayIndex is used for indexes of a JSON value array. It
     is an unsigned int (typically 32 bits).
+	
+  - Array index can be passed as int to operator[], allowing use of literal:
+    Json::Value array;
+	array.append( 1234 );
+	int value = array[0].asInt();  // did not compile previously
 
 * Tests
 

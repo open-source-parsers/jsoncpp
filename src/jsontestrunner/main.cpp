@@ -3,6 +3,10 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
+/* This executable is used for testing parser/writer using real JSON files.
+ */
+
+
 #include <json/json.h>
 #include <algorithm> // sort
 #include <stdio.h>

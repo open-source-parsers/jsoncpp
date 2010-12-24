@@ -284,11 +284,25 @@ namespace Json {
       /// (You may need to say 'value[0u]' to get your compiler to distinguish
       ///  this from the operator[] which takes a string.)
       Value &operator[]( ArrayIndex index );
-      /// Access an array element (zero based index )
+
+	  /// Access an array element (zero based index ).
+      /// If the array contains less than index element, then null value are inserted
+      /// in the array so that its size is index+1.
+      /// (You may need to say 'value[0u]' to get your compiler to distinguish
+      ///  this from the operator[] which takes a string.)
+      Value &operator[]( int index );
+
+	  /// Access an array element (zero based index )
       /// (You may need to say 'value[0u]' to get your compiler to distinguish
       ///  this from the operator[] which takes a string.)
       const Value &operator[]( ArrayIndex index ) const;
-      /// If the array contains at least index+1 elements, returns the element value, 
+
+	  /// Access an array element (zero based index )
+      /// (You may need to say 'value[0u]' to get your compiler to distinguish
+      ///  this from the operator[] which takes a string.)
+      const Value &operator[]( int index ) const;
+
+	  /// If the array contains at least index+1 elements, returns the element value, 
       /// otherwise returns defaultValue.
       Value get( ArrayIndex index, 
                  const Value &defaultValue ) const;

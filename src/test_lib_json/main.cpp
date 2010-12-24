@@ -172,6 +172,18 @@ JSONTEST_FIXTURE( ValueTest, isUInt )
 }
 
 
+JSONTEST_FIXTURE( ValueTest, accessArray )
+{
+	const unsigned int index0 = 0;
+	JSONTEST_ASSERT( Json::Value(1234) == array1_[index0] ) << "Json::Value::operator[ArrayIndex]";
+	JSONTEST_ASSERT( Json::Value(1234) == array1_[0] ) << "Json::Value::operator[int]";
+
+	const Json::Value &constArray = array1_;
+	JSONTEST_ASSERT( Json::Value(1234) == constArray[index0] ) << "Json::Value::operator[ArrayIndex] const";
+	JSONTEST_ASSERT( Json::Value(1234) == constArray[0] ) << "Json::Value::operator[int] const";
+}
+
+
 void
 ValueTest::checkConstMemberCount( const Json::Value &value, unsigned int expectedCount )
 {
@@ -245,5 +257,7 @@ int main( int argc, const char *argv[] )
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, isDouble );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, isString );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, isNull );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, isNull );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, accessArray );
    return runner.runCommandLine( argc, argv );
 }

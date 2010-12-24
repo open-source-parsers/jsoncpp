@@ -975,6 +975,14 @@ Value::operator[]( ArrayIndex index )
 }
 
 
+Value &
+Value::operator[]( int index )
+{
+   JSON_ASSERT( index >= 0 );
+   return (*this)[ ArrayIndex(index) ];
+}
+
+
 const Value &
 Value::operator[]( ArrayIndex index ) const
 {
@@ -991,6 +999,14 @@ Value::operator[]( ArrayIndex index ) const
    Value *value = value_.array_->find( index );
    return value ? *value : null;
 #endif
+}
+
+
+const Value &
+Value::operator[]( int index ) const
+{
+   JSON_ASSERT( index >= 0 );
+   return (*this)[ ArrayIndex(index) ];
 }
 
 

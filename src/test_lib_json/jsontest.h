@@ -199,7 +199,7 @@ namespace JsonTest {
 /// JSONTEST_ASSERT( x == y ) << "x=" << x << ", y=" << y;
 /// JSONTEST_ASSERT( x == y );
 #define JSONTEST_ASSERT( expr )                                               \
-   if ( condition )                                                           \
+   if ( expr )                                                                \
    {                                                                          \
    }                                                                          \
    else                                                                       \
