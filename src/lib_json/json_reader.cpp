@@ -567,12 +567,12 @@ Reader::decodeNumber( Token &token )
    bool isNegative = *current == '-';
    if ( isNegative )
       ++current;
-   Value::UInt maxIntegerValue = isNegative ? Value::UInt(-Value::minInt) 
-                                            : Value::maxUInt;
-   Value::UInt threshold = maxIntegerValue / 10;
-   Value::UInt lastDigitThreshold = maxIntegerValue % 10;
+   Value::LargestUInt maxIntegerValue = isNegative ? Value::LargestUInt(-Value::minLargestInt) 
+                                                   : Value::maxLargestUInt;
+   Value::LargestUInt threshold = maxIntegerValue / 10;
+   Value::UInt lastDigitThreshold = Value::UInt( maxIntegerValue % 10 );
    assert( lastDigitThreshold >=0  &&  lastDigitThreshold <= 9 );
-   Value::UInt value = 0;
+   Value::LargestUInt value = 0;
    while ( current < token.end_ )
    {
       Char c = *current++;
@@ -592,9 +592,9 @@ Reader::decodeNumber( Token &token )
       value = value * 10 + digit;
    }
    if ( isNegative )
-      currentValue() = -Value::Int( value );
-   else if ( value <= Value::UInt(Value::maxInt) )
-      currentValue() = Value::Int( value );
+      currentValue() = -Value::LargestInt( value );
+   else if ( value <= Value::LargestUInt(Value::maxInt) )
+      currentValue() = Value::LargestInt( value );
    else
       currentValue() = value;
    return true;

@@ -63,7 +63,7 @@ isControlCharacter(char ch)
 
 enum { 
    /// Constant that specify the size of the buffer that must be passed to uintToString.
-   uintToStringBufferSize = 3*sizeof(UInt)+1 
+   uintToStringBufferSize = 3*sizeof(LargestUInt)+1 
 };
 
 // Defines a char buffer for use with uintToString().
@@ -76,7 +76,7 @@ typedef char UIntToStringBuffer[uintToStringBufferSize];
  *        Must have at least uintToStringBufferSize chars free.
  */
 static inline void 
-uintToString( UInt value, 
+uintToString( LargestUInt value, 
               char *&current )
 {
    *--current = 0;

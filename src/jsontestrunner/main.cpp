@@ -44,10 +44,10 @@ printValueTree( FILE *fout, Json::Value &value, const std::string &path = "." )
       fprintf( fout, "%s=null\n", path.c_str() );
       break;
    case Json::intValue:
-      fprintf( fout, "%s=%s\n", path.c_str(), Json::valueToString( value.asInt() ).c_str() );
+      fprintf( fout, "%s=%s\n", path.c_str(), Json::valueToString( value.asLargestInt() ).c_str() );
       break;
    case Json::uintValue:
-      fprintf( fout, "%s=%s\n", path.c_str(), Json::valueToString( value.asUInt() ).c_str() );
+      fprintf( fout, "%s=%s\n", path.c_str(), Json::valueToString( value.asLargestUInt() ).c_str() );
       break;
    case Json::realValue:
       fprintf( fout, "%s=%.16g\n", path.c_str(), value.asDouble() );
@@ -224,36 +224,44 @@ int main( int argc, const char *argv[] )
       return exitCode;
    }
 
-   std::string input = readInputTestFile( path.c_str() );
-   if ( input.empty() )
+   try
    {
-      printf( "Failed to read input or empty input: %s\n", path.c_str() );
-      return 3;
-   }
-
-   std::string basePath = removeSuffix( argv[1], ".json" );
-   if ( !parseOnly  &&  basePath.empty() )
-   {
-      printf( "Bad input path. Path does not end with '.expected':\n%s\n", path.c_str() );
-      return 3;
-   }
-
-   std::string actualPath = basePath + ".actual";
-   std::string rewritePath = basePath + ".rewrite";
-   std::string rewriteActualPath = basePath + ".actual-rewrite";
-
-   Json::Value root;
-   exitCode = parseAndSaveValueTree( input, actualPath, "input", root, features, parseOnly );
-   if ( exitCode == 0  &&  !parseOnly )
-   {
-      std::string rewrite;
-      exitCode = rewriteValueTree( rewritePath, root, rewrite );
-      if ( exitCode == 0 )
+      std::string input = readInputTestFile( path.c_str() );
+      if ( input.empty() )
       {
-         Json::Value rewriteRoot;
-         exitCode = parseAndSaveValueTree( rewrite, rewriteActualPath, 
-            "rewrite", rewriteRoot, features, parseOnly );
+         printf( "Failed to read input or empty input: %s\n", path.c_str() );
+         return 3;
       }
+
+      std::string basePath = removeSuffix( argv[1], ".json" );
+      if ( !parseOnly  &&  basePath.empty() )
+      {
+         printf( "Bad input path. Path does not end with '.expected':\n%s\n", path.c_str() );
+         return 3;
+      }
+
+      std::string actualPath = basePath + ".actual";
+      std::string rewritePath = basePath + ".rewrite";
+      std::string rewriteActualPath = basePath + ".actual-rewrite";
+
+      Json::Value root;
+      exitCode = parseAndSaveValueTree( input, actualPath, "input", root, features, parseOnly );
+      if ( exitCode == 0  &&  !parseOnly )
+      {
+         std::string rewrite;
+         exitCode = rewriteValueTree( rewritePath, root, rewrite );
+         if ( exitCode == 0 )
+         {
+            Json::Value rewriteRoot;
+            exitCode = parseAndSaveValueTree( rewrite, rewriteActualPath, 
+               "rewrite", rewriteRoot, features, parseOnly );
+         }
+      }
+   }
+   catch ( const std::exception &e )
+   {
+      printf( "Unhandled exception:\n%s\n", e.what() );
+      exitCode = 1;
    }
 
    return exitCode;

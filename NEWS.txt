@@ -18,17 +18,38 @@
     initialization/destruction order issues (bug #2934500). 
     The DefaultValueAllocator has been inlined in code.
     
-  - Added support for 64 bits integer. Json::Int and Json::UInt are 
-    now 64 bits integers on system that support them (more precisely
-    they are of the size of long long, so if it is 128 bits it will
-    also work).
+  - Added support for 64 bits integer:
+  
+    Types Json::Int64 and Json::UInt64 have been added. They are aliased
+	to 64 bits integers on system that support them (based on __int64 on 
+	Microsoft Visual Studio platform, and long long on other platforms).
+	
+	Types Json::LargestInt and Json::LargestUInt have been added. They are
+	aliased to the largest integer type supported: 
+	either Json::Int/Json::UInt or Json::Int64/Json::UInt64 respectively.
+	
+	Json::Value::asInt() and Json::Value::asUInt() still returns plain
+	"int" based types, but asserts if an attempt is made to retrieve
+	a 64 bits value that can not represented as the return type.
+	
+	Json::Value::asInt64() and Json::Value::asUInt64() have been added
+	to obtain the 64 bits integer value.
+	
+	Json::Value::asLargestInt() and Json::Value::asLargestUInt() returns
+	the integer as a LargestInt/LargestUInt respectively. Those functions
+	functions are typically used when implementing writer.
+	
+	The reader attempts to read number as 64 bits integer, and fall back
+	to reading a double if the number is not in the range of 64 bits 
+	integer.
     
     Warning: Json::Value::asInt() and Json::Value::asUInt() now returns
     long long. This changes break code that was passing the return value
     to *printf() function.
-    
-    Notes: you can switch back to the 32 bits only behavior by defining the 
-    macro JSON_NO_INT64 (se include/json/config.h).
+  
+    Support for 64 bits integer can be disabled by defining the macro 
+	JSON_NO_INT64 (uncomment it in json/config.h for example), though
+	it should have no impact on existing usage.
     
   - The type Json::ArrayIndex is used for indexes of a JSON value array. It
     is an unsigned int (typically 32 bits).

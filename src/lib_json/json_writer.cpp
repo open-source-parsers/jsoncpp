@@ -29,14 +29,15 @@ static bool containsControlCharacter( const char* str )
    return false;
 }
 
-std::string valueToString( Int value )
+
+std::string valueToString( LargestInt value )
 {
    UIntToStringBuffer buffer;
    char *current = buffer + sizeof(buffer);
    bool isNegative = value < 0;
    if ( isNegative )
       value = -value;
-   uintToString( UInt(value), current );
+   uintToString( LargestUInt(value), current );
    if ( isNegative )
       *--current = '-';
    assert( current >= buffer );
@@ -44,7 +45,7 @@ std::string valueToString( Int value )
 }
 
 
-std::string valueToString( UInt value )
+std::string valueToString( LargestUInt value )
 {
    UIntToStringBuffer buffer;
    char *current = buffer + sizeof(buffer);
@@ -52,6 +53,22 @@ std::string valueToString( UInt value )
    assert( current >= buffer );
    return current;
 }
+
+#if defined(JSON_HAS_INT64)
+
+std::string valueToString( Int value )
+{
+   return valueToString( LargestInt(value) );
+}
+
+
+std::string valueToString( UInt value )
+{
+   return valueToString( LargestUInt(value) );
+}
+
+#endif // # if defined(JSON_HAS_INT64)
+
 
 std::string valueToString( double value )
 {
@@ -203,10 +220,10 @@ FastWriter::writeValue( const Value &value )
       document_ += "null";
       break;
    case intValue:
-      document_ += valueToString( value.asInt() );
+      document_ += valueToString( value.asLargestInt() );
       break;
    case uintValue:
-      document_ += valueToString( value.asUInt() );
+      document_ += valueToString( value.asLargestUInt() );
       break;
    case realValue:
       document_ += valueToString( value.asDouble() );
@@ -286,10 +303,10 @@ StyledWriter::writeValue( const Value &value )
       pushValue( "null" );
       break;
    case intValue:
-      pushValue( valueToString( value.asInt() ) );
+      pushValue( valueToString( value.asLargestInt() ) );
       break;
    case uintValue:
-      pushValue( valueToString( value.asUInt() ) );
+      pushValue( valueToString( value.asLargestUInt() ) );
       break;
    case realValue:
       pushValue( valueToString( value.asDouble() ) );
@@ -562,10 +579,10 @@ StyledStreamWriter::writeValue( const Value &value )
       pushValue( "null" );
       break;
    case intValue:
-      pushValue( valueToString( value.asInt() ) );
+      pushValue( valueToString( value.asLargestInt() ) );
       break;
    case uintValue:
-      pushValue( valueToString( value.asUInt() ) );
+      pushValue( valueToString( value.asLargestUInt() ) );
       break;
    case realValue:
       pushValue( valueToString( value.asDouble() ) );

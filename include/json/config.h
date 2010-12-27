@@ -46,7 +46,7 @@
 # endif
 
 // If JSON_NO_INT64 is defined, then Json only support C++ "int" type for integer
-// Storages.
+// Storages, and 64 bits integer support is disabled.
 // #define JSON_NO_INT64 1
 
 #if defined(_MSC_VER)  &&  _MSC_VER <= 1200 // MSVC 6
@@ -57,18 +57,24 @@
 
 
 namespace Json {
-# if defined(JSON_NO_INT64)
    typedef int Int;
    typedef unsigned int UInt;
+# if defined(JSON_NO_INT64)
+   typedef int LargestInt;
+   typedef unsigned int LargestUInt;
+#  undef JSON_HAS_INT64
 # else // if defined(JSON_NO_INT64)
    // For Microsoft Visual use specific types as long long is not supported
 #  if defined(_MSC_VER) // Microsoft Visual Studio
-   typedef __int64 Int;
-   typedef unsigned __int64 UInt;
+   typedef __int64 Int64;
+   typedef unsigned __int64 UInt64;
 #  else // if defined(_MSC_VER) // Other platforms, use long long
-   typedef long long int Int;
-   typedef unsigned long long int UInt;
+   typedef long long int Int64;
+   typedef unsigned long long int UInt64;
 #  endif // if defined(_MSC_VER)
+   typedef Int64 LargestInt;
+   typedef UInt64 LargestUInt;
+#  define JSON_HAS_INT64
 # endif // if defined(JSON_NO_INT64)
 } // end namespace Json
 
