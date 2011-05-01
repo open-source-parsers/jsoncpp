@@ -28,6 +28,12 @@
 /// instead of C assert macro.
 # define JSON_USE_EXCEPTION 1
 
+/// If defined, indicates that the source file is amalgated
+/// to prevent private header inclusion.
+/// Remarks: it is automatically defined in the generated amalgated header.
+// #define JSON_IS_AMALGATED
+
+
 # ifdef JSON_IN_CPPTL
 #  include <cpptl/config.h>
 #  ifndef JSON_USE_CPPTL

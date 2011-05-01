@@ -6,8 +6,10 @@
 #ifndef CPPTL_JSON_READER_H_INCLUDED
 # define CPPTL_JSON_READER_H_INCLUDED
 
+#if !defined(JSON_IS_AMALGATED)
 # include "features.h"
 # include "value.h"
+#endif // if !defined(JSON_IS_AMALGATED)
 # include <deque>
 # include <stack>
 # include <string>

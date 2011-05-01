@@ -4,8 +4,8 @@
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
 // included by json_value.cpp
-// everything is within Json namespace
 
+namespace Json {
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
@@ -295,3 +295,5 @@ ValueIterator::operator =( const SelfType &other )
    copy( other );
    return *this;
 }
+
+} // namespace Json

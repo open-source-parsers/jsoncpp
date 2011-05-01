@@ -6,7 +6,9 @@
 #ifndef JSON_FORWARDS_H_INCLUDED
 # define JSON_FORWARDS_H_INCLUDED
 
+#if !defined(JSON_IS_AMALGATED)
 # include "config.h"
+#endif // if !defined(JSON_IS_AMALGATED)
 
 namespace Json {
 

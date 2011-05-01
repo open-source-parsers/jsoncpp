@@ -4,7 +4,8 @@
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
 // included by json_value.cpp
-// everything is within Json namespace
+
+namespace Json {
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
@@ -610,3 +611,5 @@ ValueInternalMap::distance( const IteratorState &x, const IteratorState &y )
       increment( it );
    return offset;
 }
+
+} // namespace Json
