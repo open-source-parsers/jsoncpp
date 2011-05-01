@@ -6,7 +6,9 @@
 #ifndef JSON_WRITER_H_INCLUDED
 # define JSON_WRITER_H_INCLUDED
 
+#if !defined(JSON_IS_AMALGATED)
 # include "value.h"
+#endif // if !defined(JSON_IS_AMALGATED)
 # include <vector>
 # include <string>
 # include <iostream>

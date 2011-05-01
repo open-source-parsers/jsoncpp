@@ -3,8 +3,10 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#include <json/writer.h>
-#include "json_tool.h"
+#if !defined(JSON_IS_AMALGATED)
+# include <json/writer.h>
+# include "json_tool.h"
+#endif // if !defined(JSON_IS_AMALGATED)
 #include <utility>
 #include <assert.h>
 #include <stdio.h>

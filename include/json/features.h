@@ -6,7 +6,9 @@
 #ifndef CPPTL_JSON_FEATURES_H_INCLUDED
 # define CPPTL_JSON_FEATURES_H_INCLUDED
 
+#if !defined(JSON_IS_AMALGATED)
 # include "forwards.h"
+#endif // if !defined(JSON_IS_AMALGATED)
 
 namespace Json {
 

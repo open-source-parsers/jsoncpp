@@ -6,8 +6,10 @@
 #ifndef CPPTL_JSON_READER_H_INCLUDED
 # define CPPTL_JSON_READER_H_INCLUDED
 
+#if !defined(JSON_IS_AMALGATED)
 # include "features.h"
 # include "value.h"
+#endif // if !defined(JSON_IS_AMALGATED)
 # include <deque>
 # include <stack>
 # include <string>
@@ -49,7 +51,9 @@ namespace Json {
                   bool collectComments = true );
 
       /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a> document.
-       * \param document UTF-8 encoded string containing the document to read.
+       * \param beginDoc Pointer on the beginning of the UTF-8 encoded string of the document to read.
+       * \param endDoc Pointer on the end of the UTF-8 encoded string of the document to read. 
+       \               Must be >= beginDoc.
        * \param root [out] Contains the root value of the document if it was
        *             successfully parsed.
        * \param collectComments \c true to collect comment and allow writing them back during
