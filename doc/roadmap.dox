@@ -1,14 +1,4 @@
 /*! \page roadmap JsonCpp roadmap
-  \section ms_64bits Adds support for 64 bits integer
-    There has been many request to add support for 64 bits integer. Use case for this are:
-	- time is nowdays commonly represented with a 64 bits integer
-	- 64 bits integer are frequently used as primary key id in many systems
-	
-	Plans to add support is:
-	- must be optional, a configuration option since not all platforms provides 64 bits integer types.
-	- move definition of Int and UInt from forwards.h to config.h, with the required platform magic.
-	- C++ defines no standard to define 64 bits integer. Rely on msvc extension, and long long type that 
-	  is widely supported.
   \section ms_release Makes JsonCpp ready for release
   - Build system clean-up:
 	- Fix build on Windows (shared-library build is broken)
@@ -34,7 +24,7 @@
 	Some typical use-case involve an application specific structure to/from a JSON document.
     - Event base parser to allow unserializing a Json document directly in datastructure instead of
       using the intermediate Json::Value.
-    - "Stream" based parser to serialized a Json document without using Json::Value as input.
+    - Stream based parser to serialized a Json document without using Json::Value as input.
 	- Performance oriented parser/writer:
 		- Provides an event based parser. Should allow pulling & skipping events for ease of use.
 		- Provides a JSON document builder: fast only.
