@@ -3,8 +3,9 @@
 
 * Compilation
 
-  - LD_LIBRARY_PATH and LIBRARY_PATH environment variables are now propagated to the build
-    environment as this is required for some compiler installation.
+  - LD_LIBRARY_PATH and LIBRARY_PATH environment variables are now 
+    propagated to the build environment as this is required for some 
+    compiler installation.
 
   - Added support for Microsoft Visual Studio 2008 (bug #2930462): 
     The platform "msvc90" has been added.
@@ -70,8 +71,11 @@
 
 * Bug fixes
 
-  - Bug #3139677: JSON [1 2 3] was incorrectly parsed as [1, 3]. Error is now correctly 
-    detected.
+  - Bug #3139677: JSON [1 2 3] was incorrectly parsed as [1, 3]. Error is now 
+    correctly detected.
+    
+  - Bug #3139678: stack buffer overflow when parsing a double with a
+    length of 32 characters.
 
 * License
   

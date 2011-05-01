@@ -610,7 +610,7 @@ Reader::decodeDouble( Token &token )
    int length = int(token.end_ - token.start_);
    if ( length <= bufferSize )
    {
-      Char buffer[bufferSize];
+      Char buffer[bufferSize+1];
       memcpy( buffer, token.start_, length );
       buffer[length] = 0;
       count = sscanf( buffer, "%lf", &value );
