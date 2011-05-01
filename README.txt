@@ -5,8 +5,8 @@ JSON (JavaScript Object Notation) is a lightweight data-interchange format.
 It can represent integer, real number, string, an ordered sequence of 
 value, and a collection of name/value pairs.
 
-JsonCpp is a simple API to manipulate JSON value, handle serialization 
-and unserialization to string.
+JsonCpp (http://jsoncpp.sourceforge.net/) is a simple API to manipulate 
+JSON value, handle serialization and unserialization to string.
 
 It can also preserve existing comment in unserialization/serialization steps,
 making it a convenient format to store user input files.
