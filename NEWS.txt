@@ -64,6 +64,12 @@
     float (avoid lost of precision warning caused by used of asDouble() 
     to initialize a float).
 
+* Reader
+
+  - Renamed Reader::getFormatedErrorMessages() to getFormattedErrorMessages.
+    Bug #3023708 (Formatted has 2 't'). The old member function is deprecated
+    but still present for backward compatibility.
+    
 * Tests
 
   - Added test to ensure that the escape sequence "\/" is corrected handled 
@@ -76,7 +82,7 @@
     
   - Bug #3139678: stack buffer overflow when parsing a double with a
     length of 32 characters.
-
+    
 * License
   
   - See file LICENSE for details. Basically JsonCpp is now licensed under 

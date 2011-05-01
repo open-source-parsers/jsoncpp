@@ -54,6 +54,7 @@ duplicateStringValue( const char *value,
    if ( length == unknown )
       length = (unsigned int)strlen(value);
    char *newString = static_cast<char *>( malloc( length + 1 ) );
+   JSON_ASSERT_MESSAGE( newString != 0, "Failed to allocate string value buffer" );
    memcpy( newString, value, length );
    newString[length] = 0;
    return newString;
@@ -112,7 +113,7 @@ Value::CommentInfo::setComment( const char *text )
 {
    if ( comment_ )
       releaseStringValue( comment_ );
-   JSON_ASSERT( text );
+   JSON_ASSERT( text != 0 );
    JSON_ASSERT_MESSAGE( text[0]=='\0' || text[0]=='/', "Comments must start with /");
    // It seems that /**/ style comments are acceptable as well.
    comment_ = duplicateStringValue( text );

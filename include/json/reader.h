@@ -72,8 +72,17 @@ namespace Json {
        * \return Formatted error message with the list of errors with their location in 
        *         the parsed document. An empty string is returned if no error occurred
        *         during parsing.
+       * \deprecated Use getFormattedErrorMessages() instead (typo fix).
        */
+      JSONCPP_DEPRECATED("Use getFormattedErrorMessages instead") 
       std::string getFormatedErrorMessages() const;
+
+      /** \brief Returns a user friendly string that list errors in the parsed document.
+       * \return Formatted error message with the list of errors with their location in 
+       *         the parsed document. An empty string is returned if no error occurred
+       *         during parsing.
+       */
+      std::string getFormattedErrorMessages() const;
 
    private:
       enum TokenType

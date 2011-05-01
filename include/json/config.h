@@ -55,6 +55,14 @@
 #define JSON_USE_INT64_DOUBLE_CONVERSION 1
 #endif // if defined(_MSC_VER)  &&  _MSC_VER < 1200 // MSVC 6
 
+#if defined(_MSC_VER)  &&  _MSC_VER >= 1500 // MSVC 2008
+/// Indicates that the following function is deprecated.
+# define JSONCPP_DEPRECATED(message) __declspec(deprecated(message))
+#endif
+
+#if !defined(JSONCPP_DEPRECATED)
+# define JSONCPP_DEPRECATED(message)
+#endif // if !defined(JSONCPP_DEPRECATED)
 
 namespace Json {
    typedef int Int;

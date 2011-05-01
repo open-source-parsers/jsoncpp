@@ -46,7 +46,7 @@ if ( !parsingSuccessful )
 {
     // report to the user the failure and their locations in the document.
     std::cout  << "Failed to parse configuration\n"
-               << reader.getFormatedErrorMessages();
+               << reader.getFormattedErrorMessages();
     return;
 }
 

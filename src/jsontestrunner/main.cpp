@@ -105,7 +105,7 @@ parseAndSaveValueTree( const std::string &input,
    {
       printf( "Failed to parse %s file: \n%s\n", 
               kind.c_str(),
-              reader.getFormatedErrorMessages().c_str() );
+              reader.getFormattedErrorMessages().c_str() );
       return 1;
    }
 

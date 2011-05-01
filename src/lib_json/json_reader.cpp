@@ -839,8 +839,16 @@ Reader::getLocationLineAndColumn( Location location ) const
 }
 
 
+// Deprecated. Preserved for backward compatibility
 std::string 
 Reader::getFormatedErrorMessages() const
+{
+    return getFormattedErrorMessages();
+}
+
+
+std::string 
+Reader::getFormattedErrorMessages() const
 {
    std::string formattedMessage;
    for ( Errors::const_iterator itError = errors_.begin();
@@ -862,7 +870,7 @@ std::istream& operator>>( std::istream &sin, Value &root )
     Json::Reader reader;
     bool ok = reader.parse(sin, root, true);
     //JSON_ASSERT( ok );
-    if (!ok) throw std::runtime_error(reader.getFormatedErrorMessages());
+    if (!ok) throw std::runtime_error(reader.getFormattedErrorMessages());
     return sin;
 }
 
