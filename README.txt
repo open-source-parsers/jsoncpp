@@ -91,6 +91,13 @@ The documentation of the latest release is available online at:
 http://jsoncpp.sourceforge.net/
 
 
+* Using json-cpp in your project:
+  ===============================
+
+include/ should be added to your compiler include path. jsoncpp headers should be included as follow:
+#include <json/json.h>
+  
+
 * Adding a reader/writer test:
   ============================
 
