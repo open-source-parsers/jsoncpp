@@ -87,7 +87,7 @@ The build instructions are located in the file
 <a HREF="README.txt">README.txt</a> in the top-directory of the project.
 
 Permanent link to the latest revision of the file in subversion: 
-<a HREF="http://svn.sourceforge.net/viewcvs.cgi/jsoncpp/README.txt?view=markup">latest README.txt</a>
+<a HREF="http://jsoncpp.svn.sourceforge.net/viewvc/jsoncpp/trunk/jsoncpp/README.txt?view=markup">latest README.txt</a>
 
 \section _pdownload Download
 The sources can be downloaded from 
