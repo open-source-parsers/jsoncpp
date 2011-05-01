@@ -21,7 +21,7 @@ JsonCpp uses Scons (http://www.scons.org) as a build system. Scons requires
 python to be installed (http://www.python.org).
 
 You download scons-local distribution from the following url:
-http://sourceforge.net/project/showfiles.php?group_id=30337&package_id=67375
+http://sourceforge.net/projects/scons/files/scons-local/1.2.0/
 
 Unzip it in the directory where you found this README file. scons.py Should be 
 at the same level as README.
@@ -52,6 +52,13 @@ and TARGET may be:
 * Running the test manually:
   ==========================
 
+Notes that test can be run by scons using the 'check' target (see above).
+
+You need to run test manually only if you are troubleshooting an issue.
+
+In the instruction below, replace "path to jsontest.exe" with the path
+of the 'jsontest' executable that was compiled on your platform.
+  
 cd test
 # This will run the Reader/Writer tests
 python runjsontests.py "path to jsontest.exe"
