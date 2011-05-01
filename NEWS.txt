@@ -68,6 +68,11 @@
   - Added test to ensure that the escape sequence "\/" is corrected handled 
     by the parser.
 
+* Bug fixes
+
+  - Bug #3139677: JSON [1 2 3] was incorrectly parsed as [1, 3]. Error is now correctly 
+    detected.
+
 * License
   
   - See file LICENSE for details. Basically JsonCpp is now licensed under 

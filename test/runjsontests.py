@@ -49,7 +49,8 @@ def runAllTests( jsontest_executable_path, input_dir = None,
     failed_tests = []
     valgrind_path = use_valgrind and VALGRIND_CMD or ''
     for input_path in tests + test_jsonchecker:
-        is_json_checker_test = input_path in test_jsonchecker
+        expect_failure = os.path.basename( input_path ).startswith( 'fail' )
+        is_json_checker_test = (input_path in test_jsonchecker) or expect_failure
         print 'TESTING:', input_path,
         options = is_json_checker_test and '--json-checker' or ''
         pipe = os.popen( "%s%s %s %s" % (
@@ -58,7 +59,6 @@ def runAllTests( jsontest_executable_path, input_dir = None,
         process_output = pipe.read()
         status = pipe.close()
         if is_json_checker_test:
-            expect_failure = os.path.basename( input_path ).startswith( 'fail' )
             if expect_failure:
                 if status is None:
                     print 'FAILED'

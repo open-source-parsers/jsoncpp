@@ -533,8 +533,8 @@ Reader::readArray( Token &tokenStart )
       {
          ok = readToken( token );
       }
-      bool badTokenType = ( token.type_ == tokenArraySeparator  &&  
-                            token.type_ == tokenArrayEnd );
+      bool badTokenType = ( token.type_ != tokenArraySeparator  &&
+                            token.type_ != tokenArrayEnd );
       if ( !ok  ||  badTokenType )
       {
          return addErrorAndRecover( "Missing ',' or ']' in array declaration", 
