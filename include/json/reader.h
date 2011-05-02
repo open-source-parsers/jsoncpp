@@ -6,10 +6,10 @@
 #ifndef CPPTL_JSON_READER_H_INCLUDED
 # define CPPTL_JSON_READER_H_INCLUDED
 
-#if !defined(JSON_IS_AMALGATED)
+#if !defined(JSON_IS_AMALGAMATION)
 # include "features.h"
 # include "value.h"
-#endif // if !defined(JSON_IS_AMALGATED)
+#endif // if !defined(JSON_IS_AMALGAMATION)
 # include <deque>
 # include <stack>
 # include <string>
@@ -197,11 +197,11 @@ namespace Json {
     Result:
     \verbatim
     {
-	"dir": {
-	    "file": {
-		// The input stream JSON would be nested here.
-	    }
-	}
+    "dir": {
+        "file": {
+        // The input stream JSON would be nested here.
+        }
+    }
     }
     \endverbatim
     \throw std::exception on parse error.

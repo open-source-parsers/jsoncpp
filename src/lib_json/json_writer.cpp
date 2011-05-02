@@ -3,10 +3,10 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#if !defined(JSON_IS_AMALGATED)
+#if !defined(JSON_IS_AMALGAMATION)
 # include <json/writer.h>
 # include "json_tool.h"
-#endif // if !defined(JSON_IS_AMALGATED)
+#endif // if !defined(JSON_IS_AMALGAMATION)
 #include <utility>
 #include <assert.h>
 #include <stdio.h>
@@ -656,7 +656,7 @@ StyledStreamWriter::writeArrayValue( const Value &value )
                writeWithIndent( childValues_[index] );
             else
             {
-	       writeIndent();
+               writeIndent();
                writeValue( childValue );
             }
             if ( ++index == size )

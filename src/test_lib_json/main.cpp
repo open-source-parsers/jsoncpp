@@ -256,6 +256,12 @@ ValueTest::checkIs( const Json::Value &value, const IsCheck &check )
 }
 
 
+JSONTEST_FIXTURE( ValueTest, compareNull )
+{
+    JSONTEST_ASSERT_PRED( checkIsEqual( Json::Value(), Json::Value() ) );
+}
+
+
 JSONTEST_FIXTURE( ValueTest, compareInt )
 {
     JSONTEST_ASSERT_PRED( checkIsLess( 0, 10 ) );
@@ -347,6 +353,19 @@ JSONTEST_FIXTURE( ValueTest, compareObject )
 }
 
 
+JSONTEST_FIXTURE( ValueTest, compareType )
+{
+    // object of different type are ordered according to their type
+    JSONTEST_ASSERT_PRED( checkIsLess( Json::Value(), Json::Value(1) ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( Json::Value(1), Json::Value(1u) ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( Json::Value(1u), Json::Value(1.0) ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( Json::Value(1.0), Json::Value("a") ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( Json::Value("a"), Json::Value(true) ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( Json::Value(true), Json::Value(Json::arrayValue) ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( Json::Value(Json::arrayValue), Json::Value(Json::objectValue) ) );
+}
+
+
 void 
 ValueTest::checkIsLess( const Json::Value &x, const Json::Value &y )
 {
@@ -360,6 +379,8 @@ ValueTest::checkIsLess( const Json::Value &x, const Json::Value &y )
     JSONTEST_ASSERT( !(y <= x) );
     JSONTEST_ASSERT( !(x > y) );
     JSONTEST_ASSERT( !(y < x) );
+    JSONTEST_ASSERT( x.compare( y ) < 0 );
+    JSONTEST_ASSERT( y.compare( x ) >= 0 );
 }
 
 
@@ -376,6 +397,8 @@ ValueTest::checkIsEqual( const Json::Value &x, const Json::Value &y )
     JSONTEST_ASSERT( !(y < x) );
     JSONTEST_ASSERT( !(x > y) );
     JSONTEST_ASSERT( !(y > x) );
+    JSONTEST_ASSERT( x.compare( y ) == 0 );
+    JSONTEST_ASSERT( y.compare( x ) == 0 );
 }
 
 
@@ -394,6 +417,7 @@ int main( int argc, const char *argv[] )
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, isNull );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, accessArray );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, asFloat );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareNull );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareInt );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareUInt );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareDouble );
@@ -401,5 +425,6 @@ int main( int argc, const char *argv[] )
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareBoolean );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareArray );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareObject );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareType );
    return runner.runCommandLine( argc, argv );
 }

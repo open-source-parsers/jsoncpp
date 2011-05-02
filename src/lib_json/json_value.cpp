@@ -3,13 +3,13 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#if !defined(JSON_IS_AMALGATED)
+#if !defined(JSON_IS_AMALGAMATION)
 # include <json/value.h>
 # include <json/writer.h>
 # ifndef JSON_USE_SIMPLE_INTERNAL_ALLOCATOR
 #  include "json_batchallocator.h"
 # endif // #ifndef JSON_USE_SIMPLE_INTERNAL_ALLOCATOR
-#endif // if !defined(JSON_IS_AMALGATED)
+#endif // if !defined(JSON_IS_AMALGAMATION)
 #include <iostream>
 #include <utility>
 #include <stdexcept>
@@ -83,14 +83,14 @@ releaseStringValue( char *value )
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
-#if !defined(JSON_IS_AMALGATED)
+#if !defined(JSON_IS_AMALGAMATION)
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
 #  include "json_internalarray.inl"
 #  include "json_internalmap.inl"
 # endif // JSON_VALUE_USE_INTERNAL_MAP
 
 # include "json_valueiterator.inl"
-#endif // if !defined(JSON_IS_AMALGATED)
+#endif // if !defined(JSON_IS_AMALGAMATION)
 
 namespace Json {
 
@@ -524,34 +524,15 @@ Value::type() const
 
 
 int 
-Value::compare( const Value &other )
+Value::compare( const Value &other ) const
 {
-   /*
-   int typeDelta = other.type_ - type_;
-   switch ( type_ )
-   {
-   case nullValue:
-
-      return other.type_ == type_;
-   case intValue:
-      if ( other.type_.isNumeric()
-   case uintValue:
-   case realValue:
-   case booleanValue:
-      break;
-   case stringValue,
-      break;
-   case arrayValue:
-      delete value_.array_;
-      break;
-   case objectValue:
-      delete value_.map_;
-   default:
-      JSON_ASSERT_UNREACHABLE;
-   }
-   */
-   return 0;  // unreachable
+   if ( *this < other )
+      return -1;
+   if ( *this > other )
+      return 1;
+   return 0;
 }
+
 
 bool 
 Value::operator <( const Value &other ) const
@@ -594,7 +575,7 @@ Value::operator <( const Value &other ) const
    default:
       JSON_ASSERT_UNREACHABLE;
    }
-   return 0;  // unreachable
+   return false;  // unreachable
 }
 
 bool 
@@ -656,7 +637,7 @@ Value::operator ==( const Value &other ) const
    default:
       JSON_ASSERT_UNREACHABLE;
    }
-   return 0;  // unreachable
+   return false;  // unreachable
 }
 
 bool 
@@ -827,9 +808,9 @@ LargestInt
 Value::asLargestInt() const
 {
 #if defined(JSON_NO_INT64)
-	return asInt();
+    return asInt();
 #else
-	return asInt64();
+    return asInt64();
 #endif
 }
 
@@ -838,9 +819,9 @@ LargestUInt
 Value::asLargestUInt() const
 {
 #if defined(JSON_NO_INT64)
-	return asUInt();
+    return asUInt();
 #else
-	return asUInt64();
+    return asUInt64();
 #endif
 }
 

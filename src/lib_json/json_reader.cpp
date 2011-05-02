@@ -3,11 +3,11 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#if !defined(JSON_IS_AMALGATED)
+#if !defined(JSON_IS_AMALGAMATION)
 # include <json/reader.h>
 # include <json/value.h>
 # include "json_tool.h"
-#endif // if !defined(JSON_IS_AMALGATED)
+#endif // if !defined(JSON_IS_AMALGAMATION)
 #include <utility>
 #include <cstdio>
 #include <cassert>
@@ -488,7 +488,7 @@ Reader::readObject( Token &/*tokenStart*/ )
       if ( !readToken( comma )
             ||  ( comma.type_ != tokenObjectEnd  &&  
                   comma.type_ != tokenArraySeparator &&
-		  comma.type_ != tokenComment ) )
+                  comma.type_ != tokenComment ) )
       {
          return addErrorAndRecover( "Missing ',' or '}' in object declaration", 
                                     comma, 
