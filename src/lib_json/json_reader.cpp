@@ -519,7 +519,7 @@ Reader::readArray( Token &tokenStart )
       return true;
    }
    int index = 0;
-   while ( true )
+   for (;;)
    {
       Value &value = currentValue()[ index++ ];
       nodes_.push( &value );
@@ -762,7 +762,7 @@ Reader::recoverFromError( TokenType skipUntilToken )
 {
    int errorCount = int(errors_.size());
    Token skip;
-   while ( true )
+   for (;;)
    {
       if ( !readToken(skip) )
          errors_.resize( errorCount ); // discard errors caused by recovery

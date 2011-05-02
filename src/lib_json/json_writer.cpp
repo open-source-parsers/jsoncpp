@@ -332,7 +332,7 @@ StyledWriter::writeValue( const Value &value )
             writeWithIndent( "{" );
             indent();
             Value::Members::iterator it = members.begin();
-            while ( true )
+            for (;;)
             {
                const std::string &name = *it;
                const Value &childValue = value[name];
@@ -372,7 +372,7 @@ StyledWriter::writeArrayValue( const Value &value )
          indent();
          bool hasChildValue = !childValues_.empty();
          unsigned index =0;
-         while ( true )
+         for (;;)
          {
             const Value &childValue = value[index];
             writeCommentBeforeValue( childValue );
@@ -608,7 +608,7 @@ StyledStreamWriter::writeValue( const Value &value )
             writeWithIndent( "{" );
             indent();
             Value::Members::iterator it = members.begin();
-            while ( true )
+            for (;;)
             {
                const std::string &name = *it;
                const Value &childValue = value[name];
@@ -648,7 +648,7 @@ StyledStreamWriter::writeArrayValue( const Value &value )
          indent();
          bool hasChildValue = !childValues_.empty();
          unsigned index =0;
-         while ( true )
+         for (;;)
          {
             const Value &childValue = value[index];
             writeCommentBeforeValue( childValue );
