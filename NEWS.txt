@@ -86,6 +86,9 @@
     
   - Bug #3139678: stack buffer overflow when parsing a double with a
     length of 32 characters.
+	
+  - Fixed Value::operator <= implementation (had the semantic of operator >=).
+    Found when addigin unit tests for comparison operators.
     
 * License
   
