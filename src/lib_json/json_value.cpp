@@ -524,34 +524,15 @@ Value::type() const
 
 
 int 
-Value::compare( const Value &other )
+Value::compare( const Value &other ) const
 {
-   /*
-   int typeDelta = other.type_ - type_;
-   switch ( type_ )
-   {
-   case nullValue:
-
-      return other.type_ == type_;
-   case intValue:
-      if ( other.type_.isNumeric()
-   case uintValue:
-   case realValue:
-   case booleanValue:
-      break;
-   case stringValue,
-      break;
-   case arrayValue:
-      delete value_.array_;
-      break;
-   case objectValue:
-      delete value_.map_;
-   default:
-      JSON_ASSERT_UNREACHABLE;
-   }
-   */
-   return 0;  // unreachable
+   if ( *this < other )
+      return -1;
+   if ( *this > other )
+      return 1;
+   return 0;
 }
+
 
 bool 
 Value::operator <( const Value &other ) const
@@ -594,7 +575,7 @@ Value::operator <( const Value &other ) const
    default:
       JSON_ASSERT_UNREACHABLE;
    }
-   return 0;  // unreachable
+   return false;  // unreachable
 }
 
 bool 
@@ -656,7 +637,7 @@ Value::operator ==( const Value &other ) const
    default:
       JSON_ASSERT_UNREACHABLE;
    }
-   return 0;  // unreachable
+   return false;  // unreachable
 }
 
 bool 

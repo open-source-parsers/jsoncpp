@@ -256,7 +256,7 @@ namespace Json {
       bool operator ==( const Value &other ) const;
       bool operator !=( const Value &other ) const;
 
-      int compare( const Value &other );
+      int compare( const Value &other ) const;
 
       const char *asCString() const;
       std::string asString() const;

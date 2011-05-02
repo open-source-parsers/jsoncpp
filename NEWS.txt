@@ -90,6 +90,9 @@
   - Fixed Value::operator <= implementation (had the semantic of operator >=).
     Found when addigin unit tests for comparison operators.
     
+  - Value::compare() is now const and has an actual implementation with
+    unit tests.
+    
 * License
   
   - See file LICENSE for details. Basically JsonCpp is now licensed under 
