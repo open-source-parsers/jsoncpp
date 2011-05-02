@@ -37,6 +37,7 @@ struct ValueTest : JsonTest::TestCase
    Json::Value true_;
    Json::Value false_;
 
+
    ValueTest()
       : emptyArray_( Json::arrayValue )
       , emptyObject_( Json::objectValue )
@@ -77,6 +78,10 @@ struct ValueTest : JsonTest::TestCase
    void checkMemberCount( Json::Value &value, unsigned int expectedCount );
 
    void checkIs( const Json::Value &value, const IsCheck &check );
+
+   void checkIsLess( const Json::Value &x, const Json::Value &y );
+
+   void checkIsEqual( const Json::Value &x, const Json::Value &y );
 };
 
 
@@ -251,6 +256,128 @@ ValueTest::checkIs( const Json::Value &value, const IsCheck &check )
 }
 
 
+JSONTEST_FIXTURE( ValueTest, compareInt )
+{
+    JSONTEST_ASSERT_PRED( checkIsLess( 0, 10 ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( 10, 10 ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( -10, -10 ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( -10, 0 ) );
+}
+
+
+JSONTEST_FIXTURE( ValueTest, compareUInt )
+{
+    JSONTEST_ASSERT_PRED( checkIsLess( 0u, 10u ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( 0u, Json::Value::maxUInt ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( 10u, 10u ) );
+}
+
+
+JSONTEST_FIXTURE( ValueTest, compareDouble )
+{
+    JSONTEST_ASSERT_PRED( checkIsLess( 0.0, 10.0 ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( 10.0, 10.0 ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( -10.0, -10.0 ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( -10.0, 0.0 ) );
+}
+
+
+JSONTEST_FIXTURE( ValueTest, compareString )
+{
+    JSONTEST_ASSERT_PRED( checkIsLess( "", " " ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( "", "a" ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( "abcd", "zyui" ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( "abc", "abcd" ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( "abcd", "abcd" ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( " ", " " ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( "ABCD", "abcd" ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( "ABCD", "ABCD" ) );
+}
+
+
+JSONTEST_FIXTURE( ValueTest, compareBoolean )
+{
+    JSONTEST_ASSERT_PRED( checkIsLess( false, true ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( false, false ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( true, true ) );
+}
+
+
+JSONTEST_FIXTURE( ValueTest, compareArray )
+{
+    // array compare size then content
+    Json::Value emptyArray(Json::arrayValue);
+    Json::Value l1aArray;
+    l1aArray.append( 0 );
+    Json::Value l1bArray;
+    l1bArray.append( 10 );
+    Json::Value l2aArray;
+    l2aArray.append( 0 );
+    l2aArray.append( 0 );
+    Json::Value l2bArray;
+    l2bArray.append( 0 );
+    l2bArray.append( 10 );
+    JSONTEST_ASSERT_PRED( checkIsLess( emptyArray, l1aArray ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( emptyArray, l2aArray ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( l1aArray, l2aArray ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( l2aArray, l2bArray ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( emptyArray, Json::Value( emptyArray ) ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( l1aArray, Json::Value( l1aArray) ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( l2bArray, Json::Value( l2bArray) ) );
+}
+
+
+JSONTEST_FIXTURE( ValueTest, compareObject )
+{
+    // object compare size then content
+    Json::Value emptyObject(Json::objectValue);
+    Json::Value l1aObject;
+    l1aObject["key1"] = 0;
+    Json::Value l1bObject;
+    l1aObject["key1"] = 10;
+    Json::Value l2aObject;
+    l2aObject["key1"] = 0;
+    l2aObject["key2"] = 0;
+    JSONTEST_ASSERT_PRED( checkIsLess( emptyObject, l1aObject ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( emptyObject, l2aObject ) );
+    JSONTEST_ASSERT_PRED( checkIsLess( l1aObject, l2aObject ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( emptyObject, Json::Value( emptyObject ) ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( l1aObject, Json::Value( l1aObject ) ) );
+    JSONTEST_ASSERT_PRED( checkIsEqual( l2aObject, Json::Value( l2aObject ) ) );
+}
+
+
+void 
+ValueTest::checkIsLess( const Json::Value &x, const Json::Value &y )
+{
+    JSONTEST_ASSERT( x < y );
+    JSONTEST_ASSERT( y > x );
+    JSONTEST_ASSERT( x <= y );
+    JSONTEST_ASSERT( y >= x );
+    JSONTEST_ASSERT( !(x == y) );
+    JSONTEST_ASSERT( !(y == x) );
+    JSONTEST_ASSERT( !(x >= y) );
+    JSONTEST_ASSERT( !(y <= x) );
+    JSONTEST_ASSERT( !(x > y) );
+    JSONTEST_ASSERT( !(y < x) );
+}
+
+
+void 
+ValueTest::checkIsEqual( const Json::Value &x, const Json::Value &y )
+{
+    JSONTEST_ASSERT( x == y );
+    JSONTEST_ASSERT( y == x );
+    JSONTEST_ASSERT( x <= y );
+    JSONTEST_ASSERT( y <= x );
+    JSONTEST_ASSERT( x >= y );
+    JSONTEST_ASSERT( y >= x );
+    JSONTEST_ASSERT( !(x < y) );
+    JSONTEST_ASSERT( !(y < x) );
+    JSONTEST_ASSERT( !(x > y) );
+    JSONTEST_ASSERT( !(y > x) );
+}
+
 
 int main( int argc, const char *argv[] )
 {
@@ -267,5 +394,12 @@ int main( int argc, const char *argv[] )
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, isNull );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, accessArray );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, asFloat );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareInt );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareUInt );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareDouble );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareString );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareBoolean );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareArray );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareObject );
    return runner.runCommandLine( argc, argv );
 }

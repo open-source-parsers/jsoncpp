@@ -22,7 +22,8 @@
 
 #define JSON_ASSERT_UNREACHABLE assert( false )
 #define JSON_ASSERT( condition ) assert( condition );  // @todo <= change this into an exception throw
-#define JSON_ASSERT_MESSAGE( condition, message ) if (!( condition )) throw std::runtime_error( message );
+#define JSON_FAIL_MESSAGE( message ) throw std::runtime_error( message );
+#define JSON_ASSERT_MESSAGE( condition, message ) if (!( condition )) JSON_FAIL_MESSAGE( message )
 
 namespace Json {
 
@@ -39,7 +40,7 @@ const LargestUInt Value::maxLargestUInt = LargestUInt(-1);
 
 
 /// Unknown size marker
-enum { unknown = (unsigned)-1 };
+static const unsigned int unknown = (unsigned)-1;
 
 
 /** Duplicates the specified string value.
@@ -688,7 +689,7 @@ Value::asString() const
    case realValue:
    case arrayValue:
    case objectValue:
-      JSON_ASSERT_MESSAGE( false, "Type is not convertible to string" );
+      JSON_FAIL_MESSAGE( "Type is not convertible to string" );
    default:
       JSON_ASSERT_UNREACHABLE;
    }
@@ -725,7 +726,7 @@ Value::asInt() const
    case stringValue:
    case arrayValue:
    case objectValue:
-      JSON_ASSERT_MESSAGE( false, "Type is not convertible to int" );
+      JSON_FAIL_MESSAGE( "Type is not convertible to int" );
    default:
       JSON_ASSERT_UNREACHABLE;
    }
@@ -755,7 +756,7 @@ Value::asUInt() const
    case stringValue:
    case arrayValue:
    case objectValue:
-      JSON_ASSERT_MESSAGE( false, "Type is not convertible to uint" );
+      JSON_FAIL_MESSAGE( "Type is not convertible to uint" );
    default:
       JSON_ASSERT_UNREACHABLE;
    }
@@ -785,7 +786,7 @@ Value::asInt64() const
    case stringValue:
    case arrayValue:
    case objectValue:
-      JSON_ASSERT_MESSAGE( false, "Type is not convertible to Int64" );
+      JSON_FAIL_MESSAGE( "Type is not convertible to Int64" );
    default:
       JSON_ASSERT_UNREACHABLE;
    }
@@ -813,7 +814,7 @@ Value::asUInt64() const
    case stringValue:
    case arrayValue:
    case objectValue:
-      JSON_ASSERT_MESSAGE( false, "Type is not convertible to UInt64" );
+      JSON_FAIL_MESSAGE( "Type is not convertible to UInt64" );
    default:
       JSON_ASSERT_UNREACHABLE;
    }
@@ -866,7 +867,7 @@ Value::asDouble() const
    case stringValue:
    case arrayValue:
    case objectValue:
-      JSON_ASSERT_MESSAGE( false, "Type is not convertible to double" );
+      JSON_FAIL_MESSAGE( "Type is not convertible to double" );
    default:
       JSON_ASSERT_UNREACHABLE;
    }
@@ -895,7 +896,7 @@ Value::asFloat() const
    case stringValue:
    case arrayValue:
    case objectValue:
-      JSON_ASSERT_MESSAGE( false, "Type is not convertible to float" );
+      JSON_FAIL_MESSAGE( "Type is not convertible to float" );
    default:
       JSON_ASSERT_UNREACHABLE;
    }
