@@ -656,7 +656,7 @@ StyledStreamWriter::writeArrayValue( const Value &value )
                writeWithIndent( childValues_[index] );
             else
             {
-	       writeIndent();
+               writeIndent();
                writeValue( childValue );
             }
             if ( ++index == size )

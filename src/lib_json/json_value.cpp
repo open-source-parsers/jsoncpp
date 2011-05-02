@@ -827,9 +827,9 @@ LargestInt
 Value::asLargestInt() const
 {
 #if defined(JSON_NO_INT64)
-	return asInt();
+    return asInt();
 #else
-	return asInt64();
+    return asInt64();
 #endif
 }
 
@@ -838,9 +838,9 @@ LargestUInt
 Value::asLargestUInt() const
 {
 #if defined(JSON_NO_INT64)
-	return asUInt();
+    return asUInt();
 #else
-	return asUInt64();
+    return asUInt64();
 #endif
 }
 

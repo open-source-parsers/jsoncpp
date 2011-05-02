@@ -132,30 +132,30 @@ namespace Json {
       typedef Json::UInt64 UInt64;
       typedef Json::Int64 Int64;
 #endif // defined(JSON_HAS_INT64)
-	  typedef Json::LargestInt LargestInt;
-	  typedef Json::LargestUInt LargestUInt;
+      typedef Json::LargestInt LargestInt;
+      typedef Json::LargestUInt LargestUInt;
       typedef Json::ArrayIndex ArrayIndex;
 
       static const Value null;
-	  /// Minimum signed integer value that can be stored in a Json::Value.
-	  static const LargestInt minLargestInt;
-	  /// Maximum signed integer value that can be stored in a Json::Value.
+      /// Minimum signed integer value that can be stored in a Json::Value.
+      static const LargestInt minLargestInt;
+      /// Maximum signed integer value that can be stored in a Json::Value.
       static const LargestInt maxLargestInt;
-	  /// Maximum unsigned integer value that can be stored in a Json::Value.
+      /// Maximum unsigned integer value that can be stored in a Json::Value.
       static const LargestUInt maxLargestUInt;
 
-	  /// Minimum signed int value that can be stored in a Json::Value.
-	  static const Int minInt;
-	  /// Maximum signed int value that can be stored in a Json::Value.
+      /// Minimum signed int value that can be stored in a Json::Value.
+      static const Int minInt;
+      /// Maximum signed int value that can be stored in a Json::Value.
       static const Int maxInt;
-	  /// Maximum unsigned int value that can be stored in a Json::Value.
+      /// Maximum unsigned int value that can be stored in a Json::Value.
       static const UInt maxUInt;
 
-	  /// Minimum signed 64 bits int value that can be stored in a Json::Value.
-	  static const Int64 minInt64;
-	  /// Maximum signed 64 bits int value that can be stored in a Json::Value.
+      /// Minimum signed 64 bits int value that can be stored in a Json::Value.
+      static const Int64 minInt64;
+      /// Maximum signed 64 bits int value that can be stored in a Json::Value.
       static const Int64 maxInt64;
-	  /// Maximum unsigned 64 bits int value that can be stored in a Json::Value.
+      /// Maximum unsigned 64 bits int value that can be stored in a Json::Value.
       static const UInt64 maxUInt64;
 
    private:
@@ -202,14 +202,14 @@ namespace Json {
         To create an empty array, pass arrayValue.
         To create an empty object, pass objectValue.
         Another Value can then be set to this one by assignment.
-	This is useful since clear() and resize() will not alter types.
+    This is useful since clear() and resize() will not alter types.
 
         Examples:
-	\code
-	Json::Value null_value; // null
-	Json::Value arr_value(Json::arrayValue); // []
-	Json::Value obj_value(Json::objectValue); // {}
-	\endcode
+    \code
+    Json::Value null_value; // null
+    Json::Value arr_value(Json::arrayValue); // []
+    Json::Value obj_value(Json::objectValue); // {}
+    \endcode
       */
       Value( ValueType type = nullValue );
       Value( Int value );
@@ -315,24 +315,24 @@ namespace Json {
       ///  this from the operator[] which takes a string.)
       Value &operator[]( ArrayIndex index );
 
-	  /// Access an array element (zero based index ).
+      /// Access an array element (zero based index ).
       /// If the array contains less than index element, then null value are inserted
       /// in the array so that its size is index+1.
       /// (You may need to say 'value[0u]' to get your compiler to distinguish
       ///  this from the operator[] which takes a string.)
       Value &operator[]( int index );
 
-	  /// Access an array element (zero based index )
+      /// Access an array element (zero based index )
       /// (You may need to say 'value[0u]' to get your compiler to distinguish
       ///  this from the operator[] which takes a string.)
       const Value &operator[]( ArrayIndex index ) const;
 
-	  /// Access an array element (zero based index )
+      /// Access an array element (zero based index )
       /// (You may need to say 'value[0u]' to get your compiler to distinguish
       ///  this from the operator[] which takes a string.)
       const Value &operator[]( int index ) const;
 
-	  /// If the array contains at least index+1 elements, returns the element value, 
+      /// If the array contains at least index+1 elements, returns the element value, 
       /// otherwise returns defaultValue.
       Value get( ArrayIndex index, 
                  const Value &defaultValue ) const;
