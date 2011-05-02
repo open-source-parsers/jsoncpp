@@ -32,4 +32,6 @@
     - Provides support for static property name definition avoiding allocation 
     - Static property dictionnary can be provided to JSON reader
     - Performance scenario & benchmarking
+  \section testing Testing
+    - Adds more tests for unicode parsing (e.g. including surrogate and error detection).
 */
