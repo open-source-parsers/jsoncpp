@@ -13,8 +13,8 @@
     Notes: you need to setup the environment by running vcvars32.bat 
     (e.g. MSVC 2008 command prompt in start menu) before running scons.
     
-  - Added support for amalgated source and header generation (a la sqlite).
-    Refer to README.txt section "Generating amalgated source and header"
+  - Added support for amalgamated source and header generation (a la sqlite).
+    Refer to README.txt section "Generating amalgamated source and header"
     for detail.
     
 * Value

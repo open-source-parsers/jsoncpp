@@ -9,7 +9,7 @@ import os
 import os.path
 import sys
 
-class AmalagatedFile:
+class AmalgamationFile:
     def __init__( self, top_dir ):
         self.top_dir = top_dir
         self.blocks = []
@@ -47,9 +47,9 @@ class AmalagatedFile:
         f.write( self.get_value() )
         f.close()
 
-def amalgate_source( source_top_dir=None,
-                     target_source_path=None,
-                     header_include_path=None ):
+def amalgamate_source( source_top_dir=None,
+                       target_source_path=None,
+                       header_include_path=None ):
     """Produces amalgated source.
        Parameters:
            source_top_dir: top-directory
@@ -57,7 +57,7 @@ def amalgate_source( source_top_dir=None,
            header_include_path: generated header path relative to target_source_path.
     """
     print 'Amalgating header...'
-    header = AmalagatedFile( source_top_dir )
+    header = AmalgamationFile( source_top_dir )
     header.add_text( '/// Json-cpp amalgated header (http://jsoncpp.sourceforge.net/).' )
     header.add_text( '/// It is intented to be used with #include <%s>' % header_include_path )
     header.add_file( 'LICENSE', wrap_in_comment=True )
@@ -81,7 +81,7 @@ def amalgate_source( source_top_dir=None,
     base, ext = os.path.splitext( header_include_path )
     forward_header_include_path = base + '-forwards' + ext
     print 'Amalgating forward header...'
-    header = AmalagatedFile( source_top_dir )
+    header = AmalgamationFile( source_top_dir )
     header.add_text( '/// Json-cpp amalgated forward header (http://jsoncpp.sourceforge.net/).' )
     header.add_text( '/// It is intented to be used with #include <%s>' % forward_header_include_path )
     header.add_text( '/// This header provides forward declaration for all JsonCpp types.' )
@@ -101,7 +101,7 @@ def amalgate_source( source_top_dir=None,
     header.write_to( target_forward_header_path )
 
     print 'Amalgating source...'
-    source = AmalagatedFile( source_top_dir )
+    source = AmalgamationFile( source_top_dir )
     source.add_text( '/// Json-cpp amalgated source (http://jsoncpp.sourceforge.net/).' )
     source.add_text( '/// It is intented to be used with #include <%s>' % header_include_path )
     source.add_file( 'LICENSE', wrap_in_comment=True )
@@ -134,9 +134,9 @@ Generate a single amalgated source and header file from the sources.
     parser.enable_interspersed_args()
     options, args = parser.parse_args()
 
-    msg = amalgate_source( source_top_dir=options.top_dir,
-                           target_source_path=options.target_source_path,
-                           header_include_path=options.header_include_path )
+    msg = amalgamate_source( source_top_dir=options.top_dir,
+                             target_source_path=options.target_source_path,
+                             header_include_path=options.header_include_path )
     if msg:
         sys.stderr.write( msg + '\n' )
         sys.exit( 1 )

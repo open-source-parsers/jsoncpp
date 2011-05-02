@@ -3,13 +3,13 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#if !defined(JSON_IS_AMALGATED)
+#if !defined(JSON_IS_AMALGAMATION)
 # include <json/value.h>
 # include <json/writer.h>
 # ifndef JSON_USE_SIMPLE_INTERNAL_ALLOCATOR
 #  include "json_batchallocator.h"
 # endif // #ifndef JSON_USE_SIMPLE_INTERNAL_ALLOCATOR
-#endif // if !defined(JSON_IS_AMALGATED)
+#endif // if !defined(JSON_IS_AMALGAMATION)
 #include <iostream>
 #include <utility>
 #include <stdexcept>
@@ -83,14 +83,14 @@ releaseStringValue( char *value )
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
-#if !defined(JSON_IS_AMALGATED)
+#if !defined(JSON_IS_AMALGAMATION)
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
 #  include "json_internalarray.inl"
 #  include "json_internalmap.inl"
 # endif // JSON_VALUE_USE_INTERNAL_MAP
 
 # include "json_valueiterator.inl"
-#endif // if !defined(JSON_IS_AMALGATED)
+#endif // if !defined(JSON_IS_AMALGAMATION)
 
 namespace Json {
 

@@ -23,7 +23,7 @@ import tempfile
 import os
 import time
 from devtools import antglob, fixeol, tarball
-import amalgate
+import amalgamate
 
 SVN_ROOT = 'https://jsoncpp.svn.sourceforge.net/svnroot/jsoncpp/'
 SVN_TAG_ROOT = SVN_ROOT + 'tags/jsoncpp'
@@ -323,13 +323,13 @@ Warning: --force should only be used when developping/testing the release script
         print 'Generating source tarball to', source_tarball_path
         tarball.make_tarball( source_tarball_path, [export_dir], export_dir, prefix_dir=source_dir )
 
-        amalgated_tarball_path = 'dist/%s-amalgated.tar.gz' % source_dir
-        print 'Generating amalgated source tarball to', amalgated_tarball_path
-        amalgated_dir = 'dist/amalgated'
-        amalgate.amalgate_source( export_dir, '%s/jsoncpp.cpp' % amalgated_dir, 'json/json.h' )
-        amalgated_source_dir = 'jsoncpp-src-amalgated' + release_version
-        tarball.make_tarball( amalgated_tarball_path, [amalgated_dir],
-                              amalgated_dir, prefix_dir=amalgated_source_dir )
+        amalgamation_tarball_path = 'dist/%s-amalgamation.tar.gz' % source_dir
+        print 'Generating amalgamation source tarball to', amalgamation_tarball_path
+        amalgamation_dir = 'dist/amalgamation'
+        amalgamate.amalgamate_source( export_dir, '%s/jsoncpp.cpp' % amalgamation_dir, 'json/json.h' )
+        amalgamation_source_dir = 'jsoncpp-src-amalgamation' + release_version
+        tarball.make_tarball( amalgamation_tarball_path, [amalgamation_dir],
+                              amalgamation_dir, prefix_dir=amalgamation_source_dir )
 
         # Decompress source tarball, download and install scons-local
         distcheck_dir = 'dist/distcheck'
