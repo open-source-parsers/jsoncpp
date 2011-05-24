@@ -573,8 +573,6 @@ Reader::decodeNumber( Token &token )
    Value::LargestUInt maxIntegerValue = isNegative ? Value::LargestUInt(-Value::minLargestInt) 
                                                    : Value::maxLargestUInt;
    Value::LargestUInt threshold = maxIntegerValue / 10;
-   Value::UInt lastDigitThreshold = Value::UInt( maxIntegerValue % 10 );
-   assert( lastDigitThreshold >=0  &&  lastDigitThreshold <= 9 );
    Value::LargestUInt value = 0;
    while ( current < token.end_ )
    {
@@ -584,10 +582,13 @@ Reader::decodeNumber( Token &token )
       Value::UInt digit(c - '0');
       if ( value >= threshold )
       {
-         // If the current digit is not the last one, or if it is
-         // greater than the last digit of the maximum integer value,
-         // the parse the number as a double.
-         if ( current != token.end_  ||  digit > lastDigitThreshold )
+         // We've hit or exceeded the max value divided by 10 (rounded down). If
+         // a) we've only just touched the limit, b) this is the last digit, and
+         // c) it's small enough to fit in that rounding delta, we're okay.
+         // Otherwise treat this number as a double to avoid overflow.
+         if (value > threshold ||
+             current != token.end_ ||
+             digit > maxIntegerValue % 10)
          {
             return decodeDouble( token );
          }
