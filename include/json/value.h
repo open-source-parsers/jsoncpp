@@ -151,12 +151,14 @@ namespace Json {
       /// Maximum unsigned int value that can be stored in a Json::Value.
       static const UInt maxUInt;
 
+# if defined(JSON_HAS_INT64)
       /// Minimum signed 64 bits int value that can be stored in a Json::Value.
       static const Int64 minInt64;
       /// Maximum signed 64 bits int value that can be stored in a Json::Value.
       static const Int64 maxInt64;
       /// Maximum unsigned 64 bits int value that can be stored in a Json::Value.
       static const UInt64 maxUInt64;
+#endif // defined(JSON_HAS_INT64)
 
    private:
 #ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
@@ -265,8 +267,10 @@ namespace Json {
 # endif
       Int asInt() const;
       UInt asUInt() const;
+#if defined(JSON_HAS_INT64)
       Int64 asInt64() const;
       UInt64 asUInt64() const;
+#endif // if defined(JSON_HAS_INT64)
       LargestInt asLargestInt() const;
       LargestUInt asLargestUInt() const;
       float asFloat() const;

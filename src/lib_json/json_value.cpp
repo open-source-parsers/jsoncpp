@@ -29,9 +29,11 @@ const Value Value::null;
 const Int Value::minInt = Int( ~(UInt(-1)/2) );
 const Int Value::maxInt = Int( UInt(-1)/2 );
 const UInt Value::maxUInt = UInt(-1);
+# if defined(JSON_HAS_INT64)
 const Int64 Value::minInt64 = Int64( ~(UInt64(-1)/2) );
 const Int64 Value::maxInt64 = Int64( UInt64(-1)/2 );
 const UInt64 Value::maxUInt64 = UInt64(-1);
+#endif // defined(JSON_HAS_INT64)
 const LargestInt Value::minLargestInt = LargestInt( ~(LargestUInt(-1)/2) );
 const LargestInt Value::maxLargestInt = LargestInt( LargestUInt(-1)/2 );
 const LargestUInt Value::maxLargestUInt = LargestUInt(-1);
@@ -281,7 +283,6 @@ Value::Value( ValueType type )
 }
 
 
-#if defined(JSON_HAS_INT64)
 Value::Value( UInt value )
    : type_( uintValue )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
@@ -302,9 +303,8 @@ Value::Value( Int value )
    value_.int_ = value;
 }
 
-#endif // if defined(JSON_HAS_INT64)
 
-
+# if defined(JSON_HAS_INT64)
 Value::Value( Int64 value )
    : type_( intValue )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
@@ -325,6 +325,7 @@ Value::Value( UInt64 value )
 {
    value_.uint_ = value;
 }
+#endif // defined(JSON_HAS_INT64)
 
 Value::Value( double value )
    : type_( realValue )
