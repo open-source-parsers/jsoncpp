@@ -926,7 +926,7 @@ Value::isConvertibleTo( ValueType other ) const
              || other == booleanValue;
    case uintValue:
       return ( other == nullValue  &&  value_.uint_ == 0 )
-             || ( other == intValue  && value_.uint_ <= (unsigned)maxInt )
+             || ( other == intValue  && value_.uint_ <= (LargestUInt)maxInt )
              || other == uintValue
              || other == realValue
              || other == stringValue
