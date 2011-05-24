@@ -4,6 +4,7 @@
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
 #if !defined(JSON_IS_AMALGAMATION)
+# include <json/assertions.h>
 # include <json/reader.h>
 # include <json/value.h>
 # include "json_tool.h"
@@ -884,8 +885,7 @@ std::istream& operator>>( std::istream &sin, Value &root )
 {
     Json::Reader reader;
     bool ok = reader.parse(sin, root, true);
-    //JSON_ASSERT( ok );
-    if (!ok) throw std::runtime_error(reader.getFormattedErrorMessages());
+    if (!ok) JSON_FAIL_MESSAGE(reader.getFormattedErrorMessages());
     return sin;
 }
 

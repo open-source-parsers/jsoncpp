@@ -53,8 +53,7 @@ public: // overridden from ValueArrayAllocator
       if ( minNewIndexCount > newIndexCount )
          newIndexCount = minNewIndexCount;
       void *newIndexes = realloc( indexes, sizeof(Value*) * newIndexCount );
-      if ( !newIndexes )
-         throw std::bad_alloc();
+      JSON_ASSERT_MESSAGE(newIndexes, "Couldn't realloc.");
       indexCount = newIndexCount;
       indexes = static_cast<Value **>( newIndexes );
    }
@@ -117,8 +116,7 @@ public: // overridden from ValueArrayAllocator
       if ( minNewIndexCount > newIndexCount )
          newIndexCount = minNewIndexCount;
       void *newIndexes = realloc( indexes, sizeof(Value*) * newIndexCount );
-      if ( !newIndexes )
-         throw std::bad_alloc();
+      JSON_ASSERT_MESSAGE(newIndexes, "Couldn't realloc.");
       indexCount = newIndexCount;
       indexes = static_cast<Value **>( newIndexes );
    }

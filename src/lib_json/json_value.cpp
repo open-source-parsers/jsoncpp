@@ -4,6 +4,7 @@
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
 #if !defined(JSON_IS_AMALGAMATION)
+# include <json/assertions.h>
 # include <json/value.h>
 # include <json/writer.h>
 # ifndef JSON_USE_SIMPLE_INTERNAL_ALLOCATOR
@@ -21,9 +22,6 @@
 #include <cstddef>    // size_t
 
 #define JSON_ASSERT_UNREACHABLE assert( false )
-#define JSON_ASSERT( condition ) assert( condition );  // @todo <= change this into an exception throw
-#define JSON_FAIL_MESSAGE( message ) throw std::runtime_error( message );
-#define JSON_ASSERT_MESSAGE( condition, message ) if (!( condition )) JSON_FAIL_MESSAGE( message )
 
 namespace Json {
 
