@@ -729,7 +729,7 @@ Value::asUInt() const
       return 0;
    case intValue:
       JSON_ASSERT_MESSAGE( value_.int_ >= 0, "Negative integer can not be converted to unsigned integer" );
-      JSON_ASSERT_MESSAGE( value_.int_ <= maxUInt, "signed integer out of UInt range" );
+      JSON_ASSERT_MESSAGE( UInt(value_.int_) <= maxUInt, "signed integer out of UInt range" );
       return UInt(value_.int_);
    case uintValue:
       JSON_ASSERT_MESSAGE( value_.uint_ <= maxUInt, "unsigned integer out of UInt range" );
