@@ -30,8 +30,6 @@ template<typename AllocatedType
 class BatchAllocator
 {
 public:
-   typedef AllocatedType Type;
-
    BatchAllocator( unsigned int objectsPerPage = 255 )
       : freeHead_( 0 )
       , objectsPerPage_( objectsPerPage )
@@ -127,4 +125,3 @@ private:
 # endif // ifndef JSONCPP_DOC_INCLUDE_IMPLEMENTATION
 
 #endif // JSONCPP_BATCHALLOCATOR_H_INCLUDED
-
