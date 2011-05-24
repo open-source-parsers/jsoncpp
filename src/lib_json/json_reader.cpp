@@ -611,6 +611,11 @@ Reader::decodeDouble( Token &token )
    int count;
    int length = int(token.end_ - token.start_);
 
+   // Sanity check to avoid buffer overflow exploits.
+   if (length < 0) {
+      return addError( "Unable to parse token length", token );
+   }
+
    // Avoid using a string constant for the format control string given to
    // sscanf, as this can cause hard to debug crashes on OS X. See here for more
    // info:

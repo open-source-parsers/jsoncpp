@@ -56,6 +56,12 @@ duplicateStringValue( const char *value,
 {
    if ( length == unknown )
       length = (unsigned int)strlen(value);
+
+   // Avoid an integer overflow in the call to malloc below by limiting length
+   // to a sane value.
+   if (length >= (unsigned)Value::maxInt)
+      length = Value::maxInt - 1;
+
    char *newString = static_cast<char *>( malloc( length + 1 ) );
    JSON_ASSERT_MESSAGE( newString != 0, "Failed to allocate string value buffer" );
    memcpy( newString, value, length );
