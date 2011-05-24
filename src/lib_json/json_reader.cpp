@@ -610,17 +610,25 @@ Reader::decodeDouble( Token &token )
    const int bufferSize = 32;
    int count;
    int length = int(token.end_ - token.start_);
+
+   // Avoid using a string constant for the format control string given to
+   // sscanf, as this can cause hard to debug crashes on OS X. See here for more
+   // info:
+   //
+   //     http://developer.apple.com/library/mac/#DOCUMENTATION/DeveloperTools/gcc-4.0.1/gcc/Incompatibilities.html
+   char format[] = "%lf";
+
    if ( length <= bufferSize )
    {
       Char buffer[bufferSize+1];
       memcpy( buffer, token.start_, length );
       buffer[length] = 0;
-      count = sscanf( buffer, "%lf", &value );
+      count = sscanf( buffer, format, &value );
    }
    else
    {
       std::string buffer( token.start_, token.end_ );
-      count = sscanf( buffer.c_str(), "%lf", &value );
+      count = sscanf( buffer.c_str(), format, &value );
    }
 
    if ( count != 1 )
