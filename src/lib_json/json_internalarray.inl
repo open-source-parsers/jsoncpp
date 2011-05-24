@@ -258,8 +258,8 @@ ValueInternalArray::ValueInternalArray()
 
 ValueInternalArray::ValueInternalArray( const ValueInternalArray &other )
    : pages_( 0 )
-   , pageCount_( 0 )
    , size_( other.size_ )
+   , pageCount_( 0 )
 {
    PageIndex minNewPages = other.size_ / itemsPerPage;
    arrayAllocator()->reallocateArrayPageIndex( pages_, pageCount_, minNewPages );

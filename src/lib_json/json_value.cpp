@@ -236,10 +236,10 @@ Value::CZString::isStaticString() const
 Value::Value( ValueType type )
    : type_( type )
    , allocated_( 0 )
-   , comments_( 0 )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
+   , comments_( 0 )
 {
    switch ( type )
    {
@@ -280,20 +280,20 @@ Value::Value( ValueType type )
 #if defined(JSON_HAS_INT64)
 Value::Value( UInt value )
    : type_( uintValue )
-   , comments_( 0 )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
+   , comments_( 0 )
 {
    value_.uint_ = value;
 }
 
 Value::Value( Int value )
    : type_( intValue )
-   , comments_( 0 )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
+   , comments_( 0 )
 {
    value_.int_ = value;
 }
@@ -303,10 +303,10 @@ Value::Value( Int value )
 
 Value::Value( Int64 value )
    : type_( intValue )
-   , comments_( 0 )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
+   , comments_( 0 )
 {
    value_.int_ = value;
 }
@@ -314,20 +314,20 @@ Value::Value( Int64 value )
 
 Value::Value( UInt64 value )
    : type_( uintValue )
-   , comments_( 0 )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
+   , comments_( 0 )
 {
    value_.uint_ = value;
 }
 
 Value::Value( double value )
    : type_( realValue )
-   , comments_( 0 )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
+   , comments_( 0 )
 {
    value_.real_ = value;
 }
@@ -335,10 +335,10 @@ Value::Value( double value )
 Value::Value( const char *value )
    : type_( stringValue )
    , allocated_( true )
-   , comments_( 0 )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
+   , comments_( 0 )
 {
    value_.string_ = duplicateStringValue( value );
 }
@@ -348,10 +348,10 @@ Value::Value( const char *beginValue,
               const char *endValue )
    : type_( stringValue )
    , allocated_( true )
-   , comments_( 0 )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
+   , comments_( 0 )
 {
    value_.string_ = duplicateStringValue( beginValue, 
                                           (unsigned int)(endValue - beginValue) );
@@ -361,10 +361,10 @@ Value::Value( const char *beginValue,
 Value::Value( const std::string &value )
    : type_( stringValue )
    , allocated_( true )
-   , comments_( 0 )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
+   , comments_( 0 )
 {
    value_.string_ = duplicateStringValue( value.c_str(), 
                                           (unsigned int)value.length() );
@@ -374,10 +374,10 @@ Value::Value( const std::string &value )
 Value::Value( const StaticString &value )
    : type_( stringValue )
    , allocated_( false )
-   , comments_( 0 )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
+   , comments_( 0 )
 {
    value_.string_ = const_cast<char *>( value.c_str() );
 }
@@ -387,10 +387,10 @@ Value::Value( const StaticString &value )
 Value::Value( const CppTL::ConstString &value )
    : type_( stringValue )
    , allocated_( true )
-   , comments_( 0 )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
+   , comments_( 0 )
 {
    value_.string_ = duplicateStringValue( value, value.length() );
 }
@@ -398,10 +398,10 @@ Value::Value( const CppTL::ConstString &value )
 
 Value::Value( bool value )
    : type_( booleanValue )
-   , comments_( 0 )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
+   , comments_( 0 )
 {
    value_.bool_ = value;
 }
@@ -409,10 +409,10 @@ Value::Value( bool value )
 
 Value::Value( const Value &other )
    : type_( other.type_ )
-   , comments_( 0 )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
+   , comments_( 0 )
 {
    switch ( type_ )
    {
