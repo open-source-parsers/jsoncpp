@@ -11,6 +11,7 @@
 #  include "json_batchallocator.h"
 # endif // #ifndef JSON_USE_SIMPLE_INTERNAL_ALLOCATOR
 #endif // if !defined(JSON_IS_AMALGAMATION)
+#include <math.h>
 #include <iostream>
 #include <utility>
 #include <stdexcept>
@@ -539,6 +540,7 @@ Value::compare( const Value &other ) const
 }
 
 
+// TODO(jacobsa): Check this for correctness given the new type-coallescing API.
 bool 
 Value::operator <( const Value &other ) const
 {
@@ -601,6 +603,7 @@ Value::operator >( const Value &other ) const
    return other < *this;
 }
 
+// TODO(jacobsa): Check this for correctness given the new type-coallescing API.
 bool 
 Value::operator ==( const Value &other ) const
 {
@@ -694,59 +697,38 @@ Value::asConstString() const
 Value::Int 
 Value::asInt() const
 {
+   JSON_ASSERT_MESSAGE(isInt(), "Value is not convertible to Int");
    switch ( type_ )
    {
-   case nullValue:
-      return 0;
    case intValue:
-      JSON_ASSERT_MESSAGE( value_.int_ >= minInt  &&  value_.int_ <= maxInt, "unsigned integer out of signed int range" );
       return Int(value_.int_);
    case uintValue:
-      JSON_ASSERT_MESSAGE( value_.uint_ <= UInt(maxInt), "unsigned integer out of signed int range" );
       return Int(value_.uint_);
    case realValue:
-      JSON_ASSERT_MESSAGE( value_.real_ >= minInt  &&  value_.real_ <= maxInt, "Real out of signed integer range" );
       return Int( value_.real_ );
-   case booleanValue:
-      return value_.bool_ ? 1 : 0;
-   case stringValue:
-   case arrayValue:
-   case objectValue:
-      JSON_FAIL_MESSAGE( "Type is not convertible to int" );
    default:
-      JSON_ASSERT_UNREACHABLE;
+      break;
    }
-   return 0; // unreachable;
+   JSON_ASSERT_UNREACHABLE;
+   return 0;
 }
 
 
 Value::UInt 
 Value::asUInt() const
 {
+   JSON_ASSERT_MESSAGE(isUInt(), "Value is not convertible to UInt");
    switch ( type_ )
    {
-   case nullValue:
-      return 0;
    case intValue:
-      JSON_ASSERT_MESSAGE( value_.int_ >= 0, "Negative integer can not be converted to unsigned integer" );
-      JSON_ASSERT_MESSAGE( UInt(value_.int_) <= maxUInt, "signed integer out of UInt range" );
       return UInt(value_.int_);
    case uintValue:
-      JSON_ASSERT_MESSAGE( value_.uint_ <= maxUInt, "unsigned integer out of UInt range" );
       return UInt(value_.uint_);
    case realValue:
-      JSON_ASSERT_MESSAGE( value_.real_ >= 0  &&  value_.real_ <= maxUInt,  "Real out of unsigned integer range" );
       return UInt( value_.real_ );
-   case booleanValue:
-      return value_.bool_ ? 1 : 0;
-   case stringValue:
-   case arrayValue:
-   case objectValue:
-      JSON_FAIL_MESSAGE( "Type is not convertible to uint" );
-   default:
-      JSON_ASSERT_UNREACHABLE;
    }
-   return 0; // unreachable;
+   JSON_ASSERT_UNREACHABLE;
+   return 0;
 }
 
 
@@ -755,55 +737,40 @@ Value::asUInt() const
 Value::Int64
 Value::asInt64() const
 {
+   JSON_ASSERT_MESSAGE(isInt64(), "Value is not convertible to Int64");
    switch ( type_ )
    {
-   case nullValue:
-      return 0;
    case intValue:
-      return value_.int_;
+      return Int64(value_.int_);
    case uintValue:
-      JSON_ASSERT_MESSAGE( value_.uint_ <= UInt64(maxInt64), "unsigned integer out of Int64 range" );
-      return value_.uint_;
+      return Int64(value_.uint_);
    case realValue:
-      JSON_ASSERT_MESSAGE( value_.real_ >= minInt64  &&  value_.real_ <= maxInt64, "Real out of Int64 range" );
       return Int64( value_.real_ );
-   case booleanValue:
-      return value_.bool_ ? 1 : 0;
-   case stringValue:
-   case arrayValue:
-   case objectValue:
-      JSON_FAIL_MESSAGE( "Type is not convertible to Int64" );
    default:
-      JSON_ASSERT_UNREACHABLE;
+      break;
    }
-   return 0; // unreachable;
+   JSON_ASSERT_UNREACHABLE;
+   return 0;
 }
 
 
 Value::UInt64
 Value::asUInt64() const
 {
+   JSON_ASSERT_MESSAGE(isUInt64(), "Value is not convertible to UInt64");
    switch ( type_ )
    {
-   case nullValue:
-      return 0;
    case intValue:
-      JSON_ASSERT_MESSAGE( value_.int_ >= 0, "Negative integer can not be converted to UInt64" );
-      return value_.int_;
+      return UInt64(value_.int_);
    case uintValue:
-      return value_.uint_;
+      return UInt64(value_.uint_);
    case realValue:
-      JSON_ASSERT_MESSAGE( value_.real_ >= 0  &&  value_.real_ <= maxUInt64,  "Real out of UInt64 range" );
       return UInt64( value_.real_ );
-   case booleanValue:
-      return value_.bool_ ? 1 : 0;
-   case stringValue:
-   case arrayValue:
-   case objectValue:
-      JSON_FAIL_MESSAGE( "Type is not convertible to UInt64" );
    default:
-      JSON_ASSERT_UNREACHABLE;
+      break;
    }
+   JSON_ASSERT_UNREACHABLE;
+   return 0;
    return 0; // unreachable;
 }
 # endif // if defined(JSON_HAS_INT64)
@@ -836,8 +803,6 @@ Value::asDouble() const
 {
    switch ( type_ )
    {
-   case nullValue:
-      return 0.0;
    case intValue:
       return static_cast<double>( value_.int_ );
    case uintValue:
@@ -848,12 +813,12 @@ Value::asDouble() const
 #endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
    case realValue:
       return value_.real_;
+   case nullValue:
    case booleanValue:
-      return value_.bool_ ? 1.0 : 0.0;
    case stringValue:
    case arrayValue:
    case objectValue:
-      JSON_FAIL_MESSAGE( "Type is not convertible to double" );
+      JSON_FAIL_MESSAGE( "Value is not a double" );
    default:
       JSON_ASSERT_UNREACHABLE;
    }
@@ -865,8 +830,6 @@ Value::asFloat() const
 {
    switch ( type_ )
    {
-   case nullValue:
-      return 0.0f;
    case intValue:
       return static_cast<float>( value_.int_ );
    case uintValue:
@@ -877,12 +840,12 @@ Value::asFloat() const
 #endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
    case realValue:
       return static_cast<float>( value_.real_ );
+   case nullValue:
    case booleanValue:
-      return value_.bool_ ? 1.0f : 0.0f;
    case stringValue:
    case arrayValue:
    case objectValue:
-      JSON_FAIL_MESSAGE( "Type is not convertible to float" );
+      JSON_FAIL_MESSAGE( "Value is not a float" );
    default:
       JSON_ASSERT_UNREACHABLE;
    }
@@ -894,20 +857,16 @@ Value::asBool() const
 {
    switch ( type_ )
    {
-   case nullValue:
-      return false;
-   case intValue:
-   case uintValue:
-      return value_.int_ != 0;
-   case realValue:
-      return value_.real_ != 0.0;
    case booleanValue:
       return value_.bool_;
+   case nullValue:
+   case intValue:
+   case uintValue:
+   case realValue:
    case stringValue:
-      return value_.string_  &&  value_.string_[0] != 0;
    case arrayValue:
    case objectValue:
-      return value_.map_->size() != 0;
+      JSON_FAIL_MESSAGE( "Value is not a bool" );
    default:
       JSON_ASSERT_UNREACHABLE;
    }
@@ -1366,6 +1325,11 @@ Value::getMemberNames() const
 //
 //# endif
 
+static bool IsIntegral(double d) {
+  double integral_part;
+  return modf(d, &integral_part) == 0.0;
+}
+
 
 bool
 Value::isNull() const
@@ -1384,30 +1348,106 @@ Value::isBool() const
 bool 
 Value::isInt() const
 {
-   return type_ == intValue;
+   switch ( type_ )
+   {
+   case intValue:
+      return value_.int_ >= minInt  &&  value_.int_ <= maxInt;
+   case uintValue:
+      return value_.uint_ <= UInt(maxInt);
+   case realValue:
+      return value_.real_ >= minInt &&
+             value_.real_ <= maxInt &&
+             IsIntegral(value_.real_);
+   default:
+      break;
+   }
+   return false;
 }
 
 
 bool 
 Value::isUInt() const
 {
-   return type_ == uintValue;
+   switch ( type_ )
+   {
+   case intValue:
+      return value_.int_ >= 0 && value_.int_ <= maxUInt;
+   case uintValue:
+      return value_.uint_ <= maxUInt;
+   case realValue:
+      return value_.real_ >= 0 &&
+             value_.real_ <= maxUInt &&
+             IsIntegral(value_.real_);
+   default:
+      break;
+   }
+   return false;
+}
+
+bool 
+Value::isInt64() const
+{
+# if defined(JSON_HAS_INT64)
+   switch ( type_ )
+   {
+   case intValue:
+     return true;
+   case uintValue:
+      return value_.uint_ <= UInt64(maxInt64);
+   case realValue:
+      // Note that maxInt64 (= 2^63 - 1) is not exactly representable as a
+      // double, so double(maxInt64) will be rounded up to 2^63. Therefore we
+      // require the value to be strictly less than the limit.
+      return value_.real_ >= double(minInt64) &&
+             value_.real_ < double(maxInt64) &&
+             IsIntegral(value_.real_);
+   default:
+      break;
+   }
+# endif  // JSON_HAS_INT64
+   return false;
+}
+
+bool 
+Value::isUInt64() const
+{
+# if defined(JSON_HAS_INT64)
+   switch ( type_ )
+   {
+   case intValue:
+     return value_.int_ >= 0;
+   case uintValue:
+      return true;
+   case realValue:
+      // Note that maxUInt64 (= 2^64 - 1) is not exactly representable as a
+      // double, so double(maxUInt64) will be rounded up to 2^64. Therefore we
+      // require the value to be strictly less than the limit.
+      return value_.real_ >= 0 &&
+             value_.real_ < double(maxUInt64) &&
+             IsIntegral(value_.real_);
+   default:
+      break;
+   }
+# endif  // JSON_HAS_INT64
+   return false;
 }
 
 
 bool 
 Value::isIntegral() const
 {
-   return type_ == intValue  
-          ||  type_ == uintValue  
-          ||  type_ == booleanValue;
+#if defined(JSON_HAS_INT64)
+  return isInt64() || isUInt64();
+#else
+  return isInt() || isUInt();
+#endif
 }
 
 
 bool 
 Value::isDouble() const
 {
-   return type_ == realValue;
+   return type_ == realValue || isIntegral();
 }
 
 
@@ -1428,14 +1468,14 @@ Value::isString() const
 bool 
 Value::isArray() const
 {
-   return type_ == nullValue  ||  type_ == arrayValue;
+   return type_ == arrayValue;
 }
 
 
 bool 
 Value::isObject() const
 {
-   return type_ == nullValue  ||  type_ == objectValue;
+   return type_ == objectValue;
 }
 
 

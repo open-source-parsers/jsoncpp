@@ -1,3 +1,23 @@
+  New in SVN:
+  -----------
+
+* Value
+
+  - Updated the Value::isFoo methods to work as follows:
+
+      * isInt, isInt64, isUInt, and isUInt64 return true if and only if the
+	value can be exactly representable as that type. In particular, a value
+	constructed with a double like 17.0 will now return true for all of
+	these methods.
+
+      * isDouble and isFloat now return true for all numeric values, since all
+	numeric values can be converted to a double or float without
+	truncation. Note that the conversion may not be exact -- for example,
+	doubles cannot exactly represent integers above 2^53.
+
+      * isBool, isNull, isString, isArray, and isObject now return true if and
+	only if the value is of that type.
+
   New in JsonCpp 0.6.0:
   ---------------------
 

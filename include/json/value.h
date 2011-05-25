@@ -280,7 +280,9 @@ namespace Json {
       bool isNull() const;
       bool isBool() const;
       bool isInt() const;
+      bool isInt64() const;
       bool isUInt() const;
+      bool isUInt64() const;
       bool isIntegral() const;
       bool isDouble() const;
       bool isNumeric() const;
