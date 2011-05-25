@@ -45,7 +45,7 @@ struct ValueTest : JsonTest::TestCase
       , smallUnsignedInteger_( Json::Value::UInt( Json::Value::maxInt ) )
       , unsignedInteger_( 34567890u )
       , real_( 1234.56789 )
-	  , float_( 0.00390625f )
+      , float_( 0.00390625f )
       , emptyString_( "" )
       , string1_( "a" )
       , string_( "sometext with space" )
