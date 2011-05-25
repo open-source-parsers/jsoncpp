@@ -100,7 +100,7 @@ JSONTEST_FIXTURE( ValueTest, size )
 }
 
 
-JSONTEST_FIXTURE( ValueTest, isObject )
+JSONTEST_FIXTURE( ValueTest, objectTypes )
 {
    IsCheck checks;
    checks.isObject_ = true;
@@ -109,7 +109,7 @@ JSONTEST_FIXTURE( ValueTest, isObject )
 }
 
 
-JSONTEST_FIXTURE( ValueTest, isArray )
+JSONTEST_FIXTURE( ValueTest, arrayTypes )
 {
    IsCheck checks;
    checks.isArray_ = true;
@@ -118,7 +118,7 @@ JSONTEST_FIXTURE( ValueTest, isArray )
 }
 
 
-JSONTEST_FIXTURE( ValueTest, isNull )
+JSONTEST_FIXTURE( ValueTest, nullTypes )
 {
    IsCheck checks;
    checks.isNull_ = true;
@@ -128,7 +128,7 @@ JSONTEST_FIXTURE( ValueTest, isNull )
 }
 
 
-JSONTEST_FIXTURE( ValueTest, isString )
+JSONTEST_FIXTURE( ValueTest, stringTypes )
 {
    IsCheck checks;
    checks.isString_ = true;
@@ -138,7 +138,7 @@ JSONTEST_FIXTURE( ValueTest, isString )
 }
 
 
-JSONTEST_FIXTURE( ValueTest, isBool )
+JSONTEST_FIXTURE( ValueTest, boolTypes )
 {
    IsCheck checks;
    checks.isBool_ = true;
@@ -149,7 +149,7 @@ JSONTEST_FIXTURE( ValueTest, isBool )
 }
 
 
-JSONTEST_FIXTURE( ValueTest, isDouble )
+JSONTEST_FIXTURE( ValueTest, doubleTypes )
 {
    IsCheck checks;
    checks.isDouble_ = true;
@@ -158,7 +158,7 @@ JSONTEST_FIXTURE( ValueTest, isDouble )
 }
 
 
-JSONTEST_FIXTURE( ValueTest, isInt )
+JSONTEST_FIXTURE( ValueTest, intTypes )
 {
    IsCheck checks;
    checks.isInt_ = true;
@@ -168,7 +168,7 @@ JSONTEST_FIXTURE( ValueTest, isInt )
 }
 
 
-JSONTEST_FIXTURE( ValueTest, isUInt )
+JSONTEST_FIXTURE( ValueTest, uintTypes )
 {
    IsCheck checks;
    checks.isUInt_ = true;
@@ -406,15 +406,14 @@ int main( int argc, const char *argv[] )
 {
    JsonTest::Runner runner;
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, size );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, isObject );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, isArray );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, isBool );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, isInt );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, isUInt );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, isDouble );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, isString );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, isNull );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, isNull );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, objectTypes );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, arrayTypes );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, boolTypes );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, intTypes );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, uintTypes );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, doubleTypes );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, stringTypes );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, nullTypes );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, accessArray );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, asFloat );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareNull );
