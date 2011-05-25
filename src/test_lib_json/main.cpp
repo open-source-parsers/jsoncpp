@@ -280,19 +280,19 @@ JSONTEST_FIXTURE( ValueTest, nonIntegerTypes )
 
 JSONTEST_FIXTURE( ValueTest, accessArray )
 {
-	const unsigned int index0 = 0;
-	JSONTEST_ASSERT( Json::Value(1234) == array1_[index0] ) << "Json::Value::operator[ArrayIndex]";
-	JSONTEST_ASSERT( Json::Value(1234) == array1_[0] ) << "Json::Value::operator[int]";
+   const unsigned int index0 = 0;
+   JSONTEST_ASSERT( Json::Value(1234) == array1_[index0] ) << "Json::Value::operator[ArrayIndex]";
+   JSONTEST_ASSERT( Json::Value(1234) == array1_[0] ) << "Json::Value::operator[int]";
 
-	const Json::Value &constArray = array1_;
-	JSONTEST_ASSERT( Json::Value(1234) == constArray[index0] ) << "Json::Value::operator[ArrayIndex] const";
-	JSONTEST_ASSERT( Json::Value(1234) == constArray[0] ) << "Json::Value::operator[int] const";
+   const Json::Value &constArray = array1_;
+   JSONTEST_ASSERT( Json::Value(1234) == constArray[index0] ) << "Json::Value::operator[ArrayIndex] const";
+   JSONTEST_ASSERT( Json::Value(1234) == constArray[0] ) << "Json::Value::operator[int] const";
 }
 
 
 JSONTEST_FIXTURE( ValueTest, asFloat )
 {
-	JSONTEST_ASSERT_EQUAL( 0.00390625f, float_.asFloat() ) << "Json::Value::asFloat()";
+   JSONTEST_ASSERT_EQUAL( 0.00390625f, float_.asFloat() ) << "Json::Value::asFloat()";
 }
 
 void
