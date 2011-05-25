@@ -349,7 +349,7 @@ JSONTEST_FIXTURE( ValueTest, integers )
    checks.isIntegral_ = true;
    JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
 
-#ifdef JSON_NO_INT64
+#ifndef JSON_NO_INT64
    JSONTEST_ASSERT( kuint32max == val.asLargestInt());
 #endif
    JSONTEST_ASSERT( kuint32max == val.asUInt());
