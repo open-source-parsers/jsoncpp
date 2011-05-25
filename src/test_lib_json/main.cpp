@@ -10,10 +10,6 @@
 #include <json/json.h>
 #include "jsontest.h"
 
-// TODO:
-// - boolean value returns that they are integral. Should not be.
-// - unsigned integer in integer range are not considered to be valid integer. Should check range.
-
 // Make numeric limits more convenient to talk about.
 #define kint32max std::numeric_limits<int32_t>::max()
 #define kint32min std::numeric_limits<int32_t>::min()

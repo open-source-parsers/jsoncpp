@@ -540,7 +540,6 @@ Value::compare( const Value &other ) const
 }
 
 
-// TODO(jacobsa): Check this for correctness given the new type-coallescing API.
 bool 
 Value::operator <( const Value &other ) const
 {
@@ -603,7 +602,6 @@ Value::operator >( const Value &other ) const
    return other < *this;
 }
 
-// TODO(jacobsa): Check this for correctness given the new type-coallescing API.
 bool 
 Value::operator ==( const Value &other ) const
 {
