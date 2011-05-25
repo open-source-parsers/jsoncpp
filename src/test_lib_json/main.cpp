@@ -93,6 +93,8 @@ JSONTEST_FIXTURE( ValueTest, size )
    JSONTEST_ASSERT_PRED( checkMemberCount(object1_, 1) );
    JSONTEST_ASSERT_PRED( checkMemberCount(null_, 0) );
    JSONTEST_ASSERT_PRED( checkMemberCount(integer_, 0) );
+   JSONTEST_ASSERT_PRED( checkMemberCount(unsignedInteger_, 0) );
+   JSONTEST_ASSERT_PRED( checkMemberCount(smallUnsignedInteger_, 0) );
    JSONTEST_ASSERT_PRED( checkMemberCount(real_, 0) );
    JSONTEST_ASSERT_PRED( checkMemberCount(emptyString_, 0) );
    JSONTEST_ASSERT_PRED( checkMemberCount(string_, 0) );
