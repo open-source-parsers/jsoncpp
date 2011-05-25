@@ -3,14 +3,20 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
+#include <stdint.h>
+#include <limits>
+
 #include <json/json.h>
 #include "jsontest.h"
-
 
 // TODO:
 // - boolean value returns that they are integral. Should not be.
 // - unsigned integer in integer range are not considered to be valid integer. Should check range.
 
+// Make numeric limits more convenient to talk about.
+#define kint32max std::numeric_limits<int32_t>::max()
+#define kint32min std::numeric_limits<int32_t>::min()
+#define kuint32max std::numeric_limits<uint32_t>::max()
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
@@ -151,33 +157,79 @@ JSONTEST_FIXTURE( ValueTest, boolTypes )
 }
 
 
-JSONTEST_FIXTURE( ValueTest, doubleTypes )
+JSONTEST_FIXTURE( ValueTest, integerTypes )
+{
+   IsCheck checks;
+
+   // Zero (signed constructor arg)
+   checks = IsCheck();
+   checks.isInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(0), checks ) );
+
+   // Zero (unsigned constructor arg)
+   checks = IsCheck();
+   checks.isUInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(0u), checks ) );
+
+   // 2^20 (signed constructor arg)
+   checks = IsCheck();
+   checks.isInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(1 << 20), checks ) );
+
+   // 2^20 (unsigned constructor arg)
+   checks = IsCheck();
+   checks.isUInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(1U << 20), checks ) );
+
+   // -2^20
+   checks = IsCheck();
+   checks.isInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(-(1 << 20)), checks ) );
+
+   // int32 max
+   checks = IsCheck();
+   checks.isInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(kint32max), checks ) );
+
+   // int32 min
+   checks = IsCheck();
+   checks.isInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(kint32min), checks ) );
+
+   // uint32 max
+   checks = IsCheck();
+   checks.isUInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(kuint32max), checks ) );
+}
+
+
+JSONTEST_FIXTURE( ValueTest, nonIntegerTypes )
 {
    IsCheck checks;
    checks.isDouble_ = true;
    checks.isNumeric_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( real_, checks ) );
-}
 
+   // Positive number
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(0.1), checks ) );
 
-JSONTEST_FIXTURE( ValueTest, intTypes )
-{
-   IsCheck checks;
-   checks.isInt_ = true;
-   checks.isNumeric_ = true;
-   checks.isIntegral_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( integer_, checks ) );
-}
-
-
-JSONTEST_FIXTURE( ValueTest, uintTypes )
-{
-   IsCheck checks;
-   checks.isUInt_ = true;
-   checks.isNumeric_ = true;
-   checks.isIntegral_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( unsignedInteger_, checks ) );
-   JSONTEST_ASSERT_PRED( checkIs( smallUnsignedInteger_, checks ) );
+   // Negative number
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(-0.1), checks ) );
 }
 
 
@@ -411,9 +463,8 @@ int main( int argc, const char *argv[] )
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, objectTypes );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, arrayTypes );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, boolTypes );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, intTypes );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, uintTypes );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, doubleTypes );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, integerTypes );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, nonIntegerTypes );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, stringTypes );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, nullTypes );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, accessArray );
