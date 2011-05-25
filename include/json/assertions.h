@@ -18,7 +18,7 @@
 #define JSON_FAIL_MESSAGE( message ) throw std::runtime_error( message );
 #else  // defined(JSON_USE_EXCEPTION)
 #define JSON_ASSERT( condition ) assert( condition );
-#define JSON_FAIL_MESSAGE( message ) { std::cerr << message; exit(123); }
+#define JSON_FAIL_MESSAGE( message ) { std::cerr << std::endl << message << std::endl; exit(123); }
 #endif
 
 #define JSON_ASSERT_MESSAGE( condition, message ) if (!( condition )) { JSON_FAIL_MESSAGE( message ) }
