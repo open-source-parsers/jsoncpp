@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <limits>
 
+#include <json/config.h>
 #include <json/json.h>
 #include "jsontest.h"
 
@@ -17,6 +18,9 @@
 #define kint32max std::numeric_limits<int32_t>::max()
 #define kint32min std::numeric_limits<int32_t>::min()
 #define kuint32max std::numeric_limits<uint32_t>::max()
+#define kint64max std::numeric_limits<int64_t>::max()
+#define kint64min std::numeric_limits<int64_t>::min()
+#define kuint64max std::numeric_limits<uint64_t>::max()
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
@@ -216,6 +220,47 @@ JSONTEST_FIXTURE( ValueTest, integerTypes )
    checks.isNumeric_ = true;
    checks.isIntegral_ = true;
    JSONTEST_ASSERT_PRED( checkIs( Json::Value(kuint32max), checks ) );
+
+#ifdef JSON_NO_INT64
+   // int64 max
+   checks = IsCheck();
+   checks.isDouble_ = true;
+   checks.isNumeric_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(double(kint64max)), checks ) );
+
+   // int64 min
+   checks = IsCheck();
+   checks.isDouble_ = true;
+   checks.isNumeric_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(double(kint64min)), checks ) );
+
+   // uint64 max
+   checks = IsCheck();
+   checks.isDouble_ = true;
+   checks.isNumeric_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(double(kuint64max)), checks ) );
+#else  // ifdef JSON_NO_INT64
+   // int64 max
+   checks = IsCheck();
+   checks.isInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(Json::Int64(kint64max)), checks ) );
+
+   // int64 min
+   checks = IsCheck();
+   checks.isInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(Json::Int64(kint64min)), checks ) );
+
+   // uint64 max
+   checks = IsCheck();
+   checks.isUInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( Json::Value(Json::UInt64(kuint64max)), checks ) );
+#endif
 }
 
 
