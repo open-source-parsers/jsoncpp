@@ -114,30 +114,49 @@ JSONTEST_FIXTURE( ValueTest, memberCount )
 
 JSONTEST_FIXTURE( ValueTest, objects )
 {
+   // Types
    IsCheck checks;
    checks.isObject_ = true;
    JSONTEST_ASSERT_PRED( checkIs( emptyObject_, checks ) );
    JSONTEST_ASSERT_PRED( checkIs( object1_, checks ) );
+
+   // Access through const reference
+   const Json::Value &constObject = object1_;
+
+   JSONTEST_ASSERT( Json::Value(1234) == constObject["id"] );
+   JSONTEST_ASSERT( Json::Value() == constObject["unknown id"] );
+
+   // Access through non-const reference
+   JSONTEST_ASSERT( Json::Value(1234) == object1_["id"] );
+   JSONTEST_ASSERT( Json::Value() == object1_["unknown id"] );
+
+   object1_["some other id"] = "foo";
+   JSONTEST_ASSERT( Json::Value("foo") == object1_["some other id"] );
 }
 
 
 JSONTEST_FIXTURE( ValueTest, arrays )
 {
+   const unsigned int index0 = 0;
+
    // Types
    IsCheck checks;
    checks.isArray_ = true;
    JSONTEST_ASSERT_PRED( checkIs( emptyArray_, checks ) );
    JSONTEST_ASSERT_PRED( checkIs( array1_, checks ) );
 
-   // Access non-const array
-   const unsigned int index0 = 0;
-   JSONTEST_ASSERT( Json::Value(1234) == array1_[index0] );
-   JSONTEST_ASSERT( Json::Value(1234) == array1_[0] );
-
-   // Access const array
+   // Access through const reference
    const Json::Value &constArray = array1_;
    JSONTEST_ASSERT( Json::Value(1234) == constArray[index0] );
    JSONTEST_ASSERT( Json::Value(1234) == constArray[0] );
+
+   // Access through non-const reference
+   JSONTEST_ASSERT( Json::Value(1234) == array1_[index0] );
+   JSONTEST_ASSERT( Json::Value(1234) == array1_[0] );
+
+   array1_[2] = Json::Value(17);
+   JSONTEST_ASSERT( Json::Value() == array1_[1] );
+   JSONTEST_ASSERT( Json::Value(17) == array1_[2] );
 }
 
 
@@ -158,6 +177,9 @@ JSONTEST_FIXTURE( ValueTest, strings )
    JSONTEST_ASSERT_PRED( checkIs( emptyString_, checks ) );
    JSONTEST_ASSERT_PRED( checkIs( string_, checks ) );
    JSONTEST_ASSERT_PRED( checkIs( string1_, checks ) );
+
+   JSONTEST_ASSERT( std::string("a") == string1_.asString());
+   JSONTEST_ASSERT( std::string("a") == string1_.asCString());
 }
 
 
@@ -169,108 +191,249 @@ JSONTEST_FIXTURE( ValueTest, bools )
    checks.isNumeric_ = true;
    JSONTEST_ASSERT_PRED( checkIs( false_, checks ) );
    JSONTEST_ASSERT_PRED( checkIs( true_, checks ) );
+
+   JSONTEST_ASSERT( true == true_.asBool());
+   JSONTEST_ASSERT( false == false_.asBool());
 }
 
 
 JSONTEST_FIXTURE( ValueTest, integers )
 {
    IsCheck checks;
+   Json::Value val;
 
    // Zero (signed constructor arg)
+   val = Json::Value(0);
+
    checks = IsCheck();
    checks.isInt_ = true;
    checks.isNumeric_ = true;
    checks.isIntegral_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(0), checks ) );
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( 0 == val.asInt());
+   JSONTEST_ASSERT( 0 == val.asLargestInt());
+   JSONTEST_ASSERT( 0 == val.asUInt());
+   JSONTEST_ASSERT( 0 == val.asLargestUInt());
+   JSONTEST_ASSERT( 0.0 == val.asDouble());
+   JSONTEST_ASSERT( 0.0 == val.asFloat());
 
    // Zero (unsigned constructor arg)
+   val = Json::Value(0u);
+
    checks = IsCheck();
    checks.isUInt_ = true;
    checks.isNumeric_ = true;
    checks.isIntegral_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(0u), checks ) );
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( 0 == val.asInt());
+   JSONTEST_ASSERT( 0 == val.asLargestInt());
+   JSONTEST_ASSERT( 0 == val.asUInt());
+   JSONTEST_ASSERT( 0 == val.asLargestUInt());
+   JSONTEST_ASSERT( 0.0 == val.asDouble());
+   JSONTEST_ASSERT( 0.0 == val.asFloat());
+
+   // Zero (floating-point constructor arg)
+   val = Json::Value(0.0);
+
+   checks = IsCheck();
+   checks.isDouble_ = true;
+   checks.isNumeric_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( 0 == val.asInt());
+   JSONTEST_ASSERT( 0 == val.asLargestInt());
+   JSONTEST_ASSERT( 0 == val.asUInt());
+   JSONTEST_ASSERT( 0 == val.asLargestUInt());
+   JSONTEST_ASSERT( 0.0 == val.asDouble());
+   JSONTEST_ASSERT( 0.0 == val.asFloat());
 
    // 2^20 (signed constructor arg)
+   val = Json::Value(1 << 20);
+
    checks = IsCheck();
    checks.isInt_ = true;
    checks.isNumeric_ = true;
    checks.isIntegral_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(1 << 20), checks ) );
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( (1 << 20) == val.asInt());
+   JSONTEST_ASSERT( (1 << 20) == val.asLargestInt());
+   JSONTEST_ASSERT( (1 << 20) == val.asUInt());
+   JSONTEST_ASSERT( (1 << 20) == val.asLargestUInt());
+   JSONTEST_ASSERT( (1 << 20) == val.asDouble());
+   JSONTEST_ASSERT( (1 << 20) == val.asFloat());
 
    // 2^20 (unsigned constructor arg)
+   val = Json::Value(1u << 20);
+
    checks = IsCheck();
    checks.isUInt_ = true;
    checks.isNumeric_ = true;
    checks.isIntegral_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(1U << 20), checks ) );
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( (1 << 20) == val.asInt());
+   JSONTEST_ASSERT( (1 << 20) == val.asLargestInt());
+   JSONTEST_ASSERT( (1 << 20) == val.asUInt());
+   JSONTEST_ASSERT( (1 << 20) == val.asLargestUInt());
+   JSONTEST_ASSERT( (1 << 20) == val.asDouble());
+   JSONTEST_ASSERT( (1 << 20) == val.asFloat());
+
+   // 2^20 (floating-point constructor arg)
+   val = Json::Value((1 << 20) / 1.0);
+
+   checks = IsCheck();
+   checks.isDouble_ = true;
+   checks.isNumeric_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( (1 << 20) == val.asInt());
+   JSONTEST_ASSERT( (1 << 20) == val.asLargestInt());
+   JSONTEST_ASSERT( (1 << 20) == val.asUInt());
+   JSONTEST_ASSERT( (1 << 20) == val.asLargestUInt());
+   JSONTEST_ASSERT( (1 << 20) == val.asDouble());
+   JSONTEST_ASSERT( (1 << 20) == val.asFloat());
 
    // -2^20
+   val = Json::Value(-(1 << 20));
+
    checks = IsCheck();
    checks.isInt_ = true;
    checks.isNumeric_ = true;
    checks.isIntegral_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(-(1 << 20)), checks ) );
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( -(1 << 20) == val.asInt());
+   JSONTEST_ASSERT( -(1 << 20) == val.asLargestInt());
+   JSONTEST_ASSERT( -(1 << 20) == val.asDouble());
+   JSONTEST_ASSERT( -(1 << 20) == val.asFloat());
 
    // int32 max
+   val = Json::Value(kint32max);
+
    checks = IsCheck();
    checks.isInt_ = true;
    checks.isNumeric_ = true;
    checks.isIntegral_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(kint32max), checks ) );
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( kint32max == val.asInt());
+   JSONTEST_ASSERT( kint32max == val.asLargestInt());
+   JSONTEST_ASSERT( kint32max == val.asUInt());
+   JSONTEST_ASSERT( kint32max == val.asLargestUInt());
+   JSONTEST_ASSERT( kint32max == val.asDouble());
+   JSONTEST_ASSERT( kint32max == val.asFloat());
 
    // int32 min
+   val = Json::Value(kint32min);
+
    checks = IsCheck();
    checks.isInt_ = true;
    checks.isNumeric_ = true;
    checks.isIntegral_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(kint32min), checks ) );
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( kint32min == val.asInt());
+   JSONTEST_ASSERT( kint32min == val.asLargestInt());
+   JSONTEST_ASSERT( kint32min == val.asDouble());
+   JSONTEST_ASSERT( kint32min == val.asFloat());
 
    // uint32 max
+   val = Json::Value(kuint32max);
+
    checks = IsCheck();
    checks.isUInt_ = true;
    checks.isNumeric_ = true;
    checks.isIntegral_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(kuint32max), checks ) );
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+#ifdef JSON_NO_INT64
+   JSONTEST_ASSERT( kuint32max == val.asLargestInt());
+#endif
+   JSONTEST_ASSERT( kuint32max == val.asUInt());
+   JSONTEST_ASSERT( kuint32max == val.asLargestUInt());
+   JSONTEST_ASSERT( kuint32max == val.asDouble());
+   JSONTEST_ASSERT( kuint32max == val.asFloat());
 
 #ifdef JSON_NO_INT64
    // int64 max
+   val = Json::Value(double(kint64max));
+
    checks = IsCheck();
    checks.isDouble_ = true;
    checks.isNumeric_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(double(kint64max)), checks ) );
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( double(kint64max) == val.asDouble());
+   JSONTEST_ASSERT( float(kint64max) == val.asFloat());
 
    // int64 min
+   val = Json::Value(double(kint64min));
+
    checks = IsCheck();
    checks.isDouble_ = true;
    checks.isNumeric_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(double(kint64min)), checks ) );
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( double(kint64min) == val.asDouble());
+   JSONTEST_ASSERT( float(kint64min) == val.asFloat());
 
    // uint64 max
+   val = Json::Value(double(kuint64max));
+
    checks = IsCheck();
    checks.isDouble_ = true;
    checks.isNumeric_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(double(kuint64max)), checks ) );
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( double(kuint64max) == val.asDouble());
+   JSONTEST_ASSERT( float(kuint64max) == val.asFloat());
 #else  // ifdef JSON_NO_INT64
    // int64 max
+   val = Json::Value(Json::Int64(kint64max));
+
    checks = IsCheck();
    checks.isInt_ = true;
    checks.isNumeric_ = true;
    checks.isIntegral_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(Json::Int64(kint64max)), checks ) );
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( kint64max == val.asInt64());
+   JSONTEST_ASSERT( kint64max == val.asLargestInt());
+   JSONTEST_ASSERT( kint64max == val.asUInt64());
+   JSONTEST_ASSERT( kint64max == val.asLargestUInt());
+   JSONTEST_ASSERT( double(kint64max) == val.asDouble());
+   JSONTEST_ASSERT( float(kint64max) == val.asFloat());
 
    // int64 min
+   val = Json::Value(Json::Int64(kint64min));
+
    checks = IsCheck();
    checks.isInt_ = true;
    checks.isNumeric_ = true;
    checks.isIntegral_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(Json::Int64(kint64min)), checks ) );
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( kint64min == val.asInt64());
+   JSONTEST_ASSERT( kint64min == val.asLargestInt());
+   JSONTEST_ASSERT( double(kint64min) == val.asDouble());
+   JSONTEST_ASSERT( float(kint64min) == val.asFloat());
 
    // uint64 max
+   val = Json::Value(Json::UInt64(kuint64max));
+
    checks = IsCheck();
    checks.isUInt_ = true;
    checks.isNumeric_ = true;
    checks.isIntegral_ = true;
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(Json::UInt64(kuint64max)), checks ) );
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( kuint64max == val.asUInt64());
+   JSONTEST_ASSERT( kuint64max == val.asLargestUInt());
+   JSONTEST_ASSERT( double(kuint64max) == val.asDouble());
+   JSONTEST_ASSERT( float(kuint64max) == val.asFloat());
 #endif
 }
 
@@ -278,14 +441,29 @@ JSONTEST_FIXTURE( ValueTest, integers )
 JSONTEST_FIXTURE( ValueTest, nonIntegers )
 {
    IsCheck checks;
-   checks.isDouble_ = true;
-   checks.isNumeric_ = true;
+   Json::Value val;
 
    // Positive number
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(0.1), checks ) );
+   val = Json::Value(0.25);
+
+   checks = IsCheck();
+   checks.isDouble_ = true;
+   checks.isNumeric_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( 0.25 == val.asDouble());
+   JSONTEST_ASSERT( 0.25 == val.asFloat());
 
    // Negative number
-   JSONTEST_ASSERT_PRED( checkIs( Json::Value(-0.1), checks ) );
+   val = Json::Value(-0.25);
+
+   checks = IsCheck();
+   checks.isDouble_ = true;
+   checks.isNumeric_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( -0.25 == val.asDouble());
+   JSONTEST_ASSERT( -0.25 == val.asFloat());
 }
 
 
