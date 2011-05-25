@@ -766,7 +766,7 @@ Value::asInt64() const
       return value_.uint_;
    case realValue:
       JSON_ASSERT_MESSAGE( value_.real_ >= minInt64  &&  value_.real_ <= maxInt64, "Real out of Int64 range" );
-      return Int( value_.real_ );
+      return Int64( value_.real_ );
    case booleanValue:
       return value_.bool_ ? 1 : 0;
    case stringValue:
@@ -794,7 +794,7 @@ Value::asUInt64() const
       return value_.uint_;
    case realValue:
       JSON_ASSERT_MESSAGE( value_.real_ >= 0  &&  value_.real_ <= maxUInt64,  "Real out of UInt64 range" );
-      return UInt( value_.real_ );
+      return UInt64( value_.real_ );
    case booleanValue:
       return value_.bool_ ? 1 : 0;
    case stringValue:

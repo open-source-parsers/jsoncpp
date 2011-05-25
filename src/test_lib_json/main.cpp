@@ -427,6 +427,67 @@ JSONTEST_FIXTURE( ValueTest, integers )
    JSONTEST_ASSERT( double(kuint64max) == val.asDouble());
    JSONTEST_ASSERT( float(kuint64max) == val.asFloat());
 #else  // ifdef JSON_NO_INT64
+   // 2^40 (signed constructor arg)
+   val = Json::Value(1LL << 40);
+
+   checks = IsCheck();
+   checks.isInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( (1LL << 40) == val.asInt64());
+   JSONTEST_ASSERT( (1LL << 40) == val.asLargestInt());
+   JSONTEST_ASSERT( (1LL << 40) == val.asUInt64());
+   JSONTEST_ASSERT( (1LL << 40) == val.asLargestUInt());
+   JSONTEST_ASSERT( (1LL << 40) == val.asDouble());
+   JSONTEST_ASSERT( (1LL << 40) == val.asFloat());
+
+   // 2^40 (unsigned constructor arg)
+   val = Json::Value(1ULL << 40);
+
+   checks = IsCheck();
+   checks.isUInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( (1LL << 40) == val.asInt64());
+   JSONTEST_ASSERT( (1LL << 40) == val.asLargestInt());
+   JSONTEST_ASSERT( (1LL << 40) == val.asUInt64());
+   JSONTEST_ASSERT( (1LL << 40) == val.asLargestUInt());
+   JSONTEST_ASSERT( (1LL << 40) == val.asDouble());
+   JSONTEST_ASSERT( (1LL << 40) == val.asFloat());
+
+   // 2^40 (floating-point constructor arg)
+   val = Json::Value((1LL << 40) / 1.0);
+
+   checks = IsCheck();
+   checks.isDouble_ = true;
+   checks.isNumeric_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( (1LL << 40) == val.asInt64());
+   JSONTEST_ASSERT( (1LL << 40) == val.asLargestInt());
+   JSONTEST_ASSERT( (1LL << 40) == val.asUInt64());
+   JSONTEST_ASSERT( (1LL << 40) == val.asLargestUInt());
+   JSONTEST_ASSERT( (1LL << 40) == val.asDouble());
+   JSONTEST_ASSERT( (1LL << 40) == val.asFloat());
+
+   // -2^40
+   val = Json::Value(-(1LL << 40));
+
+   checks = IsCheck();
+   checks.isInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( -(1LL << 40) == val.asInt64());
+   JSONTEST_ASSERT( -(1LL << 40) == val.asLargestInt());
+   JSONTEST_ASSERT( -(1LL << 40) == val.asDouble());
+   JSONTEST_ASSERT( -(1LL << 40) == val.asFloat());
+
    // int64 max
    val = Json::Value(Json::Int64(kint64max));
 
