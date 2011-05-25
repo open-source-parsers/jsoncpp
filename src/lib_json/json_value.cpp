@@ -1373,7 +1373,7 @@ Value::isUInt() const
    switch ( type_ )
    {
    case intValue:
-      return value_.int_ >= 0 && value_.int_ <= maxUInt;
+      return value_.int_ >= 0 && LargestUInt(value_.int_) <= LargestUInt(maxUInt);
    case uintValue:
       return value_.uint_ <= maxUInt;
    case realValue:
