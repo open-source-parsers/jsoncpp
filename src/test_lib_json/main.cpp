@@ -95,7 +95,7 @@ struct ValueTest : JsonTest::TestCase
 };
 
 
-JSONTEST_FIXTURE( ValueTest, size )
+JSONTEST_FIXTURE( ValueTest, memberCount )
 {
    JSONTEST_ASSERT_PRED( checkMemberCount(emptyArray_, 0) );
    JSONTEST_ASSERT_PRED( checkMemberCount(emptyObject_, 0) );
@@ -112,7 +112,7 @@ JSONTEST_FIXTURE( ValueTest, size )
 }
 
 
-JSONTEST_FIXTURE( ValueTest, objectTypes )
+JSONTEST_FIXTURE( ValueTest, objects )
 {
    IsCheck checks;
    checks.isObject_ = true;
@@ -121,16 +121,27 @@ JSONTEST_FIXTURE( ValueTest, objectTypes )
 }
 
 
-JSONTEST_FIXTURE( ValueTest, arrayTypes )
+JSONTEST_FIXTURE( ValueTest, arrays )
 {
+   // Types
    IsCheck checks;
    checks.isArray_ = true;
    JSONTEST_ASSERT_PRED( checkIs( emptyArray_, checks ) );
    JSONTEST_ASSERT_PRED( checkIs( array1_, checks ) );
+
+   // Access non-const array
+   const unsigned int index0 = 0;
+   JSONTEST_ASSERT( Json::Value(1234) == array1_[index0] );
+   JSONTEST_ASSERT( Json::Value(1234) == array1_[0] );
+
+   // Access const array
+   const Json::Value &constArray = array1_;
+   JSONTEST_ASSERT( Json::Value(1234) == constArray[index0] );
+   JSONTEST_ASSERT( Json::Value(1234) == constArray[0] );
 }
 
 
-JSONTEST_FIXTURE( ValueTest, nullTypes )
+JSONTEST_FIXTURE( ValueTest, null )
 {
    IsCheck checks;
    checks.isNull_ = true;
@@ -140,7 +151,7 @@ JSONTEST_FIXTURE( ValueTest, nullTypes )
 }
 
 
-JSONTEST_FIXTURE( ValueTest, stringTypes )
+JSONTEST_FIXTURE( ValueTest, strings )
 {
    IsCheck checks;
    checks.isString_ = true;
@@ -150,7 +161,7 @@ JSONTEST_FIXTURE( ValueTest, stringTypes )
 }
 
 
-JSONTEST_FIXTURE( ValueTest, boolTypes )
+JSONTEST_FIXTURE( ValueTest, bools )
 {
    IsCheck checks;
    checks.isBool_ = true;
@@ -161,7 +172,7 @@ JSONTEST_FIXTURE( ValueTest, boolTypes )
 }
 
 
-JSONTEST_FIXTURE( ValueTest, integerTypes )
+JSONTEST_FIXTURE( ValueTest, integers )
 {
    IsCheck checks;
 
@@ -264,7 +275,7 @@ JSONTEST_FIXTURE( ValueTest, integerTypes )
 }
 
 
-JSONTEST_FIXTURE( ValueTest, nonIntegerTypes )
+JSONTEST_FIXTURE( ValueTest, nonIntegers )
 {
    IsCheck checks;
    checks.isDouble_ = true;
@@ -277,23 +288,6 @@ JSONTEST_FIXTURE( ValueTest, nonIntegerTypes )
    JSONTEST_ASSERT_PRED( checkIs( Json::Value(-0.1), checks ) );
 }
 
-
-JSONTEST_FIXTURE( ValueTest, accessArray )
-{
-   const unsigned int index0 = 0;
-   JSONTEST_ASSERT( Json::Value(1234) == array1_[index0] ) << "Json::Value::operator[ArrayIndex]";
-   JSONTEST_ASSERT( Json::Value(1234) == array1_[0] ) << "Json::Value::operator[int]";
-
-   const Json::Value &constArray = array1_;
-   JSONTEST_ASSERT( Json::Value(1234) == constArray[index0] ) << "Json::Value::operator[ArrayIndex] const";
-   JSONTEST_ASSERT( Json::Value(1234) == constArray[0] ) << "Json::Value::operator[int] const";
-}
-
-
-JSONTEST_FIXTURE( ValueTest, asFloat )
-{
-   JSONTEST_ASSERT_EQUAL( 0.00390625f, float_.asFloat() ) << "Json::Value::asFloat()";
-}
 
 void
 ValueTest::checkConstMemberCount( const Json::Value &value, unsigned int expectedCount )
@@ -504,16 +498,14 @@ ValueTest::checkIsEqual( const Json::Value &x, const Json::Value &y )
 int main( int argc, const char *argv[] )
 {
    JsonTest::Runner runner;
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, size );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, objectTypes );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, arrayTypes );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, boolTypes );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, integerTypes );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, nonIntegerTypes );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, stringTypes );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, nullTypes );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, accessArray );
-   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, asFloat );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, memberCount );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, objects );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, arrays );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, null );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, strings );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, bools );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, integers );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, nonIntegers );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareNull );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareInt );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareUInt );
