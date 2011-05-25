@@ -726,6 +726,8 @@ Value::asUInt() const
       return UInt(value_.uint_);
    case realValue:
       return UInt( value_.real_ );
+   default:
+      break;
    }
    JSON_ASSERT_UNREACHABLE;
    return 0;
