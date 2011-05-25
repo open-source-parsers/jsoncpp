@@ -202,6 +202,42 @@ JSONTEST_FIXTURE( ValueTest, integers )
    IsCheck checks;
    Json::Value val;
 
+   // Default int
+   val = Json::Value(Json::intValue);
+
+   JSONTEST_ASSERT_EQUAL(Json::intValue, val.type());
+
+   checks = IsCheck();
+   checks.isInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( 0 == val.asInt());
+   JSONTEST_ASSERT( 0 == val.asLargestInt());
+   JSONTEST_ASSERT( 0 == val.asUInt());
+   JSONTEST_ASSERT( 0 == val.asLargestUInt());
+   JSONTEST_ASSERT( 0.0 == val.asDouble());
+   JSONTEST_ASSERT( 0.0 == val.asFloat());
+
+   // Default uint
+   val = Json::Value(Json::uintValue);
+
+   JSONTEST_ASSERT_EQUAL(Json::uintValue, val.type());
+
+   checks = IsCheck();
+   checks.isUInt_ = true;
+   checks.isNumeric_ = true;
+   checks.isIntegral_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( 0 == val.asInt());
+   JSONTEST_ASSERT( 0 == val.asLargestInt());
+   JSONTEST_ASSERT( 0 == val.asUInt());
+   JSONTEST_ASSERT( 0 == val.asLargestUInt());
+   JSONTEST_ASSERT( 0.0 == val.asDouble());
+   JSONTEST_ASSERT( 0.0 == val.asFloat());
+
    // Zero (signed constructor arg)
    val = Json::Value(0);
 
@@ -442,6 +478,23 @@ JSONTEST_FIXTURE( ValueTest, nonIntegers )
 {
    IsCheck checks;
    Json::Value val;
+
+   // Default real
+   val = Json::Value(Json::realValue);
+
+   JSONTEST_ASSERT_EQUAL(Json::realValue, val.type());
+
+   checks = IsCheck();
+   checks.isDouble_ = true;
+   checks.isNumeric_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT( 0 == val.asInt());
+   JSONTEST_ASSERT( 0 == val.asLargestInt());
+   JSONTEST_ASSERT( 0 == val.asUInt());
+   JSONTEST_ASSERT( 0 == val.asLargestUInt());
+   JSONTEST_ASSERT( 0.0 == val.asDouble());
+   JSONTEST_ASSERT( 0.0 == val.asFloat());
 
    // Positive number
    val = Json::Value(0.25);
