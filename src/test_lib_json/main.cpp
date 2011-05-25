@@ -800,13 +800,19 @@ ValueTest::checkIs( const Json::Value &value, const IsCheck &check )
    JSONTEST_ASSERT_EQUAL( check.isBool_, value.isBool() );
    JSONTEST_ASSERT_EQUAL( check.isDouble_, value.isDouble() );
    JSONTEST_ASSERT_EQUAL( check.isInt_, value.isInt() );
-   JSONTEST_ASSERT_EQUAL( check.isInt64_, value.isInt64() );
    JSONTEST_ASSERT_EQUAL( check.isUInt_, value.isUInt() );
-   JSONTEST_ASSERT_EQUAL( check.isUInt64_, value.isUInt64() );
    JSONTEST_ASSERT_EQUAL( check.isIntegral_, value.isIntegral() );
    JSONTEST_ASSERT_EQUAL( check.isNumeric_, value.isNumeric() );
    JSONTEST_ASSERT_EQUAL( check.isString_, value.isString() );
    JSONTEST_ASSERT_EQUAL( check.isNull_, value.isNull() );
+
+#ifdef JSON_HAS_INT64
+   JSONTEST_ASSERT_EQUAL( check.isInt64_, value.isInt64() );
+   JSONTEST_ASSERT_EQUAL( check.isUInt64_, value.isUInt64() );
+#else
+   JSONTEST_ASSERT_EQUAL( false, value.isInt64() );
+   JSONTEST_ASSERT_EQUAL( false, value.isUInt64() );
+#endif
 }
 
 
