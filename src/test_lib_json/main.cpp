@@ -697,7 +697,7 @@ JSONTEST_FIXTURE( ValueTest, integers )
    JSONTEST_ASSERT_EQUAL(double(kint64max), val.asDouble());
    JSONTEST_ASSERT_EQUAL(float(kint64max), val.asFloat());
    JSONTEST_ASSERT_EQUAL(true, val.asBool());
-   JSONTEST_ASSERT_STRING_EQUAL("9.22337204e18", val.asString());
+   JSONTEST_ASSERT_STRING_EQUAL("9.22337e+18", val.asString());
 
    // int64 min
    val = Json::Value(double(kint64min));
@@ -716,7 +716,7 @@ JSONTEST_FIXTURE( ValueTest, integers )
    JSONTEST_ASSERT_EQUAL(double(kint64min), val.asDouble());
    JSONTEST_ASSERT_EQUAL(float(kint64min), val.asFloat());
    JSONTEST_ASSERT_EQUAL(true, val.asBool());
-   JSONTEST_ASSERT_STRING_EQUAL("-9.22337204e18", val.asString());
+   JSONTEST_ASSERT_STRING_EQUAL("-9.22337e+18", val.asString());
 
    // uint64 max
    val = Json::Value(double(kuint64max));
@@ -735,7 +735,7 @@ JSONTEST_FIXTURE( ValueTest, integers )
    JSONTEST_ASSERT_EQUAL(double(kuint64max), val.asDouble());
    JSONTEST_ASSERT_EQUAL(float(kuint64max), val.asFloat());
    JSONTEST_ASSERT_EQUAL(true, val.asBool());
-   JSONTEST_ASSERT_STRING_EQUAL("1.84467441e19", val.asString());
+   JSONTEST_ASSERT_STRING_EQUAL("1.84467e+19", val.asString());
 #else  // ifdef JSON_NO_INT64
    // 2^40 (signed constructor arg)
    val = Json::Value(1LL << 40);
