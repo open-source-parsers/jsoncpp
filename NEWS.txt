@@ -1,22 +1,36 @@
-  New in SVN:
-  -----------
+New in SVN
+----------
 
-* Value
+ *  Updated the type system's behavior, in order to better support backwards
+    compatibility with code that was written before 64-bit integer support was
+    introduced. Here's how it works now:
 
-  - Updated the Value::isFoo methods to work as follows:
+     *  isInt, isInt64, isUInt, and isUInt64 return true if and only if the
+        value can be exactly represented as that type. In particular, a value
+        constructed with a double like 17.0 will now return true for all of
+        these methods.
 
-      * isInt, isInt64, isUInt, and isUInt64 return true if and only if the
-	value can be exactly representable as that type. In particular, a value
-	constructed with a double like 17.0 will now return true for all of
-	these methods.
+     *  isDouble and isFloat now return true for all numeric values, since all
+        numeric values can be converted to a double or float without
+        truncation. Note however that the conversion may not be exact -- for
+        example, doubles cannot exactly represent all integers above 2^53 + 1.
 
-      * isDouble and isFloat now return true for all numeric values, since all
-	numeric values can be converted to a double or float without
-	truncation. Note that the conversion may not be exact -- for example,
-	doubles cannot exactly represent integers above 2^53.
+     *  isBool, isNull, isString, isArray, and isObject now return true if and
+        only if the value is of that type.
 
-      * isBool, isNull, isString, isArray, and isObject now return true if and
-	only if the value is of that type.
+     *  isConvertibleTo(fooValue) indicates that it is safe to call asFoo.
+        (For each type foo, isFoo always implies isConvertibleTo(fooValue).)
+        asFoo returns an approximate or exact representation as appropriate.
+        For example, a double value may be truncated when asInt is called.
+
+     *  For backwards compatibility with old code, isConvertibleTo(intValue)
+        may return false even if type() == intValue. This is because the value
+        may have been constructed with a 64-bit integer larger than maxInt,
+        and calling asInt() would cause an exception. If you're writing new
+        code, use isInt64 to find out whether the value is exactly
+        representable using an Int64, or asDouble() combined with minInt64 and
+        maxInt64 to figure out whether it is approximately representable.
+
 
   New in JsonCpp 0.6.0:
   ---------------------

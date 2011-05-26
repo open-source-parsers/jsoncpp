@@ -13,6 +13,7 @@
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <math.h>
 #include <iostream>
+#include <sstream>
 #include <utility>
 #include <stdexcept>
 #include <cstring>
@@ -42,6 +43,11 @@ const LargestUInt Value::maxLargestUInt = LargestUInt(-1);
 
 /// Unknown size marker
 static const unsigned int unknown = (unsigned)-1;
+
+template <typename T, typename U>
+static inline bool InRange(double d, T min, U max) {
+  return d >= min && d <= max;
+}
 
 
 /** Duplicates the specified string value.
@@ -663,6 +669,9 @@ Value::asCString() const
 std::string 
 Value::asString() const
 {
+   // Let the STL sort it out for numeric types.
+   std::ostringstream oss;
+
    switch ( type_ )
    {
    case nullValue:
@@ -672,15 +681,18 @@ Value::asString() const
    case booleanValue:
       return value_.bool_ ? "true" : "false";
    case intValue:
+      oss << value_.int_;
+      break;
    case uintValue:
+      oss << value_.uint_;
+      break;
    case realValue:
-   case arrayValue:
-   case objectValue:
-      JSON_FAIL_MESSAGE( "Type is not convertible to string" );
+      oss << value_.real_;
+      break;
    default:
-      JSON_ASSERT_UNREACHABLE;
+      JSON_FAIL_MESSAGE( "Type is not convertible to string" );
    }
-   return ""; // unreachable
+   return oss.str();
 }
 
 # ifdef JSON_USE_CPPTL
@@ -695,17 +707,23 @@ Value::asConstString() const
 Value::Int 
 Value::asInt() const
 {
-   JSON_ASSERT_MESSAGE(isInt(), "Value is not convertible to Int");
    switch ( type_ )
    {
    case intValue:
+      JSON_ASSERT_MESSAGE(isInt(), "LargestInt out of Int range");
       return Int(value_.int_);
    case uintValue:
+      JSON_ASSERT_MESSAGE(isInt(), "LargestUInt out of Int range");
       return Int(value_.uint_);
    case realValue:
-      return Int( value_.real_ );
+      JSON_ASSERT_MESSAGE(InRange(value_.real_, minInt, maxInt), "double out of Int range");
+      return Int(value_.real_);
+   case nullValue:
+      return 0;
+   case booleanValue:
+      return value_.bool_ ? 1 : 0;
    default:
-      break;
+      JSON_FAIL_MESSAGE("Value is not convertible to Int.");
    }
    JSON_ASSERT_UNREACHABLE;
    return 0;
@@ -715,17 +733,23 @@ Value::asInt() const
 Value::UInt 
 Value::asUInt() const
 {
-   JSON_ASSERT_MESSAGE(isUInt(), "Value is not convertible to UInt");
    switch ( type_ )
    {
    case intValue:
+      JSON_ASSERT_MESSAGE(isUInt(), "LargestInt out of UInt range");
       return UInt(value_.int_);
    case uintValue:
+      JSON_ASSERT_MESSAGE(isUInt(), "LargestUInt out of UInt range");
       return UInt(value_.uint_);
    case realValue:
+      JSON_ASSERT_MESSAGE(InRange(value_.real_, 0, maxUInt), "double out of UInt range");
       return UInt( value_.real_ );
+   case nullValue:
+      return 0;
+   case booleanValue:
+      return value_.bool_ ? 1 : 0;
    default:
-      break;
+      JSON_FAIL_MESSAGE("Value is not convertible to UInt.");
    }
    JSON_ASSERT_UNREACHABLE;
    return 0;
@@ -737,17 +761,22 @@ Value::asUInt() const
 Value::Int64
 Value::asInt64() const
 {
-   JSON_ASSERT_MESSAGE(isInt64(), "Value is not convertible to Int64");
    switch ( type_ )
    {
    case intValue:
       return Int64(value_.int_);
    case uintValue:
+      JSON_ASSERT_MESSAGE(isInt64(), "LargestUInt out of Int64 range");
       return Int64(value_.uint_);
    case realValue:
-      return Int64( value_.real_ );
+      JSON_ASSERT_MESSAGE(InRange(value_.real_, minInt64, maxInt64), "double out of Int64 range");
+      return Int64(value_.real_);
+   case nullValue:
+      return 0;
+   case booleanValue:
+      return value_.bool_ ? 1 : 0;
    default:
-      break;
+      JSON_FAIL_MESSAGE("Value is not convertible to Int64.");
    }
    JSON_ASSERT_UNREACHABLE;
    return 0;
@@ -757,15 +786,20 @@ Value::asInt64() const
 Value::UInt64
 Value::asUInt64() const
 {
-   JSON_ASSERT_MESSAGE(isUInt64(), "Value is not convertible to UInt64");
    switch ( type_ )
    {
    case intValue:
+      JSON_ASSERT_MESSAGE(isUInt64(), "LargestInt out of UInt64 range");
       return UInt64(value_.int_);
    case uintValue:
       return UInt64(value_.uint_);
    case realValue:
+      JSON_ASSERT_MESSAGE(InRange(value_.real_, 0, maxUInt64), "double out of UInt64 range");
       return UInt64( value_.real_ );
+   case nullValue:
+      return 0;
+   case booleanValue:
+      return value_.bool_ ? 1 : 0;
    default:
       break;
    }
@@ -814,13 +848,11 @@ Value::asDouble() const
    case realValue:
       return value_.real_;
    case nullValue:
+      return 0.0;
    case booleanValue:
-   case stringValue:
-   case arrayValue:
-   case objectValue:
-      JSON_FAIL_MESSAGE( "Value is not a double" );
+      return value_.bool_ ? 1.0 : 0.0;
    default:
-      JSON_ASSERT_UNREACHABLE;
+      JSON_FAIL_MESSAGE("Value is not convertible to double.");
    }
    return 0; // unreachable;
 }
@@ -841,15 +873,14 @@ Value::asFloat() const
    case realValue:
       return static_cast<float>( value_.real_ );
    case nullValue:
+      return 0.0;
    case booleanValue:
-   case stringValue:
-   case arrayValue:
-   case objectValue:
-      JSON_FAIL_MESSAGE( "Value is not a float" );
+      return value_.bool_ ? 1.0 : 0.0;
    default:
-      JSON_ASSERT_UNREACHABLE;
+      JSON_FAIL_MESSAGE("Value is not convertible to float.");
    }
-   return 0.0f; // unreachable;
+   JSON_ASSERT_UNREACHABLE;
+   return 0.0f;
 }
 
 bool 
@@ -860,68 +891,67 @@ Value::asBool() const
    case booleanValue:
       return value_.bool_;
    case nullValue:
+      return false;
    case intValue:
+      return value_.int_ ? true : false;
    case uintValue:
+      return value_.uint_ ? true : false;
    case realValue:
-   case stringValue:
-   case arrayValue:
-   case objectValue:
-      JSON_FAIL_MESSAGE( "Value is not a bool" );
+      return value_.real_ ? true : false;
    default:
-      JSON_ASSERT_UNREACHABLE;
+      JSON_FAIL_MESSAGE("Value is not convertible to bool.");
    }
-   return false; // unreachable;
+   JSON_ASSERT_UNREACHABLE;
+   return false;
 }
 
 
 bool 
 Value::isConvertibleTo( ValueType other ) const
 {
-   switch ( type_ )
+   switch ( other )
    {
    case nullValue:
-      return true;
+      return ( isNumeric() && asDouble() == 0.0 )
+             || ( type_ == booleanValue && value_.bool_ == false )
+             || ( type_ == stringValue && asString() == "" )
+             || ( type_ == arrayValue && value_.map_->size() == 0 )
+             || ( type_ == objectValue && value_.map_->size() == 0 )
+             || type_ == nullValue;
    case intValue:
-      return ( other == nullValue  &&  value_.int_ == 0 )
-             || other == intValue
-             || ( other == uintValue  && value_.int_ >= 0 )
-             || other == realValue
-             || other == stringValue
-             || other == booleanValue;
+      return isInt()
+             || (type_ == realValue && InRange(value_.real_, minInt, maxInt))
+             || type_ == booleanValue
+             || type_ == nullValue;
    case uintValue:
-      return ( other == nullValue  &&  value_.uint_ == 0 )
-             || ( other == intValue  && value_.uint_ <= (LargestUInt)maxInt )
-             || other == uintValue
-             || other == realValue
-             || other == stringValue
-             || other == booleanValue;
+      return isUInt()
+             || (type_ == realValue && InRange(value_.real_, 0, maxUInt))
+             || type_ == booleanValue
+             || type_ == nullValue;
    case realValue:
-      return ( other == nullValue  &&  value_.real_ == 0.0 )
-             || ( other == intValue  &&  value_.real_ >= minInt  &&  value_.real_ <= maxInt )
-             || ( other == uintValue  &&  value_.real_ >= 0  &&  value_.real_ <= maxUInt )
-             || other == realValue
-             || other == stringValue
-             || other == booleanValue;
+      return isNumeric()
+             || type_ == booleanValue
+             || type_ == nullValue;
    case booleanValue:
-      return ( other == nullValue  &&  value_.bool_ == false )
-             || other == intValue
-             || other == uintValue
-             || other == realValue
-             || other == stringValue
-             || other == booleanValue;
+      return isNumeric()
+             || type_ == booleanValue
+             || type_ == nullValue;
    case stringValue:
-      return other == stringValue
-             || ( other == nullValue  &&  (!value_.string_  ||  value_.string_[0] == 0) );
+      return isNumeric()
+             || type_ == booleanValue
+             || type_ == stringValue
+             || type_ == nullValue;
    case arrayValue:
-      return other == arrayValue
-             ||  ( other == nullValue  &&  value_.map_->size() == 0 );
+      return type_ == arrayValue
+             || type_ == nullValue;
    case objectValue:
-      return other == objectValue
-             ||  ( other == nullValue  &&  value_.map_->size() == 0 );
+      return type_ == objectValue
+             || type_ == nullValue;
    default:
-      JSON_ASSERT_UNREACHABLE;
+      break;
    }
-   return false; // unreachable;
+   JSON_ASSERT_UNREACHABLE;
+   return false;
 }
 
 

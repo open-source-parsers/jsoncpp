@@ -250,7 +250,6 @@ TestResult::addToLastFailure( const std::string &message )
 }
 
 
-
 // class TestCase
 // //////////////////////////////////////////////////////////////////
 
@@ -324,7 +323,7 @@ Runner::runTestAt( unsigned int index, TestResult &result ) const
    catch ( const std::exception &e ) 
    {
       result.addFailure( __FILE__, __LINE__, 
-         "Unexpected exception caugth:" ) << e.what();
+         "Unexpected exception caught:" ) << e.what();
    }
 #endif // if JSON_USE_EXCEPTION
    delete test;
