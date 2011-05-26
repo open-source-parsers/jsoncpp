@@ -875,7 +875,7 @@ Value::asFloat() const
    case nullValue:
       return 0.0;
    case booleanValue:
-      return value_.bool_ ? 1.0 : 0.0;
+      return value_.bool_ ? 1.0f : 0.0f;
    default:
       JSON_FAIL_MESSAGE("Value is not convertible to float.");
    }
