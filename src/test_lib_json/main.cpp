@@ -3,7 +3,6 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#include <stdint.h>
 #include <limits>
 
 #include <json/config.h>
@@ -11,12 +10,19 @@
 #include "jsontest.h"
 
 // Make numeric limits more convenient to talk about.
-#define kint32max std::numeric_limits<int32_t>::max()
-#define kint32min std::numeric_limits<int32_t>::min()
-#define kuint32max std::numeric_limits<uint32_t>::max()
-#define kint64max std::numeric_limits<int64_t>::max()
-#define kint64min std::numeric_limits<int64_t>::min()
-#define kuint64max std::numeric_limits<uint64_t>::max()
+// Assumes int type in 32 bits.
+#define kint32max std::numeric_limits<int>::max()
+#define kint32min std::numeric_limits<int>::min()
+#define kuint32max std::numeric_limits<unsigned int>::max()
+#define kint64max std::numeric_limits<Json::Int64>::max()
+#define kint64min std::numeric_limits<Json::Int64>::min()
+#define kuint64max std::numeric_limits<Json::UInt64>::max()
+
+static const double kdint64max = double(kint64max);
+static const float kfint64max = float(kint64max);
+static const float kfint32max = float(kint32max);
+static const float kfuint32max = float(kuint32max);
+
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
@@ -623,7 +629,7 @@ JSONTEST_FIXTURE( ValueTest, integers )
    JSONTEST_ASSERT_EQUAL(kint32max, val.asUInt());
    JSONTEST_ASSERT_EQUAL(kint32max, val.asLargestUInt());
    JSONTEST_ASSERT_EQUAL(kint32max, val.asDouble());
-   JSONTEST_ASSERT_EQUAL(kint32max, val.asFloat());
+   JSONTEST_ASSERT_EQUAL(kfint32max, val.asFloat());
    JSONTEST_ASSERT_EQUAL(true, val.asBool());
    JSONTEST_ASSERT_STRING_EQUAL("2147483647", val.asString());
 
@@ -675,7 +681,7 @@ JSONTEST_FIXTURE( ValueTest, integers )
    JSONTEST_ASSERT_EQUAL(kuint32max, val.asUInt());
    JSONTEST_ASSERT_EQUAL(kuint32max, val.asLargestUInt());
    JSONTEST_ASSERT_EQUAL(kuint32max, val.asDouble());
-   JSONTEST_ASSERT_EQUAL(kuint32max, val.asFloat());
+   JSONTEST_ASSERT_EQUAL(kfuint32max, val.asFloat());
    JSONTEST_ASSERT_EQUAL(true, val.asBool());
    JSONTEST_ASSERT_STRING_EQUAL("4294967295", val.asString());
 
