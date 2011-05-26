@@ -48,10 +48,28 @@ const LargestUInt Value::maxLargestUInt = LargestUInt(-1);
 /// Unknown size marker
 static const unsigned int unknown = (unsigned)-1;
 
+#if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 template <typename T, typename U>
 static inline bool InRange(double d, T min, U max) {
-  return d >= min && d <= max;
+   return d >= min && d <= max;
 }
+#else // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
+static inline double integerToDouble( Json::UInt64 value )
+{
+    return static_cast<double>( UInt(value >> 32) ) * (UInt64(1)<<32) + UInt(value & 0xffffffff);
+}
+
+template<typename T>
+static inline double integerToDouble( T value )
+{
+    return static_cast<double>( value );
+}
+
+template <typename T, typename U>
+static inline bool InRange(double d, T min, U max) {
+   return d >= integerToDouble(min) && d <= integerToDouble(max);
+}
+#endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 
 
 /** Duplicates the specified string value.
@@ -673,9 +691,6 @@ Value::asCString() const
 std::string 
 Value::asString() const
 {
-   // Let the STL sort it out for numeric types.
-   std::ostringstream oss;
-
    switch ( type_ )
    {
    case nullValue:
@@ -685,18 +700,14 @@ Value::asString() const
    case booleanValue:
       return value_.bool_ ? "true" : "false";
    case intValue:
-      oss << value_.int_;
-      break;
+      return valueToString( value_.int_ );
    case uintValue:
-      oss << value_.uint_;
-      break;
+      return valueToString( value_.uint_ );
    case realValue:
-      oss << value_.real_;
-      break;
+      return valueToString( value_.real_ );
    default:
       JSON_FAIL_MESSAGE( "Type is not convertible to string" );
    }
-   return oss.str();
 }
 
 # ifdef JSON_USE_CPPTL
@@ -842,7 +853,7 @@ Value::asDouble() const
 #if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
       return static_cast<double>( value_.uint_ );
 #else // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
-      return static_cast<double>( Int(value_.uint_/2) ) * 2 + Int(value_.uint_ & 1);
+      return integerToDouble( value_.uint_ );
 #endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
    case realValue:
       return value_.real_;

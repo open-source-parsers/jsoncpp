@@ -8,6 +8,7 @@
 
 # include <json/config.h>
 # include <json/value.h>
+# include <json/writer.h>
 # include <stdio.h>
 # include <deque>
 # include <sstream>
@@ -90,14 +91,17 @@ namespace JsonTest {
       template <typename T>
       TestResult &operator << ( const T& value ) {
          std::ostringstream oss;
+         oss.precision( 16 );
+         oss.setf( std::ios_base::floatfield );
          oss << value;
          return addToLastFailure(oss.str());
       }
 
       // Specialized versions.
-      TestResult &operator << ( bool value ) {
-         return addToLastFailure(value ? "true" : "false");
-      }
+      TestResult &operator << ( bool value );
+      // std:ostream does not support 64bits integers on all STL implementation
+      TestResult &operator << ( Json::Int64 value );
+      TestResult &operator << ( Json::UInt64 value );
 
    private:
       TestResult &addToLastFailure( const std::string &message );
@@ -194,6 +198,7 @@ namespace JsonTest {
       }
       return result;
    }
+
 
    TestResult &
    checkStringEqual( TestResult &result, 

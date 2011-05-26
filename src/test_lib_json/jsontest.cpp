@@ -249,6 +249,23 @@ TestResult::addToLastFailure( const std::string &message )
    return *this;
 }
 
+TestResult &
+TestResult::operator << ( Json::Int64 value ) {
+   return addToLastFailure( Json::valueToString(value) );
+}
+
+
+TestResult &
+TestResult::operator << ( Json::UInt64 value ) {
+   return addToLastFailure( Json::valueToString(value) );
+}
+
+
+TestResult &
+TestResult::operator << ( bool value ) {
+   return addToLastFailure(value ? "true" : "false");
+}
+
 
 // class TestCase
 // //////////////////////////////////////////////////////////////////
