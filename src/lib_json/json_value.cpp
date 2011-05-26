@@ -805,7 +805,6 @@ Value::asUInt64() const
    }
    JSON_ASSERT_UNREACHABLE;
    return 0;
-   return 0; // unreachable;
 }
 # endif // if defined(JSON_HAS_INT64)
 
@@ -876,10 +875,8 @@ Value::asFloat() const
       return 0.0;
    case booleanValue:
       return value_.bool_ ? 1.0f : 0.0f;
-   default:
-      JSON_FAIL_MESSAGE("Value is not convertible to float.");
    }
-   JSON_ASSERT_UNREACHABLE;
+   JSON_FAIL_MESSAGE("Value is not convertible to float.");
    return 0.0f;
 }
 
@@ -898,10 +895,8 @@ Value::asBool() const
       return value_.uint_ ? true : false;
    case realValue:
       return value_.real_ ? true : false;
-   default:
-      JSON_FAIL_MESSAGE("Value is not convertible to bool.");
    }
-   JSON_ASSERT_UNREACHABLE;
+   JSON_FAIL_MESSAGE("Value is not convertible to bool.");
    return false;
 }
 
@@ -947,8 +942,6 @@ Value::isConvertibleTo( ValueType other ) const
    case objectValue:
       return type_ == objectValue
              || type_ == nullValue;
-   default:
-      break;
    }
    JSON_ASSERT_UNREACHABLE;
    return false;
@@ -985,9 +978,8 @@ Value::size() const
    case objectValue:
       return Int( value_.map_->size() );
 #endif
-   default:
-      JSON_ASSERT_UNREACHABLE;
    }
+   JSON_ASSERT_UNREACHABLE;
    return 0; // unreachable;
 }
 
