@@ -87,6 +87,10 @@ namespace JsonTest {
       TestResult &operator << ( bool value );
       TestResult &operator << ( int value );
       TestResult &operator << ( unsigned int value );
+#ifdef JSON_HAS_INT64
+      TestResult &operator << ( Json::Int64 value );
+      TestResult &operator << ( Json::UInt64 value );
+#endif
       TestResult &operator << ( double value );
       TestResult &operator << ( const char *value );
       TestResult &operator << ( const std::string &value );
@@ -229,6 +233,7 @@ namespace JsonTest {
 #define JSONTEST_ASSERT_STRING_EQUAL( expected, actual ) \
    JsonTest::checkStringEqual( *result_,                 \
       std::string(expected), std::string(actual),        \
+      __FILE__, __LINE__,                                \
       #expected " == " #actual )
 
 /// \brief Begin a fixture test case.

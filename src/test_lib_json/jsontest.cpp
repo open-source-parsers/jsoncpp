@@ -275,6 +275,25 @@ TestResult::operator << ( unsigned int value )
 }
 
 
+#ifdef JSON_HAS_INT64
+TestResult &
+TestResult::operator << ( Json::Int64 value )
+{
+   char buffer[32];
+   sprintf( buffer, "%lld", value );
+   return addToLastFailure( buffer );
+}
+
+TestResult &
+TestResult::operator << ( Json::UInt64 value )
+{
+   char buffer[32];
+   sprintf( buffer, "%ull", value );
+   return addToLastFailure( buffer );
+}
+#endif
+
+
 TestResult &
 TestResult::operator << ( double value )
 {
