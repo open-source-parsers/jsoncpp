@@ -35,6 +35,10 @@ const UInt Value::maxUInt = UInt(-1);
 const Int64 Value::minInt64 = Int64( ~(UInt64(-1)/2) );
 const Int64 Value::maxInt64 = Int64( UInt64(-1)/2 );
 const UInt64 Value::maxUInt64 = UInt64(-1);
+// The constant is hard-coded because some compiler have trouble
+// converting Value::maxUInt64 to a double correctly (AIX/xlC).
+// Assumes that UInt64 is a 64 bits integer.
+static const double maxUInt64AsDouble = 18446744073709551615.0;
 #endif // defined(JSON_HAS_INT64)
 const LargestInt Value::minLargestInt = LargestInt( ~(LargestUInt(-1)/2) );
 const LargestInt Value::maxLargestInt = LargestInt( LargestUInt(-1)/2 );
@@ -1443,7 +1447,7 @@ Value::isUInt64() const
       // double, so double(maxUInt64) will be rounded up to 2^64. Therefore we
       // require the value to be strictly less than the limit.
       return value_.real_ >= 0 &&
-             value_.real_ < double(maxUInt64) &&
+             value_.real_ < maxUInt64AsDouble &&
              IsIntegral(value_.real_);
    default:
       break;
