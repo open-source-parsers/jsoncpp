@@ -7,8 +7,10 @@
 # define JSONTEST_H_INCLUDED
 
 # include <json/config.h>
+# include <json/value.h>
 # include <stdio.h>
 # include <deque>
+# include <sstream>
 # include <string>
 
 // //////////////////////////////////////////////////////////////////
@@ -84,16 +86,18 @@ namespace JsonTest {
 
       void printFailure( bool printTestName ) const;
 
-      TestResult &operator << ( bool value );
-      TestResult &operator << ( int value );
-      TestResult &operator << ( unsigned int value );
-#ifdef JSON_HAS_INT64
-      TestResult &operator << ( Json::Int64 value );
-      TestResult &operator << ( Json::UInt64 value );
-#endif
-      TestResult &operator << ( double value );
-      TestResult &operator << ( const char *value );
-      TestResult &operator << ( const std::string &value );
+      // Generic operator that will work with anything ostream can deal with.
+      template <typename T>
+      TestResult &operator << ( const T& value ) {
+         std::ostringstream oss;
+         oss << value;
+         return addToLastFailure(oss.str());
+      }
+
+      // Specialized versions.
+      TestResult &operator << ( bool value ) {
+         return addToLastFailure(value ? "true" : "false");
+      }
 
    private:
       TestResult &addToLastFailure( const std::string &message );
@@ -177,9 +181,9 @@ namespace JsonTest {
       Factories tests_;
    };
 
-   template<typename T>
+   template<typename T, typename U>
    TestResult &
-   checkEqual( TestResult &result, const T &expected, const T &actual, 
+   checkEqual( TestResult &result, const T &expected, const U &actual, 
                const char *file, unsigned int line, const char *expr )
    {
       if ( expected != actual )
