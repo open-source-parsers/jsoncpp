@@ -726,7 +726,6 @@ Value::asInt() const
       break;
    }
    JSON_FAIL_MESSAGE("Value is not convertible to Int.");
-   return 0;
 }
 
 
@@ -752,7 +751,6 @@ Value::asUInt() const
       break;
    }
    JSON_FAIL_MESSAGE("Value is not convertible to UInt.");
-   return 0;
 }
 
 
@@ -779,7 +777,6 @@ Value::asInt64() const
       break;
    }
    JSON_FAIL_MESSAGE("Value is not convertible to Int64.");
-   return 0;
 }
 
 
@@ -804,7 +801,6 @@ Value::asUInt64() const
       break;
    }
    JSON_FAIL_MESSAGE("Value is not convertible to UInt64.");
-   return 0;
 }
 # endif // if defined(JSON_HAS_INT64)
 
@@ -854,7 +850,6 @@ Value::asDouble() const
       break;
    }
    JSON_FAIL_MESSAGE("Value is not convertible to double.");
-   return 0;
 }
 
 float
@@ -880,7 +875,6 @@ Value::asFloat() const
       break;
    }
    JSON_FAIL_MESSAGE("Value is not convertible to float.");
-   return 0.0f;
 }
 
 bool 
@@ -902,7 +896,6 @@ Value::asBool() const
       break;
    }
    JSON_FAIL_MESSAGE("Value is not convertible to bool.");
-   return false;
 }
 
 
