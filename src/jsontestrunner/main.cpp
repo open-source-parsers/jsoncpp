@@ -15,6 +15,31 @@
 # pragma warning( disable: 4996 )     // disable fopen deprecation warning
 #endif
 
+static std::string 
+normalizeFloatingPointStr( double value )
+{
+    char buffer[32];
+    sprintf( buffer, "%.16g", value );
+    buffer[sizeof(buffer)-1] = 0;
+    std::string s( buffer );
+    std::string::size_type index = s.find_last_of( "eE" );
+    if ( index != std::string::npos )
+    {
+        std::string::size_type hasSign = (s[index+1] == '+' || s[index+1] == '-') ? 1 : 0;
+        std::string::size_type exponentStartIndex = index + 1 + hasSign;
+        std::string normalized = s.substr( 0, exponentStartIndex );
+        std::string::size_type indexDigit = s.find_first_not_of( '0', exponentStartIndex );
+        std::string exponent = "0";
+        if ( indexDigit != std::string::npos ) // There is an exponent different from 0
+        {
+            exponent = s.substr( indexDigit );
+        }
+        return normalized + exponent;
+    }
+    return s;
+}
+
+
 static std::string
 readInputTestFile( const char *path )
 {
@@ -34,7 +59,6 @@ readInputTestFile( const char *path )
    return text;
 }
 
-
 static void
 printValueTree( FILE *fout, Json::Value &value, const std::string &path = "." )
 {
@@ -50,7 +74,7 @@ printValueTree( FILE *fout, Json::Value &value, const std::string &path = "." )
       fprintf( fout, "%s=%s\n", path.c_str(), Json::valueToString( value.asLargestUInt() ).c_str() );
       break;
    case Json::realValue:
-      fprintf( fout, "%s=%.16g\n", path.c_str(), value.asDouble() );
+       fprintf( fout, "%s=%s\n", path.c_str(), normalizeFloatingPointStr(value.asDouble()).c_str() );
       break;
    case Json::stringValue:
       fprintf( fout, "%s=\"%s\"\n", path.c_str(), value.asString().c_str() );
