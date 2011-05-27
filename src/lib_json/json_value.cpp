@@ -56,7 +56,7 @@ static inline bool InRange(double d, T min, U max) {
 #else // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 static inline double integerToDouble( Json::UInt64 value )
 {
-    return static_cast<double>( UInt(value >> 32) ) * (UInt64(1)<<32) + UInt(value & 0xffffffff);
+    return static_cast<double>( Int64(value/2) ) * 2.0 + Int64(value & 1);
 }
 
 template<typename T>
@@ -878,7 +878,7 @@ Value::asFloat() const
 #if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
       return static_cast<float>( value_.uint_ );
 #else // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
-      return static_cast<float>( Int(value_.uint_/2) ) * 2 + Int(value_.uint_ & 1);
+      return integerToDouble( value_.uint_ );
 #endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
    case realValue:
       return static_cast<float>( value_.real_ );

@@ -3,20 +3,18 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#include <limits>
-
 #include <json/config.h>
 #include <json/json.h>
 #include "jsontest.h"
 
 // Make numeric limits more convenient to talk about.
 // Assumes int type in 32 bits.
-#define kint32max std::numeric_limits<int>::max()
-#define kint32min std::numeric_limits<int>::min()
-#define kuint32max std::numeric_limits<unsigned int>::max()
-#define kint64max std::numeric_limits<Json::Int64>::max()
-#define kint64min std::numeric_limits<Json::Int64>::min()
-#define kuint64max std::numeric_limits<Json::UInt64>::max()
+#define kint32max Json::Value::maxInt
+#define kint32min Json::Value::minInt
+#define kuint32max Json::Value::maxUInt
+#define kint64max Json::Value::maxInt64
+#define kint64min Json::Value::minInt64
+#define kuint64max Json::Value::maxUInt64
 
 static const double kdint64max = double(kint64max);
 static const float kfint64max = float(kint64max);
@@ -38,7 +36,7 @@ static inline double uint64ToDouble( Json::UInt64 value )
 #else // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 static inline double uint64ToDouble( Json::UInt64 value )
 {
-    return static_cast<double>( Json::UInt(value >> 32) ) * (Json::UInt64(1)<<32) + Json::UInt(value & 0xffffffff);
+    return static_cast<double>( Json::Int64(value/2) ) * 2.0 + Json::Int64(value & 1);
 }
 #endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 
