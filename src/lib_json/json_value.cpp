@@ -1,4 +1,4 @@
-// Copyright 2007-2010 Baptiste Lepilleur
+// Copyright 2011 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
@@ -270,7 +270,7 @@ Value::CZString::isStaticString() const
  */
 Value::Value( ValueType type )
    : type_( type )
-   , allocated_( 0 )
+   , allocated_( false )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
@@ -314,6 +314,7 @@ Value::Value( ValueType type )
 
 Value::Value( UInt value )
    : type_( uintValue )
+   , allocated_( false )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
@@ -324,6 +325,7 @@ Value::Value( UInt value )
 
 Value::Value( Int value )
    : type_( intValue )
+   , allocated_( false )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
@@ -336,6 +338,7 @@ Value::Value( Int value )
 # if defined(JSON_HAS_INT64)
 Value::Value( Int64 value )
    : type_( intValue )
+   , allocated_( false )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
@@ -347,6 +350,7 @@ Value::Value( Int64 value )
 
 Value::Value( UInt64 value )
    : type_( uintValue )
+   , allocated_( false )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
@@ -358,6 +362,7 @@ Value::Value( UInt64 value )
 
 Value::Value( double value )
    : type_( realValue )
+   , allocated_( false )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
@@ -432,6 +437,7 @@ Value::Value( const CppTL::ConstString &value )
 
 Value::Value( bool value )
    : type_( booleanValue )
+   , allocated_( false )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
@@ -443,6 +449,7 @@ Value::Value( bool value )
 
 Value::Value( const Value &other )
    : type_( other.type_ )
+   , allocated_( false )
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
    , itemIsUsed_( 0 )
 #endif
@@ -1701,13 +1708,16 @@ Value::end()
 // //////////////////////////////////////////////////////////////////
 
 PathArgument::PathArgument()
-   : kind_( kindNone )
+   : key_()
+   , index_()
+   , kind_( kindNone )
 {
 }
 
 
 PathArgument::PathArgument( ArrayIndex index )
-   : index_( index )
+   : key_()
+   , index_( index )
    , kind_( kindIndex )
 {
 }
@@ -1715,6 +1725,7 @@ PathArgument::PathArgument( ArrayIndex index )
 
 PathArgument::PathArgument( const char *key )
    : key_( key )
+   , index_()
    , kind_( kindKey )
 {
 }
@@ -1722,6 +1733,7 @@ PathArgument::PathArgument( const char *key )
 
 PathArgument::PathArgument( const std::string &key )
    : key_( key.c_str() )
+   , index_()
    , kind_( kindKey )
 {
 }
