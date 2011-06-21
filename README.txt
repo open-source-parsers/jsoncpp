@@ -170,3 +170,4 @@ test_complex_01.process-output: jsontest.exe output, typically useful to
   
 See file LICENSE for details. Basically JsonCpp is licensed under 
 MIT license, or public domain if desired and recognized in your jurisdiction.
+
