@@ -1,4 +1,4 @@
-// Copyright 2007-2010 Baptiste Lepilleur
+// Copyright 2007-2011 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
@@ -80,13 +80,31 @@ containsNewLine( Reader::Location begin,
 // //////////////////////////////////////////////////////////////////
 
 Reader::Reader()
-   : features_( Features::all() )
+    : errors_(),
+      document_(),
+      begin_(),
+      end_(),
+      current_(),
+      lastValueEnd_(),
+      lastValue_(),
+      commentsBefore_(),
+      features_( Features::all() ),
+      collectComments_()
 {
 }
 
 
 Reader::Reader( const Features &features )
-   : features_( features )
+    : errors_(),
+      document_(),
+      begin_(),
+      end_(),
+      current_(),
+      lastValueEnd_(),
+      lastValue_(),
+      commentsBefore_(),
+      features_( features ),
+      collectComments_()
 {
 }
 
