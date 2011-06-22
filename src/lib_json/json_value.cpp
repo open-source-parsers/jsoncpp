@@ -1840,7 +1840,7 @@ Path::resolve( const Value &root ) const
       const PathArgument &arg = *it;
       if ( arg.kind_ == PathArgument::kindIndex )
       {
-         if ( !node->isArray()  ||  node->isValidIndex( arg.index_ ) )
+         if ( !node->isArray()  ||  !node->isValidIndex( arg.index_ ) )
          {
             // Error: unable to resolve path (array value expected at position...
          }
@@ -1873,7 +1873,7 @@ Path::resolve( const Value &root,
       const PathArgument &arg = *it;
       if ( arg.kind_ == PathArgument::kindIndex )
       {
-         if ( !node->isArray()  ||  node->isValidIndex( arg.index_ ) )
+         if ( !node->isArray()  ||  !node->isValidIndex( arg.index_ ) )
             return defaultValue;
          node = &((*node)[arg.index_]);
       }
