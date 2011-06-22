@@ -119,6 +119,8 @@ std::string valueToString( bool value )
 
 std::string valueToQuotedString( const char *value )
 {
+   if (value == NULL)
+      return "";
    // Not sure how to handle unicode...
    if (strpbrk(value, "\"\\\b\f\n\r\t") == NULL && !containsControlCharacter( value ))
       return std::string("\"") + value + "\"";
