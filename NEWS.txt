@@ -122,10 +122,18 @@ New in SVN
     length of 32 characters.
 	
   - Fixed Value::operator <= implementation (had the semantic of operator >=).
-    Found when addigin unit tests for comparison operators.
+    Found when adding unit tests for comparison operators.
     
   - Value::compare() is now const and has an actual implementation with
     unit tests.
+
+  - Bug #2407932: strpbrk() can fail for NULL pointer.
+
+  - Bug #3306345: Fixed minor typo in Path::resolve().
+
+  - Bug #3314841/#3306896: errors in amalgamate.py
+
+  - Fixed some Coverity warnings and line-endings.
     
 * License
   
