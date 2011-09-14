@@ -13,10 +13,10 @@
 # include <json/config.h>
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
-#if defined(JSON_USE_EXCEPTION)
+#if JSON_USE_EXCEPTION
 #define JSON_ASSERT( condition ) assert( condition );  // @todo <= change this into an exception throw
 #define JSON_FAIL_MESSAGE( message ) throw std::runtime_error( message );
-#else  // defined(JSON_USE_EXCEPTION)
+#else  // JSON_USE_EXCEPTION
 #define JSON_ASSERT( condition ) assert( condition );
 #define JSON_FAIL_MESSAGE( message ) { std::cerr << std::endl << message << std::endl; exit(123); }
 #endif
