@@ -7,7 +7,6 @@
 # define CPPTL_JSON_ASSERTIONS_H_INCLUDED
 
 #include <stdlib.h>
-#include <iostream>
 
 #if !defined(JSON_IS_AMALGAMATION)
 # include <json/config.h>
@@ -18,7 +17,13 @@
 #define JSON_FAIL_MESSAGE( message ) throw std::runtime_error( message );
 #else  // JSON_USE_EXCEPTION
 #define JSON_ASSERT( condition ) assert( condition );
-#define JSON_FAIL_MESSAGE( message ) { std::cerr << std::endl << message << std::endl; exit(123); }
+
+// The call to assert() will show the failure message in debug builds. In
+// release bugs we write to invalid memory in order to crash hard instead of
+// calling exit(), so that a debugger or crash reporter gets the chance to take
+// over.
+#define JSON_FAIL_MESSAGE( message ) { assert(false && message); strcpy(reinterpret_cast<char*>(666), message); }
+
 #endif
 
 #define JSON_ASSERT_MESSAGE( condition, message ) if (!( condition )) { JSON_FAIL_MESSAGE( message ) }

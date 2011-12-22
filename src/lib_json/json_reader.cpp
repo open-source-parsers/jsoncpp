@@ -13,7 +13,6 @@
 #include <cstdio>
 #include <cassert>
 #include <cstring>
-#include <iostream>
 #include <stdexcept>
 
 #if _MSC_VER >= 1400 // VC++ 8.0
@@ -904,7 +903,14 @@ std::istream& operator>>( std::istream &sin, Value &root )
 {
     Json::Reader reader;
     bool ok = reader.parse(sin, root, true);
-    if (!ok) JSON_FAIL_MESSAGE(reader.getFormattedErrorMessages());
+    if (!ok) {
+      fprintf(
+          stderr,
+          "Error from reader: %s",
+          reader.getFormattedErrorMessages().c_str());
+
+      JSON_FAIL_MESSAGE("reader error");
+    }
     return sin;
 }
 
