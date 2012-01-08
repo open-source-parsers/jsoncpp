@@ -19,10 +19,10 @@
 #define JSON_ASSERT( condition ) assert( condition );
 
 // The call to assert() will show the failure message in debug builds. In
-// release bugs we write to invalid memory in order to crash hard instead of
-// calling exit(), so that a debugger or crash reporter gets the chance to take
-// over.
-#define JSON_FAIL_MESSAGE( message ) { assert(false && message); strcpy(reinterpret_cast<char*>(666), message); }
+// release bugs we write to invalid memory in order to crash hard, so that a
+// debugger or crash reporter gets the chance to take over. We still call exit()
+// afterward in order to tell the compiler that this macro doesn't return.
+#define JSON_FAIL_MESSAGE( message ) { assert(false && message); strcpy(reinterpret_cast<char*>(666), message); exit(123); }
 
 #endif
 
