@@ -192,7 +192,8 @@ Writer::~Writer()
 // //////////////////////////////////////////////////////////////////
 
 FastWriter::FastWriter()
-   : yamlCompatiblityEnabled_( false )
+   : yamlCompatiblityEnabled_( false ),
+     dropNullPlaceholders_( false )
 {
 }
 
@@ -201,6 +202,13 @@ void
 FastWriter::enableYAMLCompatibility()
 {
    yamlCompatiblityEnabled_ = true;
+}
+
+
+void
+FastWriter::dropNullPlaceholders()
+{
+   dropNullPlaceholders_ = true;
 }
 
 
@@ -220,7 +228,7 @@ FastWriter::writeValue( const Value &value )
    switch ( value.type() )
    {
    case nullValue:
-      document_ += "null";
+      if (!dropNullPlaceholders_) document_ += "null";
       break;
    case intValue:
       document_ += valueToString( value.asLargestInt() );

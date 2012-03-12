@@ -40,6 +40,13 @@ namespace Json {
 
       void enableYAMLCompatibility();
 
+      /** \brief Drop the "null" string from the writer's output for nullValues.
+       * Strictly speaking, this is not valid JSON. But when the output is being
+       * fed to a browser's Javascript, it makes for smaller output and the
+       * browser can handle the output just fine.
+       */
+      void dropNullPlaceholders();
+
    public: // overridden from Writer
       virtual std::string write( const Value &root );
 
@@ -48,6 +55,7 @@ namespace Json {
 
       std::string document_;
       bool yamlCompatiblityEnabled_;
+      bool dropNullPlaceholders_;
    };
 
    /** \brief Writes a Value in <a HREF="http://www.json.org">JSON</a> format in a human friendly way.

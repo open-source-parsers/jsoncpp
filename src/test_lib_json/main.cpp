@@ -1399,6 +1399,23 @@ ValueTest::checkIsEqual( const Json::Value &x, const Json::Value &y )
     JSONTEST_ASSERT( y.compare( x ) == 0 );
 }
 
+
+struct WriterTest : JsonTest::TestCase
+{
+};
+
+
+JSONTEST_FIXTURE( WriterTest, dropNullPlaceholders )
+{
+    Json::FastWriter writer;
+    Json::Value nullValue;
+    JSONTEST_ASSERT( writer.write(nullValue) == "null\n" );
+
+    writer.dropNullPlaceholders();
+    JSONTEST_ASSERT( writer.write(nullValue) == "\n" );
+}
+
+
 int main( int argc, const char *argv[] )
 {
    JsonTest::Runner runner;
@@ -1420,5 +1437,6 @@ int main( int argc, const char *argv[] )
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareArray );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareObject );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareType );
+   JSONTEST_REGISTER_FIXTURE( runner, WriterTest, dropNullPlaceholders );
    return runner.runCommandLine( argc, argv );
 }
