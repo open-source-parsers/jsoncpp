@@ -72,6 +72,7 @@ def amalgamate_source( source_top_dir=None,
     header.add_file( 'include/json/value.h' )
     header.add_file( 'include/json/reader.h' )
     header.add_file( 'include/json/writer.h' )
+    header.add_file( 'include/json/assertions.h' )
     header.add_text( '#endif //ifndef JSON_AMALGATED_H_INCLUDED' )
 
     target_header_path = os.path.join( os.path.dirname(target_source_path), header_include_path )
