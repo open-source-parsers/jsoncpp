@@ -14,7 +14,7 @@
 #include <sstream>
 #include <iomanip>
 
-#if _MSC_VER >= 1400 // VC++ 8.0
+#if defined(_MSC_VER)  &&  _MSC_VER >= 1400 // VC++ 8.0
 #pragma warning( disable : 4996 )   // disable warning about strdup being deprecated.
 #endif
 
