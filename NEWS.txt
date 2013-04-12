@@ -35,6 +35,9 @@ New in SVN
   - Patch #3539678: Copy constructor does not initialize allocated_ for stringValue
     (contributed by rmongia).
 
+  - Patch #3600941: Missing field copy in Json::Value::iterator causing infinite 
+    loop when using experimental internal map (#define JSON_VALUE_USE_INTERNAL_MAP)
+	(contributed by Ming-Lin Kao).
 		
 
   New in JsonCpp 0.6.0:
