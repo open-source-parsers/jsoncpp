@@ -2,6 +2,7 @@
   \section ms_release Makes JsonCpp ready for release
   - Build system clean-up:
 	- Fix build on Windows (shared-library build is broken)
+	- Compile and run tests using shared library on Windows to ensure no JSON_API macro is missing.
 	- Add enable/disable flag for static and shared library build
 	- Enhance help
   - Platform portability check: (Notes: was ok on last check)
