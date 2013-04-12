@@ -470,7 +470,10 @@ Value::Value( const Value &other )
          allocated_ = true;
       }
       else
+      {
          value_.string_ = 0;
+         allocated_ = false;
+      }
       break;
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
    case arrayValue:

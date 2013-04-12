@@ -31,6 +31,11 @@ New in SVN
         representable using an Int64, or asDouble() combined with minInt64 and
         maxInt64 to figure out whether it is approximately representable.
 
+* Bug fixes
+  - Patch #3539678: Copy constructor does not initialize allocated_ for stringValue
+    (contributed by rmongia).
+
+		
 
   New in JsonCpp 0.6.0:
   ---------------------
