@@ -1,4 +1,6 @@
 before_install: sudo apt-get install cmake
 language: cpp
-compiler: gcc
+compiler:
+  - gcc
+  - clang
 script: cmake . && make
