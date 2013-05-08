@@ -4,3 +4,9 @@ compiler:
   - gcc
   - clang
 script: cmake . && make
+notifications:
+  recipients:
+    - baptiste.lepilleur@gmail.com
+  email:
+    on_success: change
+    on_failure: always
