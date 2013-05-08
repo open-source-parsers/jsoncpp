@@ -62,8 +62,9 @@ Generating solution/makefiles using cmake-gui:
 Alternatively, from the command-line on Unix in the source directory:
   
   mkdir -p ../build/debug
-  cmake -DCMAKE_BUILD_TYPE=debug -DJSONCPP_LIB_BUILD_SHARED=OFF -G "Unix Makefiles" ../build/debug
-  (cd ../build/debug && make)
+  cd ../build/debug
+  cmake -DCMAKE_BUILD_TYPE=debug -DJSONCPP_LIB_BUILD_SHARED=OFF -G "Unix Makefiles" ../../jsoncpp-src
+  make
   
 Running "cmake -h" will display the list of available generators (passed as -G option).
   
