@@ -32,21 +32,32 @@ New in SVN
         maxInt64 to figure out whether it is approximately representable.
 
 * Value
-  - Patch #3393345: BOOST_FOREACH compatibility. Made Json::iterator more 
+  - Patch #10: BOOST_FOREACH compatibility. Made Json::iterator more 
     standard compliant, added missing iterator_category and value_type 
 	typedefs (contribued by Robert A. Iannucci).
 		
 * Compilation
 
-  - Patch #3474563: added missing JSON_API on some classes causing link issues
+  - New CMake based build system. Based in part on contribution from
+    Igor Okulist and Damien Buhl (Patch #14).
+    
+  - New header json/version.h now contains version number macros
+    (JSONCPP_VERSION_MAJOR, JSONCPP_VERSION_MINOR, JSONCPP_VERSION_PATCH
+    and JSONCPP_VERSION_HEXA).
+
+  - Patch #11: added missing JSON_API on some classes causing link issues
     when building as a dynamic library on Windows 
 	(contributed by Francis Bolduc).
+    
+  - Visual Studio DLL: suppressed warning "C4251: <data member>: <type> 
+    needs to have dll-interface to be used by..." via pragma push/pop
+    in json-cpp headers.
 		
 * Bug fixes
-  - Patch #3539678: Copy constructor does not initialize allocated_ for stringValue
+  - Patch #15: Copy constructor does not initialize allocated_ for stringValue
     (contributed by rmongia).
 
-  - Patch #3600941: Missing field copy in Json::Value::iterator causing infinite 
+  - Patch #16: Missing field copy in Json::Value::iterator causing infinite 
     loop when using experimental internal map (#define JSON_VALUE_USE_INTERNAL_MAP)
 	(contributed by Ming-Lin Kao).
 		

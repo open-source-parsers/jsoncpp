@@ -12,6 +12,13 @@
 # include <vector>
 # include <string>
 
+// Disable warning C4251: <data member>: <type> needs to have dll-interface to be used by...
+#if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
+# pragma warning(push)
+# pragma warning(disable:4251)
+#endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
+
+
 namespace Json {
 
    class Value;
@@ -183,10 +190,14 @@ namespace Json {
 
    /// \brief Output using the StyledStreamWriter.
    /// \see Json::operator>>()
-   std::ostream& operator<<( std::ostream&, const Value &root );
+   JSON_API std::ostream& operator<<( std::ostream&, const Value &root );
 
 } // namespace Json
 
+
+#if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
+# pragma warning(pop)
+#endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
 
 #endif // JSON_WRITER_H_INCLUDED

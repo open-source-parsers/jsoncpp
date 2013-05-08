@@ -21,6 +21,13 @@
 #  include <cpptl/forwards.h>
 # endif
 
+// Disable warning C4251: <data member>: <type> needs to have dll-interface to be used by...
+#if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
+# pragma warning(push)
+# pragma warning(disable:4251)
+#endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
+
+
 /** \brief JSON (JavaScript Object Notation).
  */
 namespace Json {
@@ -1107,6 +1114,11 @@ public: // overridden from ValueArrayAllocator
 
 
 } // namespace Json
+
+
+#if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
+# pragma warning(pop)
+#endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
 
 #endif // CPPTL_JSON_H_INCLUDED

@@ -46,10 +46,17 @@
 # ifdef JSON_IN_CPPTL
 #  define JSON_API CPPTL_API
 # elif defined(JSON_DLL_BUILD)
-#  define JSON_API __declspec(dllexport)
+#  if defined(_MSC_VER)
+#   define JSON_API __declspec(dllexport)
+#   define JSONCPP_DISABLE_DLL_INTERFACE_WARNING
+#  endif // if defined(_MSC_VER)
 # elif defined(JSON_DLL)
-#  define JSON_API __declspec(dllimport)
-# else
+#  if defined(_MSC_VER)
+#   define JSON_API __declspec(dllimport)
+#   define JSONCPP_DISABLE_DLL_INTERFACE_WARNING
+#  endif // if defined(_MSC_VER)
+# endif // ifdef JSON_IN_CPPTL
+# if !defined(JSON_API)
 #  define JSON_API
 # endif
 

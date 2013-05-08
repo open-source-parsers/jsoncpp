@@ -14,6 +14,13 @@
 # include <stack>
 # include <string>
 
+// Disable warning C4251: <data member>: <type> needs to have dll-interface to be used by...
+#if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
+# pragma warning(push)
+# pragma warning(disable:4251)
+#endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
+
+
 namespace Json {
 
    /** \brief Unserialize a <a HREF="http://www.json.org">JSON</a> document into a Value.
@@ -206,8 +213,13 @@ namespace Json {
     \throw std::exception on parse error.
     \see Json::operator<<()
    */
-   std::istream& operator>>( std::istream&, Value& );
+   JSON_API std::istream& operator>>( std::istream&, Value& );
 
 } // namespace Json
+
+#if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
+# pragma warning(pop)
+#endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
+
 
 #endif // CPPTL_JSON_READER_H_INCLUDED
