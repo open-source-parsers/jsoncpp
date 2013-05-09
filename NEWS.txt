@@ -52,6 +52,8 @@ New in SVN
   - Visual Studio DLL: suppressed warning "C4251: <data member>: <type> 
     needs to have dll-interface to be used by..." via pragma push/pop
     in json-cpp headers.
+    
+  - Added Travis CI intregration: https://travis-ci.org/blep/jsoncpp-mirror
 		
 * Bug fixes
   - Patch #15: Copy constructor does not initialize allocated_ for stringValue
