@@ -193,7 +193,7 @@ namespace JsonTest {
       if ( static_cast< U >( expected ) != actual )
       {
          result.addFailure( file, line, expr );
-         result << "Expected: " << expected << "\n";
+         result << "Expected: " << static_cast< U >( expected ) << "\n";
          result << "Actual  : " << actual;
       }
       return result;

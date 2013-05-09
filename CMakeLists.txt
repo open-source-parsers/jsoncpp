@@ -4,6 +4,7 @@ ENABLE_TESTING()
 
 OPTION(JSONCPP_WITH_TESTS "Compile and run JsonCpp test executables" ON)
 OPTION(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)
+OPTION(JSONCPP_WITH_WARNING_AS_ERROR "Force compilation to fail if a warning occurs" OFF)
 
 # Ensures that CMAKE_BUILD_TYPE is visible in cmake-gui on Unix
 IF(NOT WIN32)
@@ -61,8 +62,26 @@ MESSAGE(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINO
 CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/src/lib_json/version.h.in"
                 "${PROJECT_SOURCE_DIR}/include/json/version.h" )
 
+macro(UseCompilationWarningAsError)
+	if ( MSVC )
+        # Only enabled in debug because some old versions of VS STL generate
+        # warnings when compiled in release configuration.
+		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /WX ")
+	endif( MSVC )
+endmacro() 
+
 # Include our configuration header
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/include )
+
+if ( MSVC )
+    # Only enabled in debug because some old versions of VS STL generate
+    # unreachable code warning when compiled in release configuration.
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /W4 ")
+endif( MSVC )
+
+IF(JSONCPP_WITH_WARNING_AS_ERROR)
+    UseCompilationWarningAsError()
+ENDIF(JSONCPP_WITH_WARNING_AS_ERROR)
 
 # Build the different applications
 ADD_SUBDIRECTORY( src )

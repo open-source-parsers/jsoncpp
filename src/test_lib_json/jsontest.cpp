@@ -480,10 +480,10 @@ Runner::runCommandLine( int argc, const char *argv[] ) const
 }
 
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER)  &&  defined(_DEBUG)
 // Hook MSVCRT assertions to prevent dialog from appearing
 static int 
-msvcrtSilentReportHook( int reportType, char *message, int *returnValue )
+msvcrtSilentReportHook( int reportType, char *message, int * /*returnValue*/ )
 {
    // The default CRT handling of error and assertion is to display
    // an error dialog to the user.
@@ -517,9 +517,11 @@ msvcrtSilentReportHook( int reportType, char *message, int *returnValue )
 void 
 Runner::preventDialogOnCrash()
 {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER)  &&  defined(_DEBUG)
    // Install a hook to prevent MSVCRT error and assertion from
-   // popping a dialog.
+   // popping a dialog
+   // This function a NO-OP in release configuration 
+   // (which cause warning since msvcrtSilentReportHook is not referenced)
    _CrtSetReportHook( &msvcrtSilentReportHook );
 #endif // if defined(_MSC_VER)
 
