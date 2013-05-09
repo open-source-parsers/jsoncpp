@@ -5,6 +5,7 @@ ENDIF(JSONCPP_LIB_BUILD_SHARED)
 
 ADD_EXECUTABLE( jsoncpp_test 
                 jsontest.cpp
+                jsontest.h
                 main.cpp
                 )
 
