@@ -19,7 +19,7 @@ static std::string
 normalizeFloatingPointStr( double value )
 {
     char buffer[32];
-    sprintf( buffer, "%.16g", value );
+    snprintf( buffer, sizeof(buffer), "%.16g", value );
     buffer[sizeof(buffer)-1] = 0;
     std::string s( buffer );
     std::string::size_type index = s.find_last_of( "eE" );
@@ -89,7 +89,7 @@ printValueTree( FILE *fout, Json::Value &value, const std::string &path = "." )
          for ( int index =0; index < size; ++index )
          {
             static char buffer[16];
-            sprintf( buffer, "[%d]", index );
+            snprintf( buffer, sizeof(buffer), "[%d]", index );
             printValueTree( fout, value[index], path + buffer );
          }
       }
@@ -290,4 +290,3 @@ int main( int argc, const char *argv[] )
 
    return exitCode;
 }
-
