@@ -868,7 +868,11 @@ Reader::getLocationLineAndColumn( Location location ) const
    int line, column;
    getLocationLineAndColumn( location, line, column );
    char buffer[18+16+16+1];
+#if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__)
+   sprintf_s(buffer, sizeof(buffer), "Line %d, Column %d", line, column);
+#else
    snprintf(buffer, sizeof(buffer), "Line %d, Column %d", line, column);
+#endif
    return buffer;
 }
 
