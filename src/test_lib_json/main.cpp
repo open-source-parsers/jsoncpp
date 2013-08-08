@@ -462,7 +462,7 @@ JSONTEST_FIXTURE( ValueTest, integers )
    JSONTEST_ASSERT_EQUAL(0.0, val.asDouble());
    JSONTEST_ASSERT_EQUAL(0.0, val.asFloat());
    JSONTEST_ASSERT_EQUAL(false, val.asBool());
-   JSONTEST_ASSERT_STRING_EQUAL("0.0", val.asString());
+   JSONTEST_ASSERT_STRING_EQUAL("0", val.asString());
 
    // Zero (signed constructor arg)
    val = Json::Value(0);
@@ -546,7 +546,7 @@ JSONTEST_FIXTURE( ValueTest, integers )
    JSONTEST_ASSERT_EQUAL(0.0, val.asDouble());
    JSONTEST_ASSERT_EQUAL(0.0, val.asFloat());
    JSONTEST_ASSERT_EQUAL(false, val.asBool());
-   JSONTEST_ASSERT_STRING_EQUAL("0.0", val.asString());
+   JSONTEST_ASSERT_STRING_EQUAL("0", val.asString());
 
    // 2^20 (signed constructor arg)
    val = Json::Value(1 << 20);
@@ -629,7 +629,7 @@ JSONTEST_FIXTURE( ValueTest, integers )
    JSONTEST_ASSERT_EQUAL((1 << 20), val.asDouble());
    JSONTEST_ASSERT_EQUAL((1 << 20), val.asFloat());
    JSONTEST_ASSERT_EQUAL(true, val.asBool());
-   JSONTEST_ASSERT_STRING_EQUAL("1048576.0", normalizeFloatingPointStr(val.asString()));
+   JSONTEST_ASSERT_STRING_EQUAL("1048576", normalizeFloatingPointStr(val.asString()));
 
    // -2^20
    val = Json::Value(-(1 << 20));
@@ -869,7 +869,7 @@ JSONTEST_FIXTURE( ValueTest, integers )
    JSONTEST_ASSERT_EQUAL((Json::Int64(1) << 40), val.asDouble());
    JSONTEST_ASSERT_EQUAL((Json::Int64(1) << 40), val.asFloat());
    JSONTEST_ASSERT_EQUAL(true, val.asBool());
-   JSONTEST_ASSERT_STRING_EQUAL("1099511627776.0", normalizeFloatingPointStr(val.asString()));
+   JSONTEST_ASSERT_STRING_EQUAL("1099511627776", normalizeFloatingPointStr(val.asString()));
 
    // -2^40
    val = Json::Value(-(Json::Int64(1) << 40));
@@ -1035,7 +1035,7 @@ JSONTEST_FIXTURE( ValueTest, integers )
    JSONTEST_ASSERT_EQUAL(1e19, val.asDouble());
    JSONTEST_ASSERT_EQUAL(1e19, val.asFloat());
    JSONTEST_ASSERT_EQUAL(true, val.asBool());
-   JSONTEST_ASSERT_STRING_EQUAL("1.000000000000000e+19", normalizeFloatingPointStr(val.asString()));
+   JSONTEST_ASSERT_STRING_EQUAL("1e+19", normalizeFloatingPointStr(val.asString()));
 
    // uint64 max
    val = Json::Value(Json::UInt64(kuint64max));
@@ -1114,7 +1114,7 @@ JSONTEST_FIXTURE( ValueTest, nonIntegers )
    JSONTEST_ASSERT_EQUAL(1, val.asUInt());
    JSONTEST_ASSERT_EQUAL(1, val.asLargestUInt());
    JSONTEST_ASSERT_EQUAL(true, val.asBool());
-   JSONTEST_ASSERT_EQUAL("1.50", val.asString());
+   JSONTEST_ASSERT_EQUAL("1.5", val.asString());
 
    // Small negative number
    val = Json::Value(-1.5);
@@ -1140,7 +1140,7 @@ JSONTEST_FIXTURE( ValueTest, nonIntegers )
    JSONTEST_ASSERT_EQUAL(-1, val.asInt());
    JSONTEST_ASSERT_EQUAL(-1, val.asLargestInt());
    JSONTEST_ASSERT_EQUAL(true, val.asBool());
-   JSONTEST_ASSERT_EQUAL("-1.50", val.asString());
+   JSONTEST_ASSERT_EQUAL("-1.5", val.asString());
 
    // A bit over int32 max
    val = Json::Value(kint32max + 0.5);
@@ -1169,7 +1169,7 @@ JSONTEST_FIXTURE( ValueTest, nonIntegers )
    JSONTEST_ASSERT_EQUAL(2147483647U, val.asLargestUInt());
 #endif
    JSONTEST_ASSERT_EQUAL(true, val.asBool());
-   JSONTEST_ASSERT_EQUAL("2147483647.50", normalizeFloatingPointStr(val.asString()));
+   JSONTEST_ASSERT_EQUAL("2147483647.5", normalizeFloatingPointStr(val.asString()));
 
    // A bit under int32 min
    val = Json::Value(kint32min - 0.5);
@@ -1196,7 +1196,7 @@ JSONTEST_FIXTURE( ValueTest, nonIntegers )
    JSONTEST_ASSERT_EQUAL(-Json::Int64(1)<< 31, val.asLargestInt());
 #endif
    JSONTEST_ASSERT_EQUAL(true, val.asBool());
-   JSONTEST_ASSERT_EQUAL("-2147483648.50", normalizeFloatingPointStr(val.asString()));
+   JSONTEST_ASSERT_EQUAL("-2147483648.5", normalizeFloatingPointStr(val.asString()));
 
    // A bit over uint32 max
    val = Json::Value(kuint32max + 0.5);
@@ -1224,15 +1224,15 @@ JSONTEST_FIXTURE( ValueTest, nonIntegers )
    JSONTEST_ASSERT_EQUAL((Json::UInt64(1) << 32)-Json::UInt64(1), val.asLargestUInt());
 #endif
    JSONTEST_ASSERT_EQUAL(true, val.asBool());
-   JSONTEST_ASSERT_EQUAL("4294967295.50", normalizeFloatingPointStr(val.asString()));
+   JSONTEST_ASSERT_EQUAL("4294967295.5", normalizeFloatingPointStr(val.asString()));
 
    val = Json::Value(1.2345678901234);
-   JSONTEST_ASSERT_STRING_EQUAL( "1.23456789012340", normalizeFloatingPointStr(val.asString()));
+   JSONTEST_ASSERT_STRING_EQUAL( "1.2345678901234", normalizeFloatingPointStr(val.asString()));
 
    // A 16-digit floating point number.
    val = Json::Value(2199023255552000.0f);
    JSONTEST_ASSERT_EQUAL(float(2199023255552000), val.asFloat());
-   JSONTEST_ASSERT_STRING_EQUAL("2199023255552000.", normalizeFloatingPointStr(val.asString()));
+   JSONTEST_ASSERT_STRING_EQUAL("2199023255552000", normalizeFloatingPointStr(val.asString()));
 
    // A very large floating point number.
    val = Json::Value(3.402823466385289e38);
@@ -1242,7 +1242,7 @@ JSONTEST_FIXTURE( ValueTest, nonIntegers )
    // An even larger floating point number.
    val = Json::Value(1.2345678e300);
    JSONTEST_ASSERT_EQUAL(double(1.2345678e300), val.asDouble());
-   JSONTEST_ASSERT_STRING_EQUAL("1.234567800000000e+300", normalizeFloatingPointStr(val.asString()));
+   JSONTEST_ASSERT_STRING_EQUAL("1.2345678e+300", normalizeFloatingPointStr(val.asString()));
 }
 
 
