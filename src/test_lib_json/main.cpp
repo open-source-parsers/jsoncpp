@@ -991,6 +991,52 @@ JSONTEST_FIXTURE( ValueTest, integers )
    JSONTEST_ASSERT_EQUAL(true, val.asBool());
    JSONTEST_ASSERT_STRING_EQUAL("-9.223372036854776e+18", normalizeFloatingPointStr(val.asString()));
 
+   // 10^19
+   const uint64_t ten_to_19 = 1e19;
+   val = Json::Value(Json::UInt64(ten_to_19));
+
+   JSONTEST_ASSERT_EQUAL(Json::uintValue, val.type());
+
+   checks = IsCheck();
+   checks.isUInt64_ = true;
+   checks.isIntegral_ = true;
+   checks.isDouble_ = true;
+   checks.isNumeric_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT(!val.isConvertibleTo(Json::nullValue));
+   JSONTEST_ASSERT(!val.isConvertibleTo(Json::intValue));
+   JSONTEST_ASSERT(!val.isConvertibleTo(Json::uintValue));
+
+   JSONTEST_ASSERT_EQUAL(ten_to_19, val.asUInt64());
+   JSONTEST_ASSERT_EQUAL(ten_to_19, val.asLargestUInt());
+   JSONTEST_ASSERT_EQUAL(uint64ToDouble(ten_to_19), val.asDouble());
+   JSONTEST_ASSERT_EQUAL(float(uint64ToDouble(ten_to_19)), val.asFloat());
+   JSONTEST_ASSERT_EQUAL(true, val.asBool());
+   JSONTEST_ASSERT_STRING_EQUAL("10000000000000000000", val.asString());
+
+   // 10^19 (double constructor). Note that 10^19 is not exactly representable
+   // as a double.
+   val = Json::Value(uint64ToDouble(ten_to_19));
+
+   JSONTEST_ASSERT_EQUAL(Json::realValue, val.type());
+
+   checks = IsCheck();
+   checks.isUInt64_ = true;
+   checks.isIntegral_ = true;
+   checks.isDouble_ = true;
+   checks.isNumeric_ = true;
+   JSONTEST_ASSERT_PRED( checkIs( val, checks ) );
+
+   JSONTEST_ASSERT(!val.isConvertibleTo(Json::nullValue));
+   JSONTEST_ASSERT(!val.isConvertibleTo(Json::intValue));
+   JSONTEST_ASSERT(!val.isConvertibleTo(Json::uintValue));
+
+   JSONTEST_ASSERT_EQUAL(1e19, val.asDouble());
+   JSONTEST_ASSERT_EQUAL(1e19, val.asFloat());
+   JSONTEST_ASSERT_EQUAL(true, val.asBool());
+   JSONTEST_ASSERT_STRING_EQUAL("1.000000000000000e+19", normalizeFloatingPointStr(val.asString()));
+
    // uint64 max
    val = Json::Value(Json::UInt64(kuint64max));
 
