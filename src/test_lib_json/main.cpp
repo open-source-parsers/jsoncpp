@@ -1228,6 +1228,21 @@ JSONTEST_FIXTURE( ValueTest, nonIntegers )
 
    val = Json::Value(1.2345678901234);
    JSONTEST_ASSERT_STRING_EQUAL( "1.23456789012340", normalizeFloatingPointStr(val.asString()));
+
+   // A 16-digit floating point number.
+   val = Json::Value(2199023255552000.0f);
+   JSONTEST_ASSERT_EQUAL(float(2199023255552000), val.asFloat());
+   JSONTEST_ASSERT_STRING_EQUAL("2199023255552000.", normalizeFloatingPointStr(val.asString()));
+
+   // A very large floating point number.
+   val = Json::Value(3.402823466385289e38);
+   JSONTEST_ASSERT_EQUAL(float(3.402823466385289e38), val.asFloat());
+   JSONTEST_ASSERT_STRING_EQUAL("3.402823466385289e+38", normalizeFloatingPointStr(val.asString()));
+
+   // An even larger floating point number.
+   val = Json::Value(1.2345678e300);
+   JSONTEST_ASSERT_EQUAL(double(1.2345678e300), val.asDouble());
+   JSONTEST_ASSERT_STRING_EQUAL("1.234567800000000e+300", normalizeFloatingPointStr(val.asString()));
 }
 
 
