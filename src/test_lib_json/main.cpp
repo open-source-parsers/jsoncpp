@@ -992,7 +992,7 @@ JSONTEST_FIXTURE( ValueTest, integers )
    JSONTEST_ASSERT_STRING_EQUAL("-9.223372036854776e+18", normalizeFloatingPointStr(val.asString()));
 
    // 10^19
-   const uint64_t ten_to_19 = 1e19;
+   const Json::UInt64 ten_to_19 = static_cast<Json::UInt64>( 1e19 );
    val = Json::Value(Json::UInt64(ten_to_19));
 
    JSONTEST_ASSERT_EQUAL(Json::uintValue, val.type());
