@@ -11,6 +11,7 @@
 # include "value.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 # include <deque>
+# include <iosfwd>
 # include <stack>
 # include <string>
 
