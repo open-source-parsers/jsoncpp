@@ -1,4 +1,3 @@
-// vim: ts=3 sts=3 sw=3 tw=0
 // Copyright 2011 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
@@ -1922,3 +1921,4 @@ Path::make( Value &root ) const
 
 
 } // namespace Json
+// vim: et ts=3 sts=3 sw=3 tw=0

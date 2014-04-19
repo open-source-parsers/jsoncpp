@@ -1,4 +1,3 @@
-// vim: ts=4 sts=4 sw=4 tw=0
 // Copyright 2007-2010 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
@@ -1516,3 +1515,4 @@ int main( int argc, const char *argv[] )
    JSONTEST_REGISTER_FIXTURE( runner, WriterTest, dropNullPlaceholders );
    return runner.runCommandLine( argc, argv );
 }
+// vim: et ts=4 sts=4 sw=4 tw=0

@@ -298,3 +298,4 @@ int main( int argc, const char *argv[] )
 
    return exitCode;
 }
+// vim: et ts=4 sts=4 sw=4 tw=0
