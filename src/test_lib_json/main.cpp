@@ -1,3 +1,4 @@
+// vim: ts=4 sts=4 sw=4 tw=0
 // Copyright 2007-2010 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
@@ -1461,6 +1462,19 @@ ValueTest::checkIsEqual( const Json::Value &x, const Json::Value &y )
 }
 
 
+JSONTEST_FIXTURE( ValueTest, checkInteger )
+{
+	try {
+		Json::Value x = 1;
+		x["key"]; // SIGABRT?
+		// regression for https://sourceforge.net/p/jsoncpp/bugs/67/
+		JSONTEST_ASSERT( 0 );
+	} catch (std::runtime_error const&) {
+		JSONTEST_ASSERT( 1 );  // good
+	}
+}
+
+
 struct WriterTest : JsonTest::TestCase
 {
 };
@@ -1498,6 +1512,7 @@ int main( int argc, const char *argv[] )
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareArray );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareObject );
    JSONTEST_REGISTER_FIXTURE( runner, ValueTest, compareType );
+   JSONTEST_REGISTER_FIXTURE( runner, ValueTest, checkInteger );
    JSONTEST_REGISTER_FIXTURE( runner, WriterTest, dropNullPlaceholders );
    return runner.runCommandLine( argc, argv );
 }

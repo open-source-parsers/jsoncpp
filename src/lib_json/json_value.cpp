@@ -1,3 +1,4 @@
+// vim: ts=3 sts=3 sw=3 tw=0
 // Copyright 2011 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
@@ -91,7 +92,7 @@ duplicateStringValue( const char *value,
       length = Value::maxInt - 1;
 
    char *newString = static_cast<char *>( malloc( length + 1 ) );
-   JSON_ASSERT_MESSAGE( newString != 0, "Failed to allocate string value buffer" );
+   JSON_ASSERT_MESSAGE( newString != 0, "in Json::Value::duplicateStringValue(): Failed to allocate string value buffer" );
    memcpy( newString, value, length );
    newString[length] = 0;
    return newString;
@@ -155,7 +156,7 @@ Value::CommentInfo::setComment( const char *text )
    if ( comment_ )
       releaseStringValue( comment_ );
    JSON_ASSERT( text != 0 );
-   JSON_ASSERT_MESSAGE( text[0]=='\0' || text[0]=='/', "Comments must start with /");
+   JSON_ASSERT_MESSAGE( text[0]=='\0' || text[0]=='/', "in Json::Value::setComment(): Comments must start with /");
    // It seems that /**/ style comments are acceptable as well.
    comment_ = duplicateStringValue( text );
 }
@@ -692,7 +693,7 @@ Value::operator !=( const Value &other ) const
 const char *
 Value::asCString() const
 {
-   JSON_ASSERT( type_ == stringValue );
+   JSON_ASSERT_MESSAGE( type_ == stringValue, "in Json::Value::asCString(): requires stringValue" );
    return value_.string_;
 }
 
@@ -1026,7 +1027,7 @@ Value::operator!() const
 void 
 Value::clear()
 {
-   JSON_ASSERT( type_ == nullValue  ||  type_ == arrayValue  || type_ == objectValue );
+   JSON_ASSERT_MESSAGE( type_ == nullValue  ||  type_ == arrayValue  || type_ == objectValue, "in Json::Value::clear(): requires complex value" );
 
    switch ( type_ )
    {
@@ -1051,7 +1052,7 @@ Value::clear()
 void 
 Value::resize( ArrayIndex newSize )
 {
-   JSON_ASSERT( type_ == nullValue  ||  type_ == arrayValue );
+   JSON_ASSERT_MESSAGE( type_ == nullValue  ||  type_ == arrayValue, "in Json::Value::resize(): requires arrayValue" );
    if ( type_ == nullValue )
       *this = Value( arrayValue );
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
@@ -1077,7 +1078,7 @@ Value::resize( ArrayIndex newSize )
 Value &
 Value::operator[]( ArrayIndex index )
 {
-   JSON_ASSERT( type_ == nullValue  ||  type_ == arrayValue );
+   JSON_ASSERT_MESSAGE( type_ == nullValue  ||  type_ == arrayValue, "in Json::Value::operator[](ArrayIndex): requires arrayValue" );
    if ( type_ == nullValue )
       *this = Value( arrayValue );
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
@@ -1098,7 +1099,7 @@ Value::operator[]( ArrayIndex index )
 Value &
 Value::operator[]( int index )
 {
-   JSON_ASSERT( index >= 0 );
+   JSON_ASSERT_MESSAGE( index >= 0, "in Json::Value::operator[](int index): index cannot be negative" );
    return (*this)[ ArrayIndex(index) ];
 }
 
@@ -1106,7 +1107,7 @@ Value::operator[]( int index )
 const Value &
 Value::operator[]( ArrayIndex index ) const
 {
-   JSON_ASSERT( type_ == nullValue  ||  type_ == arrayValue );
+   JSON_ASSERT_MESSAGE( type_ == nullValue  ||  type_ == arrayValue, "in Json::Value::operator[](ArrayIndex)const: requires arrayValue" );
    if ( type_ == nullValue )
       return null;
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
@@ -1125,7 +1126,7 @@ Value::operator[]( ArrayIndex index ) const
 const Value &
 Value::operator[]( int index ) const
 {
-   JSON_ASSERT( index >= 0 );
+   JSON_ASSERT_MESSAGE( index >= 0, "in Json::Value::operator[](int index) const: index cannot be negative" );
    return (*this)[ ArrayIndex(index) ];
 }
 
@@ -1141,7 +1142,7 @@ Value &
 Value::resolveReference( const char *key, 
                          bool isStatic )
 {
-   JSON_ASSERT( type_ == nullValue  ||  type_ == objectValue );
+   JSON_ASSERT_MESSAGE( type_ == nullValue  ||  type_ == objectValue, "in Json::Value::resolveReference(): requires objectValue" );
    if ( type_ == nullValue )
       *this = Value( objectValue );
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
@@ -1181,7 +1182,7 @@ Value::isValidIndex( ArrayIndex index ) const
 const Value &
 Value::operator[]( const char *key ) const
 {
-   JSON_ASSERT( type_ == nullValue  ||  type_ == objectValue );
+   JSON_ASSERT_MESSAGE( type_ == nullValue  ||  type_ == objectValue, "in Json::Value::operator[](char const*)const: requires objectValue" );
    if ( type_ == nullValue )
       return null;
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
@@ -1259,7 +1260,7 @@ Value::get( const std::string &key,
 Value
 Value::removeMember( const char* key )
 {
-   JSON_ASSERT( type_ == nullValue  ||  type_ == objectValue );
+   JSON_ASSERT_MESSAGE( type_ == nullValue  ||  type_ == objectValue, "in Json::Value::removeMember(): requires objectValue" );
    if ( type_ == nullValue )
       return null;
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
@@ -1323,7 +1324,7 @@ Value::isMember( const CppTL::ConstString &key ) const
 Value::Members 
 Value::getMemberNames() const
 {
-   JSON_ASSERT( type_ == nullValue  ||  type_ == objectValue );
+   JSON_ASSERT_MESSAGE( type_ == nullValue  ||  type_ == objectValue, "in Json::Value::getMemberNames(), value must be objectValue" );
    if ( type_ == nullValue )
        return Value::Members();
    Members members;
