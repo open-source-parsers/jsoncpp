@@ -42,6 +42,12 @@ namespace Json {
 
       /// \c true if root must be either an array or an object value. Default: \c false.
       bool strictRoot_;
+
+      /// \c true if dropped null placeholders are allowed. Default: \c false.
+      bool allowDroppedNullPlaceholders_;
+
+      /// \c true if numeric object key are allowed. Default: \c false.
+      bool allowNumericKeys_;
    };
 
 } // namespace Json

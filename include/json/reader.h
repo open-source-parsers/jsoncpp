@@ -146,9 +146,11 @@ namespace Json {
       bool readObject( Token &token );
       bool readArray( Token &token );
       bool decodeNumber( Token &token );
+      bool decodeNumber( Token &token, Value &decoded );
       bool decodeString( Token &token );
       bool decodeString( Token &token, std::string &decoded );
       bool decodeDouble( Token &token );
+      bool decodeDouble( Token &token, Value &decoded );
       bool decodeUnicodeCodePoint( Token &token, 
                                    Location &current, 
                                    Location end, 

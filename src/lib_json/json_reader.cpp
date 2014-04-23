@@ -28,6 +28,8 @@ namespace Json {
 Features::Features()
    : allowComments_( true )
    , strictRoot_( false )
+   , allowDroppedNullPlaceholders_ ( false )
+   , allowNumericKeys_ ( false )
 {
 }
 
@@ -45,6 +47,8 @@ Features::strictMode()
    Features features;
    features.allowComments_ = false;
    features.strictRoot_ = true;
+   features.allowDroppedNullPlaceholders_ = false;
+   features.allowNumericKeys_ = false;
    return features;
 }
 
@@ -230,6 +234,16 @@ Reader::readValue()
    case tokenNull:
       currentValue() = Value();
       break;
+   case tokenArraySeparator:
+      if ( features_.allowDroppedNullPlaceholders_ )
+      {
+         // "Un-read" the current token and mark the current value as a null
+         // token.
+         current_--;
+         currentValue() = Value();
+         break;
+      }
+      // Else, fall through...
    default:
       return addError( "Syntax error: value, object or array expected.", token );
    }
@@ -493,12 +507,24 @@ Reader::readObject( Token &/*tokenStart*/ )
          break;
       if ( tokenName.type_ == tokenObjectEnd  &&  name.empty() )  // empty object
          return true;
-      if ( tokenName.type_ != tokenString )
-         break;
-      
       name = "";
-      if ( !decodeString( tokenName, name ) )
-         return recoverFromError( tokenObjectEnd );
+      if ( tokenName.type_ == tokenString )
+      {
+         if ( !decodeString( tokenName, name ) )
+            return recoverFromError( tokenObjectEnd );
+      }
+      else if ( tokenName.type_ == tokenNumber &&
+                features_.allowNumericKeys_ )
+      {
+         Value numberName;
+         if ( !decodeNumber( tokenName, numberName ) )
+            return recoverFromError( tokenObjectEnd );
+         name = numberName.asString();
+      }
+      else
+      {
+         break;
+      }
 
       Token colon;
       if ( !readToken( colon ) ||  colon.type_ != tokenMemberSeparator )
@@ -583,6 +609,17 @@ Reader::readArray( Token &/*tokenStart*/ )
 bool 
 Reader::decodeNumber( Token &token )
 {
+  Value decoded;
+  if ( !decodeNumber( token, decoded ) )
+     return false;
+  currentValue() = decoded;
+  return true;
+}
+
+
+bool
+Reader::decodeNumber( Token &token, Value &decoded )
+{
    bool isDouble = false;
    for ( Location inspect = token.start_; inspect != token.end_; ++inspect )
    {
@@ -591,7 +628,7 @@ Reader::decodeNumber( Token &token )
                  ||  ( *inspect == '-'  &&  inspect != token.start_ );
    }
    if ( isDouble )
-      return decodeDouble( token );
+      return decodeDouble( token, decoded );
    // Attempts to parse the number as an integer. If the number is
    // larger than the maximum supported value of an integer then
    // we decode the number as a double.
@@ -619,23 +656,34 @@ Reader::decodeNumber( Token &token )
              current != token.end_ ||
              digit > maxIntegerValue % 10)
          {
-            return decodeDouble( token );
+            return decodeDouble( token, decoded );
          }
       }
       value = value * 10 + digit;
    }
    if ( isNegative )
-      currentValue() = -Value::LargestInt( value );
+      decoded = -Value::LargestInt( value );
    else if ( value <= Value::LargestUInt(Value::maxInt) )
-      currentValue() = Value::LargestInt( value );
+      decoded = Value::LargestInt( value );
    else
-      currentValue() = value;
+      decoded = value;
    return true;
 }
 
 
 bool 
 Reader::decodeDouble( Token &token )
+{
+  Value decoded;
+  if ( !decodeDouble( token, decoded ) )
+     return false;
+  currentValue() = decoded;
+  return true;
+}
+
+
+bool
+Reader::decodeDouble( Token &token, Value &decoded )
 {
    double value = 0;
    const int bufferSize = 32;
@@ -669,7 +717,7 @@ Reader::decodeDouble( Token &token )
 
    if ( count != 1 )
       return addError( "'" + std::string( token.start_, token.end_ ) + "' is not a number.", token );
-   currentValue() = value;
+   decoded = value;
    return true;
 }
 
