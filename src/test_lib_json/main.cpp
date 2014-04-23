@@ -1463,14 +1463,16 @@ ValueTest::checkIsEqual( const Json::Value &x, const Json::Value &y )
 
 JSONTEST_FIXTURE( ValueTest, checkInteger )
 {
-	try {
-		Json::Value x = 1;
-		x["key"]; // SIGABRT?
-		// regression for https://sourceforge.net/p/jsoncpp/bugs/67/
-		JSONTEST_ASSERT( 0 );
-	} catch (std::runtime_error const&) {
-		JSONTEST_ASSERT( 1 );  // good
-	}
+#if JSON_USE_EXCEPTION
+  try {
+    Json::Value x = 1;
+    x["key"]; // SIGABRT?
+    // regression for https://sourceforge.net/p/jsoncpp/bugs/67/
+    JSONTEST_ASSERT( 0 );
+  } catch (std::runtime_error const&) {
+    JSONTEST_ASSERT( 1 );  // good
+  }
+#endif  // JSON_USE_EXCEPTION
 }
 
 
