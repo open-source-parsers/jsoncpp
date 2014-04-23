@@ -33,6 +33,19 @@ namespace Json {
       typedef char Char;
       typedef const Char *Location;
 
+      /** \brief An error tagged with where in the JSON text it was encountered.
+       *
+       * The offsets give the [start, limit) range of bytes within the text. Note
+       * that this is bytes, not codepoints.
+       *
+       */
+      struct StructuredError
+      {
+         size_t offset_start;
+         size_t offset_limit;
+         std::string message;
+      };
+
       /** \brief Constructs a Reader allowing all features
        * for parsing.
        */
@@ -94,6 +107,14 @@ namespace Json {
        *         during parsing.
        */
       std::string getFormattedErrorMessages() const;
+
+     /** \brief Returns a vector of structured erros encounted while parsing.
+      * \return A (possibly empty) vector of StructuredError objects. Currently
+      *         only one error can be returned, but the caller should tolerate multiple
+      *         errors.  This can occur if the parser recovers from a non-fatal
+      *         parse error and then encounters additional errors.
+      */
+     std::vector<StructuredError> getStructuredErrors() const;
 
    private:
       enum TokenType

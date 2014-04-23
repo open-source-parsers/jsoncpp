@@ -274,6 +274,8 @@ Value::Value( ValueType type )
    , itemIsUsed_( 0 )
 #endif
    , comments_( 0 )
+   , start_( 0 )
+   , limit_( 0 )
 {
    switch ( type )
    {
@@ -318,6 +320,8 @@ Value::Value( UInt value )
    , itemIsUsed_( 0 )
 #endif
    , comments_( 0 )
+   , start_( 0 )
+   , limit_( 0 )
 {
    value_.uint_ = value;
 }
@@ -329,6 +333,8 @@ Value::Value( Int value )
    , itemIsUsed_( 0 )
 #endif
    , comments_( 0 )
+   , start_( 0 )
+   , limit_( 0 )
 {
    value_.int_ = value;
 }
@@ -342,6 +348,8 @@ Value::Value( Int64 value )
    , itemIsUsed_( 0 )
 #endif
    , comments_( 0 )
+   , start_( 0 )
+   , limit_( 0 )
 {
    value_.int_ = value;
 }
@@ -354,6 +362,8 @@ Value::Value( UInt64 value )
    , itemIsUsed_( 0 )
 #endif
    , comments_( 0 )
+   , start_( 0 )
+   , limit_( 0 )
 {
    value_.uint_ = value;
 }
@@ -366,6 +376,8 @@ Value::Value( double value )
    , itemIsUsed_( 0 )
 #endif
    , comments_( 0 )
+   , start_( 0 )
+   , limit_( 0 )
 {
    value_.real_ = value;
 }
@@ -377,6 +389,8 @@ Value::Value( const char *value )
    , itemIsUsed_( 0 )
 #endif
    , comments_( 0 )
+   , start_( 0 )
+   , limit_( 0 )
 {
    value_.string_ = duplicateStringValue( value );
 }
@@ -390,6 +404,8 @@ Value::Value( const char *beginValue,
    , itemIsUsed_( 0 )
 #endif
    , comments_( 0 )
+   , start_( 0 )
+   , limit_( 0 )
 {
    value_.string_ = duplicateStringValue( beginValue, 
                                           (unsigned int)(endValue - beginValue) );
@@ -403,6 +419,8 @@ Value::Value( const std::string &value )
    , itemIsUsed_( 0 )
 #endif
    , comments_( 0 )
+   , start_( 0 )
+   , limit_( 0 )
 {
    value_.string_ = duplicateStringValue( value.c_str(), 
                                           (unsigned int)value.length() );
@@ -416,6 +434,8 @@ Value::Value( const StaticString &value )
    , itemIsUsed_( 0 )
 #endif
    , comments_( 0 )
+   , start_( 0 )
+   , limit_( 0 )
 {
    value_.string_ = const_cast<char *>( value.c_str() );
 }
@@ -429,6 +449,8 @@ Value::Value( const CppTL::ConstString &value )
    , itemIsUsed_( 0 )
 #endif
    , comments_( 0 )
+   , start_( 0 )
+   , limit_( 0 )
 {
    value_.string_ = duplicateStringValue( value, value.length() );
 }
@@ -441,6 +463,8 @@ Value::Value( bool value )
    , itemIsUsed_( 0 )
 #endif
    , comments_( 0 )
+   , start_( 0 )
+   , limit_( 0 )
 {
    value_.bool_ = value;
 }
@@ -453,6 +477,8 @@ Value::Value( const Value &other )
    , itemIsUsed_( 0 )
 #endif
    , comments_( 0 )
+   , start_( other.start_ )
+   , limit_( other.limit_ )
 {
    switch ( type_ )
    {
@@ -557,6 +583,8 @@ Value::swap( Value &other )
    int temp2 = allocated_;
    allocated_ = other.allocated_;
    other.allocated_ = temp2;
+   std::swap( start_, other.start_ );
+   std::swap( limit_, other.limit_ );
 }
 
 ValueType 
@@ -1027,7 +1055,8 @@ void
 Value::clear()
 {
    JSON_ASSERT_MESSAGE( type_ == nullValue  ||  type_ == arrayValue  || type_ == objectValue, "in Json::Value::clear(): requires complex value" );
-
+   start_ = 0;
+   limit_ = 0;
    switch ( type_ )
    {
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
@@ -1553,6 +1582,34 @@ Value::getComment( CommentPlacement placement ) const
    if ( hasComment(placement) )
       return comments_[placement].comment_;
    return "";
+}
+
+
+void
+Value::setOffsetStart( size_t start )
+{
+   start_ = start;
+}
+
+
+void
+Value::setOffsetLimit( size_t limit )
+{
+   limit_ = limit;
+}
+
+
+size_t
+Value::getOffsetStart() const
+{
+   return start_;
+}
+
+
+size_t
+Value::getOffsetLimit() const
+{
+   return limit_;
 }
 
 
