@@ -3,9 +3,10 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
+#include "jsontest.h"
 #include <json/config.h>
 #include <json/json.h>
-#include "jsontest.h"
+#include <stdexcept>
 
 // Make numeric limits more convenient to talk about.
 // Assumes int type in 32 bits.
