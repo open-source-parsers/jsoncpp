@@ -19,14 +19,11 @@ namespace Json {
  * the page size, the number of object in each page).
  *
  * It does not allow the destruction of a single object. All the allocated
- *objects
- * can be destroyed at once. The memory can be either released or reused for
- *future
- * allocation.
+ * objects can be destroyed at once. The memory can be either released or reused
+ * for future allocation.
  *
  * The in-place new operator must be used to construct the object using the
- *pointer
- * returned by allocate.
+ * pointer returned by allocate.
  */
 template <typename AllocatedType, const unsigned int objectPerAllocation>
 class BatchAllocator {
