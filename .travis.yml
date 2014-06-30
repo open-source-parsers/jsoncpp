@@ -17,7 +17,7 @@ env:
     - SHARED_LIBRARY=OFF BUILD_TYPE=debug VERBOSE VERBOSE_MAKE=true
 notifications:
   recipients:
-    - baptiste.lepilleur@gmail.com
+    - aaronjjacobs@gmail.com
   email:
     on_success: change
     on_failure: always
