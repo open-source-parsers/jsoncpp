@@ -9,15 +9,10 @@ compiler:
   - clang
 script: cmake -DJSONCPP_LIB_BUILD_SHARED=$SHARED_LIBRARY -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_VERBOSE_MAKEFILE=$VERBOSE_MAKE . && make
 env:
-  global:
-    - JSONCPP_CONTINUOUS_INTERATION=1
   matrix:
     - SHARED_LIBRARY=ON BUILD_TYPE=release VERBOSE_MAKE=false
     - SHARED_LIBRARY=OFF BUILD_TYPE=release VERBOSE_MAKE=false
     - SHARED_LIBRARY=OFF BUILD_TYPE=debug VERBOSE VERBOSE_MAKE=true
 notifications:
-  recipients:
-    - aaronjjacobs@gmail.com
   email:
-    on_success: change
-    on_failure: always
+    - aaronjjacobs@gmail.com
