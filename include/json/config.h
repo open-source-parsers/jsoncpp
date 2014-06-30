@@ -102,7 +102,7 @@ typedef unsigned __int64 UInt64;
 #else                 // if defined(_MSC_VER) // Other platforms, use long long
 typedef long long int Int64;
 typedef unsigned long long int UInt64;
-#endif                // if defined(_MSC_VER)
+#endif // if defined(_MSC_VER)
 typedef Int64 LargestInt;
 typedef UInt64 LargestUInt;
 #define JSON_HAS_INT64

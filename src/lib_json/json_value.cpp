@@ -83,8 +83,9 @@ static inline char *duplicateStringValue(const char *value,
     length = Value::maxInt - 1;
 
   char *newString = static_cast<char *>(malloc(length + 1));
-  JSON_ASSERT_MESSAGE(newString != 0, "in Json::Value::duplicateStringValue(): "
-                                      "Failed to allocate string value buffer");
+  JSON_ASSERT_MESSAGE(newString != 0,
+                      "in Json::Value::duplicateStringValue(): "
+                      "Failed to allocate string value buffer");
   memcpy(newString, value, length);
   newString[length] = 0;
   return newString;

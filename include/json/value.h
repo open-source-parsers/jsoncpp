@@ -49,7 +49,7 @@ enum CommentPlacement {
   commentBefore = 0,      ///< a comment placed on the line before a value
   commentAfterOnSameLine, ///< a comment just after a value on the same line
   commentAfter, ///< a comment on the line after a value (only make sense for
-                ///root value)
+  /// root value)
   numberOfCommentPlacement
 };
 
