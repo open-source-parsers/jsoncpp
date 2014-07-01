@@ -30,45 +30,49 @@ If JsonCpp was build as a dynamic library on Windows, then your project needs to
 define the macro `JSON_DLL`.
 
 
-Building/Testing with new CMake build system
---------------------------------------------
-  
-CMake is a C++ Makefiles/Solution generator that can be downloaded from:
-  http://www.cmake.org
-  
-It is usually available on most Linux system as package. On Ubuntu:
-  sudo apt-get install cmake
-  
-Notes that python is also required to run JSON reader/writer tests. If
+Building and testing with new CMake
+-----------------------------------
+
+[CMake][] is a C++ Makefiles/Solution generator. It is usually available on most
+Linux system as package. On Ubuntu:
+
+    sudo apt-get install cmake
+
+[CMake]: http://www.cmake.org
+
+Note that Python is also required to run the JSON reader/writer tests. If
 missing, the build will skip running those tests.
-  
+
 When running CMake, a few parameters are required:
-- a build directory where the makefiles/solution are generated. It is
-  also used to store objects, libraries and executables files.
-- the generator to use: makefiles or Visual Studio solution? What version
-  or Visual Studio, 32 or 64 bits solution? 
-  
-Generating solution/makefiles using cmake-gui:
-- Makes "source code" points the source directory
-- Makes "where to build the binary" points to the directory to use for 
-  the build.
-- Click on the "Grouped" check box
-- Review JsonCpp build option (tick JSONCPP_LIB_BUILD_SHARED to build as 
-  a dynamic library)
-- Click configure button at the bottom, then the generate button.
-- The generated solution/makefiles can be found in the binary directory.
-  
+
+* a build directory where the makefiles/solution are generated. It is also used
+  to store objects, libraries and executables files.
+* the generator to use: makefiles or Visual Studio solution? What version or
+  Visual Studio, 32 or 64 bits solution? 
+
+Steps for generating solution/makefiles using `cmake-gui`:
+
+* Make "source code" point to the source directory.
+* Make "where to build the binary" point to the directory to use for the build.
+* Click on the "Grouped" check box.
+* Review JsonCpp build options (tick `JSONCPP_LIB_BUILD_SHARED` to build as a
+  dynamic library).
+* Click the configure button at the bottom, then the generate button.
+* The generated solution/makefiles can be found in the binary directory.
+
 Alternatively, from the command-line on Unix in the source directory:
-  
-  mkdir -p ../build/debug
-  cd ../build/debug
-  cmake -DCMAKE_BUILD_TYPE=debug -DJSONCPP_LIB_BUILD_SHARED=OFF -G "Unix Makefiles" ../../jsoncpp-src
-  make
-  
-Running "cmake -h" will display the list of available generators (passed as -G option).
-  
-By default CMake hides compilation command-line. This can be modified by specifying:
--DCMAKE_VERBOSE_MAKEFILE=true when generating makefiles.
+
+    mkdir -p ../build/debug
+    cd ../build/debug
+    cmake -DCMAKE_BUILD_TYPE=debug -DJSONCPP_LIB_BUILD_SHARED=OFF -G "Unix Makefiles" ../../jsoncpp-src
+    make
+
+Running `cmake -`" will display the list of available generators (passed using
+the `-G` option).
+
+By default CMake hides compilation commands. This can be modified by specifying
+`-DCMAKE_VERBOSE_MAKEFILE=true` when generating makefiles.
+
 
 Building/Testing with the legacy build system based on SCons
 ------------------------------------------------------------
