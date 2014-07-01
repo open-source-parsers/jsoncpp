@@ -74,40 +74,38 @@ By default CMake hides compilation commands. This can be modified by specifying
 `-DCMAKE_VERBOSE_MAKEFILE=true` when generating makefiles.
 
 
-Building/Testing with the legacy build system based on SCons
-------------------------------------------------------------
+Building and testing with SCons
+-------------------------------
 
-JsonCpp uses Scons (http://www.scons.org) as a build system. Scons requires
-python to be installed (http://www.python.org).
+**Note:** The SCons-based build system is deprecated. Please use CMake; see the
+section above.
 
-You download scons-local distribution from the following url:
-http://sourceforge.net/projects/scons/files/scons-local/1.2.0/
+JsonCpp can use [Scons][] as a build system. Note that SCons requires python to
+be installed.
 
-Unzip it in the directory where you found this README file. scons.py Should be 
-at the same level as README.
+[SCons]: http://www.scons.org/
 
-python scons.py platform=PLTFRM [TARGET]
-where PLTFRM may be one of:
-	suncc Sun C++ (Solaris)
-	vacpp Visual Age C++ (AIX)
-	mingw 
-	msvc6 Microsoft Visual Studio 6 service pack 5-6
-	msvc70 Microsoft Visual Studio 2002
-	msvc71 Microsoft Visual Studio 2003
-	msvc80 Microsoft Visual Studio 2005
-	msvc90 Microsoft Visual Studio 2008
-	linux-gcc Gnu C++ (linux, also reported to work for Mac OS X)
+Invoke SCons as follows:
 
-Notes: if you are building with Microsoft Visual Studio 2008, you need to 
-setup the environment by running vcvars32.bat (e.g. MSVC 2008 command prompt)
-before running scons.
-	
-Adding platform is fairly simple. You need to change the Sconstruct file 
-to do so.
-	
-and TARGET may be:
-	check: build library and run unit tests.
-    
+    scons platform=PLTFRM [TARGET]
+
+where `PLTFRM` may be one of:
+
+* `suncc`: Sun C++ (Solaris)
+* `vacpp`: Visual Age C++ (AIX)
+* `mingw`
+* `msvc6`: Microsoft Visual Studio 6 service pack 5-6
+* `msvc70`: Microsoft Visual Studio 2002
+* `msvc71`: Microsoft Visual Studio 2003
+* `msvc80`: Microsoft Visual Studio 2005
+* `msvc90`: Microsoft Visual Studio 2008
+* `linux-gcc`: Gnu C++ (linux, also reported to work for Mac OS X)
+
+If you are building with Microsoft Visual Studio 2008, you need to set up the
+environment by running `vcvars32.bat` (e.g. MSVC 2008 command prompt) before
+running SCons.
+
+
 Running the test manually
 -------------------------
 
