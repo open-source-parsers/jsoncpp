@@ -1,17 +1,16 @@
 Introduction
 ------------
 
-JSON (JavaScript Object Notation) is a lightweight data-interchange format. 
-It can represent integer, real number, string, an ordered sequence of 
-value, and a collection of name/value pairs.
+[JSON][json-org] is a lightweight data-interchange format. It can represent
+numbers, strings, ordered sequences of values, and collections of name/value
+pairs.
 
-JsonCpp (http://jsoncpp.sourceforge.net/) is a simple API to manipulate 
-JSON value, handle serialization and unserialization to string.
+[json-org]: http://json.org/
 
-It can also preserve existing comment in unserialization/serialization steps,
-making it a convenient format to store user input files.
-
-Unserialization parsing is user friendly and provides precise error reports.
+JsonCpp is a C++ library that allows manipulating JSON values, including
+serialization and deserialization to and from strings. It can also preserve
+existing comment in unserialization/serialization steps, making it a convenient
+format to store user input files.
 
 Using json-cpp in your project
 ------------------------------
