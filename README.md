@@ -196,22 +196,21 @@ understand element paths.
 Understanding reader/writer test output
 ---------------------------------------
 
-When a test is run, output files are generated aside the input test files. 
+When a test is run, output files are generated beside the input test files.
 Below is a short description of the content of each file:
 
-- test_complex_01.json: input JSON document
-- test_complex_01.expected: flattened JSON element tree used to check if 
-    parsing was corrected.
-
-- test_complex_01.actual: flattened JSON element tree produced by 
-    jsontest.exe from reading test_complex_01.json
-- test_complex_01.rewrite: JSON document written by jsontest.exe using the
-    Json::Value parsed from test_complex_01.json and serialized using
-    Json::StyledWritter.
-- test_complex_01.actual-rewrite: flattened JSON element tree produced by 
-    jsontest.exe from reading test_complex_01.rewrite.
-test_complex_01.process-output: jsontest.exe output, typically useful to
-    understand parsing error.
+* `test_complex_01.json`: input JSON document.
+* `test_complex_01.expected`: flattened JSON element tree used to check if
+  parsing was corrected.
+* `test_complex_01.actual`: flattened JSON element tree produced by `jsontest`
+  from reading `test_complex_01.json`.
+* `test_complex_01.rewrite`: JSON document written by `jsontest` using the
+  `Json::Value` parsed from `test_complex_01.json` and serialized using
+  `Json::StyledWritter`.
+* `test_complex_01.actual-rewrite`: flattened JSON element tree produced by
+  `jsontest` from reading `test_complex_01.rewrite`.
+* `test_complex_01.process-output`: `jsontest` output, typically useful for
+  understanding parsing errors.
 
 License
 -------
