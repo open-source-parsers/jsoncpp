@@ -174,21 +174,23 @@ Adding a reader/writer test
 ---------------------------
 
 To add a test, you need to create two files in test/data:
-- a TESTNAME.json file, that contains the input document in JSON format.
-- a TESTNAME.expected file, that contains a flatened representation of 
-  the input document.
-  
-TESTNAME.expected file format:
-- each line represents a JSON element of the element tree represented 
-  by the input document.
-- each line has two parts: the path to access the element separated from
-  the element value by '='. Array and object values are always empty 
-  (e.g. represented by either [] or {}).
-- element path: '.' represented the root element, and is used to separate 
-  object members. [N] is used to specify the value of an array element
-  at index N.
-See test_complex_01.json and test_complex_01.expected to better understand
-element path.
+
+* a `TESTNAME.json` file, that contains the input document in JSON format.
+* a `TESTNAME.expected` file, that contains a flatened representation of the
+  input document.
+
+The `TESTNAME.expected` file format is as follows:
+
+* each line represents a JSON element of the element tree represented by the
+  input document.
+* each line has two parts: the path to access the element separated from the
+  element value by `=`. Array and object values are always empty (i.e.
+  represented by either `[]` or `{}`).
+* element path: `.` represents the root element, and is used to separate object
+  members. `[N]` is used to specify the value of an array element at index `N`.
+
+See the examples `test_complex_01.json` and `test_complex_01.expected` to better
+understand element paths.
 
 
 Understanding reader/writer test output
