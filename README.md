@@ -87,9 +87,9 @@ be installed.
 
 Invoke SCons as follows:
 
-    scons platform=PLTFRM [TARGET]
+    scons platform=$PLATFORM [TARGET]
 
-where `PLTFRM` may be one of:
+where `$PLATFORM` may be one of:
 
 * `suncc`: Sun C++ (Solaris)
 * `vacpp`: Visual Age C++ (AIX)
@@ -106,32 +106,34 @@ environment by running `vcvars32.bat` (e.g. MSVC 2008 command prompt) before
 running SCons.
 
 
-Running the test manually
--------------------------
+Running the tests manually
+--------------------------
 
-Notes that test can be run by scons using the 'check' target (see above).
+Note that test can be run using SCons using the `check` target:
 
-You need to run test manually only if you are troubleshooting an issue.
+    scons platform=$PLATFORM check
 
-In the instruction below, replace "path to jsontest.exe" with the path
-of the 'jsontest' executable that was compiled on your platform.
-  
-cd test
-# This will run the Reader/Writer tests
-python runjsontests.py "path to jsontest.exe"
+You need to run tests manually only if you are troubleshooting an issue.
 
-# This will run the Reader/Writer tests, using JSONChecker test suite
-# (http://www.json.org/JSON_checker/).
-# Notes: not all tests pass: JsonCpp is too lenient (for example,
-# it allows an integer to start with '0'). The goal is to improve
-# strict mode parsing to get all tests to pass.
-python runjsontests.py --with-json-checker "path to jsontest.exe"
+In the instructions below, replace `path/to/jsontest` with the path of the
+`jsontest` executable that was compiled on your platform.
 
-# This will run the unit tests (mostly Value)
-python rununittests.py "path to test_lib_json.exe"
-
-You can run the tests using valgrind:
-python rununittests.py --valgrind "path to test_lib_json.exe"
+    cd test
+    # This will run the Reader/Writer tests
+    python runjsontests.py path/to/jsontest
+    
+    # This will run the Reader/Writer tests, using JSONChecker test suite
+    # (http://www.json.org/JSON_checker/).
+    # Notes: not all tests pass: JsonCpp is too lenient (for example,
+    # it allows an integer to start with '0'). The goal is to improve
+    # strict mode parsing to get all tests to pass.
+    python runjsontests.py --with-json-checker path/to/jsontest
+    
+    # This will run the unit tests (mostly Value)
+    python rununittests.py path/to/test_lib_json
+    
+    # You can run the tests using valgrind:
+    python rununittests.py --valgrind path/to/test_lib_json
 
 
 Building the documentation
