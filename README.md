@@ -139,15 +139,12 @@ In the instructions below, replace `path/to/jsontest` with the path of the
 Building the documentation
 --------------------------
 
-Run the python script doxybuild.py from the top directory:
+Run the python script `doxybuild.py` from the top directory:
 
-python doxybuild.py --open --with-dot
+    python doxybuild.py --open --with-dot
 
-See doxybuild.py --help for options. 
+See `doxybuild.py --help` for options.
 
-Notes that the documentation is also available for download as a tarball. 
-The documentation of the latest release is available online at:
-http://jsoncpp.sourceforge.net/
 
 Generating amalgamated source and header
 ----------------------------------------
