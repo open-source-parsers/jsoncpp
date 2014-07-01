@@ -12,23 +12,23 @@ serialization and deserialization to and from strings. It can also preserve
 existing comment in unserialization/serialization steps, making it a convenient
 format to store user input files.
 
-Using json-cpp in your project
-------------------------------
 
-The recommended approach to integrate json-cpp in your project is to
-build the the amalgamated source (a single .cpp) with your own build
-system. This ensures compilation flags consistency and ABI compatibility.
+Using JsonCpp in your project
+-----------------------------
 
-See section "Generating amalgamated source and header" to generate them
-from the source distribution.
+The recommended approach to integrating JsonCpp in your project is to build the
+the amalgamated source (a single `.cpp` file) with your own build system. This
+ensures consistency of compilation flags and ABI compatibility. See the section
+"Generating amalgamated source and header" for instructions.
   
-Directory include/ should be added to your compiler include path. 
-json-cpp headers should be included as follow:
+The `include/` should be added to your compiler include path. Jsoncpp headers
+should be included as follow:
 
-  #include <json/json.h>
-  
-If json-cpp was build as a dynamic library on Windows, then your project
-need to define macro "JSON_DLL" to JSON_API should import exported symbols.
+    #include <json/json.h>
+
+If JsonCpp was build as a dynamic library on Windows, then your project needs to
+define the macro `JSON_DLL`.
+
 
 Building/Testing with new CMake build system
 --------------------------------------------
