@@ -341,7 +341,7 @@ bool StyledWriter::isMultineArray(const Value &value) {
     childValues_.reserve(size);
     addChildValues_ = true;
     int lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
-    for (int index = 0; index < size && !isMultiLine; ++index) {
+    for (int index = 0; index < size; ++index) {
       writeValue(value[index]);
       lineLength += int(childValues_[index].length());
     }
@@ -564,7 +564,7 @@ bool StyledStreamWriter::isMultineArray(const Value &value) {
     childValues_.reserve(size);
     addChildValues_ = true;
     int lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
-    for (int index = 0; index < size && !isMultiLine; ++index) {
+    for (int index = 0; index < size; ++index) {
       writeValue(value[index]);
       lineLength += int(childValues_[index].length());
     }
