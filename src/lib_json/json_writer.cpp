@@ -344,7 +344,7 @@ bool StyledWriter::isMultineArray(const Value &value) {
     for (int index = 0; index < size && !isMultiLine; ++index) {
       writeValue(value[index]);
       lineLength += int(childValues_[index].length());
-      isMultiLine = isMultiLine && hasCommentForValue(value[index]);
+      isMultiLine = isMultiLine || hasCommentForValue(value[index]);
     }
     addChildValues_ = false;
     isMultiLine = isMultiLine || lineLength >= rightMargin_;
@@ -568,7 +568,7 @@ bool StyledStreamWriter::isMultineArray(const Value &value) {
     for (int index = 0; index < size && !isMultiLine; ++index) {
       writeValue(value[index]);
       lineLength += int(childValues_[index].length());
-      isMultiLine = isMultiLine && hasCommentForValue(value[index]);
+      isMultiLine = isMultiLine || hasCommentForValue(value[index]);
     }
     addChildValues_ = false;
     isMultiLine = isMultiLine || lineLength >= rightMargin_;
