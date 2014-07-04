@@ -5,6 +5,8 @@
 *.actual-rewrite
 *.process-output
 *.rewrite
-bin/
-buildscons/
-libs/
+/bin/
+/buildscons/
+/libs/
+/doc/doxyfile
+/dist/
