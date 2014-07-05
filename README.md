@@ -141,7 +141,7 @@ Building the documentation
 
 Run the Python script `doxybuild.py` from the top directory:
 
-    python doxybuild.py --open --with-dot
+    python doxybuild.py --doxygen=$(which doxygen) --open --with-dot
 
 See `doxybuild.py --help` for options.
 
