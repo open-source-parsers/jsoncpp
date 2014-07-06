@@ -85,7 +85,7 @@ std::cout << root;
 
 \section _pbuild Build instructions
 The build instructions are located in the file 
-<a HREF="https://github.com/open-source-parsers/jsoncpp/blob/master/README.txt">README.txt</a> in the top-directory of the project.
+<a HREF="https://github.com/open-source-parsers/jsoncpp/blob/master/README.md">README.md</a> in the top-directory of the project.
 
 The latest version of the source is available in the project's GitHub repository:
 <a HREF="https://github.com/open-source-parsers/jsoncpp/">
@@ -93,9 +93,9 @@ jsoncpp</a>
 
 \section _news What's New?
 The description of latest changes can be found in 
-<a HREF="https://github.com/open-source-parsers/jsoncpp/blob/master/NEWS.txt">NEWS.txt</a> in the top-directory of the project.
-
-<strong>TODO</strong>: Move to wiki.
+<a HREF="https://github.com/open-source-parsers/jsoncpp/wiki/NEWS">
+  the NEWS wiki
+</a>.
 
 \section _rlinks Related links
 - <a HREF="http://www.json.org/">JSON</a> Specification and alternate language implementations.
