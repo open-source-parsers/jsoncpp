@@ -85,15 +85,15 @@ std::cout << root;
 
 \section _pbuild Build instructions
 The build instructions are located in the file 
-<a HREF="https://github.com/jacobsa/jsoncpp/blob/master/README.txt">README.txt</a> in the top-directory of the project.
+<a HREF="https://github.com/open-source-parsers/jsoncpp/blob/master/README.txt">README.txt</a> in the top-directory of the project.
 
 The latest version of the source is available in the project's GitHub repository:
-<a HREF="https://github.com/jacobsa/jsoncpp/">
+<a HREF="https://github.com/open-source-parsers/jsoncpp/">
 jsoncpp</a>
 
 \section _news What's New?
 The description of latest changes can be found in 
-<a HREF="https://github.com/jacobsa/jsoncpp/blob/master/NEWS.txt">NEWS.txt</a> in the top-directory of the project.
+<a HREF="https://github.com/open-source-parsers/jsoncpp/blob/master/NEWS.txt">NEWS.txt</a> in the top-directory of the project.
 
 <strong>TODO</strong>: Move to wiki.
 
@@ -110,7 +110,7 @@ The description of latest changes can be found in
 - <a href="http://jsoncpp.sourceforge.net/old.html">http://jsoncpp.sourceforge.net/old.html</a>
 
 \section _license License
-See file <a href="https://github.com/jacobsa/jsoncpp/blob/master/LICENSE"><code>LICENSE</code></a> in the top-directory of the project.
+See file <a href="https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE"><code>LICENSE</code></a> in the top-directory of the project.
 
 Basically JsonCpp is licensed under MIT license, or public domain if desired 
 and recognized in your jurisdiction.
