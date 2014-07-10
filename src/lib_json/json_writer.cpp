@@ -63,6 +63,11 @@ std::string valueToString(UInt value) {
 #endif // # if defined(JSON_HAS_INT64)
 
 std::string valueToString(double value) {
+#if defined(WINCE)
+  char buffer[32];
+  _snprintf(buffer, sizeof(buffer), "%.16g", value);
+  return buffer;
+#else
   // We need not request the alternative representation
   // that always has a decimal point because JSON doesn't distingish the
   // concepts of reals and integers.
@@ -72,6 +77,7 @@ std::string valueToString(double value) {
   str.precision(16);
   str << value;
   return str.str();
+#endif
 }
 
 std::string valueToString(bool value) { return value ? "true" : "false"; }
