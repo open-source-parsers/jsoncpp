@@ -116,7 +116,7 @@ def build_doc( options,  make_release=False ):
     ok = run_doxygen( options.doxygen_path, 'doc/doxyfile', 'doc', is_silent=options.silent )
     if not options.silent:
         print open(warning_log_path, 'rb').read()
-    index_path = os.path.abspath(os.path.join(subst_keys['%HTML_OUTPUT%'], 'index.html'))
+    index_path = os.path.abspath(os.path.join('doc', subst_keys['%HTML_OUTPUT%'], 'index.html'))
     print 'Generated documentation can be found in:'
     print index_path
     if options.open:

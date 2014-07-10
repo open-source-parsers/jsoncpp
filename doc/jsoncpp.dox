@@ -25,10 +25,11 @@ Here is an example of JSON data:
     "indent" : { "length" : 3, "use_space": true }
 }
 \endverbatim
+<code>jsoncpp</code> supports comments as <i>meta-data</i>.
 
 \section _features Features
 - read and write JSON document
-- attach C and C++ style comments to element during parsing
+- attach C++ style comments to element during parsing
 - rewrite JSON document preserving original comments
 
 Notes: Comments used to be supported in JSON but where removed for 
@@ -84,43 +85,35 @@ std::cout << root;
 
 \section _pbuild Build instructions
 The build instructions are located in the file 
-<a HREF="README.txt">README.txt</a> in the top-directory of the project.
+<a HREF="https://github.com/open-source-parsers/jsoncpp/blob/master/README.md">README.md</a> in the top-directory of the project.
 
-Permanent link to the latest revision of the file in subversion: 
-<a HREF="http://jsoncpp.svn.sourceforge.net/viewvc/jsoncpp/trunk/jsoncpp/README.txt?view=markup">latest README.txt</a>
-
-\section _pdownload Download
-The sources can be downloaded from 
-<a HREF="http://sourceforge.net/projects/jsoncpp/files/">SourceForge download page</a>.
-
-The latest version of the source is available in the project's subversion repository: 
-<a HREF="http://jsoncpp.svn.sourceforge.net/svnroot/jsoncpp/trunk/">
-http://jsoncpp.svn.sourceforge.net/svnroot/jsoncpp/trunk/</a>
-
-To checkout the source, see the following 
-<a HREF="http://sourceforge.net/scm/?type=svn&group_id=144446">instructions</a>.
+The latest version of the source is available in the project's GitHub repository:
+<a HREF="https://github.com/open-source-parsers/jsoncpp/">
+jsoncpp</a>
 
 \section _news What's New?
 The description of latest changes can be found in 
-<a HREF="NEWS.txt">NEWS.txt</a> in the top-directory of the project.
-
-Permanent link to the latest revision of the file in subversion: 
-<a HREF="http://svn.sourceforge.net/viewcvs.cgi/jsoncpp/README.txt?view=markup">latest NEWS.txt</a>
-
-\section _plinks Project links
-- <a HREF="http://jsoncpp.sourceforge.net">json-cpp home</a>
-- <a HREF="http://www.sourceforge.net/projects/jsoncpp/">json-cpp sourceforge project</a>
+<a HREF="https://github.com/open-source-parsers/jsoncpp/wiki/NEWS">
+  the NEWS wiki
+</a>.
 
 \section _rlinks Related links
 - <a HREF="http://www.json.org/">JSON</a> Specification and alternate language implementations.
 - <a HREF="http://www.yaml.org/">YAML</a> A data format designed for human readability.
 - <a HREF="http://www.cl.cam.ac.uk/~mgk25/unicode.html">UTF-8 and Unicode FAQ</a>.
 
+\section _plinks Old project links
+- <a href="https://sourceforge.net/projects/jsoncpp/">https://sourceforge.net/projects/jsoncpp/</a>
+- <a href="http://jsoncpp.sourceforge.net">http://jsoncpp.sourceforge.net</a>
+- <a href="http://sourceforge.net/projects/jsoncpp/files/">http://sourceforge.net/projects/jsoncpp/files/</a>
+- <a href="http://jsoncpp.svn.sourceforge.net/svnroot/jsoncpp/trunk/">http://jsoncpp.svn.sourceforge.net/svnroot/jsoncpp/trunk/</a>
+- <a href="http://jsoncpp.sourceforge.net/old.html">http://jsoncpp.sourceforge.net/old.html</a>
+
 \section _license License
-See file <a HREF="LICENSE">LICENSE</a> in the top-directory of the project.
+See file <a href="https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE"><code>LICENSE</code></a> in the top-directory of the project.
 
 Basically JsonCpp is licensed under MIT license, or public domain if desired 
 and recognized in your jurisdiction.
 
-\author Baptiste Lepilleur <blep@users.sourceforge.net>
+\author Baptiste Lepilleur <blep@users.sourceforge.net> (originator)
 */
