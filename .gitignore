@@ -10,3 +10,4 @@
 /libs/
 /doc/doxyfile
 /dist/
+/include/json/version.h
