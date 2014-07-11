@@ -77,7 +77,7 @@ std::string valueToString(double value) {
 #else
   snprintf(buffer, sizeof(buffer), "%.16g", value);
 #endif
-
+  fixNumericLocale(buffer, buffer + strlen(buffer));
   return buffer;
 }
 
