@@ -1582,4 +1582,4 @@ int main(int argc, const char *argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, WriterTest, dropNullPlaceholders);
   return runner.runCommandLine(argc, argv);
 }
-// vim: et ts=4 sts=4 sw=4 tw=0
+// vim: et ts=2 sts=2 sw=2 tw=0
