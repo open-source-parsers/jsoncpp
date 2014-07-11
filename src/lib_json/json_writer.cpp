@@ -63,15 +63,22 @@ std::string valueToString(UInt value) {
 #endif // # if defined(JSON_HAS_INT64)
 
 std::string valueToString(double value) {
-  // We need not request the alternative representation
-  // that always has a decimal point because JSON doesn't distingish the
-  // concepts of reals and integers.
-  std::stringstream str;
-  // Set locale to "C" to always get a '.' instead of a ','
-  str.imbue(std::locale::classic());
-  str.precision(16);
-  str << value;
-  return str.str();
+  // Allocate a buffer that is more than large enough to store the 16 digits of
+  // precision requested below.
+  char buffer[32];
+
+// Print into the buffer. We need not request the alternative representation
+// that always has a decimal point because JSON doesn't distingish the
+// concepts of reals and integers.
+#if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__) // Use secure version with
+                                                      // visual studio 2005 to
+                                                      // avoid warning.
+  sprintf_s(buffer, sizeof(buffer), "%.16g", value);
+#else
+  snprintf(buffer, sizeof(buffer), "%.16g", value);
+#endif
+
+  return buffer;
 }
 
 std::string valueToString(bool value) { return value ? "true" : "false"; }
