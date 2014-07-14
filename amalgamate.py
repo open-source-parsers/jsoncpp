@@ -66,7 +66,7 @@ def amalgamate_source( source_top_dir=None,
     header.add_text( '/// If defined, indicates that the source file is amalgated' )
     header.add_text( '/// to prevent private header inclusion.' )
     header.add_text( '#define JSON_IS_AMALGAMATION' )
-    header.add_file( 'include/json/version.h' )
+    #header.add_file( 'include/json/version.h' )
     header.add_file( 'include/json/config.h' )
     header.add_file( 'include/json/forwards.h' )
     header.add_file( 'include/json/features.h' )
@@ -105,10 +105,10 @@ def amalgamate_source( source_top_dir=None,
     print 'Amalgating source...'
     source = AmalgamationFile( source_top_dir )
     source.add_text( '/// Json-cpp amalgated source (http://jsoncpp.sourceforge.net/).' )
-    source.add_text( '/// It is intented to be used with #include <%s>' % header_include_path )
+    source.add_text( '/// It is intented to be used with #include "%s"' % target_source_path )
     source.add_file( 'LICENSE', wrap_in_comment=True )
     source.add_text( '' )
-    source.add_text( '#include <%s>' % header_include_path )
+    source.add_text( '#include "%s"' % header_include_path )
     source.add_text( '' )
     lib_json = 'src/lib_json'
     source.add_file( os.path.join(lib_json, 'json_tool.h') )
