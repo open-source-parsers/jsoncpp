@@ -1414,18 +1414,70 @@ void ValueTest::checkIsEqual(const Json::Value &x, const Json::Value &y) {
   JSONTEST_ASSERT(y.compare(x) == 0);
 }
 
-JSONTEST_FIXTURE(ValueTest, checkInteger) {
+JSONTEST_FIXTURE(ValueTest, typeChecksThrowExceptions) {
 #if JSON_USE_EXCEPTION
-  try {
-    Json::Value x = 1;
-    x["key"]; // SIGABRT?
-    // regression for https://sourceforge.net/p/jsoncpp/bugs/67/
-    JSONTEST_ASSERT(0);
-  }
-  catch (std::runtime_error const &) {
-    JSONTEST_ASSERT(1); // good
-  }
-#endif // JSON_USE_EXCEPTION
+
+  Json::Value intVal(1);
+  Json::Value strVal("Test");
+  Json::Value objVal(Json::objectValue);
+  Json::Value arrVal(Json::arrayValue);
+
+  JSONTEST_ASSERT_THROWS(intVal["test"]);
+  JSONTEST_ASSERT_THROWS(strVal["test"]);
+  JSONTEST_ASSERT_THROWS(arrVal["test"]);
+
+  JSONTEST_ASSERT_THROWS(intVal.removeMember("test"));
+  JSONTEST_ASSERT_THROWS(strVal.removeMember("test"));
+  JSONTEST_ASSERT_THROWS(arrVal.removeMember("test"));
+
+  JSONTEST_ASSERT_THROWS(intVal.getMemberNames());
+  JSONTEST_ASSERT_THROWS(strVal.getMemberNames());
+  JSONTEST_ASSERT_THROWS(arrVal.getMemberNames());
+
+  JSONTEST_ASSERT_THROWS(intVal[0]);
+  JSONTEST_ASSERT_THROWS(objVal[0]);
+  JSONTEST_ASSERT_THROWS(strVal[0]);
+
+  JSONTEST_ASSERT_THROWS(intVal.clear());
+
+  JSONTEST_ASSERT_THROWS(intVal.resize(1));
+  JSONTEST_ASSERT_THROWS(strVal.resize(1));
+  JSONTEST_ASSERT_THROWS(objVal.resize(1));
+
+  JSONTEST_ASSERT_THROWS(intVal.asCString());
+
+  JSONTEST_ASSERT_THROWS(objVal.asString());
+  JSONTEST_ASSERT_THROWS(arrVal.asString());
+
+  JSONTEST_ASSERT_THROWS(strVal.asInt());
+  JSONTEST_ASSERT_THROWS(objVal.asInt());
+  JSONTEST_ASSERT_THROWS(arrVal.asInt());
+
+  JSONTEST_ASSERT_THROWS(strVal.asUInt());
+  JSONTEST_ASSERT_THROWS(objVal.asUInt());
+  JSONTEST_ASSERT_THROWS(arrVal.asUInt());
+
+  JSONTEST_ASSERT_THROWS(strVal.asInt64());
+  JSONTEST_ASSERT_THROWS(objVal.asInt64());
+  JSONTEST_ASSERT_THROWS(arrVal.asInt64());
+
+  JSONTEST_ASSERT_THROWS(strVal.asUInt64());
+  JSONTEST_ASSERT_THROWS(objVal.asUInt64());
+  JSONTEST_ASSERT_THROWS(arrVal.asUInt64());
+
+  JSONTEST_ASSERT_THROWS(strVal.asDouble());
+  JSONTEST_ASSERT_THROWS(objVal.asDouble());
+  JSONTEST_ASSERT_THROWS(arrVal.asDouble());
+
+  JSONTEST_ASSERT_THROWS(strVal.asFloat());
+  JSONTEST_ASSERT_THROWS(objVal.asFloat());
+  JSONTEST_ASSERT_THROWS(arrVal.asFloat());
+
+  JSONTEST_ASSERT_THROWS(strVal.asBool());
+  JSONTEST_ASSERT_THROWS(objVal.asBool());
+  JSONTEST_ASSERT_THROWS(arrVal.asBool());
+
+#endif
 }
 
 JSONTEST_FIXTURE(ValueTest, offsetAccessors) {
@@ -1569,8 +1621,8 @@ int main(int argc, const char *argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, compareArray);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, compareObject);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, compareType);
-  JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkInteger);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, offsetAccessors);
+  JSONTEST_REGISTER_FIXTURE(runner, ValueTest, typeChecksThrowExceptions);
 
   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseWithNoErrors);
   JSONTEST_REGISTER_FIXTURE(
@@ -1580,6 +1632,7 @@ int main(int argc, const char *argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseWithDetailError);
 
   JSONTEST_REGISTER_FIXTURE(runner, WriterTest, dropNullPlaceholders);
+
   return runner.runCommandLine(argc, argv);
 }
 // vim: et ts=2 sts=2 sw=2 tw=0
