@@ -241,6 +241,20 @@ TestResult &checkStringEqual(TestResult &result,
                              __LINE__,                                         \
                              #expected " == " #actual)
 
+/// \brief Asserts that a given expression throws an exception
+#define JSONTEST_ASSERT_THROWS(expr)                                           \
+  {                                                                            \
+    bool _threw = false;                                                       \
+    try {                                                                      \
+      expr;                                                                    \
+    } catch (...) {                                                            \
+      _threw = true;                                                           \
+    }                                                                          \
+    if (!_threw)                                                               \
+      result_->addFailure(__FILE__, __LINE__,                                  \
+                          "expected exception thrown: " #expr);                \
+  }
+
 /// \brief Begin a fixture test case.
 #define JSONTEST_FIXTURE(FixtureType, name)                                    \
   class Test##FixtureType##name : public FixtureType {                         \
