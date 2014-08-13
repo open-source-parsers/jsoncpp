@@ -71,7 +71,7 @@ macro(UseCompilationWarningAsError)
 endmacro() 
 
 # Include our configuration header
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/include )
+INCLUDE_DIRECTORIES( ${jsoncpp_SOURCE_DIR}/include )
 
 if ( MSVC )
     # Only enabled in debug because some old versions of VS STL generate
