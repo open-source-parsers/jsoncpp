@@ -15,8 +15,8 @@ TARGET_LINK_LIBRARIES(jsoncpp_test jsoncpp_lib)
 # (default cmake workflow hides away the test result into a file, resulting in poor dev workflow?!?)
 IF(JSONCPP_WITH_POST_BUILD_UNITTEST)
     ADD_CUSTOM_COMMAND( TARGET jsoncpp_test
-				        POST_BUILD
-				        COMMAND jsoncpp_test)
+                        POST_BUILD
+                        COMMAND $<TARGET_FILE:jsoncpp_test>)
 ENDIF(JSONCPP_WITH_POST_BUILD_UNITTEST)
 
 SET_TARGET_PROPERTIES(jsoncpp_test PROPERTIES OUTPUT_NAME jsoncpp_test) 
