@@ -13,6 +13,7 @@
 #include <string.h>
 #include <sstream>
 #include <iomanip>
+#include <math.h>
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400 // VC++ 8.0
 // Disable warning about strdup being deprecated.
@@ -79,7 +80,29 @@ std::string valueToString(double value) {
   sprintf_s(buffer, sizeof(buffer), "%.16g", value);
   #endif
 #else
-  snprintf(buffer, sizeof(buffer), "%.16g", value);
+  if ( isfinite( value ))
+  {
+     snprintf(buffer, sizeof(buffer), "%.16g", value);
+  }
+  else
+  {
+     // IEEE standard states that NaN values will not compare to themselves
+     if ( value != value)
+     {
+        snprintf(buffer, sizeof(buffer), "null");
+     }
+     else if ( value < 0)
+     {
+        snprintf(buffer, sizeof(buffer), "-1e+9999");
+     }
+     else
+     {
+        snprintf(buffer, sizeof(buffer), "1e+9999");
+     }
+     // nothing more to do, return.
+     return buffer;
+  }
+
 #endif
   fixNumericLocale(buffer, buffer + strlen(buffer));
   return buffer;
