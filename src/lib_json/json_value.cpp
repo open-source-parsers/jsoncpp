@@ -795,6 +795,42 @@ bool Value::asBool() const {
   JSON_FAIL_MESSAGE("Value is not convertible to bool.");
 }
 
+Value::operator const char*() const {
+  return Value::asCString();
+}
+
+Value::operator std::string() const {
+  return Value::asString();
+}
+
+Value::operator Int() const {
+  return Value::asInt();
+}
+
+Value::operator UInt() const {
+  return Value::asUInt();
+}
+
+Value::operator Int64() const {
+  return Value::asInt64();
+}
+
+Value::operator UInt64() const {
+  return Value::asUInt64();
+}
+
+Value::operator float() const {
+  return Value::asFloat();
+}
+
+Value::operator double() const {
+  return Value::asDouble();
+}
+
+Value::operator bool() const {
+  return Value::asBool();
+}
+
 bool Value::isConvertibleTo(ValueType other) const {
   switch (other) {
   case nullValue:
