@@ -74,20 +74,20 @@ std::string valueToString(double value) {
 #if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__) // Use secure version with
                                                       // visual studio 2005 to
                                                       // avoid warning.
-	int len;
+  int len;
   #if defined(WINCE)
-		len = _snprintf(buffer, sizeof(buffer), "%.16g", value);
+  len = _snprintf(buffer, sizeof(buffer), "%.16g", value);
   #else
-		len = sprintf_s(buffer, sizeof(buffer), "%.16g", value);
+  len = sprintf_s(buffer, sizeof(buffer), "%.16g", value);
   #endif
-                assert(len>=0);
-		fixNumericLocale(buffer, buffer + len);
+  assert(len>=0);
+  fixNumericLocale(buffer, buffer + len);
 #else
   if ( isfinite( value ))
-	{
-		int len = snprintf(buffer, sizeof(buffer), "%.16g", value);
-                assert(len>=0);
-		fixNumericLocale(buffer, buffer + len);
+  {
+    int len = snprintf(buffer, sizeof(buffer), "%.16g", value);
+    assert(len>=0);
+    fixNumericLocale(buffer, buffer + len);
   }
   else
   {
