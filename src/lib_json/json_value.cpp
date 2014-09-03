@@ -105,8 +105,7 @@ static inline char *duplicateStringValue(const char *value,
 /** Free the string duplicated by duplicateStringValue().
  */
 static inline void releaseStringValue(char *value) {
-  if (value)
-    free(value);
+  free(value);
 }
 
 } // namespace Json
