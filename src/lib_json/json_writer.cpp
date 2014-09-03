@@ -67,6 +67,7 @@ std::string valueToString(double value) {
   // Allocate a buffer that is more than large enough to store the 16 digits of
   // precision requested below.
   char buffer[32];
+  int len = -1;
 
 // Print into the buffer. We need not request the alternative representation
 // that always has a decimal point because JSON doesn't distingish the
@@ -74,38 +75,36 @@ std::string valueToString(double value) {
 #if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__) // Use secure version with
                                                       // visual studio 2005 to
                                                       // avoid warning.
-  int len;
   #if defined(WINCE)
   len = _snprintf(buffer, sizeof(buffer), "%.16g", value);
   #else
   len = sprintf_s(buffer, sizeof(buffer), "%.16g", value);
   #endif
-  assert(len>=0);
-  fixNumericLocale(buffer, buffer + len);
 #else
   if ( isfinite( value ))
   {
-    int len = snprintf(buffer, sizeof(buffer), "%.16g", value);
-    assert(len>=0);
-    fixNumericLocale(buffer, buffer + len);
+    len = snprintf(buffer, sizeof(buffer), "%.16g", value);
   }
   else
   {
      // IEEE standard states that NaN values will not compare to themselves
      if ( value != value)
      {
-        snprintf(buffer, sizeof(buffer), "null");
+        len = snprintf(buffer, sizeof(buffer), "null");
      }
      else if ( value < 0)
      {
-        snprintf(buffer, sizeof(buffer), "-1e+9999");
+        len = snprintf(buffer, sizeof(buffer), "-1e+9999");
      }
      else
      {
-        snprintf(buffer, sizeof(buffer), "1e+9999");
+        len = snprintf(buffer, sizeof(buffer), "1e+9999");
      }
+     // For those, we do not need to call fixNumLoc, but it is fast.
   }
 #endif
+  assert(len>=0);
+  fixNumericLocale(buffer, buffer + len);
   return buffer;
 }
 
