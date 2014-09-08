@@ -190,9 +190,8 @@ void Value::CZString::swap(CZString &other) {
   std::swap(index_, other.index_);
 }
 
-Value::CZString &Value::CZString::operator=(const CZString &other) {
-  CZString temp(other);
-  swap(temp);
+Value::CZString &Value::CZString::operator=(CZString other) {
+  swap(other);
   return *this;
 }
 
@@ -481,9 +480,8 @@ Value::~Value() {
     delete[] comments_;
 }
 
-Value &Value::operator=(const Value &other) {
-  Value temp(other);
-  swap(temp);
+Value &Value::operator=(Value other) {
+  swap(other);
   return *this;
 }
 
