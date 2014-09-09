@@ -280,10 +280,9 @@ ValueInternalArray::ValueInternalArray( const ValueInternalArray &other )
 
 
 ValueInternalArray &
-ValueInternalArray::operator =( const ValueInternalArray &other )
+ValueInternalArray::operator=(ValueInternalArray other)
 {
-   ValueInternalArray temp( other );
-   swap( temp );
+   swap(other);
    return *this;
 }
 

@@ -196,10 +196,9 @@ ValueInternalMap::ValueInternalMap( const ValueInternalMap &other )
 
 
 ValueInternalMap &
-ValueInternalMap::operator =( const ValueInternalMap &other )
+ValueInternalMap::operator=(ValueInternalMap other)
 {
-   ValueInternalMap dummy( other );
-   swap( dummy );
+   swap(other);
    return *this;
 }
 
