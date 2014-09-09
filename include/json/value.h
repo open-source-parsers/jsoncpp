@@ -171,7 +171,7 @@ private:
     CZString(const char *cstr, DuplicationPolicy allocate);
     CZString(const CZString &other);
     ~CZString();
-    CZString &operator=(const CZString &other);
+    CZString &operator=(CZString other);
     bool operator<(const CZString &other) const;
     bool operator==(const CZString &other) const;
     ArrayIndex index() const;
@@ -238,7 +238,7 @@ Json::Value obj_value(Json::objectValue); // {}
   Value(const Value &other);
   ~Value();
 
-  Value &operator=(const Value &other);
+  Value &operator=(Value other);
   /// Swap values.
   /// \note Currently, comments are intentionally not swapped, for
   /// both logic and efficiency.
@@ -681,7 +681,7 @@ public:
 
   ValueInternalMap();
   ValueInternalMap(const ValueInternalMap &other);
-  ValueInternalMap &operator=(const ValueInternalMap &other);
+  ValueInternalMap &operator=(ValueInternalMap other);
   ~ValueInternalMap();
 
   void swap(ValueInternalMap &other);
@@ -775,7 +775,7 @@ public:
 
   ValueInternalArray();
   ValueInternalArray(const ValueInternalArray &other);
-  ValueInternalArray &operator=(const ValueInternalArray &other);
+  ValueInternalArray &operator=(ValueInternalArray other);
   ~ValueInternalArray();
   void swap(ValueInternalArray &other);
 
