@@ -81,23 +81,15 @@ std::string valueToString(double value) {
   len = sprintf_s(buffer, sizeof(buffer), "%.16g", value);
   #endif
 #else
-  if ( isfinite( value ))
-  {
+  if (isfinite( value )) {
     len = snprintf(buffer, sizeof(buffer), "%.16g", value);
-  }
-  else
-  {
+  } else {
      // IEEE standard states that NaN values will not compare to themselves
-     if ( value != value)
-     {
+     if ( value != value) {
         len = snprintf(buffer, sizeof(buffer), "null");
-     }
-     else if ( value < 0)
-     {
+     } else if ( value < 0) {
         len = snprintf(buffer, sizeof(buffer), "-1e+9999");
-     }
-     else
-     {
+     } else {
         len = snprintf(buffer, sizeof(buffer), "1e+9999");
      }
      // For those, we do not need to call fixNumLoc, but it is fast.
