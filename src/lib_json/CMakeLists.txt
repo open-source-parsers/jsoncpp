@@ -34,7 +34,6 @@ ADD_LIBRARY( jsoncpp_lib ${JSONCPP_LIB_TYPE}
              json_valueiterator.inl
              json_value.cpp
              json_writer.cpp
-             version.h.in
              )
 SET_TARGET_PROPERTIES( jsoncpp_lib PROPERTIES OUTPUT_NAME jsoncpp )
 SET_TARGET_PROPERTIES( jsoncpp_lib PROPERTIES VERSION ${JSON_CPP_VERSION} SOVERSION ${JSON_CPP_VERSION} )
