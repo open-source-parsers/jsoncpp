@@ -44,7 +44,7 @@ class AmalgamationFile:
         if output_dir and not os.path.isdir( output_dir ):
             os.makedirs( output_dir )
         f = open( output_path, "wb" )
-        f.write( bytes(self.get_value(), 'UTF-8') )
+        f.write( str.encode(self.get_value(), 'UTF-8') )
         f.close()
 
 def amalgamate_source( source_top_dir=None,
