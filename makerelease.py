@@ -10,6 +10,9 @@ python makerelease.py --force --retag --platform=msvc6,msvc71,msvc80,mingw -uble
 
 Example of invocation when doing a release:
 python makerelease.py 0.5.0 0.6.0-dev
+
+Note: This was for Subversion. Now that we are in GitHub, we do not
+need to build versioned tarballs anymore, so makerelease.py is defunct.
 """
 import os.path
 import subprocess
