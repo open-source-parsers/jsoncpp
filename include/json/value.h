@@ -1017,6 +1017,8 @@ public:
   }
 
   reference operator*() const { return deref(); }
+
+  pointer operator->() const { return &deref(); }
 };
 
 /** \brief Iterator for object and array value.
@@ -1071,6 +1073,8 @@ public:
   }
 
   reference operator*() const { return deref(); }
+
+  pointer operator->() const { return &deref(); }
 };
 
 } // namespace Json
