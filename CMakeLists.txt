@@ -5,6 +5,7 @@ ENABLE_TESTING()
 OPTION(JSONCPP_WITH_TESTS "Compile and run JsonCpp test executables" ON)
 OPTION(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)
 OPTION(JSONCPP_WITH_WARNING_AS_ERROR "Force compilation to fail if a warning occurs" OFF)
+OPTION(JSONCPP_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" ON)
 
 # Ensures that CMAKE_BUILD_TYPE is visible in cmake-gui on Unix
 IF(NOT WIN32)
@@ -50,6 +51,15 @@ endif( MSVC )
 IF(JSONCPP_WITH_WARNING_AS_ERROR)
     UseCompilationWarningAsError()
 ENDIF(JSONCPP_WITH_WARNING_AS_ERROR)
+
+IF(JSONCPP_WITH_PKGCONFIG_SUPPORT)
+	CONFIGURE_FILE(
+		"pkg-config/jsoncpp.pc.in"
+		"pkg-config/jsoncpp.pc"
+		@ONLY)
+	INSTALL(FILES "${CMAKE_BINARY_DIR}/pkg-config/jsoncpp.pc"
+		DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
+ENDIF(JSONCPP_WITH_PKGCONFIG_SUPPORT)
 
 # Build the different applications
 ADD_SUBDIRECTORY( src )
