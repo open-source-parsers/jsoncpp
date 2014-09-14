@@ -1540,4 +1540,3 @@ Value &Path::make(Value &root) const {
 }
 
 } // namespace Json
-// vim: et ts=2 sts=2 sw=2 tw=0

@@ -277,4 +277,3 @@ TestResult &checkStringEqual(TestResult &result,
   (runner).add(JSONTEST_FIXTURE_FACTORY(FixtureType, name))
 
 #endif // ifndef JSONTEST_H_INCLUDED
-// vim: et ts=2 sts=2 sw=2 tw=0
