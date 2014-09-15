@@ -42,15 +42,15 @@ static std::string normalizeFloatingPointStr(double value) {
   return s;
 }
 
-static std::string readInputTestFile(const char *path) {
-  FILE *file = fopen(path, "rb");
+static std::string readInputTestFile(const char* path) {
+  FILE* file = fopen(path, "rb");
   if (!file)
     return std::string("");
   fseek(file, 0, SEEK_END);
   long size = ftell(file);
   fseek(file, 0, SEEK_SET);
   std::string text;
-  char *buffer = new char[size + 1];
+  char* buffer = new char[size + 1];
   buffer[size] = 0;
   if (fread(buffer, 1, size, file) == (unsigned long)size)
     text = buffer;
@@ -60,7 +60,7 @@ static std::string readInputTestFile(const char *path) {
 }
 
 static void
-printValueTree(FILE *fout, Json::Value &value, const std::string &path = ".") {
+printValueTree(FILE* fout, Json::Value& value, const std::string& path = ".") {
   switch (value.type()) {
   case Json::nullValue:
     fprintf(fout, "%s=null\n", path.c_str());
@@ -110,7 +110,7 @@ printValueTree(FILE *fout, Json::Value &value, const std::string &path = ".") {
     for (Json::Value::Members::iterator it = members.begin();
          it != members.end();
          ++it) {
-      const std::string &name = *it;
+      const std::string& name = *it;
       printValueTree(fout, value[name], path + suffix + name);
     }
   } break;
@@ -119,11 +119,11 @@ printValueTree(FILE *fout, Json::Value &value, const std::string &path = ".") {
   }
 }
 
-static int parseAndSaveValueTree(const std::string &input,
-                                 const std::string &actual,
-                                 const std::string &kind,
-                                 Json::Value &root,
-                                 const Json::Features &features,
+static int parseAndSaveValueTree(const std::string& input,
+                                 const std::string& actual,
+                                 const std::string& kind,
+                                 Json::Value& root,
+                                 const Json::Features& features,
                                  bool parseOnly) {
   Json::Reader reader(features);
   bool parsingSuccessful = reader.parse(input, root);
@@ -135,7 +135,7 @@ static int parseAndSaveValueTree(const std::string &input,
   }
 
   if (!parseOnly) {
-    FILE *factual = fopen(actual.c_str(), "wt");
+    FILE* factual = fopen(actual.c_str(), "wt");
     if (!factual) {
       printf("Failed to create %s actual file.\n", kind.c_str());
       return 2;
@@ -146,14 +146,14 @@ static int parseAndSaveValueTree(const std::string &input,
   return 0;
 }
 
-static int rewriteValueTree(const std::string &rewritePath,
-                            const Json::Value &root,
-                            std::string &rewrite) {
+static int rewriteValueTree(const std::string& rewritePath,
+                            const Json::Value& root,
+                            std::string& rewrite) {
   // Json::FastWriter writer;
   // writer.enableYAMLCompatibility();
   Json::StyledWriter writer;
   rewrite = writer.write(root);
-  FILE *fout = fopen(rewritePath.c_str(), "wt");
+  FILE* fout = fopen(rewritePath.c_str(), "wt");
   if (!fout) {
     printf("Failed to create rewrite file: %s\n", rewritePath.c_str());
     return 2;
@@ -163,8 +163,8 @@ static int rewriteValueTree(const std::string &rewritePath,
   return 0;
 }
 
-static std::string removeSuffix(const std::string &path,
-                                const std::string &extension) {
+static std::string removeSuffix(const std::string& path,
+                                const std::string& extension) {
   if (extension.length() >= path.length())
     return std::string("");
   std::string suffix = path.substr(path.length() - extension.length());
@@ -182,16 +182,16 @@ static void printConfig() {
 #endif
 }
 
-static int printUsage(const char *argv[]) {
+static int printUsage(const char* argv[]) {
   printf("Usage: %s [--strict] input-json-file", argv[0]);
   return 3;
 }
 
 int parseCommandLine(int argc,
-                     const char *argv[],
-                     Json::Features &features,
-                     std::string &path,
-                     bool &parseOnly) {
+                     const char* argv[],
+                     Json::Features& features,
+                     std::string& path,
+                     bool& parseOnly) {
   parseOnly = false;
   if (argc < 2) {
     return printUsage(argv);
@@ -217,7 +217,7 @@ int parseCommandLine(int argc,
   return 0;
 }
 
-int main(int argc, const char *argv[]) {
+int main(int argc, const char* argv[]) {
   std::string path;
   Json::Features features;
   bool parseOnly;
@@ -261,7 +261,7 @@ int main(int argc, const char *argv[]) {
       }
     }
   }
-  catch (const std::exception &e) {
+  catch (const std::exception& e) {
     printf("Unhandled exception:\n%s\n", e.what());
     exitCode = 1;
   }

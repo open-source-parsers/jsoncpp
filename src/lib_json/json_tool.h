@@ -60,7 +60,7 @@ typedef char UIntToStringBuffer[uintToStringBufferSize];
  * @param current Input/Output string buffer.
  *        Must have at least uintToStringBufferSize chars free.
  */
-static inline void uintToString(LargestUInt value, char *&current) {
+static inline void uintToString(LargestUInt value, char*& current) {
   *--current = 0;
   do {
     *--current = char(value % 10) + '0';
@@ -73,7 +73,7 @@ static inline void uintToString(LargestUInt value, char *&current) {
  * We had a sophisticated way, but it did not work in WinCE.
  * @see https://github.com/open-source-parsers/jsoncpp/pull/9
  */
-static inline void fixNumericLocale(char *begin, char *end) {
+static inline void fixNumericLocale(char* begin, char* end) {
   while (begin < end) {
     if (*begin == ',') {
       *begin = '.';

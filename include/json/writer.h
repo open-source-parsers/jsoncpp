@@ -29,7 +29,7 @@ class JSON_API Writer {
 public:
   virtual ~Writer();
 
-  virtual std::string write(const Value &root) = 0;
+  virtual std::string write(const Value& root) = 0;
 };
 
 /** \brief Outputs a Value in <a HREF="http://www.json.org">JSON</a> format
@@ -57,10 +57,10 @@ public:
   void omitEndingLineFeed();
 
 public: // overridden from Writer
-  virtual std::string write(const Value &root);
+  virtual std::string write(const Value& root);
 
 private:
-  void writeValue(const Value &value);
+  void writeValue(const Value& value);
 
   std::string document_;
   bool yamlCompatiblityEnabled_;
@@ -101,21 +101,21 @@ public: // overridden from Writer
    * \param root Value to serialize.
    * \return String containing the JSON document that represents the root value.
    */
-  virtual std::string write(const Value &root);
+  virtual std::string write(const Value& root);
 
 private:
-  void writeValue(const Value &value);
-  void writeArrayValue(const Value &value);
-  bool isMultineArray(const Value &value);
-  void pushValue(const std::string &value);
+  void writeValue(const Value& value);
+  void writeArrayValue(const Value& value);
+  bool isMultineArray(const Value& value);
+  void pushValue(const std::string& value);
   void writeIndent();
-  void writeWithIndent(const std::string &value);
+  void writeWithIndent(const std::string& value);
   void indent();
   void unindent();
-  void writeCommentBeforeValue(const Value &root);
-  void writeCommentAfterValueOnSameLine(const Value &root);
-  bool hasCommentForValue(const Value &value);
-  static std::string normalizeEOL(const std::string &text);
+  void writeCommentBeforeValue(const Value& root);
+  void writeCommentAfterValueOnSameLine(const Value& root);
+  bool hasCommentForValue(const Value& value);
+  static std::string normalizeEOL(const std::string& text);
 
   typedef std::vector<std::string> ChildValues;
 
@@ -164,26 +164,26 @@ public:
    * \note There is no point in deriving from Writer, since write() should not
    * return a value.
    */
-  void write(std::ostream &out, const Value &root);
+  void write(std::ostream& out, const Value& root);
 
 private:
-  void writeValue(const Value &value);
-  void writeArrayValue(const Value &value);
-  bool isMultineArray(const Value &value);
-  void pushValue(const std::string &value);
+  void writeValue(const Value& value);
+  void writeArrayValue(const Value& value);
+  bool isMultineArray(const Value& value);
+  void pushValue(const std::string& value);
   void writeIndent();
-  void writeWithIndent(const std::string &value);
+  void writeWithIndent(const std::string& value);
   void indent();
   void unindent();
-  void writeCommentBeforeValue(const Value &root);
-  void writeCommentAfterValueOnSameLine(const Value &root);
-  bool hasCommentForValue(const Value &value);
-  static std::string normalizeEOL(const std::string &text);
+  void writeCommentBeforeValue(const Value& root);
+  void writeCommentAfterValueOnSameLine(const Value& root);
+  bool hasCommentForValue(const Value& value);
+  static std::string normalizeEOL(const std::string& text);
 
   typedef std::vector<std::string> ChildValues;
 
   ChildValues childValues_;
-  std::ostream *document_;
+  std::ostream* document_;
   std::string indentString_;
   int rightMargin_;
   std::string indentation_;
@@ -198,11 +198,11 @@ std::string JSON_API valueToString(LargestInt value);
 std::string JSON_API valueToString(LargestUInt value);
 std::string JSON_API valueToString(double value);
 std::string JSON_API valueToString(bool value);
-std::string JSON_API valueToQuotedString(const char *value);
+std::string JSON_API valueToQuotedString(const char* value);
 
 /// \brief Output using the StyledStreamWriter.
 /// \see Json::operator>>()
-JSON_API std::ostream &operator<<(std::ostream &, const Value &root);
+JSON_API std::ostream& operator<<(std::ostream&, const Value& root);
 
 } // namespace Json
 

@@ -30,7 +30,7 @@ namespace JsonTest {
 
 class Failure {
 public:
-  const char *file_;
+  const char* file_;
   unsigned int line_;
   std::string expr_;
   std::string message_;
@@ -43,13 +43,13 @@ public:
 struct PredicateContext {
   typedef unsigned int Id;
   Id id_;
-  const char *file_;
+  const char* file_;
   unsigned int line_;
-  const char *expr_;
-  PredicateContext *next_;
+  const char* expr_;
+  PredicateContext* next_;
   /// Related Failure, set when the PredicateContext is converted
   /// into a Failure.
-  Failure *failure_;
+  Failure* failure_;
 };
 
 class TestResult {
@@ -63,25 +63,25 @@ public:
   PredicateContext::Id predicateId_;
 
   /// \internal Implementation detail for predicate macros
-  PredicateContext *predicateStackTail_;
+  PredicateContext* predicateStackTail_;
 
-  void setTestName(const std::string &name);
+  void setTestName(const std::string& name);
 
   /// Adds an assertion failure.
-  TestResult &
-  addFailure(const char *file, unsigned int line, const char *expr = 0);
+  TestResult&
+  addFailure(const char* file, unsigned int line, const char* expr = 0);
 
   /// Removes the last PredicateContext added to the predicate stack
   /// chained list.
   /// Next messages will be targed at the PredicateContext that was removed.
-  TestResult &popPredicateContext();
+  TestResult& popPredicateContext();
 
   bool failed() const;
 
   void printFailure(bool printTestName) const;
 
   // Generic operator that will work with anything ostream can deal with.
-  template <typename T> TestResult &operator<<(const T &value) {
+  template <typename T> TestResult& operator<<(const T& value) {
     std::ostringstream oss;
     oss.precision(16);
     oss.setf(std::ios_base::floatfield);
@@ -90,21 +90,21 @@ public:
   }
 
   // Specialized versions.
-  TestResult &operator<<(bool value);
+  TestResult& operator<<(bool value);
   // std:ostream does not support 64bits integers on all STL implementation
-  TestResult &operator<<(Json::Int64 value);
-  TestResult &operator<<(Json::UInt64 value);
+  TestResult& operator<<(Json::Int64 value);
+  TestResult& operator<<(Json::UInt64 value);
 
 private:
-  TestResult &addToLastFailure(const std::string &message);
+  TestResult& addToLastFailure(const std::string& message);
   unsigned int getAssertionNestingLevel() const;
   /// Adds a failure or a predicate context
-  void addFailureInfo(const char *file,
+  void addFailureInfo(const char* file,
                       unsigned int line,
-                      const char *expr,
+                      const char* expr,
                       unsigned int nestingLevel);
-  static std::string indentText(const std::string &text,
-                                const std::string &indent);
+  static std::string indentText(const std::string& text,
+                                const std::string& indent);
 
   typedef std::deque<Failure> Failures;
   Failures failures_;
@@ -112,7 +112,7 @@ private:
   PredicateContext rootPredicateNode_;
   PredicateContext::Id lastUsedPredicateId_;
   /// Failure which is the target of the messages added using operator <<
-  Failure *messageTarget_;
+  Failure* messageTarget_;
 };
 
 class TestCase {
@@ -121,32 +121,32 @@ public:
 
   virtual ~TestCase();
 
-  void run(TestResult &result);
+  void run(TestResult& result);
 
-  virtual const char *testName() const = 0;
+  virtual const char* testName() const = 0;
 
 protected:
-  TestResult *result_;
+  TestResult* result_;
 
 private:
   virtual void runTestCase() = 0;
 };
 
 /// Function pointer type for TestCase factory
-typedef TestCase *(*TestCaseFactory)();
+typedef TestCase* (*TestCaseFactory)();
 
 class Runner {
 public:
   Runner();
 
   /// Adds a test to the suite
-  Runner &add(TestCaseFactory factory);
+  Runner& add(TestCaseFactory factory);
 
   /// Runs test as specified on the command-line
   /// If no command-line arguments are provided, run all tests.
   /// If --list-tests is provided, then print the list of all test cases
   /// If --test <testname> is provided, then run test testname.
-  int runCommandLine(int argc, const char *argv[]) const;
+  int runCommandLine(int argc, const char* argv[]) const;
 
   /// Runs all the test cases
   bool runAllTest(bool printSummary) const;
@@ -158,17 +158,17 @@ public:
   std::string testNameAt(unsigned int index) const;
 
   /// Runs the test case at the specified index using the specified TestResult
-  void runTestAt(unsigned int index, TestResult &result) const;
+  void runTestAt(unsigned int index, TestResult& result) const;
 
-  static void printUsage(const char *appName);
+  static void printUsage(const char* appName);
 
 private: // prevents copy construction and assignment
-  Runner(const Runner &other);
-  Runner &operator=(const Runner &other);
+  Runner(const Runner& other);
+  Runner& operator=(const Runner& other);
 
 private:
   void listTests() const;
-  bool testIndex(const std::string &testName, unsigned int &index) const;
+  bool testIndex(const std::string& testName, unsigned int& index) const;
   static void preventDialogOnCrash();
 
 private:
@@ -177,12 +177,12 @@ private:
 };
 
 template <typename T, typename U>
-TestResult &checkEqual(TestResult &result,
-                       const T &expected,
-                       const U &actual,
-                       const char *file,
+TestResult& checkEqual(TestResult& result,
+                       const T& expected,
+                       const U& actual,
+                       const char* file,
                        unsigned int line,
-                       const char *expr) {
+                       const char* expr) {
   if (static_cast<U>(expected) != actual) {
     result.addFailure(file, line, expr);
     result << "Expected: " << static_cast<U>(expected) << "\n";
@@ -191,12 +191,12 @@ TestResult &checkEqual(TestResult &result,
   return result;
 }
 
-TestResult &checkStringEqual(TestResult &result,
-                             const std::string &expected,
-                             const std::string &actual,
-                             const char *file,
+TestResult& checkStringEqual(TestResult& result,
+                             const std::string& expected,
+                             const std::string& actual,
+                             const char* file,
                              unsigned int line,
-                             const char *expr);
+                             const char* expr);
 
 } // namespace JsonTest
 
@@ -260,12 +260,12 @@ TestResult &checkStringEqual(TestResult &result,
 #define JSONTEST_FIXTURE(FixtureType, name)                                    \
   class Test##FixtureType##name : public FixtureType {                         \
   public:                                                                      \
-    static JsonTest::TestCase *factory() {                                     \
+    static JsonTest::TestCase* factory() {                                     \
       return new Test##FixtureType##name();                                    \
     }                                                                          \
                                                                                \
   public: /* overidden from TestCase */                                        \
-    virtual const char *testName() const { return #FixtureType "/" #name; }    \
+    virtual const char* testName() const { return #FixtureType "/" #name; }    \
     virtual void runTestCase();                                                \
   };                                                                           \
                                                                                \

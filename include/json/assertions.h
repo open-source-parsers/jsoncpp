@@ -26,8 +26,8 @@
 // afterward in order to tell the compiler that this macro doesn't return.
 #define JSON_FAIL_MESSAGE(message)                                             \
   {                                                                            \
-    assert(false &&message);                                                   \
-    strcpy(reinterpret_cast<char *>(666), message);                            \
+    assert(false&& message);                                                   \
+    strcpy(reinterpret_cast<char*>(666), message);                             \
     exit(123);                                                                 \
   }
 

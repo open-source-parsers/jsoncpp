@@ -81,14 +81,14 @@ TestResult::TestResult()
   predicateStackTail_ = &rootPredicateNode_;
 }
 
-void TestResult::setTestName(const std::string &name) { name_ = name; }
+void TestResult::setTestName(const std::string& name) { name_ = name; }
 
-TestResult &
-TestResult::addFailure(const char *file, unsigned int line, const char *expr) {
+TestResult&
+TestResult::addFailure(const char* file, unsigned int line, const char* expr) {
   /// Walks the PredicateContext stack adding them to failures_ if not already
   /// added.
   unsigned int nestingLevel = 0;
-  PredicateContext *lastNode = rootPredicateNode_.next_;
+  PredicateContext* lastNode = rootPredicateNode_.next_;
   for (; lastNode != 0; lastNode = lastNode->next_) {
     if (lastNode->id_ > lastUsedPredicateId_) // new PredicateContext
     {
@@ -108,9 +108,9 @@ TestResult::addFailure(const char *file, unsigned int line, const char *expr) {
   return *this;
 }
 
-void TestResult::addFailureInfo(const char *file,
+void TestResult::addFailureInfo(const char* file,
                                 unsigned int line,
-                                const char *expr,
+                                const char* expr,
                                 unsigned int nestingLevel) {
   Failure failure;
   failure.file_ = file;
@@ -122,13 +122,13 @@ void TestResult::addFailureInfo(const char *file,
   failures_.push_back(failure);
 }
 
-TestResult &TestResult::popPredicateContext() {
-  PredicateContext *lastNode = &rootPredicateNode_;
+TestResult& TestResult::popPredicateContext() {
+  PredicateContext* lastNode = &rootPredicateNode_;
   while (lastNode->next_ != 0 && lastNode->next_->next_ != 0) {
     lastNode = lastNode->next_;
   }
   // Set message target to popped failure
-  PredicateContext *tail = lastNode->next_;
+  PredicateContext* tail = lastNode->next_;
   if (tail != 0 && tail->failure_ != 0) {
     messageTarget_ = tail->failure_;
   }
@@ -142,7 +142,7 @@ bool TestResult::failed() const { return !failures_.empty(); }
 
 unsigned int TestResult::getAssertionNestingLevel() const {
   unsigned int level = 0;
-  const PredicateContext *lastNode = &rootPredicateNode_;
+  const PredicateContext* lastNode = &rootPredicateNode_;
   while (lastNode->next_ != 0) {
     lastNode = lastNode->next_;
     ++level;
@@ -162,7 +162,7 @@ void TestResult::printFailure(bool printTestName) const {
   // Print in reverse to display the callstack in the right order
   Failures::const_iterator itEnd = failures_.end();
   for (Failures::const_iterator it = failures_.begin(); it != itEnd; ++it) {
-    const Failure &failure = *it;
+    const Failure& failure = *it;
     std::string indent(failure.nestingLevel_ * 2, ' ');
     if (failure.file_) {
       printf("%s%s(%d): ", indent.c_str(), failure.file_, failure.line_);
@@ -179,8 +179,8 @@ void TestResult::printFailure(bool printTestName) const {
   }
 }
 
-std::string TestResult::indentText(const std::string &text,
-                                   const std::string &indent) {
+std::string TestResult::indentText(const std::string& text,
+                                   const std::string& indent) {
   std::string reindented;
   std::string::size_type lastIndex = 0;
   while (lastIndex < text.size()) {
@@ -195,22 +195,22 @@ std::string TestResult::indentText(const std::string &text,
   return reindented;
 }
 
-TestResult &TestResult::addToLastFailure(const std::string &message) {
+TestResult& TestResult::addToLastFailure(const std::string& message) {
   if (messageTarget_ != 0) {
     messageTarget_->message_ += message;
   }
   return *this;
 }
 
-TestResult &TestResult::operator<<(Json::Int64 value) {
+TestResult& TestResult::operator<<(Json::Int64 value) {
   return addToLastFailure(Json::valueToString(value));
 }
 
-TestResult &TestResult::operator<<(Json::UInt64 value) {
+TestResult& TestResult::operator<<(Json::UInt64 value) {
   return addToLastFailure(Json::valueToString(value));
 }
 
-TestResult &TestResult::operator<<(bool value) {
+TestResult& TestResult::operator<<(bool value) {
   return addToLastFailure(value ? "true" : "false");
 }
 
@@ -221,7 +221,7 @@ TestCase::TestCase() : result_(0) {}
 
 TestCase::~TestCase() {}
 
-void TestCase::run(TestResult &result) {
+void TestCase::run(TestResult& result) {
   result_ = &result;
   runTestCase();
 }
@@ -231,7 +231,7 @@ void TestCase::run(TestResult &result) {
 
 Runner::Runner() {}
 
-Runner &Runner::add(TestCaseFactory factory) {
+Runner& Runner::add(TestCaseFactory factory) {
   tests_.push_back(factory);
   return *this;
 }
@@ -241,14 +241,14 @@ unsigned int Runner::testCount() const {
 }
 
 std::string Runner::testNameAt(unsigned int index) const {
-  TestCase *test = tests_[index]();
+  TestCase* test = tests_[index]();
   std::string name = test->testName();
   delete test;
   return name;
 }
 
-void Runner::runTestAt(unsigned int index, TestResult &result) const {
-  TestCase *test = tests_[index]();
+void Runner::runTestAt(unsigned int index, TestResult& result) const {
+  TestCase* test = tests_[index]();
   result.setTestName(test->testName());
   printf("Testing %s: ", test->testName());
   fflush(stdout);
@@ -258,13 +258,13 @@ void Runner::runTestAt(unsigned int index, TestResult &result) const {
     test->run(result);
 #if JSON_USE_EXCEPTION
   }
-  catch (const std::exception &e) {
+  catch (const std::exception& e) {
     result.addFailure(__FILE__, __LINE__, "Unexpected exception caught:")
         << e.what();
   }
 #endif // if JSON_USE_EXCEPTION
   delete test;
-  const char *status = result.failed() ? "FAILED" : "OK";
+  const char* status = result.failed() ? "FAILED" : "OK";
   printf("%s\n", status);
   fflush(stdout);
 }
@@ -287,7 +287,7 @@ bool Runner::runAllTest(bool printSummary) const {
     return true;
   } else {
     for (unsigned int index = 0; index < failures.size(); ++index) {
-      TestResult &result = failures[index];
+      TestResult& result = failures[index];
       result.printFailure(count > 1);
     }
 
@@ -303,8 +303,8 @@ bool Runner::runAllTest(bool printSummary) const {
   }
 }
 
-bool Runner::testIndex(const std::string &testName,
-                       unsigned int &indexOut) const {
+bool Runner::testIndex(const std::string& testName,
+                       unsigned int& indexOut) const {
   unsigned int count = testCount();
   for (unsigned int index = 0; index < count; ++index) {
     if (testNameAt(index) == testName) {
@@ -322,7 +322,7 @@ void Runner::listTests() const {
   }
 }
 
-int Runner::runCommandLine(int argc, const char *argv[]) const {
+int Runner::runCommandLine(int argc, const char* argv[]) const {
   typedef std::deque<std::string> TestNames;
   Runner subrunner;
   for (int index = 1; index < argc; ++index) {
@@ -363,7 +363,7 @@ int Runner::runCommandLine(int argc, const char *argv[]) const {
 #if defined(_MSC_VER) && defined(_DEBUG)
 // Hook MSVCRT assertions to prevent dialog from appearing
 static int
-msvcrtSilentReportHook(int reportType, char *message, int * /*returnValue*/) {
+msvcrtSilentReportHook(int reportType, char* message, int* /*returnValue*/) {
   // The default CRT handling of error and assertion is to display
   // an error dialog to the user.
   // Instead, when an error or an assertion occurs, we force the
@@ -409,7 +409,7 @@ void Runner::preventDialogOnCrash() {
 #endif // if defined(_WIN32)
 }
 
-void Runner::printUsage(const char *appName) {
+void Runner::printUsage(const char* appName) {
   printf("Usage: %s [options]\n"
          "\n"
          "If --test is not specified, then all the test cases be run.\n"
@@ -426,12 +426,12 @@ void Runner::printUsage(const char *appName) {
 // Assertion functions
 // //////////////////////////////////////////////////////////////////
 
-TestResult &checkStringEqual(TestResult &result,
-                             const std::string &expected,
-                             const std::string &actual,
-                             const char *file,
+TestResult& checkStringEqual(TestResult& result,
+                             const std::string& expected,
+                             const std::string& actual,
+                             const char* file,
                              unsigned int line,
-                             const char *expr) {
+                             const char* expr) {
   if (expected != actual) {
     result.addFailure(file, line, expr);
     result << "Expected: '" << expected << "'\n";
