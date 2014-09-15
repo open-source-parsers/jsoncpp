@@ -247,12 +247,13 @@ TestResult &checkStringEqual(TestResult &result,
     bool _threw = false;                                                       \
     try {                                                                      \
       expr;                                                                    \
-    } catch (...) {                                                            \
+    }                                                                          \
+    catch (...) {                                                              \
       _threw = true;                                                           \
     }                                                                          \
     if (!_threw)                                                               \
-      result_->addFailure(__FILE__, __LINE__,                                  \
-                          "expected exception thrown: " #expr);                \
+      result_->addFailure(                                                     \
+          __FILE__, __LINE__, "expected exception thrown: " #expr);            \
   }
 
 /// \brief Begin a fixture test case.

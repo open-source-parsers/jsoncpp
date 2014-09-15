@@ -75,27 +75,27 @@ std::string valueToString(double value) {
 #if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__) // Use secure version with
                                                       // visual studio 2005 to
                                                       // avoid warning.
-  #if defined(WINCE)
+#if defined(WINCE)
   len = _snprintf(buffer, sizeof(buffer), "%.16g", value);
-  #else
-  len = sprintf_s(buffer, sizeof(buffer), "%.16g", value);
-  #endif
 #else
-  if (isfinite( value )) {
+  len = sprintf_s(buffer, sizeof(buffer), "%.16g", value);
+#endif
+#else
+  if (isfinite(value)) {
     len = snprintf(buffer, sizeof(buffer), "%.16g", value);
   } else {
-     // IEEE standard states that NaN values will not compare to themselves
-     if ( value != value) {
-        len = snprintf(buffer, sizeof(buffer), "null");
-     } else if ( value < 0) {
-        len = snprintf(buffer, sizeof(buffer), "-1e+9999");
-     } else {
-        len = snprintf(buffer, sizeof(buffer), "1e+9999");
-     }
-     // For those, we do not need to call fixNumLoc, but it is fast.
+    // IEEE standard states that NaN values will not compare to themselves
+    if (value != value) {
+      len = snprintf(buffer, sizeof(buffer), "null");
+    } else if (value < 0) {
+      len = snprintf(buffer, sizeof(buffer), "-1e+9999");
+    } else {
+      len = snprintf(buffer, sizeof(buffer), "1e+9999");
+    }
+    // For those, we do not need to call fixNumLoc, but it is fast.
   }
 #endif
-  assert(len>=0);
+  assert(len >= 0);
   fixNumericLocale(buffer, buffer + len);
   return buffer;
 }
@@ -172,7 +172,8 @@ Writer::~Writer() {}
 // //////////////////////////////////////////////////////////////////
 
 FastWriter::FastWriter()
-    : yamlCompatiblityEnabled_(false), dropNullPlaceholders_(false), omitEndingLineFeed_(false) {}
+    : yamlCompatiblityEnabled_(false), dropNullPlaceholders_(false),
+      omitEndingLineFeed_(false) {}
 
 void FastWriter::enableYAMLCompatibility() { yamlCompatiblityEnabled_ = true; }
 

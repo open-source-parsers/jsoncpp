@@ -33,9 +33,9 @@ namespace Json {
 #else
 #define ALIGNAS(byte_alignment)
 #endif
-static const unsigned char ALIGNAS(8) kNull[sizeof(Value)] = {0};
-const unsigned char& kNullRef = kNull[0];
-const Value& Value::null = reinterpret_cast<const Value&>(kNullRef);
+static const unsigned char ALIGNAS(8) kNull[sizeof(Value)] = { 0 };
+const unsigned char &kNullRef = kNull[0];
+const Value &Value::null = reinterpret_cast<const Value &>(kNullRef);
 
 const Int Value::minInt = Int(~(UInt(-1) / 2));
 const Int Value::maxInt = Int(UInt(-1) / 2);
@@ -104,9 +104,7 @@ static inline char *duplicateStringValue(const char *value,
 
 /** Free the string duplicated by duplicateStringValue().
  */
-static inline void releaseStringValue(char *value) {
-  free(value);
-}
+static inline void releaseStringValue(char *value) { free(value); }
 
 } // namespace Json
 

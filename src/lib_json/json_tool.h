@@ -73,7 +73,7 @@ static inline void uintToString(LargestUInt value, char *&current) {
  * We had a sophisticated way, but it did not work in WinCE.
  * @see https://github.com/open-source-parsers/jsoncpp/pull/9
  */
-static inline void fixNumericLocale(char* begin, char* end) {
+static inline void fixNumericLocale(char *begin, char *end) {
   while (begin < end) {
     if (*begin == ',') {
       *begin = '.';
