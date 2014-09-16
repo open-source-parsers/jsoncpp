@@ -682,3 +682,4 @@ std::ostream& operator<<(std::ostream& sout, const Value& root) {
 }
 
 } // namespace Json
+// vim: et ts=2 sts=2 sw=2 tw=0

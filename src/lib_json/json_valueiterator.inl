@@ -298,3 +298,4 @@ ValueIterator::operator =( const SelfType &other )
 }
 
 } // namespace Json
+// vim: et ts=3 sts=3 sw=3 tw=0
