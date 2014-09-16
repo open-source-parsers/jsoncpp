@@ -31,6 +31,38 @@ FUNCTION(set_using_dynamic_name VAR_NAME VALUE)
     SET( "${VAR_NAME}" "${VALUE}" PARENT_SCOPE)
 ENDFUNCTION(set_using_dynamic_name) 
 
+# Extract major, minor, patch and qualifier from version text
+# Parse a version string "X.Y.Z[-qualifier]" and outputs
+# version parts in ${OUPUT_PREFIX}_MAJOR, _MINOR, _PATCH, _QUALIFIER.
+# If parse succed then ${OUPUT_PREFIX}_FOUND is TRUE.
+MACRO(jsoncpp_parse_version VERSION_TEXT OUPUT_PREFIX)
+    SET(VERSION_REGEX "[0-9]+\\.[0-9]+\\.[0-9]+(-[a-zA-Z0-9_]+)?")
+    IF( ${VERSION_TEXT} MATCHES ${VERSION_REGEX} )
+        STRING(REGEX MATCHALL "[0-9]+|-([A-Za-z0-9_]+)" VERSION_PARTS ${VERSION_TEXT})
+        list(APPEND VERSION_PARTS "") # empty qualifier to handle no qualifier case
+        LIST(GET VERSION_PARTS 0 ${OUPUT_PREFIX}_MAJOR)
+        LIST(GET VERSION_PARTS 1 ${OUPUT_PREFIX}_MINOR)
+        LIST(GET VERSION_PARTS 2 ${OUPUT_PREFIX}_PATCH)
+        LIST(GET VERSION_PARTS 3 ${OUPUT_PREFIX}_QUALIFIER)
+        set_using_dynamic_name( "${OUPUT_PREFIX}_FOUND" TRUE ) 
+    ELSE( ${VERSION_TEXT} MATCHES ${VERSION_REGEX} )
+        set_using_dynamic_name( "${OUPUT_PREFIX}_FOUND" FALSE ) 
+    ENDIF( ${VERSION_TEXT} MATCHES ${VERSION_REGEX} )
+ENDMACRO(jsoncpp_parse_version)
+
+# Read out version from "version" file
+FILE(STRINGS "version" JSONCPP_VERSION)
+
+jsoncpp_parse_version( ${JSONCPP_VERSION} JSONCPP_VERSION )
+IF(NOT JSONCPP_VERSION_FOUND)
+    MESSAGE(FATAL_ERROR "Failed to parse version string properly. Expect X.Y.Z[-qualifier]")
+ENDIF(NOT JSONCPP_VERSION_FOUND)
+
+MESSAGE(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}${JSONCPP_VERSION_QUALIFIER}")
+# File version.h is only regenerated on CMake configure step
+CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/src/lib_json/version.h.in"
+                "${PROJECT_SOURCE_DIR}/include/json/version.h" )
+
 macro(UseCompilationWarningAsError)
 	if ( MSVC )
         # Only enabled in debug because some old versions of VS STL generate
