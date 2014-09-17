@@ -14,7 +14,7 @@ IF(NOT WIN32)
             "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Coverage."
             FORCE)
     ENDIF(NOT CMAKE_BUILD_TYPE)
-ENDIF(NOT WIN32) 
+ENDIF(NOT WIN32)
 
 # This ensures shared DLL are in the same dir as executable on Windows.
 # Put all executables / libraries are in a project global directory.
@@ -29,12 +29,12 @@ MARK_AS_ADVANCED( CMAKE_RUNTIME_OUTPUT_DIRECTORY CMAKE_LIBRARY_OUTPUT_DIRECTORY 
 # Set variable named ${VAR_NAME} to value ${VALUE}
 FUNCTION(set_using_dynamic_name VAR_NAME VALUE)
     SET( "${VAR_NAME}" "${VALUE}" PARENT_SCOPE)
-ENDFUNCTION(set_using_dynamic_name) 
+ENDFUNCTION(set_using_dynamic_name)
 
 # Extract major, minor, patch and qualifier from version text
 # Parse a version string "X.Y.Z[-qualifier]" and outputs
 # version parts in ${OUPUT_PREFIX}_MAJOR, _MINOR, _PATCH, _QUALIFIER.
-# If parse succed then ${OUPUT_PREFIX}_FOUND is TRUE.
+# If parse succeeds then ${OUPUT_PREFIX}_FOUND is TRUE.
 MACRO(jsoncpp_parse_version VERSION_TEXT OUPUT_PREFIX)
     SET(VERSION_REGEX "[0-9]+\\.[0-9]+\\.[0-9]+(-[a-zA-Z0-9_]+)?")
     IF( ${VERSION_TEXT} MATCHES ${VERSION_REGEX} )
@@ -44,9 +44,9 @@ MACRO(jsoncpp_parse_version VERSION_TEXT OUPUT_PREFIX)
         LIST(GET VERSION_PARTS 1 ${OUPUT_PREFIX}_MINOR)
         LIST(GET VERSION_PARTS 2 ${OUPUT_PREFIX}_PATCH)
         LIST(GET VERSION_PARTS 3 ${OUPUT_PREFIX}_QUALIFIER)
-        set_using_dynamic_name( "${OUPUT_PREFIX}_FOUND" TRUE ) 
+        set_using_dynamic_name( "${OUPUT_PREFIX}_FOUND" TRUE )
     ELSE( ${VERSION_TEXT} MATCHES ${VERSION_REGEX} )
-        set_using_dynamic_name( "${OUPUT_PREFIX}_FOUND" FALSE ) 
+        set_using_dynamic_name( "${OUPUT_PREFIX}_FOUND" FALSE )
     ENDIF( ${VERSION_TEXT} MATCHES ${VERSION_REGEX} )
 ENDMACRO(jsoncpp_parse_version)
 
@@ -69,7 +69,7 @@ macro(UseCompilationWarningAsError)
         # warnings when compiled in release configuration.
 		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /WX ")
 	endif( MSVC )
-endmacro() 
+endmacro()
 
 # Include our configuration header
 INCLUDE_DIRECTORIES( ${jsoncpp_SOURCE_DIR}/include )
