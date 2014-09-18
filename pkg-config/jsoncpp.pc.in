@@ -5,6 +5,7 @@ includedir=${prefix}/include
 
 Name: jsoncpp
 Description: A C++ library for interacting with JSON
+Version: @JSONCPP_VERSION@
 URL: https://github.com/open-source-parsers/jsoncpp
 Libs: -L${libdir} -ljsoncpp
 Cflags: -I${includedir}
