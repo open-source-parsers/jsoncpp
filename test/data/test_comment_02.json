@@ -9,7 +9,8 @@
    },
    // C++-style comment
    "cpp-test" : {
-      // Internal comment cpp-style
+      // Multiline comment cpp-style
+      // Second line
       "c" : 3,
       "d" : 4
    }
