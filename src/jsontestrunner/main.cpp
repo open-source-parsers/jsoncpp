@@ -61,6 +61,9 @@ static std::string readInputTestFile(const char* path) {
 
 static void
 printValueTree(FILE* fout, Json::Value& value, const std::string& path = ".") {
+  if (value.hasComment(Json::commentBefore)) {
+    fprintf(fout, "%s\n", value.getComment(Json::commentBefore).c_str());
+  }
   switch (value.type()) {
   case Json::nullValue:
     fprintf(fout, "%s=null\n", path.c_str());
@@ -116,6 +119,10 @@ printValueTree(FILE* fout, Json::Value& value, const std::string& path = ".") {
   } break;
   default:
     break;
+  }
+
+  if (value.hasComment(Json::commentAfter)) {
+    fprintf(fout, "%s\n", value.getComment(Json::commentAfter).c_str());
   }
 }
 
