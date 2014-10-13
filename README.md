@@ -16,7 +16,7 @@ format to store user input files.
 Using JsonCpp in your project
 -----------------------------
 
-The recommended approach to integrating JsonCpp in your project is to build the
+The recommended approach to integrating JsonCpp in your project is to build
 the amalgamated source (a single `.cpp` file) with your own build system. This
 ensures consistency of compilation flags and ABI compatibility. See the section
 "Generating amalgamated source and header" for instructions.
