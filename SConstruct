@@ -119,7 +119,7 @@ elif platform == 'mingw':
     env.Append( CPPDEFINES=[ "WIN32", "NDEBUG", "_MT" ] )
 elif platform.startswith('linux-gcc'):
     env.Tool( 'default' )
-    env.Append( LIBS = ['pthread'], CCFLAGS = "-Wall" )
+    env.Append( LIBS = ['pthread'], CCFLAGS = os.environ.get("CXXFLAGS", "-Wall"), LINKFLAGS=os.environ.get("LDFLAGS", "") )
     env['SHARED_LIB_ENABLED'] = True
 else:
     print "UNSUPPORTED PLATFORM."
