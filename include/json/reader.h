@@ -130,6 +130,29 @@ public:
    */
   std::vector<StructuredError> getStructuredErrors() const;
 
+  /** \brief Add a semantic error message.
+   * \param value JSON Value location associated with the error
+   * \param message The error message.
+   * \return \c true if the error was successfully added, \c false if the
+   * Value offset exceeds the document size.
+   */
+  bool pushError(const Value& value, const std::string& message);
+
+  /** \brief Add a semantic error message with extra context.
+   * \param value JSON Value location associated with the error
+   * \param message The error message.
+   * \param extra Additional JSON Value location to contextualize the error
+   * \return \c true if the error was successfully added, \c false if either
+   * Value offset exceeds the document size.
+   */
+  bool pushError(const Value& value, const std::string& message, const Value& extra);
+
+  /** \brief Return whether there are any errors.
+   * \return \c true if there are no errors to report \c false if
+   * errors have occurred.
+   */
+  bool good() const;
+
 private:
   enum TokenType {
     tokenEndOfStream = 0,
