@@ -12,6 +12,8 @@ serialization and deserialization to and from strings. It can also preserve
 existing comment in unserialization/serialization steps, making it a convenient
 format to store user input files.
 
+## A note on backward-compatibility
+Very soon, we are switching to C++11 only. For older compilers, try the `pre-C++11` branch.
 
 Using JsonCpp in your project
 -----------------------------
