@@ -16,6 +16,16 @@ IF(NOT WIN32)
     ENDIF(NOT CMAKE_BUILD_TYPE)
 ENDIF(NOT WIN32)
 
+SET(RUNTIME_INSTALL_DIR lib
+    CACHE PATH "Install dir for executables and dlls")
+SET(ARCHIVE_INSTALL_DIR lib
+    CACHE PATH "Install dir for static libraries")
+SET(LIBRARY_INSTALL_DIR lib
+    CACHE PATH "Install dir for shared libraries")
+SET(INCLUDE_INSTALL_DIR include
+    CACHE PATH "Install dir for headers")
+MARK_AS_ADVANCED( RUNTIME_INSTALL_DIR ARCHIVE_INSTALL_DIR INCLUDE_INSTALL_DIR )
+
 # This ensures shared DLL are in the same dir as executable on Windows.
 # Put all executables / libraries are in a project global directory.
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib
