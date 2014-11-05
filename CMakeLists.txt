@@ -6,6 +6,7 @@ OPTION(JSONCPP_WITH_TESTS "Compile and run JsonCpp test executables" ON)
 OPTION(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)
 OPTION(JSONCPP_WITH_WARNING_AS_ERROR "Force compilation to fail if a warning occurs" OFF)
 OPTION(JSONCPP_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" ON)
+OPTION(JSONCPP_WITH_CMAKE_PACKAGE "Generate and install cmake package files" OFF)
 
 # Ensures that CMAKE_BUILD_TYPE is visible in cmake-gui on Unix
 IF(NOT WIN32)
@@ -15,6 +16,18 @@ IF(NOT WIN32)
             FORCE)
     ENDIF(NOT CMAKE_BUILD_TYPE)
 ENDIF(NOT WIN32)
+
+SET(RUNTIME_INSTALL_DIR lib
+    CACHE PATH "Install dir for executables and dlls")
+SET(ARCHIVE_INSTALL_DIR lib
+    CACHE PATH "Install dir for static libraries")
+SET(LIBRARY_INSTALL_DIR lib
+    CACHE PATH "Install dir for shared libraries")
+SET(INCLUDE_INSTALL_DIR include
+    CACHE PATH "Install dir for headers")
+SET(PACKAGE_INSTALL_DIR lib/cmake
+    CACHE PATH "Install dir for cmake package config files")
+MARK_AS_ADVANCED( RUNTIME_INSTALL_DIR ARCHIVE_INSTALL_DIR INCLUDE_INSTALL_DIR PACKAGE_INSTALL_DIR )
 
 # This ensures shared DLL are in the same dir as executable on Windows.
 # Put all executables / libraries are in a project global directory.
@@ -90,6 +103,12 @@ IF(JSONCPP_WITH_PKGCONFIG_SUPPORT)
 	INSTALL(FILES "${CMAKE_BINARY_DIR}/pkg-config/jsoncpp.pc"
 		DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
 ENDIF(JSONCPP_WITH_PKGCONFIG_SUPPORT)
+
+IF(JSONCPP_WITH_CMAKE_PACKAGE)
+        INSTALL(EXPORT jsoncpp
+                DESTINATION ${PACKAGE_INSTALL_DIR}/jsoncpp
+                FILE        jsoncppConfig.cmake)
+ENDIF(JSONCPP_WITH_CMAKE_PACKAGE)
 
 # Build the different applications
 ADD_SUBDIRECTORY( src )
