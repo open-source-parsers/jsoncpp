@@ -85,13 +85,12 @@ private:
   const char* str_;
 };
 
-// Some helper traits for Json::Value
+// Some Json::Value helpers in lieu of C++11 <type_traits>.
 namespace Detail {
 
 template <typename T>
 struct IsIntegral {
-  enum { value = std::numeric_limits<T>::is_specialized &&
-                 std::numeric_limits<T>::is_integer };
+  enum { value = std::numeric_limits<T>::is_integer };
 };
 
 template <typename T>
@@ -236,6 +235,21 @@ Json::Value obj_value(Json::objectValue); // {}
   */
   Value(ValueType type = nullValue);
 
+  /** \brief Accept any arithmetic 'T'.
+   *
+   * Selected by substitution failure (sfinae) on dummy argument.
+   * Arithmetic means built-in integral or floating point type.
+   * This is currently determined with std::numeric_traits.
+   * Example:
+   * \code
+   * Json::Value v[] = {
+   *   Json::Value(my_vector.size()),
+   *   Json::Value(array_last - array_first),
+   *   Json::Value('x'),
+   *   Json::Value(3.14)
+   * };
+   * \endcode
+   */
   template <typename T>
   Value(T value, typename Detail::EnableIfArithmetic<T>::type = 0)
     : allocated_(false),
