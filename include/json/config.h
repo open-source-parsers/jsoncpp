@@ -87,7 +87,7 @@
 #define JSONCPP_DEPRECATED(message)
 #endif // if !defined(JSONCPP_DEPRECATED)
 
-#include <stdint.h>
+#include <cstdint>
 namespace Json {
 typedef int Int;
 typedef unsigned int UInt;
@@ -100,9 +100,12 @@ typedef unsigned int LargestUInt;
 #if defined(_MSC_VER) // Microsoft Visual Studio
 typedef __int64 Int64;
 typedef unsigned __int64 UInt64;
-#else                 // if defined(_MSC_VER) // Other platforms, use long long
+#elif __cplusplus >= 201103L // Using C++11
 typedef int64_t Int64;
 typedef uint64_t UInt64;
+#else               // Other platforms, use long long
+typedef long long Int64;
+typedef unsigned long long Uint64;
 #endif // if defined(_MSC_VER)
 typedef Int64 LargestInt;
 typedef UInt64 LargestUInt;
