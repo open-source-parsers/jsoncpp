@@ -440,6 +440,8 @@ Json::Value obj_value(Json::objectValue); // {}
   size_t getOffsetLimit() const;
 
 private:
+  void initBasic(ValueType type, bool allocated = false);
+
   Value& resolveReference(const char* key, bool isStatic);
 
 #ifdef JSON_VALUE_USE_INTERNAL_MAP
