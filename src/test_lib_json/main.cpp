@@ -6,6 +6,7 @@
 #include "jsontest.h"
 #include <json/config.h>
 #include <json/json.h>
+#include <climits>
 #include <stdexcept>
 
 // Make numeric limits more convenient to talk about.
@@ -393,6 +394,42 @@ JSONTEST_FIXTURE(ValueTest, integers) {
   val = Json::Value(Json::uintValue);
 
   JSONTEST_ASSERT_EQUAL(Json::uintValue, val.type());
+
+  // A few more integral types
+  //  special
+  JSONTEST_ASSERT_EQUAL(Json::booleanValue,
+                        Json::Value(static_cast<bool>(0)).type());
+  JSONTEST_ASSERT_EQUAL(Json::uintValue,
+                        Json::Value(static_cast<std::size_t>(0)).type());
+  JSONTEST_ASSERT_EQUAL(Json::intValue,
+                        Json::Value(static_cast<std::ptrdiff_t>(0)).type());
+  //  signed
+  JSONTEST_ASSERT_EQUAL(Json::intValue,
+                        Json::Value(static_cast<signed char>(0)).type());
+  JSONTEST_ASSERT_EQUAL(Json::intValue,
+                        Json::Value(static_cast<short>(0)).type());
+  JSONTEST_ASSERT_EQUAL(Json::intValue,
+                        Json::Value(static_cast<int>(0)).type());
+  JSONTEST_ASSERT_EQUAL(Json::intValue,
+                        Json::Value(static_cast<long>(0)).type());
+  //  unsigned
+  JSONTEST_ASSERT_EQUAL(Json::uintValue,
+                        Json::Value(static_cast<unsigned char>(0)).type());
+  JSONTEST_ASSERT_EQUAL(Json::uintValue,
+                        Json::Value(static_cast<unsigned short>(0)).type());
+  JSONTEST_ASSERT_EQUAL(Json::uintValue,
+                        Json::Value(static_cast<unsigned>(0)).type());
+  JSONTEST_ASSERT_EQUAL(Json::uintValue,
+                        Json::Value(static_cast<unsigned long>(0)).type());
+  // long long types if available
+#ifdef LLONG_MAX
+  JSONTEST_ASSERT_EQUAL(Json::intValue,
+                        Json::Value(static_cast<long long>(0)).type());
+#endif
+#ifdef ULLONG_MAX
+  JSONTEST_ASSERT_EQUAL(Json::uintValue,
+                        Json::Value(static_cast<unsigned long long>(0)).type());
+#endif
 
   checks = IsCheck();
   checks.isInt_ = true;
