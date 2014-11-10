@@ -225,14 +225,8 @@ bool Value::CZString::isStaticString() const { return index_ == noDuplication; }
  * memset( this, 0, sizeof(Value) )
  * This optimization is used in ValueInternalMap fast allocator.
  */
-Value::Value(ValueType type)
-    : type_(type), allocated_(false)
-#ifdef JSON_VALUE_USE_INTERNAL_MAP
-      ,
-      itemIsUsed_(0)
-#endif
-      ,
-      comments_(0), start_(0), limit_(0) {
+Value::Value(ValueType type) {
+  initBasic(type);
   switch (type) {
   case nullValue:
     break;
@@ -267,130 +261,62 @@ Value::Value(ValueType type)
   }
 }
 
-Value::Value(UInt value)
-    : type_(uintValue), allocated_(false)
-#ifdef JSON_VALUE_USE_INTERNAL_MAP
-      ,
-      itemIsUsed_(0)
-#endif
-      ,
-      comments_(0), start_(0), limit_(0) {
+Value::Value(Int value) {
+  initBasic(intValue);
+  value_.int_ = value;
+}
+
+Value::Value(UInt value) {
+  initBasic(uintValue);
   value_.uint_ = value;
 }
-
-Value::Value(Int value)
-    : type_(intValue), allocated_(false)
-#ifdef JSON_VALUE_USE_INTERNAL_MAP
-      ,
-      itemIsUsed_(0)
-#endif
-      ,
-      comments_(0), start_(0), limit_(0) {
-  value_.int_ = value;
-}
-
 #if defined(JSON_HAS_INT64)
-Value::Value(Int64 value)
-    : type_(intValue), allocated_(false)
-#ifdef JSON_VALUE_USE_INTERNAL_MAP
-      ,
-      itemIsUsed_(0)
-#endif
-      ,
-      comments_(0), start_(0), limit_(0) {
+Value::Value(Int64 value) {
+  initBasic(intValue);
   value_.int_ = value;
 }
-
-Value::Value(UInt64 value)
-    : type_(uintValue), allocated_(false)
-#ifdef JSON_VALUE_USE_INTERNAL_MAP
-      ,
-      itemIsUsed_(0)
-#endif
-      ,
-      comments_(0), start_(0), limit_(0) {
+Value::Value(UInt64 value) {
+  initBasic(uintValue);
   value_.uint_ = value;
 }
 #endif // defined(JSON_HAS_INT64)
 
-Value::Value(double value)
-    : type_(realValue), allocated_(false)
-#ifdef JSON_VALUE_USE_INTERNAL_MAP
-      ,
-      itemIsUsed_(0)
-#endif
-      ,
-      comments_(0), start_(0), limit_(0) {
+Value::Value(double value) {
+  initBasic(realValue);
   value_.real_ = value;
 }
 
-Value::Value(const char* value)
-    : type_(stringValue), allocated_(true)
-#ifdef JSON_VALUE_USE_INTERNAL_MAP
-      ,
-      itemIsUsed_(0)
-#endif
-      ,
-      comments_(0), start_(0), limit_(0) {
+Value::Value(const char* value) {
+  initBasic(stringValue, true);
   value_.string_ = duplicateStringValue(value);
 }
 
-Value::Value(const char* beginValue, const char* endValue)
-    : type_(stringValue), allocated_(true)
-#ifdef JSON_VALUE_USE_INTERNAL_MAP
-      ,
-      itemIsUsed_(0)
-#endif
-      ,
-      comments_(0), start_(0), limit_(0) {
+Value::Value(const char* beginValue, const char* endValue) {
+  initBasic(stringValue, true);
   value_.string_ =
       duplicateStringValue(beginValue, (unsigned int)(endValue - beginValue));
 }
 
-Value::Value(const std::string& value)
-    : type_(stringValue), allocated_(true)
-#ifdef JSON_VALUE_USE_INTERNAL_MAP
-      ,
-      itemIsUsed_(0)
-#endif
-      ,
-      comments_(0), start_(0), limit_(0) {
+Value::Value(const std::string& value) {
+  initBasic(stringValue, true);
   value_.string_ =
       duplicateStringValue(value.c_str(), (unsigned int)value.length());
 }
 
-Value::Value(const StaticString& value)
-    : type_(stringValue), allocated_(false)
-#ifdef JSON_VALUE_USE_INTERNAL_MAP
-      ,
-      itemIsUsed_(0)
-#endif
-      ,
-      comments_(0), start_(0), limit_(0) {
+Value::Value(const StaticString& value) {
+  initBasic(stringValue);
   value_.string_ = const_cast<char*>(value.c_str());
 }
 
 #ifdef JSON_USE_CPPTL
-Value::Value(const CppTL::ConstString& value)
-    : type_(stringValue), allocated_(true)
-#ifdef JSON_VALUE_USE_INTERNAL_MAP
-      ,
-      itemIsUsed_(0)
-#endif
-      ,
-      comments_(0), start_(0), limit_(0) {
+Value::Value(const CppTL::ConstString& value) {
+  initBasic(stringValue, true);
   value_.string_ = duplicateStringValue(value, value.length());
 }
 #endif
 
-Value::Value(bool value)
-    : type_(booleanValue), allocated_(false)
-#ifdef JSON_VALUE_USE_INTERNAL_MAP
-      ,
-      itemIsUsed_(0)
-#endif
-      ,
-      comments_(0), start_(0), limit_(0) {
+Value::Value(bool value) {
+  initBasic(booleanValue);
   value_.bool_ = value;
 }
 
@@ -964,6 +890,17 @@ const Value& Value::operator[](int index) const {
 
 Value& Value::operator[](const char* key) {
   return resolveReference(key, false);
+}
+
+void Value::initBasic(ValueType type, bool allocated) {
+  type_ = type;
+  allocated_ = allocated;
+#ifdef JSON_VALUE_USE_INTERNAL_MAP
+  itemIsUsed_ = 0;
+#endif
+  comments_ = 0;
+  start_ = 0;
+  limit_ = 0;
 }
 
 Value& Value::resolveReference(const char* key, bool isStatic) {
