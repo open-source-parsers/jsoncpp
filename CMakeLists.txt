@@ -17,7 +17,7 @@ IF(NOT WIN32)
     ENDIF(NOT CMAKE_BUILD_TYPE)
 ENDIF(NOT WIN32)
 
-SET(RUNTIME_INSTALL_DIR lib
+SET(RUNTIME_INSTALL_DIR bin
     CACHE PATH "Install dir for executables and dlls")
 SET(ARCHIVE_INSTALL_DIR lib
     CACHE PATH "Install dir for static libraries")
