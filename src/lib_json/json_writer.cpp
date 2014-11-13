@@ -217,28 +217,28 @@ void FastWriter::writeValue(const Value& value) {
     document_ += valueToString(value.asBool());
     break;
   case arrayValue: {
-    document_ += "[";
+    document_ += '[';
     int size = value.size();
     for (int index = 0; index < size; ++index) {
       if (index > 0)
-        document_ += ",";
+        document_ += ',';
       writeValue(value[index]);
     }
-    document_ += "]";
+    document_ += ']';
   } break;
   case objectValue: {
     Value::Members members(value.getMemberNames());
-    document_ += "{";
+    document_ += '{';
     for (Value::Members::iterator it = members.begin(); it != members.end();
          ++it) {
       const std::string& name = *it;
       if (it != members.begin())
-        document_ += ",";
+        document_ += ',';
       document_ += valueToQuotedString(name.c_str());
       document_ += yamlCompatiblityEnabled_ ? ": " : ":";
       writeValue(value[name]);
     }
-    document_ += "}";
+    document_ += '}';
   } break;
   }
 }
@@ -302,7 +302,7 @@ void StyledWriter::writeValue(const Value& value) {
           writeCommentAfterValueOnSameLine(childValue);
           break;
         }
-        document_ += ",";
+        document_ += ',';
         writeCommentAfterValueOnSameLine(childValue);
       }
       unindent();
@@ -336,7 +336,7 @@ void StyledWriter::writeArrayValue(const Value& value) {
           writeCommentAfterValueOnSameLine(childValue);
           break;
         }
-        document_ += ",";
+        document_ += ',';
         writeCommentAfterValueOnSameLine(childValue);
       }
       unindent();
