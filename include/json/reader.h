@@ -99,6 +99,12 @@ public:
   /// \see Json::operator>>(std::istream&, Json::Value&).
   bool parse(std::istream& is, Value& root, bool collectComments = true);
 
+  /// \brief Parse from iterator
+  template<typename Iterator>
+  bool parseIterator(Iterator begin, Iterator end, Value& root, bool collectComments = true) {
+    return parse(&(*begin), &(*end), root, collectComments);
+  }
+
   /** \brief Returns a user friendly string that list errors in the parsed
    * document.
    * \return Formatted error message with the list of errors with their location
