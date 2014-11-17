@@ -172,7 +172,7 @@ private:
     CZString(const char* cstr, DuplicationPolicy allocate);
     CZString(const CZString& other);
     ~CZString();
-    CZString& operator=(CZString other);
+    CZString &operator=(const CZString &other);
     bool operator<(const CZString& other) const;
     bool operator==(const CZString& other) const;
     ArrayIndex index() const;
@@ -241,7 +241,7 @@ Json::Value obj_value(Json::objectValue); // {}
   ~Value();
 
   // Deep copy, then swap(other).
-  Value& operator=(Value other);
+  Value &operator=(const Value &other);
   /// Swap everything.
   void swap(Value& other);
   /// Swap values but leave comments and source offsets in place.
