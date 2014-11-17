@@ -831,8 +831,9 @@ std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
 }
 
 bool Reader::pushError(const Value& value, const std::string& message) {
-  if(value.getOffsetStart() > end_ - begin_
-    || value.getOffsetLimit() > end_ - begin_)
+  size_t length = end_ - begin_;
+  if(value.getOffsetStart() > length
+    || value.getOffsetLimit() > length)
     return false;
   Token token;
   token.type_ = tokenError;
@@ -847,9 +848,10 @@ bool Reader::pushError(const Value& value, const std::string& message) {
 }
 
 bool Reader::pushError(const Value& value, const std::string& message, const Value& extra) {
-  if(value.getOffsetStart() > end_ - begin_
-    || value.getOffsetLimit() > end_ - begin_
-    || extra.getOffsetLimit() > end_ - begin_)
+  size_t length = end_ - begin_;
+  if(value.getOffsetStart() > length
+    || value.getOffsetLimit() > length
+    || extra.getOffsetLimit() > length)
     return false;
   Token token;
   token.type_ = tokenError;
