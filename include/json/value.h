@@ -171,7 +171,7 @@ private:
     CZString(const char* cstr, DuplicationPolicy allocate);
     CZString(const CZString& other);
     ~CZString();
-    CZString& operator=(CZString other);
+    CZString &operator=(const CZString &other);
     bool operator<(const CZString& other) const;
     bool operator==(const CZString& other) const;
     ArrayIndex index() const;
@@ -238,7 +238,7 @@ Json::Value obj_value(Json::objectValue); // {}
   Value(const Value& other);
   ~Value();
 
-  Value& operator=(Value other);
+  Value &operator=(const Value &other);
   /// Swap values.
   /// \note Currently, comments are intentionally not swapped, for
   /// both logic and efficiency.
