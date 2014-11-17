@@ -256,7 +256,7 @@ Json::Value obj_value(Json::objectValue); // {}
   ~Value();
 
   // Deep copy, then swap(other).
-  Value& operator=(Value other);
+  Value &operator=(const Value &other);
   /// Swap everything.
   void swap(Value& other);
   /// Swap values but leave comments and source offsets in place.
