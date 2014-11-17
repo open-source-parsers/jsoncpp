@@ -421,8 +421,9 @@ Value::~Value() {
     delete[] comments_;
 }
 
-Value& Value::operator=(Value other) {
-  swap(other);
+Value &Value::operator=(const Value &other) {
+  Value temp(other);
+  swap(temp);
   return *this;
 }
 

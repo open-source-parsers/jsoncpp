@@ -257,7 +257,7 @@ Json::Value obj_value(Json::objectValue); // {}
 
   /// Deep copy, then swap(other).
   /// \note Over-write existing comments. To preserve comments, use #swapPayload().
-  Value& operator=(Value other);
+  Value &operator=(const Value &other);
   /// Swap everything.
   void swap(Value& other);
   /// Swap values but leave comments and source offsets in place.
