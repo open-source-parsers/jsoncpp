@@ -175,7 +175,8 @@ Value::CZString::CZString(const CZString& other)
                 ? duplicateStringValue(other.cstr_)
                 : other.cstr_),
       index_(other.cstr_
-                 ? (other.index_ == noDuplication ? noDuplication : duplicate)
+                 ? static_cast<ArrayIndex>(other.index_ == noDuplication
+                     ? noDuplication : duplicate)
                  : other.index_) {}
 
 Value::CZString::~CZString() {
