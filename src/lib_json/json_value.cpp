@@ -170,13 +170,17 @@ Value::CZString::CZString(const char* cstr, DuplicationPolicy allocate)
     : cstr_(allocate == duplicate ? duplicateStringValue(cstr) : cstr),
       index_(allocate) {}
 
-Value::CZString::CZString(const CZString& other)
-    : cstr_(other.index_ != noDuplication && other.cstr_ != 0
-                ? duplicateStringValue(other.cstr_)
-                : other.cstr_),
-      index_(other.cstr_
-                 ? (other.index_ == noDuplication ? noDuplication : duplicate)
-                 : other.index_) {}
+Value::CZString::CZString(const CZString& other) {
+  DuplicationPolicy policy = static_cast<DuplicationPolicy>(other.index_);
+  if (policy != noDuplication && other.cstr_ != 0)
+    cstr_ = duplicateStringValue(other.cstr_);
+  else
+      cstr_ = other.cstr_;
+  if (other.cstr_)
+    index_ = (policy == noDuplication ? noDuplication : duplicate);
+  else
+    index_ = other.index_;
+}
 
 Value::CZString::~CZString() {
   if (cstr_ && index_ == duplicate)
