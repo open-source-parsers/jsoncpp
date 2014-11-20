@@ -1,12 +1,12 @@
 # Simple implementation of a json test runner to run the test against json-py.
-
+from __future__ import print_function
 import sys
 import os.path
 import json
 import types
 
 if len(sys.argv) != 2:
-    print "Usage: %s input-json-file", sys.argv[0]
+    print("Usage: %s input-json-file", sys.argv[0])
     sys.exit(3)
     
 input_path = sys.argv[1]

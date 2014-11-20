@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import os
 import os.path
@@ -11,7 +12,7 @@ def compareOutputs( expected, actual, message ):
     actual = actual.strip().replace('\r','').split('\n')
     diff_line = 0
     max_line_to_compare = min( len(expected), len(actual) )
-    for index in xrange(0,max_line_to_compare):
+    for index in range(0,max_line_to_compare):
         if expected[index].strip() != actual[index].strip():
             diff_line = index + 1
             break
@@ -34,7 +35,7 @@ def compareOutputs( expected, actual, message ):
 def safeReadFile( path ):
     try:
         return file( path, 'rt' ).read()
-    except IOError, e:
+    except IOError as e:
         return '<File "%s" is missing: %s>' % (path,e)
 
 def runAllTests( jsontest_executable_path, input_dir = None,
@@ -51,7 +52,7 @@ def runAllTests( jsontest_executable_path, input_dir = None,
     for input_path in tests + test_jsonchecker:
         expect_failure = os.path.basename( input_path ).startswith( 'fail' )
         is_json_checker_test = (input_path in test_jsonchecker) or expect_failure
-        print 'TESTING:', input_path,
+        print('TESTING:', input_path, end=' ')
         options = is_json_checker_test and '--json-checker' or ''
         pipe = os.popen( "%s%s %s %s" % (
             valgrind_path, jsontest_executable_path, options,
@@ -61,24 +62,24 @@ def runAllTests( jsontest_executable_path, input_dir = None,
         if is_json_checker_test:
             if expect_failure:
                 if status is None:
-                    print 'FAILED'
+                    print('FAILED')
                     failed_tests.append( (input_path, 'Parsing should have failed:\n%s' %
                                           safeReadFile(input_path)) )
                 else:
-                    print 'OK'
+                    print('OK')
             else:
                 if status is not None:
-                    print 'FAILED'
+                    print('FAILED')
                     failed_tests.append( (input_path, 'Parsing failed:\n' + process_output) )
                 else:
-                    print 'OK'
+                    print('OK')
         else:
             base_path = os.path.splitext(input_path)[0]
             actual_output = safeReadFile( base_path + '.actual' )
             actual_rewrite_output = safeReadFile( base_path + '.actual-rewrite' )
             file(base_path + '.process-output','wt').write( process_output )
             if status:
-                print 'parsing failed'
+                print('parsing failed')
                 failed_tests.append( (input_path, 'Parsing failed:\n' + process_output) )
             else:
                 expected_output_path = os.path.splitext(input_path)[0] + '.expected'
@@ -86,23 +87,23 @@ def runAllTests( jsontest_executable_path, input_dir = None,
                 detail = ( compareOutputs( expected_output, actual_output, 'input' )
                             or compareOutputs( expected_output, actual_rewrite_output, 'rewrite' ) )
                 if detail:
-                    print 'FAILED'
+                    print('FAILED')
                     failed_tests.append( (input_path, detail) )
                 else:
-                    print 'OK'
+                    print('OK')
 
     if failed_tests:
-        print
-        print 'Failure details:'
+        print()
+        print('Failure details:')
         for failed_test in failed_tests:
-            print '* Test', failed_test[0]
-            print failed_test[1]
-            print
-        print 'Test results: %d passed, %d failed.' % (len(tests)-len(failed_tests),
-                                                       len(failed_tests) )
+            print('* Test', failed_test[0])
+            print(failed_test[1])
+            print()
+        print('Test results: %d passed, %d failed.' % (len(tests)-len(failed_tests),
+                                                       len(failed_tests) ))
         return 1
     else:
-        print 'All %d tests passed.' % len(tests)
+        print('All %d tests passed.' % len(tests))
         return 0
 
 def main():

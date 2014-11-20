@@ -14,6 +14,7 @@ python makerelease.py 0.5.0 0.6.0-dev
 Note: This was for Subversion. Now that we are in GitHub, we do not
 need to build versioned tarballs anymore, so makerelease.py is defunct.
 """
+from __future__ import print_function
 import os.path
 import subprocess
 import sys
@@ -46,7 +47,7 @@ class SVNError(Exception):
 
 def svn_command( command, *args ):
     cmd = ['svn', '--non-interactive', command] + list(args)
-    print 'Running:', ' '.join( cmd )
+    print('Running:', ' '.join( cmd ))
     process = subprocess.Popen( cmd,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT )
@@ -84,7 +85,7 @@ def svn_check_if_tag_exist( tag_url ):
     """
     try:
         list_stdout = svn_command( 'list', tag_url )
-    except SVNError, e:
+    except SVNError as e:
         if e.returncode != 1 or not str(e).find('tag_url'):
             raise e
         # otherwise ignore error, meaning tag does not exist
@@ -117,7 +118,7 @@ def svn_export( tag_url, export_dir ):
 def fix_sources_eol( dist_dir ):
     """Set file EOL for tarball distribution.
     """
-    print 'Preparing exported source file EOL for distribution...'
+    print('Preparing exported source file EOL for distribution...')
     prune_dirs = antglob.prune_dirs + 'scons-local* ./build* ./libs ./dist'
     win_sources = antglob.glob( dist_dir, 
         includes = '**/*.sln **/*.vcproj',
@@ -148,7 +149,7 @@ def download( url, target_path ):
 
 def check_compile( distcheck_top_dir, platform ):
     cmd = [sys.executable, 'scons.py', 'platform=%s' % platform, 'check']
-    print 'Running:', ' '.join( cmd )
+    print('Running:', ' '.join( cmd ))
     log_path = os.path.join( distcheck_top_dir, 'build-%s.log' % platform )
     flog = open( log_path, 'wb' )
     try:
@@ -179,9 +180,9 @@ def run_sftp_batch( userhost, sftp, batch, retry=0 ):
     # psftp -agent -C blep,jsoncpp@web.sourceforge.net -batch -b batch.sftp -bc
     cmd = [sftp, '-agent', '-C', '-batch', '-b', path, '-bc', userhost]
     error = None
-    for retry_index in xrange(0, max(1,retry)):
+    for retry_index in range(0, max(1,retry)):
         heading = retry_index == 0 and 'Running:' or 'Retrying:'
-        print heading, ' '.join( cmd )
+        print(heading, ' '.join( cmd ))
         process = subprocess.Popen( cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT )
         stdout = process.communicate()[0]
         if process.returncode != 0:
@@ -219,21 +220,21 @@ exit
     upload_paths = set( [os.path.basename(p) for p in antglob.glob( doc_dir )] )
     paths_to_remove = existing_paths - upload_paths
     if paths_to_remove:
-        print 'Removing the following file from web:'
-        print '\n'.join( paths_to_remove )
+        print('Removing the following file from web:')
+        print('\n'.join( paths_to_remove ))
         stdout = run_sftp_batch( userhost, sftp, """cd htdocs
 rm %s
 exit""" % ' '.join(paths_to_remove) )
-    print 'Uploading %d files:' % len(upload_paths)
+    print('Uploading %d files:' % len(upload_paths))
     batch_size = 10
     upload_paths = list(upload_paths)
     start_time = time.time()
-    for index in xrange(0,len(upload_paths),batch_size):
+    for index in range(0,len(upload_paths),batch_size):
         paths = upload_paths[index:index+batch_size]
         file_per_sec = (time.time() - start_time) / (index+1)
         remaining_files = len(upload_paths) - index
         remaining_sec = file_per_sec * remaining_files
-        print '%d/%d, ETA=%.1fs' % (index+1, len(upload_paths), remaining_sec)
+        print('%d/%d, ETA=%.1fs' % (index+1, len(upload_paths), remaining_sec))
         run_sftp_batch( userhost, sftp, """cd htdocs
 lcd %s
 mput %s
@@ -297,7 +298,7 @@ Warning: --force should only be used when developping/testing the release script
     else:
         msg = check_no_pending_commit()
     if not msg:
-        print 'Setting version to', release_version
+        print('Setting version to', release_version)
         set_version( release_version )
         svn_commit( 'Release ' + release_version )
         tag_url = svn_join_url( SVN_TAG_ROOT, release_version )
@@ -305,11 +306,11 @@ Warning: --force should only be used when developping/testing the release script
             if options.retag_release:
                 svn_remove_tag( tag_url, 'Overwriting previous tag' )
             else:
-                print 'Aborting, tag %s already exist. Use --retag to overwrite it!' % tag_url
+                print('Aborting, tag %s already exist. Use --retag to overwrite it!' % tag_url)
                 sys.exit( 1 )
         svn_tag_sandbox( tag_url, 'Release ' + release_version )
 
-        print 'Generated doxygen document...'
+        print('Generated doxygen document...')
 ##        doc_dirname = r'jsoncpp-api-html-0.5.0'
 ##        doc_tarball_path = r'e:\prg\vc\Lib\jsoncpp-trunk\dist\jsoncpp-api-html-0.5.0.tar.gz'
         doc_tarball_path, doc_dirname = doxybuild.build_doc( options, make_release=True )
@@ -323,11 +324,11 @@ Warning: --force should only be used when developping/testing the release script
         
         source_dir = 'jsoncpp-src-' + release_version
         source_tarball_path = 'dist/%s.tar.gz' % source_dir
-        print 'Generating source tarball to', source_tarball_path
+        print('Generating source tarball to', source_tarball_path)
         tarball.make_tarball( source_tarball_path, [export_dir], export_dir, prefix_dir=source_dir )
 
         amalgamation_tarball_path = 'dist/%s-amalgamation.tar.gz' % source_dir
-        print 'Generating amalgamation source tarball to', amalgamation_tarball_path
+        print('Generating amalgamation source tarball to', amalgamation_tarball_path)
         amalgamation_dir = 'dist/amalgamation'
         amalgamate.amalgamate_source( export_dir, '%s/jsoncpp.cpp' % amalgamation_dir, 'json/json.h' )
         amalgamation_source_dir = 'jsoncpp-src-amalgamation' + release_version
@@ -337,41 +338,41 @@ Warning: --force should only be used when developping/testing the release script
         # Decompress source tarball, download and install scons-local
         distcheck_dir = 'dist/distcheck'
         distcheck_top_dir = distcheck_dir + '/' + source_dir
-        print 'Decompressing source tarball to', distcheck_dir
+        print('Decompressing source tarball to', distcheck_dir)
         rmdir_if_exist( distcheck_dir )
         tarball.decompress( source_tarball_path, distcheck_dir )
         scons_local_path = 'dist/scons-local.tar.gz'
-        print 'Downloading scons-local to', scons_local_path
+        print('Downloading scons-local to', scons_local_path)
         download( SCONS_LOCAL_URL, scons_local_path )
-        print 'Decompressing scons-local to', distcheck_top_dir
+        print('Decompressing scons-local to', distcheck_top_dir)
         tarball.decompress( scons_local_path, distcheck_top_dir )
 
         # Run compilation
-        print 'Compiling decompressed tarball'
+        print('Compiling decompressed tarball')
         all_build_status = True
         for platform in options.platforms.split(','):
-            print 'Testing platform:', platform
+            print('Testing platform:', platform)
             build_status, log_path = check_compile( distcheck_top_dir, platform )
-            print 'see build log:', log_path
-            print build_status and '=> ok' or '=> FAILED'
+            print('see build log:', log_path)
+            print(build_status and '=> ok' or '=> FAILED')
             all_build_status = all_build_status and build_status
         if not build_status:
-            print 'Testing failed on at least one platform, aborting...'
+            print('Testing failed on at least one platform, aborting...')
             svn_remove_tag( tag_url, 'Removing tag due to failed testing' )
             sys.exit(1)
         if options.user:
             if not options.no_web:
-                print 'Uploading documentation using user', options.user
+                print('Uploading documentation using user', options.user)
                 sourceforge_web_synchro( SOURCEFORGE_PROJECT, doc_distcheck_top_dir, user=options.user, sftp=options.sftp )
-                print 'Completed documentation upload'
-            print 'Uploading source and documentation tarballs for release using user', options.user
+                print('Completed documentation upload')
+            print('Uploading source and documentation tarballs for release using user', options.user)
             sourceforge_release_tarball( SOURCEFORGE_PROJECT,
                                          [source_tarball_path, doc_tarball_path],
                                          user=options.user, sftp=options.sftp )
-            print 'Source and doc release tarballs uploaded'
+            print('Source and doc release tarballs uploaded')
         else:
-            print 'No upload user specified. Web site and download tarbal were not uploaded.'
-            print 'Tarball can be found at:', doc_tarball_path
+            print('No upload user specified. Web site and download tarbal were not uploaded.')
+            print('Tarball can be found at:', doc_tarball_path)
 
         # Set next version number and commit            
         set_version( next_version )

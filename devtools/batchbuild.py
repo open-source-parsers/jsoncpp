@@ -1,3 +1,4 @@
+from __future__ import print_function
 import collections
 import itertools
 import json
@@ -29,7 +30,7 @@ class BuildDesc:
     def env( self ):
         environ = os.environ.copy()
         for values_by_name in self.prepend_envs:
-            for var, value in values_by_name.items():
+            for var, value in list(values_by_name.items()):
                 var = var.upper()
                 if type(value) is unicode:
                     value = value.encode( sys.getdefaultencoding() )
@@ -62,7 +63,7 @@ class BuildData:
         self.build_succeeded = False
 
     def execute_build(self):
-        print 'Build %s' % self.desc
+        print('Build %s' % self.desc)
         self._make_new_work_dir( )
         self.cmake_succeeded = self._generate_makefiles( )
         if self.cmake_succeeded:
@@ -70,19 +71,19 @@ class BuildData:
         return self.build_succeeded
 
     def _generate_makefiles(self):
-        print '  Generating makefiles: ',
+        print('  Generating makefiles: ', end=' ')
         cmd = ['cmake'] + self.desc.cmake_args( ) + [os.path.abspath( self.source_dir )]
         succeeded = self._execute_build_subprocess( cmd, self.desc.env(), self.cmake_log_path )
-        print 'done' if succeeded else 'FAILED'
+        print('done' if succeeded else 'FAILED')
         return succeeded
 
     def _build_using_makefiles(self):
-        print '  Building:',
+        print('  Building:', end=' ')
         cmd = ['cmake', '--build', self.work_dir]
         if self.desc.build_type:
             cmd += ['--config', self.desc.build_type]
         succeeded = self._execute_build_subprocess( cmd, self.desc.env(), self.build_log_path )
-        print 'done' if succeeded else 'FAILED'
+        print('done' if succeeded else 'FAILED')
         return succeeded
 
     def _execute_build_subprocess(self, cmd, env, log_path):
@@ -97,7 +98,7 @@ class BuildData:
 
     def _make_new_work_dir(self):
         if os.path.isdir( self.work_dir ):
-            print '  Removing work directory', self.work_dir
+            print('  Removing work directory', self.work_dir)
             shutil.rmtree( self.work_dir, ignore_errors=True )
         if not os.path.isdir( self.work_dir ):
             os.makedirs( self.work_dir )
@@ -134,9 +135,9 @@ def load_build_variants_from_config( config_path ):
 
 def generate_build_variants( build_descs_by_axis ):
     """Returns a list of BuildDesc generated for the partial BuildDesc for each axis."""
-    axis_names = build_descs_by_axis.keys()
+    axis_names = list(build_descs_by_axis.keys())
     build_descs = []
-    for axis_name, axis_build_descs in build_descs_by_axis.items():
+    for axis_name, axis_build_descs in list(build_descs_by_axis.items()):
         if len(build_descs):
             # for each existing build_desc and each axis build desc, create a new build_desc
             new_build_descs = []
@@ -227,7 +228,7 @@ def generate_html_report( html_report_path, builds ):
         tr_builds='\n'.join( tr_builds ) )
     with open( html_report_path, 'wt' ) as fhtml:
         fhtml.write( html )
-    print 'HTML report generated in:', html_report_path
+    print('HTML report generated in:', html_report_path)
 
 def main():
     usage = r"""%prog WORK_DIR SOURCE_DIR CONFIG_JSON_PATH [CONFIG2_JSON_PATH...]
@@ -258,7 +259,7 @@ python devtools\batchbuild.py e:\buildbots\jsoncpp\build . devtools\agent_vmw7.j
     for config_path in config_paths:
         build_descs_by_axis = load_build_variants_from_config( config_path )
         build_descs.extend( generate_build_variants( build_descs_by_axis ) )
-    print 'Build variants (%d):' % len(build_descs)
+    print('Build variants (%d):' % len(build_descs))
     # assign build directory for each variant
     if not os.path.isdir( work_dir ):
         os.makedirs( work_dir )
@@ -272,8 +273,8 @@ python devtools\batchbuild.py e:\buildbots\jsoncpp\build . devtools\agent_vmw7.j
         build.execute_build()
     html_report_path = os.path.join( work_dir, 'batchbuild-report.html' )
     generate_html_report( html_report_path, builds )
-    print 'Done'
-        
+    print('Done')
+
 
 if __name__ == '__main__':
     main()

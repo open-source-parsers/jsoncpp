@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os.path
 
 def fix_source_eol( path, is_dry_run = True, verbose = True, eol = '\n' ):
@@ -6,8 +7,8 @@ def fix_source_eol( path, is_dry_run = True, verbose = True, eol = '\n' ):
         raise ValueError( 'Path "%s" is not a file' % path )
     try:
         f = open(path, 'rb')
-    except IOError, msg:
-        print >> sys.stderr, "%s: I/O Error: %s" % (file, str(msg))
+    except IOError as msg:
+        print("%s: I/O Error: %s" % (file, str(msg)), file=sys.stderr)
         return False
     try:
         raw_lines = f.readlines()
@@ -15,7 +16,7 @@ def fix_source_eol( path, is_dry_run = True, verbose = True, eol = '\n' ):
         f.close()
     fixed_lines = [line.rstrip('\r\n') + eol for line in raw_lines]
     if raw_lines != fixed_lines:
-        print '%s =>' % path,
+        print('%s =>' % path, end=' ')
         if not is_dry_run:
             f = open(path, "wb")
             try:
@@ -23,7 +24,7 @@ def fix_source_eol( path, is_dry_run = True, verbose = True, eol = '\n' ):
             finally:
                 f.close()
         if verbose:
-            print is_dry_run and ' NEED FIX' or ' FIXED'
+            print(is_dry_run and ' NEED FIX' or ' FIXED')
     return True
 ##    
 ##    
