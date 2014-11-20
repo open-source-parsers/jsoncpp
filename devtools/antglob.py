@@ -2,6 +2,7 @@
 # encoding: utf-8
 # Baptiste Lepilleur, 2009
 
+from __future__ import print_function
 from dircache import listdir
 import re
 import fnmatch
@@ -190,12 +191,12 @@ if __name__ == "__main__":
                 test_cases.append( (ant_pattern, local_path(accepted_matches), local_path( rejected_matches )) )
             for ant_pattern, accepted_matches, rejected_matches in test_cases:
                 rex = ant_pattern_to_re( ant_pattern )
-                print 'ant_pattern:', ant_pattern, ' => ', rex.pattern
+                print('ant_pattern:', ant_pattern, ' => ', rex.pattern)
                 for accepted_match in accepted_matches:
-                    print 'Accepted?:', accepted_match
-                    self.assert_( rex.match( accepted_match ) is not None )
+                    print('Accepted?:', accepted_match)
+                    self.assertTrue( rex.match( accepted_match ) is not None )
                 for rejected_match in rejected_matches:
-                    print 'Rejected?:', rejected_match
-                    self.assert_( rex.match( rejected_match ) is None )
+                    print('Rejected?:', rejected_match)
+                    self.assertTrue( rex.match( rejected_match ) is None )
 
     unittest.main()

@@ -1,5 +1,6 @@
 import re
 from SCons.Script import *  # the usual scons stuff you get in a SConscript
+import collections
 
 def generate(env):
     """
@@ -25,28 +26,28 @@ def generate(env):
             contents = f.read()
             f.close()
         except:
-            raise SCons.Errors.UserError, "Can't read source file %s"%sourcefile
-        for (k,v) in dict.items():
+            raise SCons.Errors.UserError("Can't read source file %s"%sourcefile)
+        for (k,v) in list(dict.items()):
             contents = re.sub(k, v, contents)
         try:
             f = open(targetfile, 'wb')
             f.write(contents)
             f.close()
         except:
-            raise SCons.Errors.UserError, "Can't write target file %s"%targetfile
+            raise SCons.Errors.UserError("Can't write target file %s"%targetfile)
         return 0 # success
 
     def subst_in_file(target, source, env):
-        if not env.has_key('SUBST_DICT'):
-            raise SCons.Errors.UserError, "SubstInFile requires SUBST_DICT to be set."
+        if 'SUBST_DICT' not in env:
+            raise SCons.Errors.UserError("SubstInFile requires SUBST_DICT to be set.")
         d = dict(env['SUBST_DICT']) # copy it
-        for (k,v) in d.items():
-            if callable(v):
+        for (k,v) in list(d.items()):
+            if isinstance(v, collections.Callable):
                 d[k] = env.subst(v()).replace('\\','\\\\')
             elif SCons.Util.is_String(v):
                 d[k] = env.subst(v).replace('\\','\\\\')
             else:
-                raise SCons.Errors.UserError, "SubstInFile: key %s: %s must be a string or callable"%(k, repr(v))
+                raise SCons.Errors.UserError("SubstInFile: key %s: %s must be a string or callable"%(k, repr(v)))
         for (t,s) in zip(target, source):
             return do_subst_in_file(str(t), str(s), d)
 
@@ -60,8 +61,8 @@ def generate(env):
         Returns original target, source tuple unchanged.
         """
         d = env['SUBST_DICT'].copy() # copy it
-        for (k,v) in d.items():
-            if callable(v):
+        for (k,v) in list(d.items()):
+            if isinstance(v, collections.Callable):
                 d[k] = env.subst(v())
             elif SCons.Util.is_String(v):
                 d[k]=env.subst(v)

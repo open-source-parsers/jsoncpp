@@ -1,12 +1,12 @@
 """Script to generate doxygen documentation.
 """
-
+from __future__ import print_function
+from devtools import tarball
 import re
 import os
 import os.path
 import sys
 import shutil
-from devtools import tarball
 
 def find_program(*filenames):
     """find a program in folders path_lst, and sets env[var]
@@ -33,9 +33,9 @@ def do_subst_in_file(targetfile, sourcefile, dict):
         contents = f.read()
         f.close()
     except:
-        print "Can't read source file %s"%sourcefile
+        print("Can't read source file %s"%sourcefile)
         raise
-    for (k,v) in dict.items():
+    for (k,v) in list(dict.items()):
         v = v.replace('\\','\\\\') 
         contents = re.sub(k, v, contents)
     try:
@@ -43,7 +43,7 @@ def do_subst_in_file(targetfile, sourcefile, dict):
         f.write(contents)
         f.close()
     except:
-        print "Can't write target file %s"%targetfile
+        print("Can't write target file %s"%targetfile)
         raise
 
 def run_doxygen(doxygen_path, config_file, working_dir, is_silent):
@@ -53,12 +53,12 @@ def run_doxygen(doxygen_path, config_file, working_dir, is_silent):
     try:
         os.chdir( working_dir )
         cmd = [doxygen_path, config_file]
-        print 'Running:', ' '.join( cmd )
+        print('Running:', ' '.join( cmd ))
         try:
             import subprocess
         except:
             if os.system( ' '.join( cmd ) ) != 0:
-                print 'Documentation generation failed'
+                print('Documentation generation failed')
                 return False
         else:
             if is_silent:
@@ -67,8 +67,8 @@ def run_doxygen(doxygen_path, config_file, working_dir, is_silent):
                 process = subprocess.Popen( cmd )
             stdout, _ = process.communicate()
             if process.returncode:
-                print 'Documentation generation failed:'
-                print stdout
+                print('Documentation generation failed:')
+                print(stdout)
                 return False
         return True
     finally:
@@ -107,7 +107,7 @@ def build_doc( options,  make_release=False ):
         }
 
     if os.path.isdir( output_dir ):
-        print 'Deleting directory:', output_dir
+        print('Deleting directory:', output_dir)
         shutil.rmtree( output_dir )
     if not os.path.isdir( output_dir ):
         os.makedirs( output_dir )
@@ -115,15 +115,15 @@ def build_doc( options,  make_release=False ):
     do_subst_in_file( 'doc/doxyfile', 'doc/doxyfile.in', subst_keys )
     ok = run_doxygen( options.doxygen_path, 'doc/doxyfile', 'doc', is_silent=options.silent )
     if not options.silent:
-        print open(warning_log_path, 'rb').read()
+        print(open(warning_log_path, 'rb').read())
     index_path = os.path.abspath(os.path.join('doc', subst_keys['%HTML_OUTPUT%'], 'index.html'))
-    print 'Generated documentation can be found in:'
-    print index_path
+    print('Generated documentation can be found in:')
+    print(index_path)
     if options.open:
         import webbrowser
         webbrowser.open( 'file://' + index_path )
     if options.make_tarball:
-        print 'Generating doc tarball to', tarball_path
+        print('Generating doc tarball to', tarball_path)
         tarball_sources = [
             output_dir,
             'README.txt',

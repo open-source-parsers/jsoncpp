@@ -56,7 +56,7 @@ def amalgamate_source( source_top_dir=None,
            target_source_path: output .cpp path
            header_include_path: generated header path relative to target_source_path.
     """
-    print ("Amalgating header...")
+    print("Amalgating header...")
     header = AmalgamationFile( source_top_dir )
     header.add_text( "/// Json-cpp amalgated header (http://jsoncpp.sourceforge.net/)." )
     header.add_text( "/// It is intented to be used with #include <%s>" % header_include_path )
@@ -77,12 +77,12 @@ def amalgamate_source( source_top_dir=None,
     header.add_text( "#endif //ifndef JSON_AMALGATED_H_INCLUDED" )
 
     target_header_path = os.path.join( os.path.dirname(target_source_path), header_include_path )
-    print ("Writing amalgated header to %r" % target_header_path)
+    print("Writing amalgated header to %r" % target_header_path)
     header.write_to( target_header_path )
 
     base, ext = os.path.splitext( header_include_path )
     forward_header_include_path = base + "-forwards" + ext
-    print ("Amalgating forward header...")
+    print("Amalgating forward header...")
     header = AmalgamationFile( source_top_dir )
     header.add_text( "/// Json-cpp amalgated forward header (http://jsoncpp.sourceforge.net/)." )
     header.add_text( "/// It is intented to be used with #include <%s>" % forward_header_include_path )
@@ -99,10 +99,10 @@ def amalgamate_source( source_top_dir=None,
 
     target_forward_header_path = os.path.join( os.path.dirname(target_source_path),
                                                forward_header_include_path )
-    print ("Writing amalgated forward header to %r" % target_forward_header_path)
+    print("Writing amalgated forward header to %r" % target_forward_header_path)
     header.write_to( target_forward_header_path )
 
-    print ("Amalgating source...")
+    print("Amalgating source...")
     source = AmalgamationFile( source_top_dir )
     source.add_text( "/// Json-cpp amalgated source (http://jsoncpp.sourceforge.net/)." )
     source.add_text( "/// It is intented to be used with #include <%s>" % header_include_path )
@@ -118,7 +118,7 @@ def amalgamate_source( source_top_dir=None,
     source.add_file( os.path.join(lib_json, "json_value.cpp") )
     source.add_file( os.path.join(lib_json, "json_writer.cpp") )
 
-    print ("Writing amalgated source to %r" % target_source_path)
+    print("Writing amalgated source to %r" % target_source_path)
     source.write_to( target_source_path )
 
 def main():
@@ -144,7 +144,7 @@ Generate a single amalgated source and header file from the sources.
         sys.stderr.write( msg + "\n" )
         sys.exit( 1 )
     else:
-        print ("Source succesfully amalagated")
+        print("Source succesfully amalagated")
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,6 @@
 """Updates the license text in source file.
 """
+from __future__ import print_function
 
 # An existing license is found if the file starts with the string below,
 # and ends with the first blank line.
@@ -34,11 +35,11 @@ def update_license( path, dry_run, show_diff ):
         if not dry_run:
             with open( path, 'wb' ) as fout:
                 fout.write( new_text.replace('\n', newline ) )
-        print 'Updated', path
+        print('Updated', path)
         if show_diff:
             import difflib
-            print '\n'.join( difflib.unified_diff( original_text.split('\n'),
-                                                   new_text.split('\n') ) )
+            print('\n'.join( difflib.unified_diff( original_text.split('\n'),
+                                                   new_text.split('\n') ) ))
         return True
     return False
 
@@ -83,7 +84,7 @@ python devtools\licenseupdater.py include src
     parser.enable_interspersed_args()
     options, args = parser.parse_args()
     update_license_in_source_directories( args, options.dry_run, options.show_diff )
-    print 'Done'
+    print('Done')
 
 if __name__ == '__main__':
     import sys
