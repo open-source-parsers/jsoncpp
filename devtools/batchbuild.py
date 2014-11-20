@@ -273,7 +273,7 @@ python devtools\batchbuild.py e:\buildbots\jsoncpp\build . devtools\agent_vmw7.j
     html_report_path = os.path.join( work_dir, 'batchbuild-report.html' )
     generate_html_report( html_report_path, builds )
     print 'Done'
-        
+
 
 if __name__ == '__main__':
     main()
