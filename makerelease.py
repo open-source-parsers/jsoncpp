@@ -84,7 +84,7 @@ def svn_check_if_tag_exist( tag_url ):
     """
     try:
         list_stdout = svn_command( 'list', tag_url )
-    except SVNError, e:
+    except SVNError as e:
         if e.returncode != 1 or not str(e).find('tag_url'):
             raise e
         # otherwise ignore error, meaning tag does not exist

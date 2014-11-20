@@ -6,7 +6,7 @@ def fix_source_eol( path, is_dry_run = True, verbose = True, eol = '\n' ):
         raise ValueError( 'Path "%s" is not a file' % path )
     try:
         f = open(path, 'rb')
-    except IOError, msg:
+    except IOError as msg:
         print >> sys.stderr, "%s: I/O Error: %s" % (file, str(msg))
         return False
     try:

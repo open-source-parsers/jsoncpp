@@ -34,7 +34,7 @@ def compareOutputs( expected, actual, message ):
 def safeReadFile( path ):
     try:
         return file( path, 'rt' ).read()
-    except IOError, e:
+    except IOError as e:
         return '<File "%s" is missing: %s>' % (path,e)
 
 def runAllTests( jsontest_executable_path, input_dir = None,
