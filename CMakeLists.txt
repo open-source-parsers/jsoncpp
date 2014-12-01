@@ -17,15 +17,17 @@ IF(NOT WIN32)
     ENDIF(NOT CMAKE_BUILD_TYPE)
 ENDIF(NOT WIN32)
 
+SET(LIB_SUFFIX "" CACHE STRING "Optional arch-dependent suffix for the library installation directory")
+
 SET(RUNTIME_INSTALL_DIR bin
     CACHE PATH "Install dir for executables and dlls")
-SET(ARCHIVE_INSTALL_DIR lib
+SET(ARCHIVE_INSTALL_DIR lib${LIB_SUFFIX}
     CACHE PATH "Install dir for static libraries")
-SET(LIBRARY_INSTALL_DIR lib
+SET(LIBRARY_INSTALL_DIR lib${LIB_SUFFIX}
     CACHE PATH "Install dir for shared libraries")
 SET(INCLUDE_INSTALL_DIR include
     CACHE PATH "Install dir for headers")
-SET(PACKAGE_INSTALL_DIR lib/cmake
+SET(PACKAGE_INSTALL_DIR lib${LIB_SUFFIX}/cmake
     CACHE PATH "Install dir for cmake package config files")
 MARK_AS_ADVANCED( RUNTIME_INSTALL_DIR ARCHIVE_INSTALL_DIR INCLUDE_INSTALL_DIR PACKAGE_INSTALL_DIR )
 
@@ -101,7 +103,7 @@ IF(JSONCPP_WITH_PKGCONFIG_SUPPORT)
 		"pkg-config/jsoncpp.pc"
 		@ONLY)
 	INSTALL(FILES "${CMAKE_BINARY_DIR}/pkg-config/jsoncpp.pc"
-		DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
+		DESTINATION "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/pkgconfig")
 ENDIF(JSONCPP_WITH_PKGCONFIG_SUPPORT)
 
 IF(JSONCPP_WITH_CMAKE_PACKAGE)
