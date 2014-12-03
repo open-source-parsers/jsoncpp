@@ -39,6 +39,10 @@ ADD_LIBRARY( jsoncpp_lib ${JSONCPP_LIB_TYPE}
 SET_TARGET_PROPERTIES( jsoncpp_lib PROPERTIES OUTPUT_NAME jsoncpp )
 SET_TARGET_PROPERTIES( jsoncpp_lib PROPERTIES VERSION ${JSONCPP_VERSION} SOVERSION ${JSONCPP_VERSION_MAJOR} )
 
+TARGET_INCLUDE_DIRECTORIES( jsoncpp_lib
+                            PUBLIC ${JSONCPP_INCLUDE_DIR}
+                            )
+
 # Install instructions for this target
 IF(JSONCPP_WITH_CMAKE_PACKAGE)
     TARGET_INCLUDE_DIRECTORIES( jsoncpp_lib
