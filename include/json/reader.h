@@ -22,6 +22,11 @@
 #pragma warning(disable : 4251)
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
+#if defined(JSONCPP_ICU_SUPPORT)
+#include "unicode/unistr.h"
+#endif  //  if defined(JSONCPP_ICU_SUPPORT)
+
+
 namespace Json {
 
 /** \brief Unserialize a <a HREF="http://www.json.org">JSON</a> document into a
@@ -71,6 +76,20 @@ public:
    */
   bool
   parse(const std::string& document, Value& root, bool collectComments = true);
+
+#if defined(JSONCPP_ICU_SUPPORT)
+  /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a> document.
+   * \param document ICU UnicodeString containing the document to read.
+   * \param root [out] Contains the root value of the document if it was
+   *             successfully parsed.
+   * \param collectComments \c true to collect comment and allow writing them back during
+   *                        serialization, \c false to discard comments.
+   *                        This parameter is ignored if Features::allowComments_
+   *                        is \c false.
+   * \return \c true if the document was successfully parsed, \c false if an error occurred.
+   */
+  bool parse(const UnicodeString& document, Value& root, bool collectComments = true);
+#endif  //  if defined(JSONCPP_ICU_SUPPORT)
 
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
    document.

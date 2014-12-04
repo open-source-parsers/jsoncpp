@@ -92,6 +92,17 @@ Reader::parse(const std::string& document, Value& root, bool collectComments) {
   return parse(begin, end, root, collectComments);
 }
 
+#ifdef JSONCPP_ICU_SUPPORT
+bool
+Reader::parse(const UnicodeString& document, Value& root, bool collectComments) {
+   document_.clear();
+   document.toUTF8String(document_);
+   const char *begin = document_.c_str();
+   const char *end = begin + document_.length();
+   return parse(begin, end, root, collectComments);
+}
+#endif
+
 bool Reader::parse(std::istream& sin, Value& root, bool collectComments) {
   // std::istream_iterator<char> begin(sin);
   // std::istream_iterator<char> end;
@@ -542,12 +553,27 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
     }
     value = value * 10 + digit;
   }
-  if (isNegative)
-    decoded = -Value::LargestInt(value);
-  else if (value <= Value::LargestUInt(Value::maxInt))
-    decoded = Value::LargestInt(value);
-  else
-    decoded = value;
+  if(isNegative) {
+    Value::Int64 newValue = -1 * value;
+    if(newValue >= Value::Int64(Value::minInt))
+       decoded = Value(Value::Int(newValue));
+    else if(newValue >= Value::Int64(Value::minLong))
+      decoded = Value(long(newValue));
+    else
+      decoded = newValue;
+   } else if (value <= Value::UInt64(Value::maxInt))
+      decoded = Value(Value::Int(value));
+   else if (value <= Value::UInt64(Value::maxUInt))
+      decoded = Value(Value::UInt(value));
+   else if (value <= Value::UInt64(Value::maxLong))
+      decoded = Value((long)value);
+   else if (value <= Value::UInt64(Value::maxULong))
+      decoded = Value((unsigned long)value);
+   else if ( value <= Value::UInt64(Value::maxInt64) )
+      decoded = Value(Value::Int64(value));
+   else
+      decoded = value;
+
   return true;
 }
 

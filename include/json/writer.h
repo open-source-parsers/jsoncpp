@@ -19,6 +19,10 @@
 #pragma warning(disable : 4251)
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
+#if defined(JSONCPP_ICU_SUPPORT)
+#include "unicode/unistr.h"
+#endif  //  if defined(JSONCPP_ICU_SUPPORT)
+
 namespace Json {
 
 class Value;
@@ -30,6 +34,10 @@ public:
   virtual ~Writer();
 
   virtual std::string write(const Value& root) = 0;
+
+#ifdef JSONCPP_ICU_SUPPORT
+  virtual UnicodeString writeUnicodeString(const Value& root) = 0;
+#endif
 };
 
 /** \brief Outputs a Value in <a HREF="http://www.json.org">JSON</a> format
@@ -58,6 +66,10 @@ public:
 
 public: // overridden from Writer
   virtual std::string write(const Value& root);
+
+#ifdef JSONCPP_ICU_SUPPORT
+  virtual UnicodeString writeUnicodeString(const Value& root);
+#endif  
 
 private:
   void writeValue(const Value& value);
@@ -102,6 +114,10 @@ public: // overridden from Writer
    * \return String containing the JSON document that represents the root value.
    */
   virtual std::string write(const Value& root);
+
+#ifdef JSONCPP_ICU_SUPPORT
+  virtual UnicodeString writeUnicodeString(const Value& root);
+#endif  
 
 private:
   void writeValue(const Value& value);
@@ -193,9 +209,13 @@ private:
 #if defined(JSON_HAS_INT64)
 std::string JSON_API valueToString(Int value);
 std::string JSON_API valueToString(UInt value);
+std::string JSON_API valueToString(Int64 value);
+std::string JSON_API valueToString(UInt64 value);
 #endif // if defined(JSON_HAS_INT64)
 std::string JSON_API valueToString(LargestInt value);
 std::string JSON_API valueToString(LargestUInt value);
+std::string JSON_API valueToString(long value);
+std::string JSON_API valueToString(unsigned long value);
 std::string JSON_API valueToString(double value);
 std::string JSON_API valueToString(bool value);
 std::string JSON_API valueToQuotedString(const char* value);
