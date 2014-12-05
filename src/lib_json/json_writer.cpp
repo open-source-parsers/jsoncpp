@@ -36,6 +36,33 @@ static bool containsControlCharacter(const char* str) {
   return false;
 }
 
+static void uintToString(UInt value, char *&current) {
+   *--current = 0;
+   do {
+      *--current = (value % 10) + '0';
+      value /= 10;
+   }
+   while (value != 0);
+}
+
+static void uint64ToString(UInt64 value, char *&current) {
+   *--current = 0;
+   do {
+      *--current = (value % 10) + '0';
+      value /= 10;
+   }
+   while (value != 0);
+}
+
+static void ulongToString(unsigned long value, char *&current) {
+   *--current = 0;
+   do {
+      *--current = (value % 10) + '0';
+      value /= 10;
+   }
+   while (value != 0);
+}
+
 std::string valueToString(LargestInt value) {
   UIntToStringBuffer buffer;
   char* current = buffer + sizeof(buffer);
@@ -68,6 +95,28 @@ std::string valueToString(UInt value) {
 }
 
 #endif // # if defined(JSON_HAS_INT64)
+
+std::string valueToString(long value) {
+   char buffer[32];
+   char *current = buffer + sizeof(buffer);
+   bool isNegative = value < 0;
+   if ( isNegative )
+      value = -value;
+   ulongToString( (unsigned long)value, current );
+   if ( isNegative )
+      *--current = '-';
+   assert( current >= buffer );
+   return current;
+}
+
+
+std::string valueToString(unsigned long value) {
+   char buffer[32];
+   char *current = buffer + sizeof(buffer);
+   ulongToString( value, current );
+   assert( current >= buffer );
+   return current;
+}
 
 std::string valueToString(double value) {
   // Allocate a buffer that is more than large enough to store the 16 digits of
@@ -195,6 +244,19 @@ std::string FastWriter::write(const Value& root) {
   return document_;
 }
 
+#ifdef JSONCPP_ICU_SUPPORT
+UnicodeString FastWriter::writeUnicodeString(const Value& root) {
+   document_ = "";
+   writeValue(root);
+   if (!omitEndingLineFeed_)
+    document_ += "\n";
+   UnicodeString result;
+   result.fromUTF8(document_);
+   return result;
+}
+#endif
+
+
 void FastWriter::writeValue(const Value& value) {
   switch (value.type()) {
   case nullValue:
@@ -207,6 +269,18 @@ void FastWriter::writeValue(const Value& value) {
   case uintValue:
     document_ += valueToString(value.asLargestUInt());
     break;
+  case int64Value:
+    document_ += valueToString( value.asInt64() );
+    break;
+   case uint64Value:
+    document_ += valueToString( value.asUInt64() );
+    break;
+   case longValue:
+    document_ += valueToString( value.asLong() );
+    break;
+   case ulongValue:
+    document_ += valueToString( value.asULong() );
+    break;    
   case realValue:
     document_ += valueToString(value.asDouble());
     break;
@@ -260,6 +334,21 @@ std::string StyledWriter::write(const Value& root) {
   return document_;
 }
 
+#ifdef JSONCPP_ICU_SUPPORT
+UnicodeString StyledWriter::writeUnicodeString(const Value& root) {
+   document_ = "";
+   addChildValues_ = false;
+   indentString_ = "";
+   writeCommentBeforeValue(root);
+   writeValue(root);
+   writeCommentAfterValueOnSameLine(root);
+   document_ += "\n";
+   UnicodeString result;
+   result.fromUTF8(document_);
+   return result;
+}
+#endif
+
 void StyledWriter::writeValue(const Value& value) {
   switch (value.type()) {
   case nullValue:
@@ -271,6 +360,18 @@ void StyledWriter::writeValue(const Value& value) {
   case uintValue:
     pushValue(valueToString(value.asLargestUInt()));
     break;
+ case int64Value:
+      pushValue( valueToString( value.asInt64() ) );
+      break;
+   case uint64Value:
+      pushValue( valueToString( value.asUInt64() ) );
+      break;
+   case longValue:
+      pushValue( valueToString( value.asLong() ) );
+      break;
+   case ulongValue:
+      pushValue( valueToString( value.asLong() ) );
+      break;    
   case realValue:
     pushValue(valueToString(value.asDouble()));
     break;
@@ -362,7 +463,7 @@ bool StyledWriter::isMultineArray(const Value& value) {
   for (int index = 0; index < size && !isMultiLine; ++index) {
     const Value& childValue = value[index];
     isMultiLine =
-        isMultiLine || ((childValue.isArray() || childValue.isObject()) &&
+        isMultiLine || hasCommentForValue(childValue) || ((childValue.isArray() || childValue.isObject()) &&
                         childValue.size() > 0);
   }
   if (!isMultiLine) // check if line length > max line length
@@ -373,6 +474,7 @@ bool StyledWriter::isMultineArray(const Value& value) {
     for (int index = 0; index < size; ++index) {
       writeValue(value[index]);
       lineLength += int(childValues_[index].length());
+      isMultiLine = isMultiLine && hasCommentForValue(value[index]);
     }
     addChildValues_ = false;
     isMultiLine = isMultiLine || lineLength >= rightMargin_;
@@ -494,6 +596,18 @@ void StyledStreamWriter::writeValue(const Value& value) {
   case uintValue:
     pushValue(valueToString(value.asLargestUInt()));
     break;
+  case int64Value:
+      pushValue( valueToString( value.asInt64() ) );
+      break;
+   case uint64Value:
+      pushValue( valueToString( value.asUInt64() ) );
+      break;
+   case longValue:
+      pushValue( valueToString( value.asLong() ) );
+      break;
+   case ulongValue:
+      pushValue( valueToString( value.asULong() ) );
+      break;    
   case realValue:
     pushValue(valueToString(value.asDouble()));
     break;

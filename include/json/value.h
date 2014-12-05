@@ -28,6 +28,10 @@
 #pragma warning(disable : 4251)
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
+#if defined(JSONCPP_ICU_SUPPORT)
+#include "unicode/unistr.h"
+#endif  //  if defined(JSONCPP_ICU_SUPPORT)
+
 /** \brief JSON (JavaScript Object Notation).
  */
 namespace Json {
@@ -38,6 +42,10 @@ enum ValueType {
   nullValue = 0, ///< 'null' value
   intValue,      ///< signed integer value
   uintValue,     ///< unsigned integer value
+  int64Value,    ///< signed 64bit integer value
+  uint64Value,   ///< unsigned 64 bit integer value
+  longValue,     ///< signed long value
+  ulongValue,    ///< unsigned long value
   realValue,     ///< double value
   stringValue,   ///< UTF-8 string value
   booleanValue,  ///< bool value
@@ -157,6 +165,10 @@ public:
   static const UInt64 maxUInt64;
 #endif // defined(JSON_HAS_INT64)
 
+  static const long minLong;
+  static const long maxLong;
+  static const unsigned long maxULong;
+
 private:
 #ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
@@ -216,6 +228,8 @@ Json::Value obj_value(Json::objectValue); // {}
   Value(Int64 value);
   Value(UInt64 value);
 #endif // if defined(JSON_HAS_INT64)
+  Value(long value);
+  Value(unsigned long value);
   Value(double value);
   Value(const char* value);
   Value(const char* beginValue, const char* endValue);
@@ -231,6 +245,11 @@ Json::Value obj_value(Json::objectValue); // {}
    */
   Value(const StaticString& value);
   Value(const std::string& value);
+
+#ifdef JSONCPP_ICU_SUPPORT
+  Value(const UnicodeString& str);
+#endif
+
 #ifdef JSON_USE_CPPTL
   Value(const CppTL::ConstString& value);
 #endif
@@ -258,6 +277,11 @@ Json::Value obj_value(Json::objectValue); // {}
 
   const char* asCString() const;
   std::string asString() const;
+
+#ifdef JSONCPP_ICU_SUPPORT
+  UnicodeString asUnicodeString() const;
+#endif
+
 #ifdef JSON_USE_CPPTL
   CppTL::ConstString asConstString() const;
 #endif
@@ -267,6 +291,9 @@ Json::Value obj_value(Json::objectValue); // {}
   Int64 asInt64() const;
   UInt64 asUInt64() const;
 #endif // if defined(JSON_HAS_INT64)
+
+  long asLong() const;
+  unsigned long asULong() const;
   LargestInt asLargestInt() const;
   LargestUInt asLargestUInt() const;
   float asFloat() const;
@@ -279,6 +306,8 @@ Json::Value obj_value(Json::objectValue); // {}
   bool isInt64() const;
   bool isUInt() const;
   bool isUInt64() const;
+  bool isLong() const;
+  bool isULong() const;
   bool isIntegral() const;
   bool isDouble() const;
   bool isNumeric() const;
@@ -370,6 +399,14 @@ Json::Value obj_value(Json::objectValue); // {}
    * \endcode
    */
   Value& operator[](const StaticString& key);
+
+#ifdef JSONCPP_ICU_SUPPORT
+  /// Access an object value by name, create a null member if it does not exist.
+  Value &operator[](const UnicodeString& key);
+  /// Access an object value by name, returns null if there is no member with that name.
+  const Value &operator[](const UnicodeString& key) const;
+#endif
+
 #ifdef JSON_USE_CPPTL
   /// Access an object value by name, create a null member if it does not exist.
   Value& operator[](const CppTL::ConstString& key);
@@ -381,6 +418,11 @@ Json::Value obj_value(Json::objectValue); // {}
   Value get(const char* key, const Value& defaultValue) const;
   /// Return the member named key if it exist, defaultValue otherwise.
   Value get(const std::string& key, const Value& defaultValue) const;
+
+#ifdef JSONCPP_ICU_SUPPORT
+  Value get(const UnicodeString& key, const Value &defaultValue) const;
+#endif
+
 #ifdef JSON_USE_CPPTL
   /// Return the member named key if it exist, defaultValue otherwise.
   Value get(const CppTL::ConstString& key, const Value& defaultValue) const;
@@ -395,10 +437,19 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Same as removeMember(const char*)
   Value removeMember(const std::string& key);
 
+#ifdef JSONCPP_ICU_SUPPORT
+  Value removeMember(const UnicodeString& key);
+#endif  
+
   /// Return true if the object has a member named key.
   bool isMember(const char* key) const;
   /// Return true if the object has a member named key.
   bool isMember(const std::string& key) const;
+
+#ifdef JSONCPP_ICU_SUPPORT
+  bool isMember(const UnicodeString& key) const;
+#endif
+
 #ifdef JSON_USE_CPPTL
   /// Return true if the object has a member named key.
   bool isMember(const CppTL::ConstString& key) const;
@@ -478,6 +529,10 @@ private:
   union ValueHolder {
     LargestInt int_;
     LargestUInt uint_;
+    Int64 int64_;
+    UInt64 uint64_;
+    long long_;
+    unsigned long ulong_;
     double real_;
     bool bool_;
     char* string_;

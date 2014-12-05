@@ -44,6 +44,11 @@ const UInt Value::maxUInt = UInt(-1);
 const Int64 Value::minInt64 = Int64(~(UInt64(-1) / 2));
 const Int64 Value::maxInt64 = Int64(UInt64(-1) / 2);
 const UInt64 Value::maxUInt64 = UInt64(-1);
+
+const long Value::minLong           = (long) ~(((unsigned long)-1)/2);
+const long Value::maxLong           = (long) (((unsigned long)-1)/2);
+const unsigned long Value::maxULong = (unsigned long)(-1);
+
 // The constant is hard-coded because some compiler have trouble
 // converting Value::maxUInt64 to a double correctly (AIX/xlC).
 // Assumes that UInt64 is a 64 bits integer.
@@ -235,6 +240,17 @@ Value::Value(ValueType type) {
   case uintValue:
     value_.int_ = 0;
     break;
+  case int64Value:
+    value_.int64_ = 0;
+    break;
+  case uint64Value:
+    value_.uint64_ = 0;
+    break;
+  case longValue:
+    value_.long_ = 0;
+    break;
+  case ulongValue:
+    value_.ulong_ = 0;    
   case realValue:
     value_.real_ = 0.0;
     break;
@@ -281,6 +297,16 @@ Value::Value(UInt64 value) {
   value_.uint_ = value;
 }
 #endif // defined(JSON_HAS_INT64)
+
+Value::Value(long value) {
+  initBasic(longValue);
+  value_.long_ = value;
+}
+
+Value::Value(unsigned long value) {
+  initBasic(ulongValue);
+  value_.ulong_ = value;
+}
 
 Value::Value(double value) {
   initBasic(realValue);
@@ -333,6 +359,10 @@ Value::Value(const Value& other)
   case nullValue:
   case intValue:
   case uintValue:
+  case int64Value:
+  case uint64Value:
+  case longValue:
+  case ulongValue:
   case realValue:
   case booleanValue:
     value_ = other.value_;
@@ -372,11 +402,30 @@ Value::Value(const Value& other)
   }
 }
 
+#ifdef JSONCPP_ICU_SUPPORT
+Value::Value(const UnicodeString& value)
+   : type_(stringValue)
+   , allocated_(true)
+   , comments_(0)
+# ifdef JSON_VALUE_USE_INTERNAL_MAP
+   , itemIsUsed_( 0 )
+#endif
+{
+   std::string v;
+   value.toUTF8String(v);
+   value_.string_ = duplicateStringValue(v.c_str(), (unsigned int)v.length());
+}
+#endif
+
 Value::~Value() {
   switch (type_) {
   case nullValue:
   case intValue:
   case uintValue:
+  case int64Value:
+  case uint64Value:
+  case longValue:
+  case ulongValue:
   case realValue:
   case booleanValue:
     break;
@@ -443,6 +492,14 @@ bool Value::operator<(const Value& other) const {
     return value_.int_ < other.value_.int_;
   case uintValue:
     return value_.uint_ < other.value_.uint_;
+  case int64Value:
+      return value_.int64_ < other.value_.int64_;
+   case uint64Value:
+      return value_.uint64_ < other.value_.uint64_;
+   case longValue:
+      return value_.long_ < other.value_.long_;
+   case ulongValue:
+      return value_.ulong_ < other.value_.ulong_;    
   case realValue:
     return value_.real_ < other.value_.real_;
   case booleanValue:
@@ -492,6 +549,14 @@ bool Value::operator==(const Value& other) const {
     return value_.int_ == other.value_.int_;
   case uintValue:
     return value_.uint_ == other.value_.uint_;
+  case int64Value:
+      return value_.int64_ == other.value_.int64_;
+   case uint64Value:
+      return value_.uint64_ == other.value_.uint64_;
+   case longValue:
+      return value_.long_ == other.value_.long_;
+   case ulongValue:
+      return value_.ulong_ == other.value_.ulong_;    
   case realValue:
     return value_.real_ == other.value_.real_;
   case booleanValue:
@@ -535,14 +600,33 @@ std::string Value::asString() const {
     return value_.bool_ ? "true" : "false";
   case intValue:
     return valueToString(value_.int_);
+  case int64Value:
+    {
+      std::stringstream stream;
+      stream << value_.int64_;
+      return stream.str();
+    }
   case uintValue:
     return valueToString(value_.uint_);
+  case uint64Value:
+    {
+      std::stringstream stream;
+      stream << value_.uint64_;
+      return stream.str();
+    }    
   case realValue:
     return valueToString(value_.real_);
   default:
     JSON_FAIL_MESSAGE("Type is not convertible to string");
   }
 }
+
+#ifdef JSONCPP_ICU_SUPPORT
+UnicodeString 
+Value::asUnicodeString() const {
+  return UnicodeString::fromUTF8(asString());
+}
+#endif
 
 #ifdef JSON_USE_CPPTL
 CppTL::ConstString Value::asConstString() const {
@@ -558,6 +642,18 @@ Value::Int Value::asInt() const {
   case uintValue:
     JSON_ASSERT_MESSAGE(isInt(), "LargestUInt out of Int range");
     return Int(value_.uint_);
+  case int64Value:
+      JSON_ASSERT_MESSAGE( (value_.int64_ >= (Int64)minInt) || (value_.int64_ <= (Int64)maxInt), "64bit integer out of signed integer range" );
+      return Int( value_.int64_ );
+   case uint64Value:
+      JSON_ASSERT_MESSAGE( (value_.uint64_ >= (UInt64)minInt) || (value_.uint64_ <= (UInt64)maxInt), "unsigned 64bit integer out of signed integer range" );
+      return Int( value_.uint64_ );
+   case longValue:
+      JSON_ASSERT_MESSAGE( (value_.long_ >= (long)minInt) || (value_.long_ <= (long)maxInt), "64bit integer out of signed integer range" );
+      return Int( value_.long_ );
+   case ulongValue:
+      JSON_ASSERT_MESSAGE( (value_.ulong_ >= (unsigned long)minInt) || (value_.ulong_ <= (unsigned long)maxInt), "unsigned 64bit integer out of signed integer range" );
+      return Int( value_.ulong_ );    
   case realValue:
     JSON_ASSERT_MESSAGE(InRange(value_.real_, minInt, maxInt),
                         "double out of Int range");
@@ -580,6 +676,18 @@ Value::UInt Value::asUInt() const {
   case uintValue:
     JSON_ASSERT_MESSAGE(isUInt(), "LargestUInt out of UInt range");
     return UInt(value_.uint_);
+  case int64Value:
+      JSON_ASSERT_MESSAGE( (value_.int64_ >= 0) || (value_.int64_ <= (Int64)maxUInt), "64bit integer out of unsigned integer range" );
+      return UInt( value_.int64_ );
+   case uint64Value:
+      JSON_ASSERT_MESSAGE( value_.uint64_ <= (UInt64)maxUInt, "unsigned 64bit integer out of unsigned integer range" );
+      return UInt( value_.uint64_ );
+   case longValue:
+      JSON_ASSERT_MESSAGE( (value_.long_ >= 0) || (value_.long_ <= (long)maxUInt), "long out of unsigned integer range" );
+      return UInt( value_.long_ );
+   case ulongValue:
+      JSON_ASSERT_MESSAGE( value_.ulong_ <= (unsigned long)maxUInt, "unsigned long out of unsigned integer range" );
+      return UInt( value_.ulong_ );    
   case realValue:
     JSON_ASSERT_MESSAGE(InRange(value_.real_, 0, maxUInt),
                         "double out of UInt range");
@@ -603,6 +711,15 @@ Value::Int64 Value::asInt64() const {
   case uintValue:
     JSON_ASSERT_MESSAGE(isInt64(), "LargestUInt out of Int64 range");
     return Int64(value_.uint_);
+  case int64Value:
+      return value_.int64_;
+   case uint64Value:
+      JSON_ASSERT_MESSAGE( (value_.uint64_ >= (UInt64)minInt64) || (value_.uint64_ <= (UInt64)maxInt64), "unsigned 64bit integer out of signed 64bit integer range" );
+      return value_.uint64_;
+   case longValue:
+      return value_.long_;
+   case ulongValue:
+      return value_.ulong_;    
   case realValue:
     JSON_ASSERT_MESSAGE(InRange(value_.real_, minInt64, maxInt64),
                         "double out of Int64 range");
@@ -624,6 +741,16 @@ Value::UInt64 Value::asUInt64() const {
     return UInt64(value_.int_);
   case uintValue:
     return UInt64(value_.uint_);
+  case int64Value:
+      JSON_ASSERT_MESSAGE( (value_.int64_ >= 0)  ||  (value_.int64_ <= (Int64)maxUInt), "64bit integer out of unsigned 64bit integer range" );
+      return value_.int64_;
+   case uint64Value:
+      return value_.uint64_;
+   case longValue:
+      JSON_ASSERT_MESSAGE( value_.long_ >= 0, "Negative long can not be converted to unsigned 64bit integer" );
+      return value_.long_;
+   case ulongValue:
+      return value_.ulong_;    
   case realValue:
     JSON_ASSERT_MESSAGE(InRange(value_.real_, 0, maxUInt64),
                         "double out of UInt64 range");
@@ -638,6 +765,81 @@ Value::UInt64 Value::asUInt64() const {
   JSON_FAIL_MESSAGE("Value is not convertible to UInt64.");
 }
 #endif // if defined(JSON_HAS_INT64)
+
+long 
+Value::asLong() const
+{
+   switch ( type_ )
+   {
+   case nullValue:
+      return 0;
+   case intValue:
+      return static_cast<long>(value_.int_);
+   case uintValue:
+      return static_cast<long>(value_.uint_);
+   case int64Value:
+      JSON_ASSERT_MESSAGE( (value_.int64_ >= (Int64)minLong) || (value_.int64_ <= (Int64)maxLong), "signed 64bit integer out of signed long range" );
+      return static_cast<long>(value_.int64_);
+   case uint64Value:
+      JSON_ASSERT_MESSAGE( (value_.uint64_ >= (UInt64)minInt64) || (value_.uint64_ <= (UInt64)maxInt64), "unsigned 64bit integer out of signed long range" );
+      return static_cast<long>(value_.uint64_);
+   case longValue:
+      return value_.long_;
+   case ulongValue:
+      return static_cast<long>(value_.ulong_);
+   case realValue:
+      JSON_ASSERT_MESSAGE( value_.real_ >= minInt64  &&  value_.real_ <= maxInt64, "Real out of signed 64bit integer range" );
+      return long( value_.real_ );
+   case booleanValue:
+      return value_.bool_ ? 1 : 0;
+   case stringValue:
+   case arrayValue:
+   case objectValue:
+      JSON_ASSERT_MESSAGE( false, "Type is not convertible to int" );
+      return 0;
+   default:
+      JSON_ASSERT_UNREACHABLE;
+   }
+   return 0; // unreachable;
+}
+
+unsigned long 
+Value::asULong() const
+{
+   switch ( type_ )
+   {
+   case nullValue:
+      return 0;
+   case intValue:
+      JSON_ASSERT_MESSAGE( value_.int_ >= 0, "Negative integer can not be converted to unsigned 64bit integer" );
+      return static_cast<unsigned long>(value_.int_);
+   case uintValue:
+      return static_cast<unsigned long>(value_.uint_);
+   case int64Value:
+      JSON_ASSERT_MESSAGE( (value_.int64_ >= 0)  ||  (value_.int64_ <= (Int64)maxUInt), "64bit integer out of unsigned 64bit integer range" );
+      return static_cast<unsigned long>(value_.int64_);
+   case uint64Value:
+      return static_cast<unsigned long>(value_.uint64_);
+   case longValue:
+      JSON_ASSERT_MESSAGE( value_.long_ >= 0, "Negative long can not be converted to unsigned long" );
+      return static_cast<unsigned long>(value_.long_);
+   case ulongValue:
+      return value_.ulong_;
+   case realValue:
+      JSON_ASSERT_MESSAGE( value_.real_ >= 0  &&  value_.real_ <= maxUInt64,  "Real out of unsigned 64bit integer range" );
+      return (unsigned long)value_.real_;
+   case booleanValue:
+      return value_.bool_ ? 1 : 0;
+   case stringValue:
+   case arrayValue:
+   case objectValue:
+      JSON_ASSERT_MESSAGE( false, "Type is not convertible to uint" );
+      return 0;
+   default:
+      JSON_ASSERT_UNREACHABLE;
+   }
+   return 0; // unreachable;
+}
 
 LargestInt Value::asLargestInt() const {
 #if defined(JSON_NO_INT64)
@@ -687,6 +889,14 @@ float Value::asFloat() const {
 #else  // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
     return integerToDouble(value_.uint_);
 #endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
+  case int64Value:
+      return double( value_.int64_ );
+   case uint64Value:
+      return double( value_.uint64_ );
+   case longValue:
+      return value_.long_;
+   case ulongValue:
+      return value_.ulong_;    
   case realValue:
     return static_cast<float>(value_.real_);
   case nullValue:
@@ -709,6 +919,14 @@ bool Value::asBool() const {
     return value_.int_ ? true : false;
   case uintValue:
     return value_.uint_ ? true : false;
+  case int64Value:
+      return value_.int64_ != 0;
+   case uint64Value:
+      return value_.uint64_ != 0;
+   case longValue:
+      return value_.long_ != 0;
+   case ulongValue:
+      return value_.ulong_ != 0;    
   case realValue:
     return value_.real_ ? true : false;
   default:
@@ -756,6 +974,10 @@ ArrayIndex Value::size() const {
   case nullValue:
   case intValue:
   case uintValue:
+  case int64Value:
+  case uint64Value:
+  case longValue:
+  case ulongValue:
   case realValue:
   case booleanValue:
   case stringValue:
@@ -963,6 +1185,18 @@ Value& Value::operator[](const StaticString& key) {
   return resolveReference(key, true);
 }
 
+#ifdef JSONCPP_ICU_SUPPORT
+Value& Value::operator[](const UnicodeString& key) {
+   std::string k;
+   return (*this)[key.toUTF8String(k).c_str()];
+}
+
+const Value& Value::operator[](const UnicodeString& key ) const {
+   std::string k;
+   return (*this)[key.toUTF8String(k).c_str()];
+}
+#endif
+
 #ifdef JSON_USE_CPPTL
 Value& Value::operator[](const CppTL::ConstString& key) {
   return (*this)[key.c_str()];
@@ -983,6 +1217,13 @@ Value Value::get(const char* key, const Value& defaultValue) const {
 Value Value::get(const std::string& key, const Value& defaultValue) const {
   return get(key.c_str(), defaultValue);
 }
+
+#ifdef JSONCPP_ICU_SUPPORT
+Value Value::get(const UnicodeString& key, const Value& defaultValue) const {
+   std::string k;
+   return get(key.toUTF8String(k).c_str(), defaultValue);
+}
+#endif
 
 Value Value::removeMember(const char* key) {
   JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == objectValue,
@@ -1013,6 +1254,13 @@ Value Value::removeMember(const std::string& key) {
   return removeMember(key.c_str());
 }
 
+#ifdef JSONCPP_ICU_SUPPORT
+Value Value::removeMember(const UnicodeString& key) {
+   std::string k;
+   return removeMember(key.toUTF8String(k).c_str());
+}
+#endif
+
 #ifdef JSON_USE_CPPTL
 Value Value::get(const CppTL::ConstString& key,
                  const Value& defaultValue) const {
@@ -1028,6 +1276,13 @@ bool Value::isMember(const char* key) const {
 bool Value::isMember(const std::string& key) const {
   return isMember(key.c_str());
 }
+
+#ifdef JSONCPP_ICU_SUPPORT
+bool Value::isMember(const UnicodeString& key) const {
+   std::string k;
+   return isMember(key.toUTF8String(k).c_str());
+}
+#endif
 
 #ifdef JSON_USE_CPPTL
 bool Value::isMember(const CppTL::ConstString& key) const {
