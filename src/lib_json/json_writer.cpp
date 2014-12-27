@@ -26,6 +26,11 @@
 #pragma warning(disable : 4996)
 #endif
 
+#if defined(__sun) && defined(__SVR4) //Solaris
+#include <ieeefp.h>
+#define isfinite finite
+#endif
+
 namespace Json {
 
 static bool containsControlCharacter(const char* str) {
