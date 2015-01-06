@@ -926,7 +926,7 @@ JSONTEST_FIXTURE(ValueTest, integers) {
   JSONTEST_ASSERT_EQUAL(float(uint64ToDouble(Json::UInt64(1) << 63)),
                         val.asFloat());
   JSONTEST_ASSERT_EQUAL(true, val.asBool());
-  JSONTEST_ASSERT_STRING_EQUAL("9.223372036854776e+18",
+  JSONTEST_ASSERT_STRING_EQUAL("9.2233720368547758e+18",
                                normalizeFloatingPointStr(val.asString()));
 
   // int64 min
@@ -974,7 +974,7 @@ JSONTEST_FIXTURE(ValueTest, integers) {
   JSONTEST_ASSERT_EQUAL(-9223372036854775808.0, val.asDouble());
   JSONTEST_ASSERT_EQUAL(-9223372036854775808.0, val.asFloat());
   JSONTEST_ASSERT_EQUAL(true, val.asBool());
-  JSONTEST_ASSERT_STRING_EQUAL("-9.223372036854776e+18",
+  JSONTEST_ASSERT_STRING_EQUAL("-9.2233720368547758e+18",
                                normalizeFloatingPointStr(val.asString()));
 
   // 10^19
@@ -1065,7 +1065,7 @@ JSONTEST_FIXTURE(ValueTest, integers) {
   JSONTEST_ASSERT_EQUAL(18446744073709551616.0, val.asDouble());
   JSONTEST_ASSERT_EQUAL(18446744073709551616.0, val.asFloat());
   JSONTEST_ASSERT_EQUAL(true, val.asBool());
-  JSONTEST_ASSERT_STRING_EQUAL("1.844674407370955e+19",
+  JSONTEST_ASSERT_STRING_EQUAL("1.8446744073709552e+19",
                                normalizeFloatingPointStr(val.asString()));
 #endif
 }
@@ -1217,7 +1217,7 @@ JSONTEST_FIXTURE(ValueTest, nonIntegers) {
                         normalizeFloatingPointStr(val.asString()));
 
   val = Json::Value(1.2345678901234);
-  JSONTEST_ASSERT_STRING_EQUAL("1.2345678901234",
+  JSONTEST_ASSERT_STRING_EQUAL("1.2345678901234001",
                                normalizeFloatingPointStr(val.asString()));
 
   // A 16-digit floating point number.
