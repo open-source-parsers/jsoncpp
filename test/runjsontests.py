@@ -1,8 +1,8 @@
 from __future__ import print_function
+from glob import glob
 import sys
 import os
-import os.path
-from glob import glob
+import pipes
 import optparse
 
 VALGRIND_CMD = 'valgrind --tool=memcheck --leak-check=yes --undef-value-errors=yes '
@@ -56,7 +56,7 @@ def runAllTests( jsontest_executable_path, input_dir = None,
         options = is_json_checker_test and '--json-checker' or ''
         pipe = os.popen( "%s%s %s %s" % (
             valgrind_path, jsontest_executable_path, options,
-            input_path) )
+            pipes.quote(input_path)))
         process_output = pipe.read()
         status = pipe.close()
         if is_json_checker_test:
