@@ -2,7 +2,6 @@ from __future__ import print_function
 from glob import glob
 import sys
 import os
-import pipes
 import optparse
 
 VALGRIND_CMD = 'valgrind --tool=memcheck --leak-check=yes --undef-value-errors=yes '
@@ -34,7 +33,7 @@ def compareOutputs( expected, actual, message ):
         
 def safeReadFile( path ):
     try:
-        return file( path, 'rt' ).read()
+        return open( path, 'rt', encoding = 'utf-8' ).read()
     except IOError as e:
         return '<File "%s" is missing: %s>' % (path,e)
 
@@ -54,9 +53,9 @@ def runAllTests( jsontest_executable_path, input_dir = None,
         is_json_checker_test = (input_path in test_jsonchecker) or expect_failure
         print('TESTING:', input_path, end=' ')
         options = is_json_checker_test and '--json-checker' or ''
-        pipe = os.popen( "%s%s %s %s" % (
+        pipe = os.popen( '%s%s %s "%s"' % (
             valgrind_path, jsontest_executable_path, options,
-            pipes.quote(input_path)))
+            input_path))
         process_output = pipe.read()
         status = pipe.close()
         if is_json_checker_test:
@@ -77,13 +76,13 @@ def runAllTests( jsontest_executable_path, input_dir = None,
             base_path = os.path.splitext(input_path)[0]
             actual_output = safeReadFile( base_path + '.actual' )
             actual_rewrite_output = safeReadFile( base_path + '.actual-rewrite' )
-            file(base_path + '.process-output','wt').write( process_output )
+            open(base_path + '.process-output', 'wt', encoding = 'utf-8').write( process_output )
             if status:
                 print('parsing failed')
                 failed_tests.append( (input_path, 'Parsing failed:\n' + process_output) )
             else:
                 expected_output_path = os.path.splitext(input_path)[0] + '.expected'
-                expected_output = file( expected_output_path, 'rt' ).read()
+                expected_output = open( expected_output_path, 'rt', encoding = 'utf-8' ).read()
                 detail = ( compareOutputs( expected_output, actual_output, 'input' )
                             or compareOutputs( expected_output, actual_rewrite_output, 'rewrite' ) )
                 if detail:
