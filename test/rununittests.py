@@ -31,7 +31,7 @@ def runAllTests( exe_path, use_valgrind=False ):
     if not status:
         print("Failed to obtain unit tests list:\n" + test_names, file=sys.stderr)
         return 1
-    test_names = [name.strip() for name in test_names.strip().split('\n')]
+    test_names = [name.strip() for name in test_names.decode('utf-8').strip().split('\n')]
     failures = []
     for name in test_names:
         print('TESTING %s:' % name, end=' ')
