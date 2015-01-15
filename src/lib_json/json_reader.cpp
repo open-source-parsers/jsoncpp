@@ -381,11 +381,24 @@ bool Reader::readCppStyleComment() {
 }
 
 void Reader::readNumber() {
-  while (current_ != end_) {
-    if (!(*current_ >= '0' && *current_ <= '9') &&
-        !in(*current_, '.', 'e', 'E', '+', '-'))
-      break;
-    ++current_;
+  const char *p = current_;
+  char c = '0'; // stopgap for already consumed character
+  // integral part
+  while (c >= '0' && c <= '9')
+    c = (current_ = p) < end_ ? *p++ : 0;
+  // fractional part
+  if (c == '.') {
+    c = (current_ = p) < end_ ? *p++ : 0;
+    while (c >= '0' && c <= '9')
+      c = (current_ = p) < end_ ? *p++ : 0;
+  }
+  // exponential part
+  if (c == 'e' || c == 'E') {
+    c = (current_ = p) < end_ ? *p++ : 0;
+    if (c == '+' || c == '-')
+      c = (current_ = p) < end_ ? *p++ : 0;
+    while (c >= '0' && c <= '9')
+      c = (current_ = p) < end_ ? *p++ : 0;
   }
 }
 
