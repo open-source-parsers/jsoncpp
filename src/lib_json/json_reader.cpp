@@ -47,23 +47,6 @@ Features Features::strictMode() {
 // Implementation of class Reader
 // ////////////////////////////////
 
-static inline bool in(Reader::Char c,
-                      Reader::Char c1,
-                      Reader::Char c2,
-                      Reader::Char c3,
-                      Reader::Char c4) {
-  return c == c1 || c == c2 || c == c3 || c == c4;
-}
-
-static inline bool in(Reader::Char c,
-                      Reader::Char c1,
-                      Reader::Char c2,
-                      Reader::Char c3,
-                      Reader::Char c4,
-                      Reader::Char c5) {
-  return c == c1 || c == c2 || c == c3 || c == c4 || c == c5;
-}
-
 static bool containsNewLine(Reader::Location begin, Reader::Location end) {
   for (; begin < end; ++begin)
     if (*begin == '\n' || *begin == '\r')
@@ -227,13 +210,6 @@ void Reader::skipCommentTokens(Token& token) {
   } else {
     readToken(token);
   }
-}
-
-bool Reader::expectToken(TokenType type, Token& token, const char* message) {
-  readToken(token);
-  if (token.type_ != type)
-    return addError(message, token);
-  return true;
 }
 
 bool Reader::readToken(Token& token) {

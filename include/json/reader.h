@@ -187,7 +187,6 @@ private:
 
   typedef std::deque<ErrorInfo> Errors;
 
-  bool expectToken(TokenType type, Token& token, const char* message);
   bool readToken(Token& token);
   void skipSpaces();
   bool match(Location pattern, int patternLength);
