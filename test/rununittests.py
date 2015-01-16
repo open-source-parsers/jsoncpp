@@ -1,4 +1,6 @@
 from __future__ import print_function
+from __future__ import unicode_literals
+from io import open
 from glob import glob
 import sys
 import os
@@ -19,7 +21,11 @@ class TestProxy(object):
         else:
             cmd = []
         cmd.extend( [self.test_exe_path, '--test-auto'] + options )
-        process = subprocess.Popen( cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT )
+        try:
+            process = subprocess.Popen( cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT )
+        except:
+            print(cmd)
+            raise
         stdout = process.communicate()[0]
         if process.returncode:
             return False, stdout
