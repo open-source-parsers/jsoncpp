@@ -47,23 +47,6 @@ Features Features::strictMode() {
 // Implementation of class Reader
 // ////////////////////////////////
 
-static inline bool in(Reader::Char c,
-                      Reader::Char c1,
-                      Reader::Char c2,
-                      Reader::Char c3,
-                      Reader::Char c4) {
-  return c == c1 || c == c2 || c == c3 || c == c4;
-}
-
-static inline bool in(Reader::Char c,
-                      Reader::Char c1,
-                      Reader::Char c2,
-                      Reader::Char c3,
-                      Reader::Char c4,
-                      Reader::Char c5) {
-  return c == c1 || c == c2 || c == c3 || c == c4 || c == c5;
-}
-
 static bool containsNewLine(Reader::Location begin, Reader::Location end) {
   for (; begin < end; ++begin)
     if (*begin == '\n' || *begin == '\r')
@@ -227,13 +210,6 @@ void Reader::skipCommentTokens(Token& token) {
   } else {
     readToken(token);
   }
-}
-
-bool Reader::expectToken(TokenType type, Token& token, const char* message) {
-  readToken(token);
-  if (token.type_ != type)
-    return addError(message, token);
-  return true;
 }
 
 bool Reader::readToken(Token& token) {
@@ -517,13 +493,6 @@ bool Reader::decodeNumber(Token& token) {
 }
 
 bool Reader::decodeNumber(Token& token, Value& decoded) {
-  bool isDouble = false;
-  for (Location inspect = token.start_; inspect != token.end_; ++inspect) {
-    isDouble = isDouble || in(*inspect, '.', 'e', 'E', '+') ||
-               (*inspect == '-' && inspect != token.start_);
-  }
-  if (isDouble)
-    return decodeDouble(token, decoded);
   // Attempts to parse the number as an integer. If the number is
   // larger than the maximum supported value of an integer then
   // we decode the number as a double.
@@ -531,6 +500,7 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
   bool isNegative = *current == '-';
   if (isNegative)
     ++current;
+  // TODO: Help the compiler do the div and mod at compile time or get rid of them.
   Value::LargestUInt maxIntegerValue =
       isNegative ? Value::LargestUInt(-Value::minLargestInt)
                  : Value::maxLargestUInt;
@@ -539,9 +509,7 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
   while (current < token.end_) {
     Char c = *current++;
     if (c < '0' || c > '9')
-      return addError("'" + std::string(token.start_, token.end_) +
-                          "' is not a number.",
-                      token);
+      return decodeDouble(token, decoded);
     Value::UInt digit(c - '0');
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
