@@ -517,13 +517,6 @@ bool Reader::decodeNumber(Token& token) {
 }
 
 bool Reader::decodeNumber(Token& token, Value& decoded) {
-  bool isDouble = false;
-  for (Location inspect = token.start_; inspect != token.end_; ++inspect) {
-    isDouble = isDouble || in(*inspect, '.', 'e', 'E', '+') ||
-               (*inspect == '-' && inspect != token.start_);
-  }
-  if (isDouble)
-    return decodeDouble(token, decoded);
   // Attempts to parse the number as an integer. If the number is
   // larger than the maximum supported value of an integer then
   // we decode the number as a double.
@@ -531,6 +524,7 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
   bool isNegative = *current == '-';
   if (isNegative)
     ++current;
+  // TODO: Help the compiler do the div and mod at compile time or get rid of them.
   Value::LargestUInt maxIntegerValue =
       isNegative ? Value::LargestUInt(-Value::minLargestInt)
                  : Value::maxLargestUInt;
@@ -539,9 +533,7 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
   while (current < token.end_) {
     Char c = *current++;
     if (c < '0' || c > '9')
-      return addError("'" + std::string(token.start_, token.end_) +
-                          "' is not a number.",
-                      token);
+      return decodeDouble(token, decoded);
     Value::UInt digit(c - '0');
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
