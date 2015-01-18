@@ -240,8 +240,6 @@ Json::Value obj_value(Json::objectValue); // {}
 
   Value& operator=(Value other);
   /// Swap values.
-  /// \note Currently, comments are intentionally not swapped, for
-  /// both logic and efficiency.
   void swap(Value& other);
 
   ValueType type() const;
@@ -443,6 +441,9 @@ private:
   void initBasic(ValueType type, bool allocated = false);
 
   Value& resolveReference(const char* key, bool isStatic);
+
+  /// Swap values but leave comments and source offsets in place.
+  void swapPayload(Value& other);
 
 #ifdef JSON_VALUE_USE_INTERNAL_MAP
   inline bool isItemAvailable() const { return itemIsUsed_ == 0; }
