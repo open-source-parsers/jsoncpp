@@ -406,11 +406,11 @@ Value::~Value() {
 }
 
 Value& Value::operator=(Value other) {
-  swap(other);
+  swapPayload(other);
   return *this;
 }
 
-void Value::swap(Value& other) {
+void Value::swapPayload(Value& other) {
   ValueType temp = type_;
   type_ = other.type_;
   other.type_ = temp;
@@ -418,6 +418,11 @@ void Value::swap(Value& other) {
   int temp2 = allocated_;
   allocated_ = other.allocated_;
   other.allocated_ = temp2;
+}
+
+void Value::swap(Value& other) {
+  swapPayload(other);
+  std::swap(comments_, other.comments_);
   std::swap(start_, other.start_);
   std::swap(limit_, other.limit_);
 }
