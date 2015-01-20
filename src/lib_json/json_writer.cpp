@@ -421,26 +421,27 @@ void StyledWriter::writeCommentBeforeValue(const Value& root) {
 
   document_ += "\n";
   writeIndent();
-  std::string normalizedComment = normalizeEOL(root.getComment(commentBefore));
-  std::string::const_iterator iter = normalizedComment.begin();
-  while (iter != normalizedComment.end()) {
+  const std::string& comment = root.getComment(commentBefore);
+  std::string::const_iterator iter = comment.begin();
+  while (iter != comment.end()) {
     document_ += *iter;
-    if (*iter == '\n' && *(iter + 1) == '/')
+    if (*iter == '\n' &&
+       (iter != comment.end() && *(iter + 1) == '/'))
       writeIndent();
     ++iter;
   }
 
-  // Comments are stripped of newlines, so add one here
+  // Comments are stripped of trailing newlines, so add one here
   document_ += "\n";
 }
 
 void StyledWriter::writeCommentAfterValueOnSameLine(const Value& root) {
   if (root.hasComment(commentAfterOnSameLine))
-    document_ += " " + normalizeEOL(root.getComment(commentAfterOnSameLine));
+    document_ += " " + root.getComment(commentAfterOnSameLine);
 
   if (root.hasComment(commentAfter)) {
     document_ += "\n";
-    document_ += normalizeEOL(root.getComment(commentAfter));
+    document_ += root.getComment(commentAfter);
     document_ += "\n";
   }
 }
@@ -449,25 +450,6 @@ bool StyledWriter::hasCommentForValue(const Value& value) {
   return value.hasComment(commentBefore) ||
          value.hasComment(commentAfterOnSameLine) ||
          value.hasComment(commentAfter);
-}
-
-std::string StyledWriter::normalizeEOL(const std::string& text) {
-  std::string normalized;
-  normalized.reserve(text.length());
-  const char* begin = text.c_str();
-  const char* end = begin + text.length();
-  const char* current = begin;
-  while (current != end) {
-    char c = *current++;
-    if (c == '\r') // mac or dos EOL
-    {
-      if (*current == '\n') // convert dos EOL
-        ++current;
-      normalized += '\n';
-    } else // handle unix EOL & other char
-      normalized += c;
-  }
-  return normalized;
 }
 
 // Class StyledStreamWriter
@@ -646,17 +628,17 @@ void StyledStreamWriter::unindent() {
 void StyledStreamWriter::writeCommentBeforeValue(const Value& root) {
   if (!root.hasComment(commentBefore))
     return;
-  *document_ << normalizeEOL(root.getComment(commentBefore));
+  *document_ << root.getComment(commentBefore);
   *document_ << "\n";
 }
 
 void StyledStreamWriter::writeCommentAfterValueOnSameLine(const Value& root) {
   if (root.hasComment(commentAfterOnSameLine))
-    *document_ << " " + normalizeEOL(root.getComment(commentAfterOnSameLine));
+    *document_ << " " + root.getComment(commentAfterOnSameLine);
 
   if (root.hasComment(commentAfter)) {
     *document_ << "\n";
-    *document_ << normalizeEOL(root.getComment(commentAfter));
+    *document_ << root.getComment(commentAfter);
     *document_ << "\n";
   }
 }
@@ -665,25 +647,6 @@ bool StyledStreamWriter::hasCommentForValue(const Value& value) {
   return value.hasComment(commentBefore) ||
          value.hasComment(commentAfterOnSameLine) ||
          value.hasComment(commentAfter);
-}
-
-std::string StyledStreamWriter::normalizeEOL(const std::string& text) {
-  std::string normalized;
-  normalized.reserve(text.length());
-  const char* begin = text.c_str();
-  const char* end = begin + text.length();
-  const char* current = begin;
-  while (current != end) {
-    char c = *current++;
-    if (c == '\r') // mac or dos EOL
-    {
-      if (*current == '\n') // convert dos EOL
-        ++current;
-      normalized += '\n';
-    } else // handle unix EOL & other char
-      normalized += c;
-  }
-  return normalized;
 }
 
 std::ostream& operator<<(std::ostream& sout, const Value& root) {

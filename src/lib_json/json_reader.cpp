@@ -135,14 +135,9 @@ bool Reader::readValue() {
   bool successful = true;
 
   if (collectComments_ && !commentsBefore_.empty()) {
-    // Remove newline characters at the end of the comments
-    size_t lastNonNewline = commentsBefore_.find_last_not_of("\r\n");
-    if (lastNonNewline != std::string::npos) {
-      commentsBefore_.erase(lastNonNewline + 1);
-    } else {
-      commentsBefore_.clear();
-    }
-
+    // Remove newline at the end of the comment
+    if (commentsBefore_[commentsBefore_.size() - 1] == '\n')
+      commentsBefore_.resize(commentsBefore_.size() - 1);
     currentValue().setComment(commentsBefore_, commentBefore);
     commentsBefore_ = "";
   }
@@ -337,14 +332,34 @@ bool Reader::readComment() {
   return true;
 }
 
+static std::string normalizeEOL(Reader::Location begin, Reader::Location end) {
+  std::string normalized;
+  normalized.reserve(end - begin);
+  Reader::Location current = begin;
+  while (current != end) {
+    char c = *current++;
+    if (c == '\r') {
+      if (current != end && *current == '\n')
+         // convert dos EOL
+         ++current;
+      // convert Mac EOL
+      normalized += '\n';
+    } else {
+      normalized += c;
+    }
+  }
+  return normalized;
+}
+
 void
 Reader::addComment(Location begin, Location end, CommentPlacement placement) {
   assert(collectComments_);
+  const std::string& normalized = normalizeEOL(begin, end);
   if (placement == commentAfterOnSameLine) {
     assert(lastValue_ != 0);
-    lastValue_->setComment(std::string(begin, end), placement);
+    lastValue_->setComment(normalized, placement);
   } else {
-    commentsBefore_ += std::string(begin, end);
+    commentsBefore_ += normalized;
   }
 }
 
@@ -360,8 +375,15 @@ bool Reader::readCStyleComment() {
 bool Reader::readCppStyleComment() {
   while (current_ != end_) {
     Char c = getNextChar();
-    if (c == '\r' || c == '\n')
+    if (c == '\n')
       break;
+    if (c == '\r') {
+      // Consume DOS EOL. It will be normalized in addComment.
+      if (current_ != end_ && *current_ == '\n')
+        getNextChar();
+      // Break on Moc OS 9 EOL.
+      break;
+    }
   }
   return true;
 }
