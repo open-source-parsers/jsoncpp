@@ -1018,6 +1018,14 @@ Value Value::removeMember(const std::string& key) {
   return removeMember(key.c_str());
 }
 
+bool Value::removeIndex(ArrayIndex i, Value* removed) {
+  JSON_ASSERT_MESSAGE(this->type_ == arrayValue,
+                      "in Json::Value::removeIndex(): requires arrayValue");
+  JSON_ASSERT_MESSAGE(this->isValidIndex(i),
+      "invalid index i=" << i << " for array of size " << this->size());
+  return true;
+}
+
 #ifdef JSON_USE_CPPTL
 Value Value::get(const CppTL::ConstString& key,
                  const Value& defaultValue) const {
