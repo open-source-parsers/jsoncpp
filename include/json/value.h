@@ -1082,6 +1082,14 @@ public:
 
 } // namespace Json
 
+
+namespace std {
+/// Specialize std::swap() for Json::Value.
+template<>
+inline void swap(Json::Value& a, Json::Value& b) { a.swap(b); }
+}
+
+
 #if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 #pragma warning(pop)
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
