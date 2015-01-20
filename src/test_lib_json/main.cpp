@@ -17,8 +17,8 @@
 #define kint64min Json::Value::minInt64
 #define kuint64max Json::Value::maxUInt64
 
-static const double kdint64max = double(kint64max);
-static const float kfint64max = float(kint64max);
+//static const double kdint64max = double(kint64max);
+//static const float kfint64max = float(kint64max);
 static const float kfint32max = float(kint32max);
 static const float kfuint32max = float(kuint32max);
 
