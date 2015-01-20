@@ -400,8 +400,7 @@ Json::Value obj_value(Json::objectValue); // {}
       O(n) expensive operations.
       Update 'removed' iff removed.
       (This is a better pattern than removeMember().)
-      JSON_FAIL if !isValidIndex(i) or if not arrayObject
-      \return true iff removed
+      \return true iff removed (no exceptions)
   */
   bool removeIndex(ArrayIndex i, Value* removed);
 
