@@ -240,7 +240,7 @@ void FastWriter::writeValue(const Value& value) {
       if (it != members.begin())
         document_ += ',';
       document_ += valueToQuotedString(name.c_str());
-      document_ += yamlCompatiblityEnabled_ ? ": " : ":";
+      document_ += yamlCompatiblityEnabled_ ? ": " : ':';
       writeValue(value[name]);
     }
     document_ += '}';
