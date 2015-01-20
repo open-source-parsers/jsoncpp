@@ -173,9 +173,12 @@ bool Reader::readValue() {
     currentValue().setOffsetLimit(token.end_ - begin_);
     break;
   case tokenNull:
-    currentValue() = Value();
+    {
+    Value v;
+    currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
+    }
     break;
   case tokenArraySeparator:
     if (features_.allowDroppedNullPlaceholders_) {
@@ -393,7 +396,8 @@ bool Reader::readString() {
 bool Reader::readObject(Token& tokenStart) {
   Token tokenName;
   std::string name;
-  currentValue() = Value(objectValue);
+  Value init(objectValue);
+  currentValue().swapPayload(init);
   currentValue().setOffsetStart(tokenStart.start_ - begin_);
   while (readToken(tokenName)) {
     bool initialTokenOk = true;
@@ -486,7 +490,7 @@ bool Reader::decodeNumber(Token& token) {
   Value decoded;
   if (!decodeNumber(token, decoded))
     return false;
-  currentValue() = decoded;
+  currentValue().swapPayload(decoded);
   currentValue().setOffsetStart(token.start_ - begin_);
   currentValue().setOffsetLimit(token.end_ - begin_);
   return true;

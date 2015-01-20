@@ -406,7 +406,7 @@ Value::~Value() {
 }
 
 Value& Value::operator=(Value other) {
-  swapPayload(other);
+  swap(other);
   return *this;
 }
 
