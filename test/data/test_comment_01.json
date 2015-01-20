@@ -1,5 +1,6 @@
 {
     "test":
+    // Comment for array
     [
        { "a" : "aaa" }, // Comment for a
        { "b" : "bbb" }, // Comment for b

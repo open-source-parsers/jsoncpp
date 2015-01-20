@@ -235,23 +235,26 @@ Json::Value obj_value(Json::objectValue); // {}
   Value(const CppTL::ConstString& value);
 #endif
   Value(bool value);
+  /// Deep copy.
   Value(const Value& other);
   ~Value();
 
+  // Deep copy, then swap(other).
   Value& operator=(Value other);
-  /// Swap values.
+  /// Swap everything.
   void swap(Value& other);
+  /// Swap values but leave comments and source offsets in place.
+  void swapPayload(Value& other);
 
   ValueType type() const;
 
+  /// Compare payload only, not comments etc.
   bool operator<(const Value& other) const;
   bool operator<=(const Value& other) const;
   bool operator>=(const Value& other) const;
   bool operator>(const Value& other) const;
-
   bool operator==(const Value& other) const;
   bool operator!=(const Value& other) const;
-
   int compare(const Value& other) const;
 
   const char* asCString() const;
@@ -441,9 +444,6 @@ private:
   void initBasic(ValueType type, bool allocated = false);
 
   Value& resolveReference(const char* key, bool isStatic);
-
-  /// Swap values but leave comments and source offsets in place.
-  void swapPayload(Value& other);
 
 #ifdef JSON_VALUE_USE_INTERNAL_MAP
   inline bool isItemAvailable() const { return itemIsUsed_ == 0; }

@@ -163,26 +163,36 @@ bool Reader::readValue() {
     successful = decodeString(token);
     break;
   case tokenTrue:
-    currentValue() = true;
+    {
+    Value v(true);
+    currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
+    }
     break;
   case tokenFalse:
-    currentValue() = false;
+    {
+    Value v(false);
+    currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
+    }
     break;
   case tokenNull:
-    currentValue() = Value();
+    {
+    Value v;
+    currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
+    }
     break;
   case tokenArraySeparator:
     if (features_.allowDroppedNullPlaceholders_) {
       // "Un-read" the current token and mark the current value as a null
       // token.
       current_--;
-      currentValue() = Value();
+      Value v;
+      currentValue().swapPayload(v);
       currentValue().setOffsetStart(current_ - begin_ - 1);
       currentValue().setOffsetLimit(current_ - begin_);
       break;
@@ -393,7 +403,8 @@ bool Reader::readString() {
 bool Reader::readObject(Token& tokenStart) {
   Token tokenName;
   std::string name;
-  currentValue() = Value(objectValue);
+  Value init(objectValue);
+  currentValue().swapPayload(init);
   currentValue().setOffsetStart(tokenStart.start_ - begin_);
   while (readToken(tokenName)) {
     bool initialTokenOk = true;
@@ -446,7 +457,8 @@ bool Reader::readObject(Token& tokenStart) {
 }
 
 bool Reader::readArray(Token& tokenStart) {
-  currentValue() = Value(arrayValue);
+  Value init(arrayValue);
+  currentValue().swapPayload(init);
   currentValue().setOffsetStart(tokenStart.start_ - begin_);
   skipSpaces();
   if (*current_ == ']') // empty array
@@ -486,7 +498,7 @@ bool Reader::decodeNumber(Token& token) {
   Value decoded;
   if (!decodeNumber(token, decoded))
     return false;
-  currentValue() = decoded;
+  currentValue().swapPayload(decoded);
   currentValue().setOffsetStart(token.start_ - begin_);
   currentValue().setOffsetLimit(token.end_ - begin_);
   return true;
@@ -536,7 +548,7 @@ bool Reader::decodeDouble(Token& token) {
   Value decoded;
   if (!decodeDouble(token, decoded))
     return false;
-  currentValue() = decoded;
+  currentValue().swapPayload(decoded);
   currentValue().setOffsetStart(token.start_ - begin_);
   currentValue().setOffsetLimit(token.end_ - begin_);
   return true;
@@ -579,10 +591,11 @@ bool Reader::decodeDouble(Token& token, Value& decoded) {
 }
 
 bool Reader::decodeString(Token& token) {
-  std::string decoded;
-  if (!decodeString(token, decoded))
+  std::string decoded_string;
+  if (!decodeString(token, decoded_string))
     return false;
-  currentValue() = decoded;
+  Value decoded(decoded_string);
+  currentValue().swapPayload(decoded);
   currentValue().setOffsetStart(token.start_ - begin_);
   currentValue().setOffsetLimit(token.end_ - begin_);
   return true;
