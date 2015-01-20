@@ -14,6 +14,7 @@ def getStatusOutput(cmd):
     Return int, unicode (for both Python 2 and 3).
     Note: os.popen().close() would return None for 0.
     """
+    print(cmd, file=sys.stderr)
     pipe = os.popen(cmd)
     process_output = pipe.read()
     try:
