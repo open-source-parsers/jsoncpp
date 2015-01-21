@@ -395,6 +395,14 @@ Json::Value obj_value(Json::objectValue); // {}
   Value removeMember(const char* key);
   /// Same as removeMember(const char*)
   Value removeMember(const std::string& key);
+  /** \brief Remove the indexed array element.
+
+      O(n) expensive operations.
+      Update 'removed' iff removed.
+      (This is a better pattern than removeMember().)
+      \return true iff removed (no exceptions)
+  */
+  bool removeIndex(ArrayIndex i, Value* removed);
 
   /// Return true if the object has a member named key.
   bool isMember(const char* key) const;
