@@ -665,12 +665,29 @@ bool StyledStreamWriter::hasCommentForValue(const Value& value) {
          value.hasComment(commentAfter);
 }
 
-std::ostream& operator<<(std::ostream& sout, const Value& root) {
-  Json::StyledStreamWriter writer;
-  writer.write(sout, root);
-  return sout;
-}
+struct BuiltStyledStreamWriter : public StreamWriter
+{
+  mutable StyledStreamWriter old_;
 
+  BuiltStyledStreamWriter(
+      std::ostream* sout,
+      std::string const& indentation,
+      StreamWriter::CommentStyle cs);
+  virtual int write(Value const& root) const;
+};
+BuiltStyledStreamWriter::BuiltStyledStreamWriter(
+      std::ostream* sout,
+      std::string const& indentation,
+      StreamWriter::CommentStyle cs)
+  : StreamWriter(sout)
+  , old_(indentation)
+{
+}
+int BuiltStyledStreamWriter::write(Value const& root) const
+{
+  old_.write(sout_, root);
+  return 0;
+}
 StreamWriter::StreamWriter(std::ostream* sout)
     : sout_(*sout)
 {
@@ -720,8 +737,7 @@ void StreamWriterBuilder::setIndentation(std::string v)
 }
 StreamWriter* StreamWriterBuilder::newStreamWriter(std::ostream* stream) const
 {
-  // return new StyledStreamWriter(stream);
-  return nullptr;
+  return new BuiltStyledStreamWriter(stream, indentation_, cs_);
 }
 StreamWriterBuilderFactory::~StreamWriterBuilderFactory()
 {
@@ -759,6 +775,15 @@ std::string writeString(Value const& root, StreamWriterBuilder const& builder) {
   std::unique_ptr<StreamWriter> const sw(builder.newStreamWriter(&sout));
   sw->write(root);
   return sout.str();
+}
+
+std::ostream& operator<<(std::ostream& sout, const Value& root) {
+  StreamWriterBuilderFactory f;
+  StreamWriter::Builder builder(&f);
+  builder.setCommentStyle(StreamWriter::CommentStyle::Some);
+  std::shared_ptr<StreamWriter> writer(builder.newStreamWriter(&sout));
+  writer->write(root);
+  return sout;
 }
 
 } // namespace Json
