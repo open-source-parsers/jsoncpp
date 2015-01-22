@@ -65,6 +65,13 @@ public:
     ~Builder();  // delete underlying StreamWriterBuilder
 
     void setCommentStyle(CommentStyle cs);  /// default: All
+    /** \brief Write in human-friendly style.
+
+        If "", then skip all indentation, newlines, and comments,
+        which implies CommentStyle::None.
+        Default: "\t"
+    */
+    void setIndentation(std::string indentation);
 
     /// Do not take ownership of sout, but maintain a reference.
     StreamWriter* newStreamWriter(std::ostream* sout);

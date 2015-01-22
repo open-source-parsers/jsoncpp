@@ -699,17 +699,24 @@ int MyStreamWriter::write(Value const& root) const
 class StreamWriterBuilder {
   typedef StreamWriter::CommentStyle CommentStyle;
   CommentStyle cs_;
+  std::string indentation_;
 public:
   virtual ~StreamWriterBuilder();
   virtual void setCommentStyle(CommentStyle cs);
+  virtual void setIndentation(std::string indentation);
   virtual StreamWriter* newStreamWriter(std::ostream* sout) const;
 };
 StreamWriterBuilder::~StreamWriterBuilder()
 {
 }
-void StreamWriterBuilder::setCommentStyle(CommentStyle cs)
+void StreamWriterBuilder::setCommentStyle(CommentStyle v)
 {
-  cs_ = cs;
+  cs_ = v;
+}
+void StreamWriterBuilder::setIndentation(std::string v)
+{
+  indentation_ = v;
+  if (indentation_.empty()) cs_ = CommentStyle::None;
 }
 StreamWriter* StreamWriterBuilder::newStreamWriter(std::ostream* stream) const
 {
@@ -732,9 +739,17 @@ StreamWriter::Builder::~Builder()
 {
   delete own_;
 }
-void StreamWriter::Builder::setCommentStyle(CommentStyle cs)
+void StreamWriter::Builder::setCommentStyle(CommentStyle v)
 {
-  own_->setCommentStyle(cs);
+  own_->setCommentStyle(v);
+}
+void StreamWriter::Builder::setIndentation(std::string v)
+{
+  own_->setIndentation(v);
+}
+StreamWriter* StreamWriter::Builder::newStreamWriter(std::ostream* sout)
+{
+  return own_->newStreamWriter(sout);
 }
 
 /// Do not take ownership of sout, but maintain a reference.
