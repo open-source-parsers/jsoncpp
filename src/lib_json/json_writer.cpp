@@ -7,13 +7,14 @@
 #include <json/writer.h>
 #include "json_tool.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
+#include <iomanip>
+#include <memory>
+#include <sstream>
 #include <utility>
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include <sstream>
-#include <iomanip>
-#include <math.h>
 
 #if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
 #include <float.h>
@@ -668,6 +669,53 @@ std::ostream& operator<<(std::ostream& sout, const Value& root) {
   Json::StyledStreamWriter writer;
   writer.write(sout, root);
   return sout;
+}
+
+StreamWriter::StreamWriter(std::ostream* sout)
+    : sout_(*sout)
+{
+}
+StreamWriter::~StreamWriter()
+{
+}
+struct MyStreamWriter : public StreamWriter {
+public:
+  MyStreamWriter(std::ostream* sout);
+  virtual ~MyStreamWriter();
+  virtual int write(Value const& root) const = 0;
+};
+MyStreamWriter::MyStreamWriter(std::ostream* sout)
+    : StreamWriter(sout)
+{
+}
+MyStreamWriter::~MyStreamWriter()
+{
+}
+int MyStreamWriter::write(Value const& root) const
+{
+  sout_ << root;
+  return 0;
+}
+StreamWriterBuilder::~StreamWriterBuilder()
+{
+}
+StreamWriter* StreamWriterBuilder::newStreamWriter(std::ostream* stream) const
+{
+  // return new StyledStreamWriter(stream);
+  return nullptr;
+}
+StreamWriterBuilderFactory::~StreamWriterBuilderFactory()
+{
+}
+StreamWriterBuilder* StreamWriterBuilderFactory::newStreamWriterBuilder()
+{
+  return new StreamWriterBuilder;
+}
+std::string writeString(Value const& root, StreamWriterBuilder const& builder) {
+  std::ostringstream sout;
+  std::unique_ptr<StreamWriter> const sw(builder.newStreamWriter(&sout));
+  sw->write(root);
+  return sout.str();
 }
 
 } // namespace Json

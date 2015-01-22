@@ -23,6 +23,35 @@ namespace Json {
 
 class Value;
 
+class JSON_API StreamWriter {
+protected:
+  std::ostream& sout_;  // not owned; will not delete
+public:
+  StreamWriter(std::ostream* sout);
+  virtual ~StreamWriter();
+  /// Write Value into document as configured in sub-class.
+  /// \return zero on success
+  /// \throw std::exception possibly, depending on configuration
+  virtual int write(Value const& root) const = 0;
+};
+
+class JSON_API StreamWriterBuilder {
+public:
+  virtual ~StreamWriterBuilder();
+  /// Do not delete stream (i.e. not owned), but keep a reference.
+  virtual StreamWriter* newStreamWriter(std::ostream* stream) const;
+};
+
+class JSON_API StreamWriterBuilderFactory {
+public:
+  virtual ~StreamWriterBuilderFactory();
+  virtual StreamWriterBuilder* newStreamWriterBuilder();
+};
+
+/// \brief Write into stringstream, then return string, for convenience.
+std::string writeString(Value const& root, StreamWriterBuilder const& builder);
+
+
 /** \brief Abstract class for writers.
  */
 class JSON_API Writer {
