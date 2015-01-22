@@ -22,30 +22,53 @@
 namespace Json {
 
 class Value;
+class StreamWriterBuilder;
+
+/**
+
+Usage:
+
+  using namespace Json;
+  Value value;
+  StreamWriterBuilderFactory f;
+  StreamWriter::Builder builder(&f);
+  builder.setCommentStyle(StreamWriter::CommentStyle::None);
+  std::shared_ptr<StreamWriter> writer(builder.newStreamWriter(&std::cout));
+  writer.write(value);
+*/
+class JSON_API StreamWriterBuilderFactory {
+public:
+  virtual ~StreamWriterBuilderFactory();
+  virtual StreamWriterBuilder* newStreamWriterBuilder() const;
+};
 
 class JSON_API StreamWriter {
 protected:
   std::ostream& sout_;  // not owned; will not delete
 public:
+  enum class CommentStyle {None, Some, All};
+
   StreamWriter(std::ostream* sout);
   virtual ~StreamWriter();
   /// Write Value into document as configured in sub-class.
   /// \return zero on success
   /// \throw std::exception possibly, depending on configuration
   virtual int write(Value const& root) const = 0;
-};
 
-class JSON_API StreamWriterBuilder {
-public:
-  virtual ~StreamWriterBuilder();
-  /// Do not delete stream (i.e. not owned), but keep a reference.
-  virtual StreamWriter* newStreamWriter(std::ostream* stream) const;
-};
+  /// Because this Builder is non-virtual, we can safely add
+  /// methods without a major version bump.
+  /// \see http://stackoverflow.com/questions/14875052/pure-virtual-functions-and-binary-compatibility
+  class Builder {
+    StreamWriterBuilder* own_;
+  public:
+    Builder(StreamWriterBuilderFactory const*);
+    ~Builder();  // delete underlying StreamWriterBuilder
 
-class JSON_API StreamWriterBuilderFactory {
-public:
-  virtual ~StreamWriterBuilderFactory();
-  virtual StreamWriterBuilder* newStreamWriterBuilder();
+    void setCommentStyle(CommentStyle cs);  /// default: All
+
+    /// Do not take ownership of sout, but maintain a reference.
+    StreamWriter* newStreamWriter(std::ostream* sout);
+  };
 };
 
 /// \brief Write into stringstream, then return string, for convenience.

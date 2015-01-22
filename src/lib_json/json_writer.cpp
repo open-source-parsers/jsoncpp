@@ -696,8 +696,20 @@ int MyStreamWriter::write(Value const& root) const
   sout_ << root;
   return 0;
 }
+class StreamWriterBuilder {
+  typedef StreamWriter::CommentStyle CommentStyle;
+  CommentStyle cs_;
+public:
+  virtual ~StreamWriterBuilder();
+  virtual void setCommentStyle(CommentStyle cs);
+  virtual StreamWriter* newStreamWriter(std::ostream* sout) const;
+};
 StreamWriterBuilder::~StreamWriterBuilder()
 {
+}
+void StreamWriterBuilder::setCommentStyle(CommentStyle cs)
+{
+  cs_ = cs;
 }
 StreamWriter* StreamWriterBuilder::newStreamWriter(std::ostream* stream) const
 {
@@ -707,10 +719,26 @@ StreamWriter* StreamWriterBuilder::newStreamWriter(std::ostream* stream) const
 StreamWriterBuilderFactory::~StreamWriterBuilderFactory()
 {
 }
-StreamWriterBuilder* StreamWriterBuilderFactory::newStreamWriterBuilder()
+StreamWriterBuilder* StreamWriterBuilderFactory::newStreamWriterBuilder() const
 {
   return new StreamWriterBuilder;
 }
+
+StreamWriter::Builder::Builder(StreamWriterBuilderFactory const* f)
+    : own_(f->newStreamWriterBuilder())
+{
+}
+StreamWriter::Builder::~Builder()
+{
+  delete own_;
+}
+void StreamWriter::Builder::setCommentStyle(CommentStyle cs)
+{
+  own_->setCommentStyle(cs);
+}
+
+/// Do not take ownership of sout, but maintain a reference.
+StreamWriter* newStreamWriter(std::ostream* sout);
 std::string writeString(Value const& root, StreamWriterBuilder const& builder) {
   std::ostringstream sout;
   std::unique_ptr<StreamWriter> const sw(builder.newStreamWriter(&sout));
