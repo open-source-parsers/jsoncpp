@@ -340,7 +340,7 @@ Value::Value(const Value& other)
   case stringValue:
     if (other.value_.string_) {
       value_.string_ = duplicateStringValue(other.value_.string_);
-      allocated_ = true;
+      allocated_ |= true;
     } else {
       value_.string_ = 0;
       allocated_ = false;
