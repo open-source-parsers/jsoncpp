@@ -14,6 +14,7 @@ def getStatusOutput(cmd):
     Return int, unicode (for both Python 2 and 3).
     Note: os.popen().close() would return None for 0.
     """
+    print(cmd, file=sys.stderr)
     pipe = os.popen(cmd)
     process_output = pipe.read()
     try:
@@ -57,7 +58,8 @@ def safeReadFile( path ):
         return '<File "%s" is missing: %s>' % (path,e)
 
 def runAllTests( jsontest_executable_path, input_dir = None,
-                 use_valgrind=False, with_json_checker=False ):
+                 use_valgrind=False, with_json_checker=False,
+                 writerClass='StyledWriter'):
     if not input_dir:
         input_dir = os.path.join( os.getcwd(), 'data' )
     tests = glob( os.path.join( input_dir, '*.json' ) )
@@ -72,6 +74,7 @@ def runAllTests( jsontest_executable_path, input_dir = None,
         is_json_checker_test = (input_path in test_jsonchecker) or expect_failure
         print('TESTING:', input_path, end=' ')
         options = is_json_checker_test and '--json-checker' or ''
+        options += ' --json-writer %s'%writerClass
         cmd = '%s%s %s "%s"' % (
             valgrind_path, jsontest_executable_path, options,
             input_path)
@@ -145,7 +148,15 @@ def main():
     else:
         input_path = None
     status = runAllTests( jsontest_executable_path, input_path,
-                          use_valgrind=options.valgrind, with_json_checker=options.with_json_checker )
+                          use_valgrind=options.valgrind,
+                          with_json_checker=options.with_json_checker,
+                          writerClass='StyledWriter')
+    if status:
+        sys.exit( status )
+    status = runAllTests( jsontest_executable_path, input_path,
+                          use_valgrind=options.valgrind,
+                          with_json_checker=options.with_json_checker,
+                          writerClass='StyledStreamWriter')
     sys.exit( status )
 
 if __name__ == '__main__':
