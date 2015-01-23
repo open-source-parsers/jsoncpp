@@ -55,7 +55,7 @@ public:
   /// Write Value into document as configured in sub-class.
   /// \return zero on success
   /// \throw std::exception possibly, depending on configuration
-  virtual int write(Value const& root) const = 0;
+  virtual int write(Value const& root) = 0;
 
   /// Because this Builder is non-virtual, we can safely add
   /// methods without a major version bump.

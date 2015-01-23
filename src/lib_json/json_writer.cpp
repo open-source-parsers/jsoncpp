@@ -671,28 +671,28 @@ struct BuiltStyledStreamWriter : public StreamWriter
       std::ostream* sout,
       std::string const& indentation,
       StreamWriter::CommentStyle cs);
-  virtual int write(Value const& root) const;
+  virtual int write(Value const& root);
 private:
-  void writeValue(const Value& value);
-  void writeArrayValue(const Value& value);
-  bool isMultineArray(const Value& value);
-  void pushValue(const std::string& value);
+  void writeValue(Value const& value);
+  void writeArrayValue(Value const& value);
+  bool isMultineArray(Value const& value);
+  void pushValue(std::string const& value);
   void writeIndent();
-  void writeWithIndent(const std::string& value);
+  void writeWithIndent(std::string const& value);
   void indent();
   void unindent();
-  void writeCommentBeforeValue(const Value& root);
-  void writeCommentAfterValueOnSameLine(const Value& root);
+  void writeCommentBeforeValue(Value const& root);
+  void writeCommentAfterValueOnSameLine(Value const& root);
   bool hasCommentForValue(const Value& value);
-  static std::string normalizeEOL(const std::string& text);
+  static std::string normalizeEOL(std::string const& text);
 
   typedef std::vector<std::string> ChildValues;
 
   ChildValues childValues_;
-  std::ostream* document_;
   std::string indentString_;
   int rightMargin_;
   std::string indentation_;
+  CommentStyle cs_;
   bool addChildValues_;
 };
 BuiltStyledStreamWriter::BuiltStyledStreamWriter(
@@ -700,27 +700,22 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
       std::string const& indentation,
       StreamWriter::CommentStyle cs)
   : StreamWriter(sout)
-  , indentation_(indentation)
   , rightMargin_(74)
+  , indentation_(indentation)
+  , cs_(cs)
 {
 }
-int BuiltStyledStreamWriter::write(Value const& root) const
+int BuiltStyledStreamWriter::write(Value const& root)
 {
-  write(sout_, root);
-  return 0;
-}
-void BuiltStyledStreamWriter::write(std::ostream& out, const Value& root) {
-  document_ = &out;
   addChildValues_ = false;
   indentString_ = "";
   writeCommentBeforeValue(root);
   writeValue(root);
   writeCommentAfterValueOnSameLine(root);
-  *document_ << "\n";
-  document_ = NULL; // Forget the stream, for safety.
+  sout_ << "\n";
+  return 0;
 }
-
-void BuiltStyledStreamWriter::writeValue(const Value& value) {
+void BuiltStyledStreamWriter::writeValue(Value const& value) {
   switch (value.type()) {
   case nullValue:
     pushValue("null");
@@ -752,17 +747,17 @@ void BuiltStyledStreamWriter::writeValue(const Value& value) {
       indent();
       Value::Members::iterator it = members.begin();
       for (;;) {
-        const std::string& name = *it;
-        const Value& childValue = value[name];
+        std::string const& name = *it;
+        Value const& childValue = value[name];
         writeCommentBeforeValue(childValue);
         writeWithIndent(valueToQuotedString(name.c_str()));
-        *document_ << " : ";
+        sout_ << " : ";
         writeValue(childValue);
         if (++it == members.end()) {
           writeCommentAfterValueOnSameLine(childValue);
           break;
         }
-        *document_ << ",";
+        sout_ << ",";
         writeCommentAfterValueOnSameLine(childValue);
       }
       unindent();
@@ -772,7 +767,7 @@ void BuiltStyledStreamWriter::writeValue(const Value& value) {
   }
 }
 
-void BuiltStyledStreamWriter::writeArrayValue(const Value& value) {
+void BuiltStyledStreamWriter::writeArrayValue(Value const& value) {
   unsigned size = value.size();
   if (size == 0)
     pushValue("[]");
@@ -784,7 +779,7 @@ void BuiltStyledStreamWriter::writeArrayValue(const Value& value) {
       bool hasChildValue = !childValues_.empty();
       unsigned index = 0;
       for (;;) {
-        const Value& childValue = value[index];
+        Value const& childValue = value[index];
         writeCommentBeforeValue(childValue);
         if (hasChildValue)
           writeWithIndent(childValues_[index]);
@@ -796,7 +791,7 @@ void BuiltStyledStreamWriter::writeArrayValue(const Value& value) {
           writeCommentAfterValueOnSameLine(childValue);
           break;
         }
-        *document_ << ",";
+        sout_ << ",";
         writeCommentAfterValueOnSameLine(childValue);
       }
       unindent();
@@ -804,23 +799,23 @@ void BuiltStyledStreamWriter::writeArrayValue(const Value& value) {
     } else // output on a single line
     {
       assert(childValues_.size() == size);
-      *document_ << "[ ";
+      sout_ << "[ ";
       for (unsigned index = 0; index < size; ++index) {
         if (index > 0)
-          *document_ << ", ";
-        *document_ << childValues_[index];
+          sout_ << ", ";
+        sout_ << childValues_[index];
       }
-      *document_ << " ]";
+      sout_ << " ]";
     }
   }
 }
 
-bool BuiltStyledStreamWriter::isMultineArray(const Value& value) {
+bool BuiltStyledStreamWriter::isMultineArray(Value const& value) {
   int size = value.size();
   bool isMultiLine = size * 3 >= rightMargin_;
   childValues_.clear();
   for (int index = 0; index < size && !isMultiLine; ++index) {
-    const Value& childValue = value[index];
+    Value const& childValue = value[index];
     isMultiLine =
         isMultiLine || ((childValue.isArray() || childValue.isObject()) &&
                         childValue.size() > 0);
@@ -840,32 +835,32 @@ bool BuiltStyledStreamWriter::isMultineArray(const Value& value) {
   return isMultiLine;
 }
 
-void BuiltStyledStreamWriter::pushValue(const std::string& value) {
+void BuiltStyledStreamWriter::pushValue(std::string const& value) {
   if (addChildValues_)
     childValues_.push_back(value);
   else
-    *document_ << value;
+    sout_ << value;
 }
 
 void BuiltStyledStreamWriter::writeIndent() {
   /*
     Some comments in this method would have been nice. ;-)
 
-   if ( !document_.empty() )
+   if ( !sout_.empty() )
    {
-      char last = document_[document_.length()-1];
+      char last = sout_[sout_.length()-1];
       if ( last == ' ' )     // already indented
          return;
       if ( last != '\n' )    // Comments may add new-line
-         *document_ << '\n';
+         sout_ << '\n';
    }
   */
-  *document_ << '\n' << indentString_;
+  sout_ << '\n' << indentString_;
 }
 
-void BuiltStyledStreamWriter::writeWithIndent(const std::string& value) {
+void BuiltStyledStreamWriter::writeWithIndent(std::string const& value) {
   writeIndent();
-  *document_ << value;
+  sout_ << value;
 }
 
 void BuiltStyledStreamWriter::indent() { indentString_ += indentation_; }
@@ -875,21 +870,21 @@ void BuiltStyledStreamWriter::unindent() {
   indentString_.resize(indentString_.size() - indentation_.size());
 }
 
-void BuiltStyledStreamWriter::writeCommentBeforeValue(const Value& root) {
+void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
   if (!root.hasComment(commentBefore))
     return;
-  *document_ << root.getComment(commentBefore);
-  *document_ << "\n";
+  sout_ << root.getComment(commentBefore);
+  sout_ << "\n";
 }
 
-void BuiltStyledStreamWriter::writeCommentAfterValueOnSameLine(const Value& root) {
+void BuiltStyledStreamWriter::writeCommentAfterValueOnSameLine(Value const& root) {
   if (root.hasComment(commentAfterOnSameLine))
-    *document_ << " " + root.getComment(commentAfterOnSameLine);
+    sout_ << " " + root.getComment(commentAfterOnSameLine);
 
   if (root.hasComment(commentAfter)) {
-    *document_ << "\n";
-    *document_ << root.getComment(commentAfter);
-    *document_ << "\n";
+    sout_ << "\n";
+    sout_ << root.getComment(commentAfter);
+    sout_ << "\n";
   }
 }
 
@@ -910,7 +905,7 @@ struct MyStreamWriter : public StreamWriter {
 public:
   MyStreamWriter(std::ostream* sout);
   virtual ~MyStreamWriter();
-  virtual int write(Value const& root) const = 0;
+  virtual int write(Value const& root) = 0;
 };
 MyStreamWriter::MyStreamWriter(std::ostream* sout)
     : StreamWriter(sout)
@@ -919,7 +914,7 @@ MyStreamWriter::MyStreamWriter(std::ostream* sout)
 MyStreamWriter::~MyStreamWriter()
 {
 }
-int MyStreamWriter::write(Value const& root) const
+int MyStreamWriter::write(Value const& root)
 {
   sout_ << root;
   return 0;
@@ -988,7 +983,7 @@ std::string writeString(Value const& root, StreamWriterBuilder const& builder) {
   return sout.str();
 }
 
-std::ostream& operator<<(std::ostream& sout, const Value& root) {
+std::ostream& operator<<(std::ostream& sout, Value const& root) {
   StreamWriterBuilderFactory f;
   StreamWriter::Builder builder(&f);
   builder.setCommentStyle(StreamWriter::CommentStyle::Some);
