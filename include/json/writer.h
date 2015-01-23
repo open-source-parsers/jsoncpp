@@ -33,8 +33,10 @@ Usage:
   StreamWriterBuilderFactory f;
   StreamWriter::Builder builder(&f);
   builder.setCommentStyle(StreamWriter::CommentStyle::None);
-  std::shared_ptr<StreamWriter> writer(builder.newStreamWriter(&std::cout));
-  writer.write(value);
+  std::shared_ptr<StreamWriter> writer(
+    builder.newStreamWriter(&std::cout));
+  writer->write(value);
+  std::cout.flush();
 */
 class JSON_API StreamWriterBuilderFactory {
 public:
