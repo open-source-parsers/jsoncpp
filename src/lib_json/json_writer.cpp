@@ -665,6 +665,9 @@ bool StyledStreamWriter::hasCommentForValue(const Value& value) {
          value.hasComment(commentAfter);
 }
 
+//////////////////////////
+// BuiltStyledStreamWriter
+
 struct BuiltStyledStreamWriter : public StreamWriter
 {
   BuiltStyledStreamWriter(
@@ -683,8 +686,7 @@ private:
   void unindent();
   void writeCommentBeforeValue(Value const& root);
   void writeCommentAfterValueOnSameLine(Value const& root);
-  bool hasCommentForValue(const Value& value);
-  static std::string normalizeEOL(std::string const& text);
+  static bool hasCommentForValue(const Value& value);
 
   typedef std::vector<std::string> ChildValues;
 
@@ -693,7 +695,8 @@ private:
   int rightMargin_;
   std::string indentation_;
   CommentStyle cs_;
-  bool addChildValues_;
+  bool addChildValues_ : 1;
+  bool indented_ : 1;
 };
 BuiltStyledStreamWriter::BuiltStyledStreamWriter(
       std::ostream* sout,
@@ -703,11 +706,14 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
   , rightMargin_(74)
   , indentation_(indentation)
   , cs_(cs)
+  , addChildValues_(false)
+  , indented_(false)
 {
 }
 int BuiltStyledStreamWriter::write(Value const& root)
 {
   addChildValues_ = false;
+  indented_ = false;
   indentString_ = "";
   writeCommentBeforeValue(root);
   writeValue(root);
@@ -784,8 +790,10 @@ void BuiltStyledStreamWriter::writeArrayValue(Value const& value) {
         if (hasChildValue)
           writeWithIndent(childValues_[index]);
         else {
-          writeIndent();
+          if (!indented_) writeIndent();
+          indented_ = true;
           writeValue(childValue);
+          indented_ = false;
         }
         if (++index == size) {
           writeCommentAfterValueOnSameLine(childValue);
@@ -826,6 +834,9 @@ bool BuiltStyledStreamWriter::isMultineArray(Value const& value) {
     addChildValues_ = true;
     int lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
     for (int index = 0; index < size; ++index) {
+      if (hasCommentForValue(value[index])) {
+        isMultiLine = true;
+      }
       writeValue(value[index]);
       lineLength += int(childValues_[index].length());
     }
@@ -843,24 +854,17 @@ void BuiltStyledStreamWriter::pushValue(std::string const& value) {
 }
 
 void BuiltStyledStreamWriter::writeIndent() {
-  /*
-    Some comments in this method would have been nice. ;-)
-
-   if ( !sout_.empty() )
-   {
-      char last = sout_[sout_.length()-1];
-      if ( last == ' ' )     // already indented
-         return;
-      if ( last != '\n' )    // Comments may add new-line
-         sout_ << '\n';
-   }
-  */
+  // blep intended this to look at the so-far-written string
+  // to determine whether we are already indented, but
+  // with a stream we cannot do that. So we rely on some saved state.
+  // The caller checks indented_.
   sout_ << '\n' << indentString_;
 }
 
 void BuiltStyledStreamWriter::writeWithIndent(std::string const& value) {
-  writeIndent();
+  if (!indented_) writeIndent();
   sout_ << value;
+  indented_ = false;
 }
 
 void BuiltStyledStreamWriter::indent() { indentString_ += indentation_; }
@@ -873,8 +877,22 @@ void BuiltStyledStreamWriter::unindent() {
 void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
   if (!root.hasComment(commentBefore))
     return;
-  sout_ << root.getComment(commentBefore);
+
   sout_ << "\n";
+  writeIndent();
+  const std::string& comment = root.getComment(commentBefore);
+  std::string::const_iterator iter = comment.begin();
+  while (iter != comment.end()) {
+    sout_ << *iter;
+    if (*iter == '\n' &&
+       (iter != comment.end() && *(iter + 1) == '/'))
+      writeIndent();
+    ++iter;
+  }
+
+  // Comments are stripped of trailing newlines, so add one here
+  sout_ << "\n";
+  indented_ = false;
 }
 
 void BuiltStyledStreamWriter::writeCommentAfterValueOnSameLine(Value const& root) {
@@ -888,11 +906,15 @@ void BuiltStyledStreamWriter::writeCommentAfterValueOnSameLine(Value const& root
   }
 }
 
+// static
 bool BuiltStyledStreamWriter::hasCommentForValue(const Value& value) {
   return value.hasComment(commentBefore) ||
          value.hasComment(commentAfterOnSameLine) ||
          value.hasComment(commentAfter);
 }
+
+///////////////
+// StreamWriter
 
 StreamWriter::StreamWriter(std::ostream* sout)
     : sout_(*sout)
