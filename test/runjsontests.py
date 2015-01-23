@@ -72,6 +72,7 @@ def runAllTests( jsontest_executable_path, input_dir = None,
         is_json_checker_test = (input_path in test_jsonchecker) or expect_failure
         print('TESTING:', input_path, end=' ')
         options = is_json_checker_test and '--json-checker' or ''
+        options += ' --json-writer StyledWriter'
         cmd = '%s%s %s "%s"' % (
             valgrind_path, jsontest_executable_path, options,
             input_path)
