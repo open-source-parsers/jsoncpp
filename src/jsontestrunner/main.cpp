@@ -132,7 +132,8 @@ static int parseAndSaveValueTree(const std::string& input,
                                  const std::string& kind,
                                  const Json::Features& features,
                                  bool parseOnly,
-                                 Json::Value* root) {
+                                 Json::Value* root)
+{
   Json::Reader reader(features);
   bool parsingSuccessful = reader.parse(input, *root);
   if (!parsingSuccessful) {
@@ -153,16 +154,31 @@ static int parseAndSaveValueTree(const std::string& input,
   }
   return 0;
 }
-
-static int rewriteValueTree(const std::string& rewritePath,
-                            const Json::Value& root,
-                            std::string* rewrite) {
-  // Json::FastWriter writer;
-  // writer.enableYAMLCompatibility();
+// static std::string useFastWriter(Json::Value const& root) {
+//   Json::FastWriter writer;
+//   writer.enableYAMLCompatibility();
+//   return writer.write(root);
+// }
+static std::string useStyledWriter(
+    Json::Value const& root)
+{
+  Json::StyledWriter writer;
+  return writer.write(root);
+}
+static std::string useStyledStreamWriter(
+    Json::Value const& root)
+{
   Json::StyledStreamWriter writer;
   std::ostringstream sout;
   writer.write(sout, root);
-  *rewrite = sout.str();
+  return sout.str();
+}
+static int rewriteValueTree(
+    const std::string& rewritePath,
+    const Json::Value& root,
+    std::string* rewrite)
+{
+  *rewrite = useStyledWriter(root);
   FILE* fout = fopen(rewritePath.c_str(), "wt");
   if (!fout) {
     printf("Failed to create rewrite file: %s\n", rewritePath.c_str());
@@ -197,56 +213,56 @@ static int printUsage(const char* argv[]) {
   return 3;
 }
 
-int parseCommandLine(int argc,
-                     const char* argv[],
-                     Json::Features& features,
-                     std::string& path,
-                     bool& parseOnly) {
-  parseOnly = false;
+struct Options
+{
+  std::string path;
+  Json::Features features;
+  bool parseOnly;
+};
+static int parseCommandLine(
+    int argc, const char* argv[], Options* opts)
+{
+  opts->parseOnly = false;
   if (argc < 2) {
     return printUsage(argv);
   }
-
   int index = 1;
   if (std::string(argv[1]) == "--json-checker") {
-    features = Json::Features::strictMode();
-    parseOnly = true;
+    opts->features = Json::Features::strictMode();
+    opts->parseOnly = true;
     ++index;
   }
-
   if (std::string(argv[1]) == "--json-config") {
     printConfig();
     return 3;
   }
-
   if (index == argc || index + 1 < argc) {
     return printUsage(argv);
   }
-
-  path = argv[index];
+  opts->path = argv[index];
   return 0;
 }
-
+static void tryTest(Options const& opts)
+{
+}
 int main(int argc, const char* argv[]) {
-  std::string path;
-  Json::Features features;
-  bool parseOnly;
-  int exitCode = parseCommandLine(argc, argv, features, path, parseOnly);
+  Options opts;
+  int exitCode = parseCommandLine(argc, argv, &opts);
   if (exitCode != 0) {
     return exitCode;
   }
 
   try {
-    std::string input = readInputTestFile(path.c_str());
+    std::string input = readInputTestFile(opts.path.c_str());
     if (input.empty()) {
-      printf("Failed to read input or empty input: %s\n", path.c_str());
+      printf("Failed to read input or empty input: %s\n", opts.path.c_str());
       return 3;
     }
 
     std::string basePath = removeSuffix(argv[1], ".json");
-    if (!parseOnly && basePath.empty()) {
+    if (!opts.parseOnly && basePath.empty()) {
       printf("Bad input path. Path does not end with '.expected':\n%s\n",
-             path.c_str());
+             opts.path.c_str());
       return 3;
     }
 
@@ -256,8 +272,9 @@ int main(int argc, const char* argv[]) {
 
     Json::Value root;
     exitCode = parseAndSaveValueTree(
-        input, actualPath, "input", features, parseOnly, &root);
-    if (exitCode || parseOnly) {
+        input, actualPath, "input",
+        opts.features, opts.parseOnly, &root);
+    if (exitCode || opts.parseOnly) {
       return exitCode;
     }
     std::string rewrite;
@@ -267,7 +284,8 @@ int main(int argc, const char* argv[]) {
     }
     Json::Value rewriteRoot;
     exitCode = parseAndSaveValueTree(
-        rewrite, rewriteActualPath, "rewrite", features, parseOnly, &rewriteRoot);
+        rewrite, rewriteActualPath, "rewrite",
+        opts.features, opts.parseOnly, &rewriteRoot);
     if (exitCode) {
       return exitCode;
     }
