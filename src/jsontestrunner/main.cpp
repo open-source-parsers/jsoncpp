@@ -15,6 +15,15 @@
 #pragma warning(disable : 4996) // disable fopen deprecation warning
 #endif
 
+struct Options
+{
+  std::string path;
+  Json::Features features;
+  bool parseOnly;
+  typedef std::string (*writeFuncType)(Json::Value const&);
+  writeFuncType write;
+};
+
 static std::string normalizeFloatingPointStr(double value) {
   char buffer[32];
 #if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__)
@@ -176,9 +185,10 @@ static std::string useStyledStreamWriter(
 static int rewriteValueTree(
     const std::string& rewritePath,
     const Json::Value& root,
+    Options::writeFuncType write,
     std::string* rewrite)
 {
-  *rewrite = useStyledWriter(root);
+  *rewrite = write(root);
   FILE* fout = fopen(rewritePath.c_str(), "wt");
   if (!fout) {
     printf("Failed to create rewrite file: %s\n", rewritePath.c_str());
@@ -213,21 +223,16 @@ static int printUsage(const char* argv[]) {
   return 3;
 }
 
-struct Options
-{
-  std::string path;
-  Json::Features features;
-  bool parseOnly;
-};
 static int parseCommandLine(
     int argc, const char* argv[], Options* opts)
 {
   opts->parseOnly = false;
+  opts->write = &useStyledWriter;
   if (argc < 2) {
     return printUsage(argv);
   }
   int index = 1;
-  if (std::string(argv[1]) == "--json-checker") {
+  if (std::string(argv[index]) == "--json-checker") {
     opts->features = Json::Features::strictMode();
     opts->parseOnly = true;
     ++index;
@@ -235,6 +240,18 @@ static int parseCommandLine(
   if (std::string(argv[index]) == "--json-config") {
     printConfig();
     return 3;
+  }
+  if (std::string(argv[index]) == "--json-writer") {
+    ++index;
+    std::string const writerName(argv[index++]);
+    if (writerName == "StyledWriter") {
+      opts->write = &useStyledWriter;
+    } else if (writerName == "StyledStreamWriter") {
+      opts->write = &useStyledStreamWriter;
+    } else {
+      printf("Unknown '--json-writer %s'\n", writerName.c_str());
+      return 4;
+    }
   }
   if (index == argc || index + 1 < argc) {
     return printUsage(argv);
@@ -271,7 +288,7 @@ static int runTest(Options const& opts)
     return exitCode;
   }
   std::string rewrite;
-  exitCode = rewriteValueTree(rewritePath, root, &rewrite);
+  exitCode = rewriteValueTree(rewritePath, root, opts.write, &rewrite);
   if (exitCode) {
     return exitCode;
   }
