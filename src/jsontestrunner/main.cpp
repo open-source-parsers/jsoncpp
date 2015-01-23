@@ -232,7 +232,7 @@ static int parseCommandLine(
     opts->parseOnly = true;
     ++index;
   }
-  if (std::string(argv[1]) == "--json-config") {
+  if (std::string(argv[index]) == "--json-config") {
     printConfig();
     return 3;
   }
@@ -259,7 +259,7 @@ int main(int argc, const char* argv[]) {
       return 3;
     }
 
-    std::string basePath = removeSuffix(argv[1], ".json");
+    std::string basePath = removeSuffix(opts.path, ".json");
     if (!opts.parseOnly && basePath.empty()) {
       printf("Bad input path. Path does not end with '.expected':\n%s\n",
              opts.path.c_str());
