@@ -202,10 +202,14 @@ JSONTEST_FIXTURE(ValueTest, objects) {
 
   // Remove.
   Json::Value got;
-  got = object1_.removeMember("some other id");
+  bool did;
+  did = object1_.removeMember("some other id", &got);
   JSONTEST_ASSERT_EQUAL(Json::Value("foo"), got);
-  got = object1_.removeMember("some other id");
-  JSONTEST_ASSERT_EQUAL(Json::nullValue, got);
+  JSONTEST_ASSERT_EQUAL(true, did);
+  got = Json::Value("bar");
+  did = object1_.removeMember("some other id", &got);
+  JSONTEST_ASSERT_EQUAL(Json::Value("bar"), got);
+  JSONTEST_ASSERT_EQUAL(false, did);
 }
 
 JSONTEST_FIXTURE(ValueTest, arrays) {

@@ -392,14 +392,21 @@ Json::Value obj_value(Json::objectValue); // {}
   /// \return the removed Value, or null.
   /// \pre type() is objectValue or nullValue
   /// \post type() is unchanged
+  /// \deprecated
   Value removeMember(const char* key);
   /// Same as removeMember(const char*)
+  /// \deprecated
   Value removeMember(const std::string& key);
+  /** \brief Remove the named map member.
+
+      Update 'removed' iff removed.
+      \return true iff removed (no exceptions)
+  */
+  bool removeMember(const char* key, Value* removed);
   /** \brief Remove the indexed array element.
 
       O(n) expensive operations.
       Update 'removed' iff removed.
-      (This is a better pattern than removeMember().)
       \return true iff removed (no exceptions)
   */
   bool removeIndex(ArrayIndex i, Value* removed);
