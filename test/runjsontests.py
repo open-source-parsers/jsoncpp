@@ -147,16 +147,23 @@ def main():
     else:
         input_path = None
     status = runAllTests(jsontest_executable_path, input_path,
-                          use_valgrind=options.valgrind,
-                          with_json_checker=options.with_json_checker,
-                          writerClass='StyledWriter')
+                         use_valgrind=options.valgrind,
+                         with_json_checker=options.with_json_checker,
+                         writerClass='StyledWriter')
     if status:
         sys.exit(status)
     status = runAllTests(jsontest_executable_path, input_path,
-                          use_valgrind=options.valgrind,
-                          with_json_checker=options.with_json_checker,
-                          writerClass='StyledStreamWriter')
-    sys.exit(status)
+                         use_valgrind=options.valgrind,
+                         with_json_checker=options.with_json_checker,
+                         writerClass='StyledStreamWriter')
+    if status:
+        sys.exit(status)
+    status = runAllTests(jsontest_executable_path, input_path,
+                         use_valgrind=options.valgrind,
+                         with_json_checker=options.with_json_checker,
+                         writerClass='BuiltStyledStreamWriter')
+    if status:
+        sys.exit(status)
 
 if __name__ == '__main__':
     main()
