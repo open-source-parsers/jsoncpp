@@ -257,19 +257,21 @@ int main(int argc, const char* argv[]) {
     Json::Value root;
     exitCode = parseAndSaveValueTree(
         input, actualPath, "input", root, features, parseOnly);
-    if (exitCode == 0 && !parseOnly) {
-      std::string rewrite;
-      exitCode = rewriteValueTree(rewritePath, root, rewrite);
-      if (exitCode == 0) {
-        Json::Value rewriteRoot;
-        exitCode = parseAndSaveValueTree(rewrite,
-                                         rewriteActualPath,
-                                         "rewrite",
-                                         rewriteRoot,
-                                         features,
-                                         parseOnly);
-      }
+    if (exitCode != 0 || parseOnly) {
+      return exitCode;
     }
+    std::string rewrite;
+    exitCode = rewriteValueTree(rewritePath, root, rewrite);
+    if (exitCode =! 0) {
+      return exitCode;
+    }
+    Json::Value rewriteRoot;
+    exitCode = parseAndSaveValueTree(rewrite,
+                                      rewriteActualPath,
+                                      "rewrite",
+                                      rewriteRoot,
+                                      features,
+                                      parseOnly);
   }
   catch (const std::exception& e) {
     printf("Unhandled exception:\n%s\n", e.what());
