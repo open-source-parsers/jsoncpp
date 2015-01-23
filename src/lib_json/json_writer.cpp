@@ -463,6 +463,7 @@ void StyledStreamWriter::write(std::ostream& out, const Value& root) {
   document_ = &out;
   addChildValues_ = false;
   indentString_ = "";
+  indented_ = false;
   writeCommentBeforeValue(root);
   writeValue(root);
   writeCommentAfterValueOnSameLine(root);
@@ -539,8 +540,10 @@ void StyledStreamWriter::writeArrayValue(const Value& value) {
         if (hasChildValue)
           writeWithIndent(childValues_[index]);
         else {
-          writeIndent();
+          if (!indented_) writeIndent();
+          indented_ = true;
           writeValue(childValue);
+          indented_ = false;
         }
         if (++index == size) {
           writeCommentAfterValueOnSameLine(childValue);
@@ -598,24 +601,17 @@ void StyledStreamWriter::pushValue(const std::string& value) {
 }
 
 void StyledStreamWriter::writeIndent() {
-  /*
-    Some comments in this method would have been nice. ;-)
-
-   if ( !document_.empty() )
-   {
-      char last = document_[document_.length()-1];
-      if ( last == ' ' )     // already indented
-         return;
-      if ( last != '\n' )    // Comments may add new-line
-         *document_ << '\n';
-   }
-  */
+  // blep intended this to look at the so-far-written string
+  // to determine whether we are already indented, but
+  // with a stream we cannot do that. So we rely on some saved state.
+  // The caller checks indented_.
   *document_ << '\n' << indentString_;
 }
 
 void StyledStreamWriter::writeWithIndent(const std::string& value) {
-  writeIndent();
+  if (!indented_) writeIndent();
   *document_ << value;
+  indented_ = false;
 }
 
 void StyledStreamWriter::indent() { indentString_ += indentation_; }
@@ -643,6 +639,7 @@ void StyledStreamWriter::writeCommentBeforeValue(const Value& root) {
 
   // Comments are stripped of trailing newlines, so add one here
   *document_ << "\n";
+  indented_ = false;
 }
 
 void StyledStreamWriter::writeCommentAfterValueOnSameLine(const Value& root) {
