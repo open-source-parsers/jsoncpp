@@ -772,8 +772,8 @@ void BuiltStyledStreamWriter::writeArrayValue(Value const& value) {
   if (size == 0)
     pushValue("[]");
   else {
-    bool isArrayMultiLine = isMultineArray(value);
-    if (isArrayMultiLine) {
+    bool isMultiLine = (cs_ == CommentStyle::All) || isMultineArray(value);
+    if (isMultiLine) {
       writeWithIndent("[");
       indent();
       bool hasChildValue = !childValues_.empty();
@@ -969,14 +969,14 @@ void StreamWriter::Builder::setIndentation(std::string v)
 {
   own_->setIndentation(v);
 }
-StreamWriter* StreamWriter::Builder::newStreamWriter(std::ostream* sout)
+StreamWriter* StreamWriter::Builder::newStreamWriter(std::ostream* sout) const
 {
   return own_->newStreamWriter(sout);
 }
 
 /// Do not take ownership of sout, but maintain a reference.
 StreamWriter* newStreamWriter(std::ostream* sout);
-std::string writeString(Value const& root, StreamWriterBuilder const& builder) {
+std::string writeString(Value const& root, StreamWriter::Builder const& builder) {
   std::ostringstream sout;
   std::unique_ptr<StreamWriter> const sw(builder.newStreamWriter(&sout));
   sw->write(root);
@@ -986,7 +986,7 @@ std::string writeString(Value const& root, StreamWriterBuilder const& builder) {
 std::ostream& operator<<(std::ostream& sout, Value const& root) {
   StreamWriterBuilderFactory f;
   StreamWriter::Builder builder(&f);
-  builder.setCommentStyle(StreamWriter::CommentStyle::Some);
+  builder.setCommentStyle(StreamWriter::CommentStyle::All);
   std::shared_ptr<StreamWriter> writer(builder.newStreamWriter(&sout));
   writer->write(root);
   return sout;

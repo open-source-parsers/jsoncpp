@@ -76,12 +76,12 @@ public:
     void setIndentation(std::string indentation);
 
     /// Do not take ownership of sout, but maintain a reference.
-    StreamWriter* newStreamWriter(std::ostream* sout);
+    StreamWriter* newStreamWriter(std::ostream* sout) const;
   };
 };
 
 /// \brief Write into stringstream, then return string, for convenience.
-std::string writeString(Value const& root, StreamWriterBuilder const& builder);
+std::string writeString(Value const& root, StreamWriter::Builder const& builder);
 
 
 /** \brief Abstract class for writers.
