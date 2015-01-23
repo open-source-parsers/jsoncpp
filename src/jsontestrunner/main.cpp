@@ -8,6 +8,7 @@
 
 #include <json/json.h>
 #include <algorithm> // sort
+#include <sstream>
 #include <stdio.h>
 
 #if defined(_MSC_VER) && _MSC_VER >= 1310
@@ -158,8 +159,10 @@ static int rewriteValueTree(const std::string& rewritePath,
                             std::string& rewrite) {
   // Json::FastWriter writer;
   // writer.enableYAMLCompatibility();
-  Json::StyledWriter writer;
-  rewrite = writer.write(root);
+  Json::StyledStreamWriter writer;
+  std::ostringstream sout;
+  writer.write(sout, root);
+  rewrite = sout.str();
   FILE* fout = fopen(rewritePath.c_str(), "wt");
   if (!fout) {
     printf("Failed to create rewrite file: %s\n", rewritePath.c_str());
