@@ -130,11 +130,11 @@ printValueTree(FILE* fout, Json::Value& value, const std::string& path = ".") {
 static int parseAndSaveValueTree(const std::string& input,
                                  const std::string& actual,
                                  const std::string& kind,
-                                 Json::Value& root,
                                  const Json::Features& features,
-                                 bool parseOnly) {
+                                 bool parseOnly,
+                                 Json::Value* root) {
   Json::Reader reader(features);
-  bool parsingSuccessful = reader.parse(input, root);
+  bool parsingSuccessful = reader.parse(input, *root);
   if (!parsingSuccessful) {
     printf("Failed to parse %s file: \n%s\n",
            kind.c_str(),
@@ -148,7 +148,7 @@ static int parseAndSaveValueTree(const std::string& input,
       printf("Failed to create %s actual file.\n", kind.c_str());
       return 2;
     }
-    printValueTree(factual, root);
+    printValueTree(factual, *root);
     fclose(factual);
   }
   return 0;
@@ -156,19 +156,19 @@ static int parseAndSaveValueTree(const std::string& input,
 
 static int rewriteValueTree(const std::string& rewritePath,
                             const Json::Value& root,
-                            std::string& rewrite) {
+                            std::string* rewrite) {
   // Json::FastWriter writer;
   // writer.enableYAMLCompatibility();
   Json::StyledStreamWriter writer;
   std::ostringstream sout;
   writer.write(sout, root);
-  rewrite = sout.str();
+  *rewrite = sout.str();
   FILE* fout = fopen(rewritePath.c_str(), "wt");
   if (!fout) {
     printf("Failed to create rewrite file: %s\n", rewritePath.c_str());
     return 2;
   }
-  fprintf(fout, "%s\n", rewrite.c_str());
+  fprintf(fout, "%s\n", rewrite->c_str());
   fclose(fout);
   return 0;
 }
@@ -250,24 +250,24 @@ int main(int argc, const char* argv[]) {
       return 3;
     }
 
-    std::string actualPath = basePath + ".actual";
-    std::string rewritePath = basePath + ".rewrite";
-    std::string rewriteActualPath = basePath + ".actual-rewrite";
+    std::string const actualPath = basePath + ".actual";
+    std::string const rewritePath = basePath + ".rewrite";
+    std::string const rewriteActualPath = basePath + ".actual-rewrite";
 
     Json::Value root;
     exitCode = parseAndSaveValueTree(
-        input, actualPath, "input", root, features, parseOnly);
+        input, actualPath, "input", features, parseOnly, &root);
     if (exitCode || parseOnly) {
       return exitCode;
     }
     std::string rewrite;
-    exitCode = rewriteValueTree(rewritePath, root, rewrite);
+    exitCode = rewriteValueTree(rewritePath, root, &rewrite);
     if (exitCode) {
       return exitCode;
     }
     Json::Value rewriteRoot;
     exitCode = parseAndSaveValueTree(
-        rewrite, rewriteActualPath, "rewrite", rewriteRoot, features, parseOnly);
+        rewrite, rewriteActualPath, "rewrite", features, parseOnly, &rewriteRoot);
     if (exitCode) {
       return exitCode;
     }
