@@ -187,7 +187,8 @@ private:
   std::string indentString_;
   int rightMargin_;
   std::string indentation_;
-  bool addChildValues_;
+  bool addChildValues_ : 1;
+  bool indented_ : 1;
 };
 
 #if defined(JSON_HAS_INT64)
