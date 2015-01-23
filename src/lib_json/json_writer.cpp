@@ -628,7 +628,20 @@ void StyledStreamWriter::unindent() {
 void StyledStreamWriter::writeCommentBeforeValue(const Value& root) {
   if (!root.hasComment(commentBefore))
     return;
-  *document_ << root.getComment(commentBefore);
+
+  *document_ << "\n";
+  writeIndent();
+  const std::string& comment = root.getComment(commentBefore);
+  std::string::const_iterator iter = comment.begin();
+  while (iter != comment.end()) {
+    *document_ << *iter;
+    if (*iter == '\n' &&
+       (iter != comment.end() && *(iter + 1) == '/'))
+      writeIndent();
+    ++iter;
+  }
+
+  // Comments are stripped of trailing newlines, so add one here
   *document_ << "\n";
 }
 
