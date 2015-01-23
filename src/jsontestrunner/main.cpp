@@ -242,58 +242,60 @@ static int parseCommandLine(
   opts->path = argv[index];
   return 0;
 }
-static void tryTest(Options const& opts)
+static int runTest(Options const& opts)
 {
+  int exitCode = 0;
+
+  std::string input = readInputTestFile(opts.path.c_str());
+  if (input.empty()) {
+    printf("Failed to read input or empty input: %s\n", opts.path.c_str());
+    return 3;
+  }
+
+  std::string basePath = removeSuffix(opts.path, ".json");
+  if (!opts.parseOnly && basePath.empty()) {
+    printf("Bad input path. Path does not end with '.expected':\n%s\n",
+            opts.path.c_str());
+    return 3;
+  }
+
+  std::string const actualPath = basePath + ".actual";
+  std::string const rewritePath = basePath + ".rewrite";
+  std::string const rewriteActualPath = basePath + ".actual-rewrite";
+
+  Json::Value root;
+  exitCode = parseAndSaveValueTree(
+      input, actualPath, "input",
+      opts.features, opts.parseOnly, &root);
+  if (exitCode || opts.parseOnly) {
+    return exitCode;
+  }
+  std::string rewrite;
+  exitCode = rewriteValueTree(rewritePath, root, &rewrite);
+  if (exitCode) {
+    return exitCode;
+  }
+  Json::Value rewriteRoot;
+  exitCode = parseAndSaveValueTree(
+      rewrite, rewriteActualPath, "rewrite",
+      opts.features, opts.parseOnly, &rewriteRoot);
+  if (exitCode) {
+    return exitCode;
+  }
+  return 0;
 }
 int main(int argc, const char* argv[]) {
   Options opts;
   int exitCode = parseCommandLine(argc, argv, &opts);
   if (exitCode != 0) {
+    printf("Failed to parse command-line.");
     return exitCode;
   }
-
   try {
-    std::string input = readInputTestFile(opts.path.c_str());
-    if (input.empty()) {
-      printf("Failed to read input or empty input: %s\n", opts.path.c_str());
-      return 3;
-    }
-
-    std::string basePath = removeSuffix(opts.path, ".json");
-    if (!opts.parseOnly && basePath.empty()) {
-      printf("Bad input path. Path does not end with '.expected':\n%s\n",
-             opts.path.c_str());
-      return 3;
-    }
-
-    std::string const actualPath = basePath + ".actual";
-    std::string const rewritePath = basePath + ".rewrite";
-    std::string const rewriteActualPath = basePath + ".actual-rewrite";
-
-    Json::Value root;
-    exitCode = parseAndSaveValueTree(
-        input, actualPath, "input",
-        opts.features, opts.parseOnly, &root);
-    if (exitCode || opts.parseOnly) {
-      return exitCode;
-    }
-    std::string rewrite;
-    exitCode = rewriteValueTree(rewritePath, root, &rewrite);
-    if (exitCode) {
-      return exitCode;
-    }
-    Json::Value rewriteRoot;
-    exitCode = parseAndSaveValueTree(
-        rewrite, rewriteActualPath, "rewrite",
-        opts.features, opts.parseOnly, &rewriteRoot);
-    if (exitCode) {
-      return exitCode;
-    }
+    return runTest(opts);
   }
   catch (const std::exception& e) {
     printf("Unhandled exception:\n%s\n", e.what());
-    exitCode = 1;
+    return 1;
   }
-
-  return exitCode;
 }
