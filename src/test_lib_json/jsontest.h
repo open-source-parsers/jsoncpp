@@ -178,8 +178,8 @@ private:
 
 template <typename T, typename U>
 TestResult& checkEqual(TestResult& result,
-                       const T& expected,
-                       const U& actual,
+                       T expected,
+                       U actual,
                        const char* file,
                        unsigned int line,
                        const char* expr) {

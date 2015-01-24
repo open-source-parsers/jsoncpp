@@ -11,6 +11,9 @@ ADD_EXECUTABLE( jsoncpp_test
 
 TARGET_LINK_LIBRARIES(jsoncpp_test jsoncpp_lib)
 
+# another way to solve issue #90
+#set_target_properties(jsoncpp_test PROPERTIES COMPILE_FLAGS -ffloat-store)
+
 # Run unit tests in post-build
 # (default cmake workflow hides away the test result into a file, resulting in poor dev workflow?!?)
 IF(JSONCPP_WITH_POST_BUILD_UNITTEST)
