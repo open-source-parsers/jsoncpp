@@ -1,5 +1,5 @@
 from contextlib import closing
-import os.path
+import os
 import tarfile
 
 TARGZ_DEFAULT_COMPRESSION_LEVEL = 9
@@ -34,7 +34,8 @@ def make_tarball(tarball_path, sources, base_dir, prefix_dir=''):
         for source in sources:
             source_path = source
             if os.path.isdir(source):
-                os.path.walk(source_path, visit, tar)
+                for dirpath, dirnames, filenames in os.walk(source_path):
+                    visit(tar, dirpath, filenames)
             else:
                 path_in_tar = archive_name(source_path)
                 tar.add(source_path, path_in_tar)      # filename, arcname

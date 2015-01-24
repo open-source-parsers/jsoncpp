@@ -1,6 +1,7 @@
 """Script to generate doxygen documentation.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
 from devtools import tarball
 from contextlib import contextmanager
 import subprocess
@@ -42,12 +43,12 @@ def do_subst_in_file(targetfile, sourcefile, dict):
     For example, if dict is {'%VERSION%': '1.2345', '%BASE%': 'MyProg'},
     then all instances of %VERSION% in the file will be replaced with 1.2345 etc.
     """
-    with open(sourcefile, 'rb') as f:
+    with open(sourcefile, 'r') as f:
         contents = f.read()
     for (k,v) in list(dict.items()):
         v = v.replace('\\','\\\\') 
         contents = re.sub(k, v, contents)
-    with open(targetfile, 'wb') as f:
+    with open(targetfile, 'w') as f:
         f.write(contents)
 
 def getstatusoutput(cmd):
@@ -100,7 +101,7 @@ def build_doc(options,  make_release=False):
         options.open = False
         options.silent = True
 
-    version = open('version','rt').read().strip()
+    version = open('version', 'rt').read().strip()
     output_dir = 'dist/doxygen' # relative to doc/doxyfile location.
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
@@ -132,7 +133,7 @@ def build_doc(options,  make_release=False):
     do_subst_in_file('doc/doxyfile', 'doc/doxyfile.in', subst_keys)
     run_doxygen(options.doxygen_path, 'doc/doxyfile', 'doc', is_silent=options.silent)
     if not options.silent:
-        print(open(warning_log_path, 'rb').read())
+        print(open(warning_log_path, 'r').read())
     index_path = os.path.abspath(os.path.join('doc', subst_keys['%HTML_OUTPUT%'], 'index.html'))
     print('Generated documentation can be found in:')
     print(index_path)
