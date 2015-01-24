@@ -126,7 +126,7 @@ def build_doc( options,  make_release=False ):
         print('Generating doc tarball to', tarball_path)
         tarball_sources = [
             output_dir,
-            'README.txt',
+            'README.md',
             'LICENSE',
             'NEWS.txt',
             'version'
