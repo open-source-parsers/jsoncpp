@@ -1,10 +1,10 @@
 from __future__ import print_function
 import glob
 import os.path
-for path in glob.glob( '*.json' ):
+for path in glob.glob('*.json'):
     text = file(path,'rt').read()
     target = os.path.splitext(path)[0] + '.expected'
-    if os.path.exists( target ):
+    if os.path.exists(target):
         print('skipping:', target)
     else:
         print('creating:', target)
