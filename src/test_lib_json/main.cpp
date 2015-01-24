@@ -1617,6 +1617,18 @@ JSONTEST_FIXTURE(ReaderTest, parseWithDetailError) {
   JSONTEST_ASSERT(errors.at(0).message == "Bad escape sequence in string");
 }
 
+JSONTEST_FIXTURE(ReaderTest, parseIterator) {
+  Json::Reader reader;
+  Json::Value root;
+
+  std::string str = "{ \"property\": \"value\" }";
+  std::vector<char> vec(str.begin(), str.end());
+
+  bool ok = reader.parseIterator(vec.begin(), vec.end(), root);
+
+  JSONTEST_ASSERT(ok);
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -1646,6 +1658,7 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseWithOneError);
   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseChineseWithOneError);
   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseWithDetailError);
+  JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseIterator);
 
   JSONTEST_REGISTER_FIXTURE(runner, WriterTest, dropNullPlaceholders);
 
