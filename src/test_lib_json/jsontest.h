@@ -214,7 +214,7 @@ TestResult& checkStringEqual(TestResult& result,
 #define JSONTEST_ASSERT_PRED(expr)                                             \
   {                                                                            \
     JsonTest::PredicateContext _minitest_Context = {                           \
-      result_->predicateId_, __FILE__, __LINE__, #expr                         \
+      result_->predicateId_, __FILE__, __LINE__, #expr, nullptr, nullptr       \
     };                                                                         \
     result_->predicateStackTail_->next_ = &_minitest_Context;                  \
     result_->predicateId_ += 1;                                                \
