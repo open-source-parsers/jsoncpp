@@ -4,6 +4,7 @@ from __future__ import print_function
 from devtools import tarball
 from contextlib import contextmanager
 import subprocess
+import traceback
 import re
 import os
 import sys
@@ -52,24 +53,39 @@ def do_subst_in_file(targetfile, sourcefile, dict):
 def getstatusoutput(cmd):
     """cmd is a list.
     """
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    output, _ = process.communicate()
-    status = process.returncode
+    try:
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output, _ = process.communicate()
+        status = process.returncode
+    except:
+        status = -1
+        output = traceback.format_exc()
     return status, output
 
 def run_cmd(cmd, silent=False):
-    print('Running:', repr(' '.join(cmd)), 'in', repr(os.getcwd()))
+    """Raise exception on failure.
+    """
+    info = 'Running: %r in %r' %(' '.join(cmd), os.getcwd())
+    print(info)
     sys.stdout.flush()
     if silent:
         status, output = getstatusoutput(cmd)
     else:
         status, output = os.system(' '.join(cmd)), ''
     if status:
-        msg = 'error=%d, output="""\n%s\n"""' %(status, output)
-        print(msg)
-        #raise Exception(msg)
+        msg = 'Error while %s ...\n\terror=%d, output="""%s"""' %(info, status, output)
+        raise Exception(msg)
+
+def assert_is_exe(path):
+    if not path:
+        raise Exception('path is empty.')
+    if not os.path.isfile(path):
+        raise Exception('%r is not a file.' %path)
+    if not os.access(path, os.X_OK):
+        raise Exception('%r is not executable by this user.' %path)
 
 def run_doxygen(doxygen_path, config_file, working_dir, is_silent):
+    assert_is_exe(doxygen_path)
     config_file = os.path.abspath(config_file)
     with cd(working_dir):
         cmd = [doxygen_path, config_file]
