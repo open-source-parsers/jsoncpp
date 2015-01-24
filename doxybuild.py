@@ -2,11 +2,24 @@
 """
 from __future__ import print_function
 from devtools import tarball
+from contextlib import contextmanager
+import subprocess
 import re
 import os
-import os.path
 import sys
 import shutil
+
+@contextmanager
+def cd(newdir):
+    """
+    http://stackoverflow.com/questions/431684/how-do-i-cd-in-python
+    """
+    prevdir = os.getcwd()
+    os.chdir(newdir)
+    try:
+        yield
+    finally:
+        os.chdir(prevdir)
 
 def find_program(*filenames):
     """find a program in folders path_lst, and sets env[var]
@@ -28,51 +41,39 @@ def do_subst_in_file(targetfile, sourcefile, dict):
     For example, if dict is {'%VERSION%': '1.2345', '%BASE%': 'MyProg'},
     then all instances of %VERSION% in the file will be replaced with 1.2345 etc.
     """
-    try:
-        f = open(sourcefile, 'rb')
+    with open(sourcefile, 'rb') as f:
         contents = f.read()
-        f.close()
-    except:
-        print("Can't read source file %s"%sourcefile)
-        raise
     for (k,v) in list(dict.items()):
         v = v.replace('\\','\\\\') 
         contents = re.sub(k, v, contents)
-    try:
-        f = open(targetfile, 'wb')
+    with open(targetfile, 'wb') as f:
         f.write(contents)
-        f.close()
-    except:
-        print("Can't write target file %s"%targetfile)
-        raise
+
+def getstatusoutput(cmd):
+    """cmd is a list.
+    """
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    output, _ = process.communicate()
+    status = process.returncode
+    return status, output
+
+def run_cmd(cmd, silent=False):
+    print('Running:', repr(' '.join(cmd)), 'in', repr(os.getcwd()))
+    sys.stdout.flush()
+    if silent:
+        status, output = getstatusoutput(cmd)
+    else:
+        status, output = os.system(' '.join(cmd)), ''
+    if status:
+        msg = 'error=%d, output="""\n%s\n"""' %(status, output)
+        print(msg)
+        #raise Exception(msg)
 
 def run_doxygen(doxygen_path, config_file, working_dir, is_silent):
     config_file = os.path.abspath(config_file)
-    doxygen_path = doxygen_path
-    old_cwd = os.getcwd()
-    try:
-        os.chdir(working_dir)
+    with cd(working_dir):
         cmd = [doxygen_path, config_file]
-        print('Running:', ' '.join(cmd))
-        try:
-            import subprocess
-        except:
-            if os.system(' '.join(cmd)) != 0:
-                print('Documentation generation failed')
-                return False
-        else:
-            if is_silent:
-                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            else:
-                process = subprocess.Popen(cmd)
-            stdout, _ = process.communicate()
-            if process.returncode:
-                print('Documentation generation failed:')
-                print(stdout)
-                return False
-        return True
-    finally:
-        os.chdir(old_cwd)
+        run_cmd(cmd, is_silent)
 
 def build_doc(options,  make_release=False):
     if make_release:
@@ -113,7 +114,7 @@ def build_doc(options,  make_release=False):
         os.makedirs(output_dir)
 
     do_subst_in_file('doc/doxyfile', 'doc/doxyfile.in', subst_keys)
-    ok = run_doxygen(options.doxygen_path, 'doc/doxyfile', 'doc', is_silent=options.silent)
+    run_doxygen(options.doxygen_path, 'doc/doxyfile', 'doc', is_silent=options.silent)
     if not options.silent:
         print(open(warning_log_path, 'rb').read())
     index_path = os.path.abspath(os.path.join('doc', subst_keys['%HTML_OUTPUT%'], 'index.html'))
