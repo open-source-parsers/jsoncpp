@@ -41,7 +41,11 @@ class JSON_API StreamWriter {
 protected:
   std::ostream& sout_;  // not owned; will not delete
 public:
-  enum class CommentStyle {None, Some, All};
+  /// `All`: Keep all comments.
+  /// `None`: Drop all comments.
+  /// Use `Most` to recover the odd behavior of previous versions.
+  /// Only `All` is currently implemented.
+  enum class CommentStyle {None, Most, All};
 
   /// Keep a reference, but do not take ownership of `sout`.
   StreamWriter(std::ostream* sout);
