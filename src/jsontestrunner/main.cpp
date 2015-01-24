@@ -184,8 +184,7 @@ static std::string useStyledStreamWriter(
 static std::string useBuiltStyledStreamWriter(
     Json::Value const& root)
 {
-  Json::StreamWriterBuilderFactory f;
-  Json::StreamWriter::Builder builder(&f);
+  Json::StreamWriter::Builder builder;
   builder.setCommentStyle(Json::StreamWriter::CommentStyle::All);
   return writeString(root, builder);
 }

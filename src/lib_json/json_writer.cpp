@@ -967,6 +967,13 @@ StreamWriter* StreamWriterBuilder::newStreamWriter(std::ostream* stream) const
 {
   return new BuiltStyledStreamWriter(stream, indentation_, cs_);
 }
+
+// This might become public someday.
+class StreamWriterBuilderFactory {
+public:
+  virtual ~StreamWriterBuilderFactory();
+  virtual StreamWriterBuilder* newStreamWriterBuilder() const;
+};
 StreamWriterBuilderFactory::~StreamWriterBuilderFactory()
 {
 }
@@ -975,14 +982,19 @@ StreamWriterBuilder* StreamWriterBuilderFactory::newStreamWriterBuilder() const
   return new StreamWriterBuilder;
 }
 
-StreamWriter::Builder::Builder(StreamWriterBuilderFactory const* f)
-    : own_(f->newStreamWriterBuilder())
+StreamWriter::Builder::Builder()
+    : own_(StreamWriterBuilderFactory().newStreamWriterBuilder())
 {
 }
 StreamWriter::Builder::~Builder()
 {
   delete own_;
 }
+StreamWriter::Builder::Builder(Builder const&)
+  : own_(nullptr)
+{abort();}
+void StreamWriter::Builder::operator=(Builder const&)
+{abort();}
 void StreamWriter::Builder::setCommentStyle(CommentStyle v)
 {
   own_->setCommentStyle(v);
@@ -1006,8 +1018,7 @@ std::string writeString(Value const& root, StreamWriter::Builder const& builder)
 }
 
 std::ostream& operator<<(std::ostream& sout, Value const& root) {
-  StreamWriterBuilderFactory f;
-  StreamWriter::Builder builder(&f);
+  StreamWriter::Builder builder;
   builder.setCommentStyle(StreamWriter::CommentStyle::All);
   std::shared_ptr<StreamWriter> writer(builder.newStreamWriter(&sout));
   writer->write(root);

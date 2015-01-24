@@ -30,26 +30,20 @@ Usage:
 
   using namespace Json;
   Value value;
-  StreamWriterBuilderFactory f;
-  StreamWriter::Builder builder(&f);
+  StreamWriter::Builder builder;
   builder.setCommentStyle(StreamWriter::CommentStyle::None);
   std::shared_ptr<StreamWriter> writer(
     builder.newStreamWriter(&std::cout));
   writer->write(value);
   std::cout.flush();
 */
-class JSON_API StreamWriterBuilderFactory {
-public:
-  virtual ~StreamWriterBuilderFactory();
-  virtual StreamWriterBuilder* newStreamWriterBuilder() const;
-};
-
 class JSON_API StreamWriter {
 protected:
   std::ostream& sout_;  // not owned; will not delete
 public:
   enum class CommentStyle {None, Some, All};
 
+  /// Keep a reference, but do not take ownership of `sout`.
   StreamWriter(std::ostream* sout);
   virtual ~StreamWriter();
   /// Write Value into document as configured in sub-class.
@@ -62,8 +56,10 @@ public:
   /// \see http://stackoverflow.com/questions/14875052/pure-virtual-functions-and-binary-compatibility
   class Builder {
     StreamWriterBuilder* own_;
+    Builder(Builder const&);  // noncopyable
+    void operator=(Builder const&);  // noncopyable
   public:
-    Builder(StreamWriterBuilderFactory const*);
+    Builder();
     ~Builder();  // delete underlying StreamWriterBuilder
 
     void setCommentStyle(CommentStyle cs);  /// default: All
