@@ -49,6 +49,12 @@ def do_subst_in_file(targetfile, sourcefile, dict):
 def run_doxygen(doxygen_path, config_file, working_dir, is_silent):
     config_file = os.path.abspath( config_file )
     doxygen_path = doxygen_path
+
+    if not doxygen_path:
+        print('Documentation generation failed:')
+        print('Program doxygen not found')
+        return False
+
     old_cwd = os.getcwd()
     try:
         os.chdir( working_dir )
@@ -114,6 +120,9 @@ def build_doc( options,  make_release=False ):
 
     do_subst_in_file( 'doc/doxyfile', 'doc/doxyfile.in', subst_keys )
     ok = run_doxygen( options.doxygen_path, 'doc/doxyfile', 'doc', is_silent=options.silent )
+    if not ok:
+        exit(1)
+
     if not options.silent:
         print(open(warning_log_path, 'rb').read())
     index_path = os.path.abspath(os.path.join('doc', subst_keys['%HTML_OUTPUT%'], 'index.html'))
