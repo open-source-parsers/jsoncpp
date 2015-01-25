@@ -4,11 +4,21 @@
 
 <a HREF="http://www.json.org/">JSON (JavaScript Object Notation)</a>
  is a lightweight data-interchange format. 
-It can represent integer, real number, string, an ordered sequence of value, and
-a collection of name/value pairs.
 
 Here is an example of JSON data:
 \verbatim
+{
+    "encoding" : "UTF-8",
+    "plug-ins" : [
+        "python",
+        "c++",
+        "ruby"
+        ],
+    "indent" : { "length" : 3, "use_space": true }
+}
+\endverbatim
+<b>JsonCpp</b> supports comments as <i>meta-data</i>:
+\code
 // Configuration options
 {
     // Default encoding for text
@@ -17,22 +27,22 @@ Here is an example of JSON data:
     // Plug-ins loaded at start-up
     "plug-ins" : [
         "python",
-        "c++",
+        "c++",  // trailing comment
         "ruby"
         ],
         
     // Tab indent size
-    "indent" : { "length" : 3, "use_space": true }
+    // (multi-line comment)
+    "indent" : { /*embedded comment*/ "length" : 3, "use_space": true }
 }
-\endverbatim
-<code>jsoncpp</code> supports comments as <i>meta-data</i>.
+\endcode
 
 \section _features Features
 - read and write JSON document
 - attach C++ style comments to element during parsing
 - rewrite JSON document preserving original comments
 
-Notes: Comments used to be supported in JSON but where removed for 
+Notes: Comments used to be supported in JSON but were removed for
 portability (C like comments are not supported in Python). Since
 comments are useful in configuration/input file, this feature was
 preserved.
@@ -40,7 +50,7 @@ preserved.
 \section _example Code example
 
 \code
-Json::Value root;   // will contains the root value after parsing.
+Json::Value root;   // will contain the root value after parsing.
 Json::Reader reader;
 bool parsingSuccessful = reader.parse( config_doc, root );
 if ( !parsingSuccessful )
