@@ -720,7 +720,9 @@ int BuiltStyledStreamWriter::write(Value const& root)
   indented_ = true;
   writeValue(root);
   writeCommentAfterValueOnSameLine(root);
-  sout_ << "\n";
+  if (!indentation_.empty()) {
+    sout_ << "\n";
+  }
   return 0;
 }
 void BuiltStyledStreamWriter::writeValue(Value const& value) {
@@ -759,7 +761,9 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
         Value const& childValue = value[name];
         writeCommentBeforeValue(childValue);
         writeWithIndent(valueToQuotedString(name.c_str()));
-        sout_ << " : ";
+        if (!indentation_.empty()) sout_ << " ";
+        sout_ << ":";
+        if (!indentation_.empty()) sout_ << " ";
         writeValue(childValue);
         if (++it == members.end()) {
           writeCommentAfterValueOnSameLine(childValue);
@@ -809,13 +813,15 @@ void BuiltStyledStreamWriter::writeArrayValue(Value const& value) {
     } else // output on a single line
     {
       assert(childValues_.size() == size);
-      sout_ << "[ ";
+      sout_ << "[";
+      if (!indentation_.empty()) sout_ << " ";
       for (unsigned index = 0; index < size; ++index) {
         if (index > 0)
           sout_ << ", ";
         sout_ << childValues_[index];
       }
-      sout_ << " ]";
+      if (!indentation_.empty()) sout_ << " ";
+      sout_ << "]";
     }
   }
 }
@@ -860,7 +866,11 @@ void BuiltStyledStreamWriter::writeIndent() {
   // to determine whether we are already indented, but
   // with a stream we cannot do that. So we rely on some saved state.
   // The caller checks indented_.
-  sout_ << '\n' << indentString_;
+
+  if (!indentation_.empty()) {
+    // In this case, drop newlines too.
+    sout_ << '\n' << indentString_;
+  }
 }
 
 void BuiltStyledStreamWriter::writeWithIndent(std::string const& value) {
@@ -877,6 +887,7 @@ void BuiltStyledStreamWriter::unindent() {
 }
 
 void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
+  if (cs_ == CommentStyle::None) return;
   if (!root.hasComment(commentBefore))
     return;
 
@@ -895,6 +906,7 @@ void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
 }
 
 void BuiltStyledStreamWriter::writeCommentAfterValueOnSameLine(Value const& root) {
+  if (cs_ == CommentStyle::None) return;
   if (root.hasComment(commentAfterOnSameLine))
     sout_ << " " + root.getComment(commentAfterOnSameLine);
 
