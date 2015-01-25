@@ -649,7 +649,7 @@ void StyledStreamWriter::writeCommentBeforeValue(const Value& root) {
 
 void StyledStreamWriter::writeCommentAfterValueOnSameLine(const Value& root) {
   if (root.hasComment(commentAfterOnSameLine))
-    *document_ << root.getComment(commentAfterOnSameLine);
+    *document_ << ' ' << root.getComment(commentAfterOnSameLine);
 
   if (root.hasComment(commentAfter)) {
     writeIndent();
