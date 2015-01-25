@@ -466,8 +466,10 @@ void StyledStreamWriter::write(std::ostream& out, const Value& root) {
   document_ = &out;
   addChildValues_ = false;
   indentString_ = "";
-  indented_ = false;
+  indented_ = true;
   writeCommentBeforeValue(root);
+  if (!indented_) writeIndent();
+  indented_ = true;
   writeValue(root);
   writeCommentAfterValueOnSameLine(root);
   *document_ << "\n";
@@ -631,32 +633,29 @@ void StyledStreamWriter::writeCommentBeforeValue(const Value& root) {
   if (!root.hasComment(commentBefore))
     return;
 
-  *document_ << "\n";
-  writeIndent();
+  if (!indented_) writeIndent();
   const std::string& comment = root.getComment(commentBefore);
   std::string::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
     *document_ << *iter;
     if (*iter == '\n' &&
        (iter != comment.end() && *(iter + 1) == '/'))
-      writeIndent();
+      // writeIndent();  // would include newline
+      *document_ << indentString_;
     ++iter;
   }
-
-  // Comments are stripped of trailing newlines, so add one here
-  *document_ << "\n";
   indented_ = false;
 }
 
 void StyledStreamWriter::writeCommentAfterValueOnSameLine(const Value& root) {
   if (root.hasComment(commentAfterOnSameLine))
-    *document_ << " " + root.getComment(commentAfterOnSameLine);
+    *document_ << root.getComment(commentAfterOnSameLine);
 
   if (root.hasComment(commentAfter)) {
-    *document_ << "\n";
+    writeIndent();
     *document_ << root.getComment(commentAfter);
-    *document_ << "\n";
   }
+  indented_ = false;
 }
 
 bool StyledStreamWriter::hasCommentForValue(const Value& value) {
