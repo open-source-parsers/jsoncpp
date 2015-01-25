@@ -142,8 +142,10 @@ Value::CommentInfo::~CommentInfo() {
 }
 
 void Value::CommentInfo::setComment(const char* text) {
-  if (comment_)
+  if (comment_) {
     releaseStringValue(comment_);
+    comment_ = 0;
+  }
   JSON_ASSERT(text != 0);
   JSON_ASSERT_MESSAGE(
       text[0] == '\0' || text[0] == '/',
