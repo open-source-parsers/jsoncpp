@@ -432,8 +432,10 @@ Json::Value obj_value(Json::objectValue); // {}
   //      EnumValues enumValues() const;
   //# endif
 
-  /// Comments must be //... or /* ... */
+  /// \deprecated Always pass len.
   void setComment(const char* comment, CommentPlacement placement);
+  /// Comments must be //... or /* ... */
+  void setComment(const char* comment, size_t len, CommentPlacement placement);
   /// Comments must be //... or /* ... */
   void setComment(const std::string& comment, CommentPlacement placement);
   bool hasComment(CommentPlacement placement) const;
@@ -477,7 +479,7 @@ private:
     CommentInfo();
     ~CommentInfo();
 
-    void setComment(const char* text);
+    void setComment(const char* text, size_t len);
 
     char* comment_;
   };
