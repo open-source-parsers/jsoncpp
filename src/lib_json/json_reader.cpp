@@ -135,9 +135,6 @@ bool Reader::readValue() {
   bool successful = true;
 
   if (collectComments_ && !commentsBefore_.empty()) {
-    // Remove newline at the end of the comment
-    if (commentsBefore_[commentsBefore_.size() - 1] == '\n')
-      commentsBefore_.resize(commentsBefore_.size() - 1);
     currentValue().setComment(commentsBefore_, commentBefore);
     commentsBefore_ = "";
   }

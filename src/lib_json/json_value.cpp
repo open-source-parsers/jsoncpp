@@ -141,7 +141,7 @@ Value::CommentInfo::~CommentInfo() {
     releaseStringValue(comment_);
 }
 
-void Value::CommentInfo::setComment(const char* text) {
+void Value::CommentInfo::setComment(const char* text, size_t len) {
   if (comment_) {
     releaseStringValue(comment_);
     comment_ = 0;
@@ -151,7 +151,7 @@ void Value::CommentInfo::setComment(const char* text) {
       text[0] == '\0' || text[0] == '/',
       "in Json::Value::setComment(): Comments must start with /");
   // It seems that /**/ style comments are acceptable as well.
-  comment_ = duplicateStringValue(text);
+  comment_ = duplicateStringValue(text, len);
 }
 
 // //////////////////////////////////////////////////////////////////
@@ -369,7 +369,8 @@ Value::Value(const Value& other)
     for (int comment = 0; comment < numberOfCommentPlacement; ++comment) {
       const CommentInfo& otherComment = other.comments_[comment];
       if (otherComment.comment_)
-        comments_[comment].setComment(otherComment.comment_);
+        comments_[comment].setComment(
+            otherComment.comment_, strlen(otherComment.comment_));
     }
   }
 }
@@ -1227,14 +1228,22 @@ bool Value::isArray() const { return type_ == arrayValue; }
 
 bool Value::isObject() const { return type_ == objectValue; }
 
-void Value::setComment(const char* comment, CommentPlacement placement) {
+void Value::setComment(const char* comment, size_t len, CommentPlacement placement) {
   if (!comments_)
     comments_ = new CommentInfo[numberOfCommentPlacement];
-  comments_[placement].setComment(comment);
+  if ((len > 0) && (comment[len-1] == '\n')) {
+    // Always discard trailing newline, to aid indentation.
+    len -= 1;
+  }
+  comments_[placement].setComment(comment, len);
+}
+
+void Value::setComment(const char* comment, CommentPlacement placement) {
+  setComment(comment, strlen(comment), placement);
 }
 
 void Value::setComment(const std::string& comment, CommentPlacement placement) {
-  setComment(comment.c_str(), placement);
+  setComment(comment.c_str(), comment.length(), placement);
 }
 
 bool Value::hasComment(CommentPlacement placement) const {
