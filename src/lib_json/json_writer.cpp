@@ -713,9 +713,11 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
 int BuiltStyledStreamWriter::write(Value const& root)
 {
   addChildValues_ = false;
-  indented_ = false;
+  indented_ = true;
   indentString_ = "";
   writeCommentBeforeValue(root);
+  if (!indented_) writeIndent();
+  indented_ = true;
   writeValue(root);
   writeCommentAfterValueOnSameLine(root);
   sout_ << "\n";
@@ -878,20 +880,17 @@ void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
   if (!root.hasComment(commentBefore))
     return;
 
-  sout_ << "\n";
-  writeIndent();
+  if (!indented_) writeIndent();
   const std::string& comment = root.getComment(commentBefore);
   std::string::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
     sout_ << *iter;
     if (*iter == '\n' &&
        (iter != comment.end() && *(iter + 1) == '/'))
-      writeIndent();
+      // writeIndent();  // would write extra newline
+      sout_ << indentString_;
     ++iter;
   }
-
-  // Comments are stripped of trailing newlines, so add one here
-  sout_ << "\n";
   indented_ = false;
 }
 
@@ -900,9 +899,8 @@ void BuiltStyledStreamWriter::writeCommentAfterValueOnSameLine(Value const& root
     sout_ << " " + root.getComment(commentAfterOnSameLine);
 
   if (root.hasComment(commentAfter)) {
-    sout_ << "\n";
+    writeIndent();
     sout_ << root.getComment(commentAfter);
-    sout_ << "\n";
   }
 }
 
