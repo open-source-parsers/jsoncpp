@@ -944,11 +944,17 @@ class StreamWriterBuilder {
   CommentStyle cs_;
   std::string indentation_;
 public:
+  StreamWriterBuilder();
   virtual ~StreamWriterBuilder();
   virtual void setCommentStyle(CommentStyle cs);
   virtual void setIndentation(std::string indentation);
   virtual StreamWriter* newStreamWriter(std::ostream* sout) const;
 };
+StreamWriterBuilder::StreamWriterBuilder()
+  : cs_(CommentStyle::All)
+  , indentation_("\t")
+{
+}
 StreamWriterBuilder::~StreamWriterBuilder()
 {
 }
