@@ -7,13 +7,14 @@
 #include <json/writer.h>
 #include "json_tool.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
+#include <iomanip>
+#include <memory>
+#include <sstream>
 #include <utility>
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include <sstream>
-#include <iomanip>
-#include <math.h>
 
 #if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
 #include <float.h>
@@ -664,9 +665,442 @@ bool StyledStreamWriter::hasCommentForValue(const Value& value) {
          value.hasComment(commentAfter);
 }
 
-std::ostream& operator<<(std::ostream& sout, const Value& root) {
-  Json::StyledStreamWriter writer;
-  writer.write(sout, root);
+//////////////////////////
+// BuiltStyledStreamWriter
+
+struct BuiltStyledStreamWriter : public StreamWriter
+{
+  BuiltStyledStreamWriter(
+      std::ostream* sout,
+      std::string const& indentation,
+      StreamWriter::CommentStyle cs,
+      std::string const& colonSymbol,
+      std::string const& nullSymbol,
+      std::string const& endingLineFeedSymbol);
+  virtual int write(Value const& root);
+private:
+  void writeValue(Value const& value);
+  void writeArrayValue(Value const& value);
+  bool isMultineArray(Value const& value);
+  void pushValue(std::string const& value);
+  void writeIndent();
+  void writeWithIndent(std::string const& value);
+  void indent();
+  void unindent();
+  void writeCommentBeforeValue(Value const& root);
+  void writeCommentAfterValueOnSameLine(Value const& root);
+  static bool hasCommentForValue(const Value& value);
+
+  typedef std::vector<std::string> ChildValues;
+
+  ChildValues childValues_;
+  std::string indentString_;
+  int rightMargin_;
+  std::string indentation_;
+  CommentStyle cs_;
+  std::string colonSymbol_;
+  std::string nullSymbol_;
+  std::string endingLineFeedSymbol_;
+  bool addChildValues_ : 1;
+  bool indented_ : 1;
+};
+BuiltStyledStreamWriter::BuiltStyledStreamWriter(
+      std::ostream* sout,
+      std::string const& indentation,
+      StreamWriter::CommentStyle cs,
+      std::string const& colonSymbol,
+      std::string const& nullSymbol,
+      std::string const& endingLineFeedSymbol)
+  : StreamWriter(sout)
+  , rightMargin_(74)
+  , indentation_(indentation)
+  , cs_(cs)
+  , colonSymbol_(colonSymbol)
+  , nullSymbol_(nullSymbol)
+  , endingLineFeedSymbol_(endingLineFeedSymbol)
+  , addChildValues_(false)
+  , indented_(false)
+{
+}
+int BuiltStyledStreamWriter::write(Value const& root)
+{
+  addChildValues_ = false;
+  indented_ = true;
+  indentString_ = "";
+  writeCommentBeforeValue(root);
+  if (!indented_) writeIndent();
+  indented_ = true;
+  writeValue(root);
+  writeCommentAfterValueOnSameLine(root);
+  sout_ << endingLineFeedSymbol_;
+  return 0;
+}
+void BuiltStyledStreamWriter::writeValue(Value const& value) {
+  switch (value.type()) {
+  case nullValue:
+    pushValue(nullSymbol_);
+    break;
+  case intValue:
+    pushValue(valueToString(value.asLargestInt()));
+    break;
+  case uintValue:
+    pushValue(valueToString(value.asLargestUInt()));
+    break;
+  case realValue:
+    pushValue(valueToString(value.asDouble()));
+    break;
+  case stringValue:
+    pushValue(valueToQuotedString(value.asCString()));
+    break;
+  case booleanValue:
+    pushValue(valueToString(value.asBool()));
+    break;
+  case arrayValue:
+    writeArrayValue(value);
+    break;
+  case objectValue: {
+    Value::Members members(value.getMemberNames());
+    if (members.empty())
+      pushValue("{}");
+    else {
+      writeWithIndent("{");
+      indent();
+      Value::Members::iterator it = members.begin();
+      for (;;) {
+        std::string const& name = *it;
+        Value const& childValue = value[name];
+        writeCommentBeforeValue(childValue);
+        writeWithIndent(valueToQuotedString(name.c_str()));
+        sout_ << colonSymbol_;
+        writeValue(childValue);
+        if (++it == members.end()) {
+          writeCommentAfterValueOnSameLine(childValue);
+          break;
+        }
+        sout_ << ",";
+        writeCommentAfterValueOnSameLine(childValue);
+      }
+      unindent();
+      writeWithIndent("}");
+    }
+  } break;
+  }
+}
+
+void BuiltStyledStreamWriter::writeArrayValue(Value const& value) {
+  unsigned size = value.size();
+  if (size == 0)
+    pushValue("[]");
+  else {
+    bool isMultiLine = (cs_ == CommentStyle::All) || isMultineArray(value);
+    if (isMultiLine) {
+      writeWithIndent("[");
+      indent();
+      bool hasChildValue = !childValues_.empty();
+      unsigned index = 0;
+      for (;;) {
+        Value const& childValue = value[index];
+        writeCommentBeforeValue(childValue);
+        if (hasChildValue)
+          writeWithIndent(childValues_[index]);
+        else {
+          if (!indented_) writeIndent();
+          indented_ = true;
+          writeValue(childValue);
+          indented_ = false;
+        }
+        if (++index == size) {
+          writeCommentAfterValueOnSameLine(childValue);
+          break;
+        }
+        sout_ << ",";
+        writeCommentAfterValueOnSameLine(childValue);
+      }
+      unindent();
+      writeWithIndent("]");
+    } else // output on a single line
+    {
+      assert(childValues_.size() == size);
+      sout_ << "[";
+      if (!indentation_.empty()) sout_ << " ";
+      for (unsigned index = 0; index < size; ++index) {
+        if (index > 0)
+          sout_ << ", ";
+        sout_ << childValues_[index];
+      }
+      if (!indentation_.empty()) sout_ << " ";
+      sout_ << "]";
+    }
+  }
+}
+
+bool BuiltStyledStreamWriter::isMultineArray(Value const& value) {
+  int size = value.size();
+  bool isMultiLine = size * 3 >= rightMargin_;
+  childValues_.clear();
+  for (int index = 0; index < size && !isMultiLine; ++index) {
+    Value const& childValue = value[index];
+    isMultiLine =
+        isMultiLine || ((childValue.isArray() || childValue.isObject()) &&
+                        childValue.size() > 0);
+  }
+  if (!isMultiLine) // check if line length > max line length
+  {
+    childValues_.reserve(size);
+    addChildValues_ = true;
+    int lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
+    for (int index = 0; index < size; ++index) {
+      if (hasCommentForValue(value[index])) {
+        isMultiLine = true;
+      }
+      writeValue(value[index]);
+      lineLength += int(childValues_[index].length());
+    }
+    addChildValues_ = false;
+    isMultiLine = isMultiLine || lineLength >= rightMargin_;
+  }
+  return isMultiLine;
+}
+
+void BuiltStyledStreamWriter::pushValue(std::string const& value) {
+  if (addChildValues_)
+    childValues_.push_back(value);
+  else
+    sout_ << value;
+}
+
+void BuiltStyledStreamWriter::writeIndent() {
+  // blep intended this to look at the so-far-written string
+  // to determine whether we are already indented, but
+  // with a stream we cannot do that. So we rely on some saved state.
+  // The caller checks indented_.
+
+  if (!indentation_.empty()) {
+    // In this case, drop newlines too.
+    sout_ << '\n' << indentString_;
+  }
+}
+
+void BuiltStyledStreamWriter::writeWithIndent(std::string const& value) {
+  if (!indented_) writeIndent();
+  sout_ << value;
+  indented_ = false;
+}
+
+void BuiltStyledStreamWriter::indent() { indentString_ += indentation_; }
+
+void BuiltStyledStreamWriter::unindent() {
+  assert(indentString_.size() >= indentation_.size());
+  indentString_.resize(indentString_.size() - indentation_.size());
+}
+
+void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
+  if (cs_ == CommentStyle::None) return;
+  if (!root.hasComment(commentBefore))
+    return;
+
+  if (!indented_) writeIndent();
+  const std::string& comment = root.getComment(commentBefore);
+  std::string::const_iterator iter = comment.begin();
+  while (iter != comment.end()) {
+    sout_ << *iter;
+    if (*iter == '\n' &&
+       (iter != comment.end() && *(iter + 1) == '/'))
+      // writeIndent();  // would write extra newline
+      sout_ << indentString_;
+    ++iter;
+  }
+  indented_ = false;
+}
+
+void BuiltStyledStreamWriter::writeCommentAfterValueOnSameLine(Value const& root) {
+  if (cs_ == CommentStyle::None) return;
+  if (root.hasComment(commentAfterOnSameLine))
+    sout_ << " " + root.getComment(commentAfterOnSameLine);
+
+  if (root.hasComment(commentAfter)) {
+    writeIndent();
+    sout_ << root.getComment(commentAfter);
+  }
+}
+
+// static
+bool BuiltStyledStreamWriter::hasCommentForValue(const Value& value) {
+  return value.hasComment(commentBefore) ||
+         value.hasComment(commentAfterOnSameLine) ||
+         value.hasComment(commentAfter);
+}
+
+///////////////
+// StreamWriter
+
+StreamWriter::StreamWriter(std::ostream* sout)
+    : sout_(*sout)
+{
+}
+StreamWriter::~StreamWriter()
+{
+}
+struct MyStreamWriter : public StreamWriter {
+public:
+  MyStreamWriter(std::ostream* sout);
+  virtual ~MyStreamWriter();
+  virtual int write(Value const& root) = 0;
+};
+MyStreamWriter::MyStreamWriter(std::ostream* sout)
+    : StreamWriter(sout)
+{
+}
+MyStreamWriter::~MyStreamWriter()
+{
+}
+int MyStreamWriter::write(Value const& root)
+{
+  sout_ << root;
+  return 0;
+}
+class StreamWriterBuilder {
+  typedef StreamWriter::CommentStyle CommentStyle;
+  CommentStyle cs_;
+  std::string indentation_;
+  bool dropNullPlaceholders_;
+  bool omitEndingLineFeed_;
+  bool enableYAMLCompatibility_;
+public:
+  StreamWriterBuilder();
+  virtual ~StreamWriterBuilder();
+  virtual void setCommentStyle(CommentStyle cs);
+  virtual void setIndentation(std::string indentation);
+  virtual void setDropNullPlaceholders(bool v);
+  virtual void setOmitEndingLineFeed(bool v);
+  virtual void setEnableYAMLCompatibility(bool v);
+  virtual StreamWriter* newStreamWriter(std::ostream* sout) const;
+};
+StreamWriterBuilder::StreamWriterBuilder()
+  : cs_(CommentStyle::All)
+  , indentation_("\t")
+  , dropNullPlaceholders_(false)
+  , omitEndingLineFeed_(false)
+  , enableYAMLCompatibility_(false)
+{
+}
+StreamWriterBuilder::~StreamWriterBuilder()
+{
+}
+void StreamWriterBuilder::setCommentStyle(CommentStyle v)
+{
+  cs_ = v;
+}
+void StreamWriterBuilder::setIndentation(std::string v)
+{
+  indentation_ = v;
+  if (indentation_.empty()) cs_ = CommentStyle::None;
+}
+void StreamWriterBuilder::setDropNullPlaceholders(bool v)
+{
+  dropNullPlaceholders_ = v;
+}
+void StreamWriterBuilder::setOmitEndingLineFeed(bool v)
+{
+  omitEndingLineFeed_ = v;
+}
+void StreamWriterBuilder::setEnableYAMLCompatibility(bool v)
+{
+  enableYAMLCompatibility_ = v;
+}
+StreamWriter* StreamWriterBuilder::newStreamWriter(std::ostream* stream) const
+{
+  std::string colonSymbol = " : ";
+  if (indentation_.empty()) {
+    if (enableYAMLCompatibility_) {
+      colonSymbol = ": ";
+    } else {
+      colonSymbol = ":";
+    }
+  }
+  std::string nullSymbol = "null";
+  if (dropNullPlaceholders_) {
+    nullSymbol = "";
+  }
+  std::string endingLineFeedSymbol = "\n";
+  if (omitEndingLineFeed_) {
+    endingLineFeedSymbol = "";
+  }
+  return new BuiltStyledStreamWriter(stream,
+      indentation_, cs_,
+      colonSymbol, nullSymbol, endingLineFeedSymbol);
+}
+
+// This might become public someday.
+class StreamWriterBuilderFactory {
+public:
+  virtual ~StreamWriterBuilderFactory();
+  virtual StreamWriterBuilder* newStreamWriterBuilder() const;
+};
+StreamWriterBuilderFactory::~StreamWriterBuilderFactory()
+{
+}
+StreamWriterBuilder* StreamWriterBuilderFactory::newStreamWriterBuilder() const
+{
+  return new StreamWriterBuilder;
+}
+
+StreamWriter::Builder::Builder()
+    : own_(StreamWriterBuilderFactory().newStreamWriterBuilder())
+{
+}
+StreamWriter::Builder::~Builder()
+{
+  delete own_;
+}
+StreamWriter::Builder::Builder(Builder const&)
+  : own_(nullptr)
+{abort();}
+void StreamWriter::Builder::operator=(Builder const&)
+{abort();}
+StreamWriter::Builder& StreamWriter::Builder::withCommentStyle(CommentStyle v)
+{
+  own_->setCommentStyle(v);
+  return *this;
+}
+StreamWriter::Builder& StreamWriter::Builder::withIndentation(std::string v)
+{
+  own_->setIndentation(v);
+  return *this;
+}
+StreamWriter::Builder& StreamWriter::Builder::withDropNullPlaceholders(bool v)
+{
+  own_->setDropNullPlaceholders(v);
+  return *this;
+}
+StreamWriter::Builder& StreamWriter::Builder::withOmitEndingLineFeed(bool v)
+{
+  own_->setOmitEndingLineFeed(v);
+  return *this;
+}
+StreamWriter::Builder& StreamWriter::Builder::withEnableYAMLCompatibility(bool v)
+{
+  own_->setEnableYAMLCompatibility(v);
+  return *this;
+}
+StreamWriter* StreamWriter::Builder::newStreamWriter(std::ostream* sout) const
+{
+  return own_->newStreamWriter(sout);
+}
+
+std::string writeString(Value const& root, StreamWriter::Builder const& builder) {
+  std::ostringstream sout;
+  std::unique_ptr<StreamWriter> const sw(builder.newStreamWriter(&sout));
+  sw->write(root);
+  return sout.str();
+}
+
+std::ostream& operator<<(std::ostream& sout, Value const& root) {
+  StreamWriter::Builder builder;
+  builder.withCommentStyle(StreamWriter::CommentStyle::All);
+  builder.withIndentation("\t");
+  std::shared_ptr<StreamWriter> writer(builder.newStreamWriter(&sout));
+  writer->write(root);
   return sout;
 }
 

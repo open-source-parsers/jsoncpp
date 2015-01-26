@@ -22,8 +22,88 @@
 namespace Json {
 
 class Value;
+class StreamWriterBuilder;
+
+/**
+
+Usage:
+
+  using namespace Json;
+  Value value;
+  StreamWriter::Builder builder;
+  builder.withCommentStyle(StreamWriter::CommentStyle::None);
+  std::shared_ptr<StreamWriter> writer(
+    builder.newStreamWriter(&std::cout));
+  writer->write(value);
+  std::cout.flush();
+*/
+class JSON_API StreamWriter {
+protected:
+  std::ostream& sout_;  // not owned; will not delete
+public:
+  /// `All`: Keep all comments.
+  /// `None`: Drop all comments.
+  /// Use `Most` to recover the odd behavior of previous versions.
+  /// Only `All` is currently implemented.
+  enum class CommentStyle {None, Most, All};
+
+  /// Keep a reference, but do not take ownership of `sout`.
+  StreamWriter(std::ostream* sout);
+  virtual ~StreamWriter();
+  /// Write Value into document as configured in sub-class.
+  /// \return zero on success
+  /// \throw std::exception possibly, depending on configuration
+  virtual int write(Value const& root) = 0;
+
+  /// Because this Builder is non-virtual, we can safely add
+  /// methods without a major version bump.
+  /// \see http://stackoverflow.com/questions/14875052/pure-virtual-functions-and-binary-compatibility
+  class Builder {
+    StreamWriterBuilder* own_;
+    Builder(Builder const&);  // noncopyable
+    void operator=(Builder const&);  // noncopyable
+  public:
+    Builder();
+    ~Builder();  // delete underlying StreamWriterBuilder
+
+    Builder& withCommentStyle(CommentStyle cs);  /// default: All
+    /** \brief Write in human-friendly style.
+
+        If "", then skip all indentation, newlines, and comments,
+        which implies CommentStyle::None.
+        Default: "\t"
+    */
+    Builder& withIndentation(std::string indentation);
+    /** \brief Drop the "null" string from the writer's output for nullValues.
+    * Strictly speaking, this is not valid JSON. But when the output is being
+    * fed to a browser's Javascript, it makes for smaller output and the
+    * browser can handle the output just fine.
+    */
+    Builder& withDropNullPlaceholders(bool v);
+    /** \brief Do not add \n at end of document.
+     * Normally, we add an extra newline, just because.
+     */
+    Builder& withOmitEndingLineFeed(bool v);
+    /** \brief Add a space after ':'.
+     * If indentation is non-empty, we surround colon with whitespace,
+     * e.g. " : "
+     * This will add back the trailing space when there is no indentation.
+     * This seems dubious when the entire document is on a single line,
+     * but we leave this here to repduce the behavior of the old `FastWriter`.
+     */
+    Builder& withEnableYAMLCompatibility(bool v);
+
+    /// Do not take ownership of sout, but maintain a reference.
+    StreamWriter* newStreamWriter(std::ostream* sout) const;
+  };
+};
+
+/// \brief Write into stringstream, then return string, for convenience.
+std::string writeString(Value const& root, StreamWriter::Builder const& builder);
+
 
 /** \brief Abstract class for writers.
+ * \deprecated Use StreamWriter::Builder.
  */
 class JSON_API Writer {
 public:
@@ -39,6 +119,7 @@ public:
  *consumption,
  * but may be usefull to support feature such as RPC where bandwith is limited.
  * \sa Reader, Value
+ * \deprecated Use StreamWriter::Builder.
  */
 class JSON_API FastWriter : public Writer {
 public:
@@ -90,6 +171,7 @@ private:
  *#CommentPlacement.
  *
  * \sa Reader, Value, Value::setComment()
+ * \deprecated Use StreamWriter::Builder.
  */
 class JSON_API StyledWriter : public Writer {
 public:
@@ -151,6 +233,7 @@ private:
  *
  * \param indentation Each level will be indented by this amount extra.
  * \sa Reader, Value, Value::setComment()
+ * \deprecated Use StreamWriter::Builder.
  */
 class JSON_API StyledStreamWriter {
 public:

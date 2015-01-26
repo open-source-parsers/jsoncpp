@@ -151,7 +151,6 @@ static int parseAndSaveValueTree(const std::string& input,
            reader.getFormattedErrorMessages().c_str());
     return 1;
   }
-
   if (!parseOnly) {
     FILE* factual = fopen(actual.c_str(), "wt");
     if (!factual) {
@@ -181,6 +180,13 @@ static std::string useStyledStreamWriter(
   std::ostringstream sout;
   writer.write(sout, root);
   return sout.str();
+}
+static std::string useBuiltStyledStreamWriter(
+    Json::Value const& root)
+{
+  Json::StreamWriter::Builder builder;
+  builder.withCommentStyle(Json::StreamWriter::CommentStyle::All);
+  return writeString(root, builder);
 }
 static int rewriteValueTree(
     const std::string& rewritePath,
@@ -248,6 +254,8 @@ static int parseCommandLine(
       opts->write = &useStyledWriter;
     } else if (writerName == "StyledStreamWriter") {
       opts->write = &useStyledStreamWriter;
+    } else if (writerName == "BuiltStyledStreamWriter") {
+      opts->write = &useBuiltStyledStreamWriter;
     } else {
       printf("Unknown '--json-writer %s'\n", writerName.c_str());
       return 4;

@@ -73,24 +73,31 @@ for ( int index = 0; index < plugins.size(); ++index )  // Iterates over the seq
 setIndentLength( root["indent"].get("length", 3).asInt() );
 setIndentUseSpace( root["indent"].get("use_space", true).asBool() );
 
-// ...
-// At application shutdown to make the new configuration document:
 // Since Json::Value has implicit constructor for all value types, it is not
 // necessary to explicitly construct the Json::Value object:
 root["encoding"] = getCurrentEncoding();
 root["indent"]["length"] = getCurrentIndentLength();
 root["indent"]["use_space"] = getCurrentIndentUseSpace();
 
-Json::StyledWriter writer;
-// Make a new JSON document for the configuration. Preserve original comments.
-std::string outputConfig = writer.write( root );
+// To write into a steam with minimal memory overhead,
+// create a Builder for a StreamWriter.
+Json::StreamWriter::Builder builder;
+builder.withIndentation("   ");  // or whatever you like
 
-// You can also use streams.  This will put the contents of any JSON
+// Then build a StreamWriter.
+// (Of course, you can write to std::ostringstream if you prefer.)
+std::shared_ptr<Json::StreamWriter> writer(
+    builder.newStreamWriter( &std::cout );
+
+// Make a new JSON document for the configuration. Preserve original comments.
+writer->write( root );
+
+// If you like the defaults, you can insert directly into a stream.
+std::cout << root;
+
+// You can also read from a stream.  This will put the contents of any JSON
 // stream at a particular sub-value, if you'd like.
 std::cin >> root["subtree"];
-
-// And you can write to a stream, using the StyledWriter automatically.
-std::cout << root;
 \endcode
 
 \section _pbuild Build instructions
