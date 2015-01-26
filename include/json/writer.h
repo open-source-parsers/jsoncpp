@@ -11,6 +11,7 @@
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <vector>
 #include <string>
+#include <ostream>
 
 // Disable warning C4251: <data member>: <type> needs to have dll-interface to
 // be used by...
@@ -60,7 +61,7 @@ public:
   /// Because this Builder is non-virtual, we can safely add
   /// methods without a major version bump.
   /// \see http://stackoverflow.com/questions/14875052/pure-virtual-functions-and-binary-compatibility
-  class Builder {
+  class JSON_API Builder {
     StreamWriterBuilder* own_;
     Builder(Builder const&);  // noncopyable
     void operator=(Builder const&);  // noncopyable
@@ -98,11 +99,81 @@ public:
     /// Do not take ownership of sout, but maintain a reference.
     StreamWriter* newStreamWriter(std::ostream* sout) const;
   };
+
+  /** \brief A simple abstract factory.
+   */
+  class JSON_API Factory {
+  public:
+    virtual ~Factory();
+    /* Because this is only a trivial API (the Factory pattern), we will
+     * never need to add virtual methods, so we do not need a concrete wrapper.
+     * This is better than the Builder above, but not everyone will agree.
+     */
+
+    /// Do not take ownership of sout, but maintain a reference.
+    virtual StreamWriter* newStreamWriter(std::ostream* sout) const = 0;
+  };
+
+  /** \brief Extensions of this are used to create a StreamWriter::Factory.
+   */
+  class JSON_API FactoryFactory {
+    virtual ~FactoryFactory();
+    virtual Factory* newFactory() const = 0;
+    /* This class will seem strange to some developers, but it actually
+     * simplifies our library maintenance.
+     */
+  };
+
 };
 
 /// \brief Write into stringstream, then return string, for convenience.
 std::string writeString(Value const& root, StreamWriter::Builder const& builder);
 
+/** \brief Build a StreamWriter implementation.
+ * Comments are not written, and most whitespace is omitted.
+ * In addition, there are some special settings to allow compatibility
+ * with the old FastWriter.
+ * Usage:
+ * \code
+ *   OldCompressingStreamWriterBuilder b;
+ *   b.dropNullPlaceHolders_ = true; // etc.
+ *   StreamWriter* w = b.newStreamWriter(&std::cout);
+ *   w.write(value);
+ *   delete w;
+ * \endcode
+ */
+class JSON_API OldCompressingStreamWriterBuilder
+{
+public:
+  // Note: We cannot add data-members to this class without a major version bump.
+  // So these might as well be completely exposed.
+
+  /** \brief Drop the "null" string from the writer's output for nullValues.
+  * Strictly speaking, this is not valid JSON. But when the output is being
+  * fed to a browser's Javascript, it makes for smaller output and the
+  * browser can handle the output just fine.
+  */
+  bool dropNullPlaceholders_;
+  /** \brief Do not add \n at end of document.
+    * Normally, we add an extra newline, just because.
+    */
+  bool omitEndingLineFeed_;
+  /** \brief Add a space after ':'.
+    * If indentation is non-empty, we surround colon with whitespace,
+    * e.g. " : "
+    * This will add back the trailing space when there is no indentation.
+    * This seems dubious when the entire document is on a single line,
+    * but we leave this here to repduce the behavior of the old `FastWriter`.
+    */
+  bool enableYAMLCompatibility_;
+
+  OldCompressingStreamWriterBuilder()
+    : dropNullPlaceholders_(false)
+    , omitEndingLineFeed_(false)
+    , enableYAMLCompatibility_(false)
+  {}
+  virtual StreamWriter* newStreamWriter(std::ostream*) const;
+};
 
 /** \brief Abstract class for writers.
  * \deprecated Use StreamWriter::Builder.

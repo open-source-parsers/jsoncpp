@@ -1083,9 +1083,32 @@ StreamWriter::Builder& StreamWriter::Builder::withEnableYAMLCompatibility(bool v
   own_->setEnableYAMLCompatibility(v);
   return *this;
 }
-StreamWriter* StreamWriter::Builder::newStreamWriter(std::ostream* sout) const
+StreamWriter* StreamWriter::Builder::newStreamWriter(
+    std::ostream* sout) const
 {
   return own_->newStreamWriter(sout);
+}
+
+StreamWriter* OldCompressingStreamWriterBuilder::newStreamWriter(
+    std::ostream* stream) const
+{
+  std::string colonSymbol = " : ";
+  if (enableYAMLCompatibility_) {
+    colonSymbol = ": ";
+  } else {
+    colonSymbol = ":";
+  }
+  std::string nullSymbol = "null";
+  if (dropNullPlaceholders_) {
+    nullSymbol = "";
+  }
+  std::string endingLineFeedSymbol = "\n";
+  if (omitEndingLineFeed_) {
+    endingLineFeedSymbol = "";
+  }
+  return new BuiltStyledStreamWriter(stream,
+      "", StreamWriter::CommentStyle::None,
+      colonSymbol, nullSymbol, endingLineFeedSymbol);
 }
 
 std::string writeString(Value const& root, StreamWriter::Builder const& builder) {
