@@ -1058,25 +1058,30 @@ StreamWriter::Builder::Builder(Builder const&)
 {abort();}
 void StreamWriter::Builder::operator=(Builder const&)
 {abort();}
-void StreamWriter::Builder::setCommentStyle(CommentStyle v)
+StreamWriter::Builder& StreamWriter::Builder::withCommentStyle(CommentStyle v)
 {
   own_->setCommentStyle(v);
+  return *this;
 }
-void StreamWriter::Builder::setIndentation(std::string v)
+StreamWriter::Builder& StreamWriter::Builder::withIndentation(std::string v)
 {
   own_->setIndentation(v);
+  return *this;
 }
-void StreamWriter::Builder::setDropNullPlaceholders(bool v)
+StreamWriter::Builder& StreamWriter::Builder::withDropNullPlaceholders(bool v)
 {
   own_->setDropNullPlaceholders(v);
+  return *this;
 }
-void StreamWriter::Builder::setOmitEndingLineFeed(bool v)
+StreamWriter::Builder& StreamWriter::Builder::withOmitEndingLineFeed(bool v)
 {
   own_->setOmitEndingLineFeed(v);
+  return *this;
 }
-void StreamWriter::Builder::setEnableYAMLCompatibility(bool v)
+StreamWriter::Builder& StreamWriter::Builder::withEnableYAMLCompatibility(bool v)
 {
   own_->setEnableYAMLCompatibility(v);
+  return *this;
 }
 StreamWriter* StreamWriter::Builder::newStreamWriter(std::ostream* sout) const
 {
@@ -1092,8 +1097,8 @@ std::string writeString(Value const& root, StreamWriter::Builder const& builder)
 
 std::ostream& operator<<(std::ostream& sout, Value const& root) {
   StreamWriter::Builder builder;
-  builder.setCommentStyle(StreamWriter::CommentStyle::All);
-  builder.setIndentation("\t");
+  builder.withCommentStyle(StreamWriter::CommentStyle::All);
+  builder.withIndentation("\t");
   std::shared_ptr<StreamWriter> writer(builder.newStreamWriter(&sout));
   writer->write(root);
   return sout;

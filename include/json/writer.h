@@ -31,7 +31,7 @@ Usage:
   using namespace Json;
   Value value;
   StreamWriter::Builder builder;
-  builder.setCommentStyle(StreamWriter::CommentStyle::None);
+  builder.withCommentStyle(StreamWriter::CommentStyle::None);
   std::shared_ptr<StreamWriter> writer(
     builder.newStreamWriter(&std::cout));
   writer->write(value);
@@ -66,24 +66,24 @@ public:
     Builder();
     ~Builder();  // delete underlying StreamWriterBuilder
 
-    void setCommentStyle(CommentStyle cs);  /// default: All
+    Builder& withCommentStyle(CommentStyle cs);  /// default: All
     /** \brief Write in human-friendly style.
 
         If "", then skip all indentation, newlines, and comments,
         which implies CommentStyle::None.
         Default: "\t"
     */
-    void setIndentation(std::string indentation);
+    Builder& withIndentation(std::string indentation);
     /** \brief Drop the "null" string from the writer's output for nullValues.
     * Strictly speaking, this is not valid JSON. But when the output is being
     * fed to a browser's Javascript, it makes for smaller output and the
     * browser can handle the output just fine.
     */
-    void setDropNullPlaceholders(bool v);
+    Builder& withDropNullPlaceholders(bool v);
     /** \brief Do not add \n at end of document.
      * Normally, we add an extra newline, just because.
      */
-    void setOmitEndingLineFeed(bool v);
+    Builder& withOmitEndingLineFeed(bool v);
     /** \brief Add a space after ':'.
      * If indentation is non-empty, we surround colon with whitespace,
      * e.g. " : "
@@ -91,7 +91,7 @@ public:
      * This seems dubious when the entire document is on a single line,
      * but we leave this here to repduce the behavior of the old `FastWriter`.
      */
-    void setEnableYAMLCompatibility(bool v);
+    Builder& withEnableYAMLCompatibility(bool v);
 
     /// Do not take ownership of sout, but maintain a reference.
     StreamWriter* newStreamWriter(std::ostream* sout) const;
@@ -103,6 +103,7 @@ std::string writeString(Value const& root, StreamWriter::Builder const& builder)
 
 
 /** \brief Abstract class for writers.
+ * \deprecated Use StreamWriter::Builder.
  */
 class JSON_API Writer {
 public:
@@ -118,6 +119,7 @@ public:
  *consumption,
  * but may be usefull to support feature such as RPC where bandwith is limited.
  * \sa Reader, Value
+ * \deprecated Use StreamWriter::Builder.
  */
 class JSON_API FastWriter : public Writer {
 public:
@@ -169,6 +171,7 @@ private:
  *#CommentPlacement.
  *
  * \sa Reader, Value, Value::setComment()
+ * \deprecated Use StreamWriter::Builder.
  */
 class JSON_API StyledWriter : public Writer {
 public:
@@ -230,6 +233,7 @@ private:
  *
  * \param indentation Each level will be indented by this amount extra.
  * \sa Reader, Value, Value::setComment()
+ * \deprecated Use StreamWriter::Builder.
  */
 class JSON_API StyledStreamWriter {
 public:
