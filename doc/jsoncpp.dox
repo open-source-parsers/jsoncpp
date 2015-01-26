@@ -79,6 +79,7 @@ root["encoding"] = getCurrentEncoding();
 root["indent"]["length"] = getCurrentIndentLength();
 root["indent"]["use_space"] = getCurrentIndentUseSpace();
 
+// (NEW IN 1.4.0)
 // To write into a steam with minimal memory overhead,
 // create a Builder for a StreamWriter.
 Json::StreamWriterBuilder builder;

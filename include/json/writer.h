@@ -29,9 +29,9 @@ class Value;
 Usage:
 \code
   using namespace Json;
-  void writeToStdout(StreamWriter::Builder const& builder, Value const& value) {
+  void writeToStdout(StreamWriter::Factory const& factory, Value const& value) {
     std::unique_ptr<StreamWriter> const writer(
-      builder.newStreamWriter(&std::cout));
+      factory.newStreamWriter(&std::cout));
     writer->write(value);
     std::cout << std::endl;  // add lf and flush
   }
@@ -76,7 +76,7 @@ Usage:
 \code
   using namespace Json;
   Value value = ...;
-  StreamWriter::Builder builder;
+  StreamWriterBuilder builder;
   builder.cs_ = StreamWriter::CommentStyle::None;
   std::shared_ptr<StreamWriter> writer(
     builder.newStreamWriter(&std::cout));
@@ -154,7 +154,7 @@ public:
 };
 
 /** \brief Abstract class for writers.
- * \deprecated Use StreamWriter::Builder.
+ * \deprecated Use StreamWriter.
  */
 class JSON_API Writer {
 public:
@@ -170,7 +170,7 @@ public:
  *consumption,
  * but may be usefull to support feature such as RPC where bandwith is limited.
  * \sa Reader, Value
- * \deprecated Use StreamWriter::Builder.
+ * \deprecated Use OldCompressingStreamWriterBuilder.
  */
 class JSON_API FastWriter : public Writer {
 public:
@@ -222,7 +222,7 @@ private:
  *#CommentPlacement.
  *
  * \sa Reader, Value, Value::setComment()
- * \deprecated Use StreamWriter::Builder.
+ * \deprecated Use StreamWriterBuilder.
  */
 class JSON_API StyledWriter : public Writer {
 public:
@@ -284,7 +284,7 @@ private:
  *
  * \param indentation Each level will be indented by this amount extra.
  * \sa Reader, Value, Value::setComment()
- * \deprecated Use StreamWriter::Builder.
+ * \deprecated Use StreamWriterBuilder.
  */
 class JSON_API StyledStreamWriter {
 public:
