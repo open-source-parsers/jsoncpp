@@ -92,14 +92,16 @@ public:
   /** \brief How to write comments.
    * Default: All
    */
-  StreamWriter::CommentStyle cs_ = StreamWriter::CommentStyle::All;
+  StreamWriter::CommentStyle cs_;
   /** \brief Write in human-friendly style.
 
       If "", then skip all indentation and newlines.
       In that case, you probably want CommentStyle::None also.
       Default: "\t"
   */
-  std::string indentation_ = "\t";
+  std::string indentation_;
+
+  StreamWriterBuilder();
 
   /// Do not take ownership of sout, but maintain a reference.
   StreamWriter* newStreamWriter(std::ostream* sout) const;
