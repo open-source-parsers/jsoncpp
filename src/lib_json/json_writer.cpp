@@ -959,34 +959,8 @@ int MyStreamWriter::write(Value const& root)
   sout_ << root;
   return 0;
 }
-class StreamWriterBuilder {
-  typedef StreamWriter::CommentStyle CommentStyle;
-  CommentStyle cs_;
-  std::string indentation_;
-public:
-  StreamWriterBuilder();
-  virtual ~StreamWriterBuilder();
-  virtual void setCommentStyle(CommentStyle cs);
-  virtual void setIndentation(std::string indentation);
-  virtual StreamWriter* newStreamWriter(std::ostream* sout) const;
-};
-StreamWriterBuilder::StreamWriterBuilder()
-  : cs_(CommentStyle::All)
-  , indentation_("\t")
-{
-}
-StreamWriterBuilder::~StreamWriterBuilder()
-{
-}
-void StreamWriterBuilder::setCommentStyle(CommentStyle v)
-{
-  cs_ = v;
-}
-void StreamWriterBuilder::setIndentation(std::string v)
-{
-  indentation_ = v;
-  if (indentation_.empty()) cs_ = CommentStyle::None;
-}
+StreamWriter::Factory::~Factory()
+{}
 StreamWriter* StreamWriterBuilder::newStreamWriter(std::ostream* stream) const
 {
   std::string colonSymbol = " : ";
@@ -999,7 +973,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter(std::ostream* stream) const
       indentation_, cs_,
       colonSymbol, nullSymbol, endingLineFeedSymbol);
 }
-
+/*
 // This might become public someday.
 class StreamWriterBuilderFactory {
 public:
@@ -1013,35 +987,7 @@ StreamWriterBuilder* StreamWriterBuilderFactory::newStreamWriterBuilder() const
 {
   return new StreamWriterBuilder;
 }
-
-StreamWriter::Builder::Builder()
-    : own_(StreamWriterBuilderFactory().newStreamWriterBuilder())
-{
-}
-StreamWriter::Builder::~Builder()
-{
-  delete own_;
-}
-StreamWriter::Builder::Builder(Builder const&)
-  : own_(nullptr)
-{abort();}
-void StreamWriter::Builder::operator=(Builder const&)
-{abort();}
-StreamWriter::Builder& StreamWriter::Builder::withCommentStyle(CommentStyle v)
-{
-  own_->setCommentStyle(v);
-  return *this;
-}
-StreamWriter::Builder& StreamWriter::Builder::withIndentation(std::string v)
-{
-  own_->setIndentation(v);
-  return *this;
-}
-StreamWriter* StreamWriter::Builder::newStreamWriter(
-    std::ostream* sout) const
-{
-  return own_->newStreamWriter(sout);
-}
+*/
 
 StreamWriter* OldCompressingStreamWriterBuilder::newStreamWriter(
     std::ostream* stream) const
@@ -1065,7 +1011,7 @@ StreamWriter* OldCompressingStreamWriterBuilder::newStreamWriter(
       colonSymbol, nullSymbol, endingLineFeedSymbol);
 }
 
-std::string writeString(Value const& root, StreamWriter::Builder const& builder) {
+std::string writeString(Value const& root, StreamWriter::Factory const& builder) {
   std::ostringstream sout;
   std::unique_ptr<StreamWriter> const sw(builder.newStreamWriter(&sout));
   sw->write(root);
@@ -1073,9 +1019,7 @@ std::string writeString(Value const& root, StreamWriter::Builder const& builder)
 }
 
 std::ostream& operator<<(std::ostream& sout, Value const& root) {
-  StreamWriter::Builder builder;
-  builder.withCommentStyle(StreamWriter::CommentStyle::All);
-  builder.withIndentation("\t");
+  StreamWriterBuilder builder;
   std::shared_ptr<StreamWriter> writer(builder.newStreamWriter(&sout));
   writer->write(root);
   return sout;

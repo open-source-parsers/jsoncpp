@@ -58,58 +58,43 @@ public:
   /// \throw std::exception possibly, depending on configuration
   virtual int write(Value const& root) = 0;
 
-  /// Because this Builder is non-virtual, we can safely add
-  /// methods without a major version bump.
-  /// \see http://stackoverflow.com/questions/14875052/pure-virtual-functions-and-binary-compatibility
-  class JSON_API Builder {
-    StreamWriterBuilder* own_;
-    Builder(Builder const&);  // noncopyable
-    void operator=(Builder const&);  // noncopyable
-  public:
-    Builder();
-    ~Builder();  // delete underlying StreamWriterBuilder
-
-    Builder& withCommentStyle(CommentStyle cs);  /// default: All
-    /** \brief Write in human-friendly style.
-
-        If "", then skip all indentation, newlines, and comments,
-        which implies CommentStyle::None.
-        Default: "\t"
-    */
-    Builder& withIndentation(std::string indentation);
-
-    /// Do not take ownership of sout, but maintain a reference.
-    StreamWriter* newStreamWriter(std::ostream* sout) const;
-  };
-
   /** \brief A simple abstract factory.
    */
   class JSON_API Factory {
   public:
     virtual ~Factory();
-    /* Because this is only a trivial API (the Factory pattern), we will
-     * never need to add virtual methods, so we do not need a concrete wrapper.
-     * This is better than the Builder above, but not everyone will agree.
-     */
-
     /// Do not take ownership of sout, but maintain a reference.
     virtual StreamWriter* newStreamWriter(std::ostream* sout) const = 0;
-  };
-
-  /** \brief Extensions of this are used to create a StreamWriter::Factory.
-   */
-  class JSON_API FactoryFactory {
-    virtual ~FactoryFactory();
-    virtual Factory* newFactory() const = 0;
-    /* This class will seem strange to some developers, but it actually
-     * simplifies our library maintenance.
-     */
-  };
-
-};
+  };  // Factory
+};  // StreamWriter
 
 /// \brief Write into stringstream, then return string, for convenience.
-std::string writeString(Value const& root, StreamWriter::Builder const& builder);
+std::string writeString(Value const& root, StreamWriter::Factory const& factory);
+
+
+/** \brief Build a StreamWriter implementation.
+ */
+class JSON_API StreamWriterBuilder : public StreamWriter::Factory {
+  // typedef StreamWriter::CommentStyle CommentStyle;
+public:
+  // Note: We cannot add data-members to this class without a major version bump.
+  // So these might as well be completely exposed.
+
+  /** \brief How to write comments.
+   * Default: All
+   */
+  StreamWriter::CommentStyle cs_ = StreamWriter::CommentStyle::All;
+  /** \brief Write in human-friendly style.
+
+      If "", then skip all indentation and newlines.
+      In that case, you probably want CommentStyle::None also.
+      Default: "\t"
+  */
+  std::string indentation_ = "\t";
+
+  /// Do not take ownership of sout, but maintain a reference.
+  StreamWriter* newStreamWriter(std::ostream* sout) const;
+};
 
 /** \brief Build a StreamWriter implementation.
  * Comments are not written, and most whitespace is omitted.
@@ -124,7 +109,7 @@ std::string writeString(Value const& root, StreamWriter::Builder const& builder)
  *   delete w;
  * \endcode
  */
-class JSON_API OldCompressingStreamWriterBuilder
+class JSON_API OldCompressingStreamWriterBuilder : public StreamWriter::Factory
 {
 public:
   // Note: We cannot add data-members to this class without a major version bump.
