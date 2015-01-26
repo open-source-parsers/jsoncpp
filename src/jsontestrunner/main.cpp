@@ -184,8 +184,7 @@ static std::string useStyledStreamWriter(
 static std::string useBuiltStyledStreamWriter(
     Json::Value const& root)
 {
-  Json::StreamWriter::Builder builder;
-  builder.withCommentStyle(Json::StreamWriter::CommentStyle::All);
+  Json::StreamWriterBuilder builder;
   return writeString(root, builder);
 }
 static int rewriteValueTree(

@@ -959,78 +959,25 @@ int MyStreamWriter::write(Value const& root)
   sout_ << root;
   return 0;
 }
-class StreamWriterBuilder {
-  typedef StreamWriter::CommentStyle CommentStyle;
-  CommentStyle cs_;
-  std::string indentation_;
-  bool dropNullPlaceholders_;
-  bool omitEndingLineFeed_;
-  bool enableYAMLCompatibility_;
-public:
-  StreamWriterBuilder();
-  virtual ~StreamWriterBuilder();
-  virtual void setCommentStyle(CommentStyle cs);
-  virtual void setIndentation(std::string indentation);
-  virtual void setDropNullPlaceholders(bool v);
-  virtual void setOmitEndingLineFeed(bool v);
-  virtual void setEnableYAMLCompatibility(bool v);
-  virtual StreamWriter* newStreamWriter(std::ostream* sout) const;
-};
+StreamWriter::Factory::~Factory()
+{}
 StreamWriterBuilder::StreamWriterBuilder()
-  : cs_(CommentStyle::All)
+  : cs_(StreamWriter::CommentStyle::All)
   , indentation_("\t")
-  , dropNullPlaceholders_(false)
-  , omitEndingLineFeed_(false)
-  , enableYAMLCompatibility_(false)
-{
-}
-StreamWriterBuilder::~StreamWriterBuilder()
-{
-}
-void StreamWriterBuilder::setCommentStyle(CommentStyle v)
-{
-  cs_ = v;
-}
-void StreamWriterBuilder::setIndentation(std::string v)
-{
-  indentation_ = v;
-  if (indentation_.empty()) cs_ = CommentStyle::None;
-}
-void StreamWriterBuilder::setDropNullPlaceholders(bool v)
-{
-  dropNullPlaceholders_ = v;
-}
-void StreamWriterBuilder::setOmitEndingLineFeed(bool v)
-{
-  omitEndingLineFeed_ = v;
-}
-void StreamWriterBuilder::setEnableYAMLCompatibility(bool v)
-{
-  enableYAMLCompatibility_ = v;
-}
+{}
 StreamWriter* StreamWriterBuilder::newStreamWriter(std::ostream* stream) const
 {
   std::string colonSymbol = " : ";
   if (indentation_.empty()) {
-    if (enableYAMLCompatibility_) {
-      colonSymbol = ": ";
-    } else {
-      colonSymbol = ":";
-    }
+    colonSymbol = ":";
   }
   std::string nullSymbol = "null";
-  if (dropNullPlaceholders_) {
-    nullSymbol = "";
-  }
-  std::string endingLineFeedSymbol = "\n";
-  if (omitEndingLineFeed_) {
-    endingLineFeedSymbol = "";
-  }
+  std::string endingLineFeedSymbol = "";
   return new BuiltStyledStreamWriter(stream,
       indentation_, cs_,
       colonSymbol, nullSymbol, endingLineFeedSymbol);
 }
-
+/*
 // This might become public someday.
 class StreamWriterBuilderFactory {
 public:
@@ -1044,51 +991,31 @@ StreamWriterBuilder* StreamWriterBuilderFactory::newStreamWriterBuilder() const
 {
   return new StreamWriterBuilder;
 }
+*/
 
-StreamWriter::Builder::Builder()
-    : own_(StreamWriterBuilderFactory().newStreamWriterBuilder())
+StreamWriter* OldCompressingStreamWriterBuilder::newStreamWriter(
+    std::ostream* stream) const
 {
-}
-StreamWriter::Builder::~Builder()
-{
-  delete own_;
-}
-StreamWriter::Builder::Builder(Builder const&)
-  : own_(nullptr)
-{abort();}
-void StreamWriter::Builder::operator=(Builder const&)
-{abort();}
-StreamWriter::Builder& StreamWriter::Builder::withCommentStyle(CommentStyle v)
-{
-  own_->setCommentStyle(v);
-  return *this;
-}
-StreamWriter::Builder& StreamWriter::Builder::withIndentation(std::string v)
-{
-  own_->setIndentation(v);
-  return *this;
-}
-StreamWriter::Builder& StreamWriter::Builder::withDropNullPlaceholders(bool v)
-{
-  own_->setDropNullPlaceholders(v);
-  return *this;
-}
-StreamWriter::Builder& StreamWriter::Builder::withOmitEndingLineFeed(bool v)
-{
-  own_->setOmitEndingLineFeed(v);
-  return *this;
-}
-StreamWriter::Builder& StreamWriter::Builder::withEnableYAMLCompatibility(bool v)
-{
-  own_->setEnableYAMLCompatibility(v);
-  return *this;
-}
-StreamWriter* StreamWriter::Builder::newStreamWriter(std::ostream* sout) const
-{
-  return own_->newStreamWriter(sout);
+  std::string colonSymbol = " : ";
+  if (enableYAMLCompatibility_) {
+    colonSymbol = ": ";
+  } else {
+    colonSymbol = ":";
+  }
+  std::string nullSymbol = "null";
+  if (dropNullPlaceholders_) {
+    nullSymbol = "";
+  }
+  std::string endingLineFeedSymbol = "\n";
+  if (omitEndingLineFeed_) {
+    endingLineFeedSymbol = "";
+  }
+  return new BuiltStyledStreamWriter(stream,
+      "", StreamWriter::CommentStyle::None,
+      colonSymbol, nullSymbol, endingLineFeedSymbol);
 }
 
-std::string writeString(Value const& root, StreamWriter::Builder const& builder) {
+std::string writeString(Value const& root, StreamWriter::Factory const& builder) {
   std::ostringstream sout;
   std::unique_ptr<StreamWriter> const sw(builder.newStreamWriter(&sout));
   sw->write(root);
@@ -1096,9 +1023,7 @@ std::string writeString(Value const& root, StreamWriter::Builder const& builder)
 }
 
 std::ostream& operator<<(std::ostream& sout, Value const& root) {
-  StreamWriter::Builder builder;
-  builder.withCommentStyle(StreamWriter::CommentStyle::All);
-  builder.withIndentation("\t");
+  StreamWriterBuilder builder;
   std::shared_ptr<StreamWriter> writer(builder.newStreamWriter(&sout));
   writer->write(root);
   return sout;

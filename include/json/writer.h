@@ -11,6 +11,7 @@
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <vector>
 #include <string>
+#include <ostream>
 
 // Disable warning C4251: <data member>: <type> needs to have dll-interface to
 // be used by...
@@ -22,20 +23,18 @@
 namespace Json {
 
 class Value;
-class StreamWriterBuilder;
 
 /**
 
 Usage:
 \code
   using namespace Json;
-  Value value;
-  StreamWriter::Builder builder;
-  builder.withCommentStyle(StreamWriter::CommentStyle::None);
-  std::shared_ptr<StreamWriter> writer(
-    builder.newStreamWriter(&std::cout));
-  writer->write(value);
-  std::cout.flush();
+  void writeToStdout(StreamWriter::Builder const& builder, Value const& value) {
+    std::unique_ptr<StreamWriter> const writer(
+      builder.newStreamWriter(&std::cout));
+    writer->write(value);
+    std::cout << std::endl;  // add lf and flush
+  }
 \endcode
 */
 class JSON_API StreamWriter {
@@ -57,52 +56,102 @@ public:
   /// \throw std::exception possibly, depending on configuration
   virtual int write(Value const& root) = 0;
 
-  /// Because this Builder is non-virtual, we can safely add
-  /// methods without a major version bump.
-  /// \see http://stackoverflow.com/questions/14875052/pure-virtual-functions-and-binary-compatibility
-  class Builder {
-    StreamWriterBuilder* own_;
-    Builder(Builder const&);  // noncopyable
-    void operator=(Builder const&);  // noncopyable
+  /** \brief A simple abstract factory.
+   */
+  class JSON_API Factory {
   public:
-    Builder();
-    ~Builder();  // delete underlying StreamWriterBuilder
-
-    Builder& withCommentStyle(CommentStyle cs);  /// default: All
-    /** \brief Write in human-friendly style.
-
-        If "", then skip all indentation, newlines, and comments,
-        which implies CommentStyle::None.
-        Default: "\t"
-    */
-    Builder& withIndentation(std::string indentation);
-    /** \brief Drop the "null" string from the writer's output for nullValues.
-    * Strictly speaking, this is not valid JSON. But when the output is being
-    * fed to a browser's Javascript, it makes for smaller output and the
-    * browser can handle the output just fine.
-    */
-    Builder& withDropNullPlaceholders(bool v);
-    /** \brief Do not add \n at end of document.
-     * Normally, we add an extra newline, just because.
-     */
-    Builder& withOmitEndingLineFeed(bool v);
-    /** \brief Add a space after ':'.
-     * If indentation is non-empty, we surround colon with whitespace,
-     * e.g. " : "
-     * This will add back the trailing space when there is no indentation.
-     * This seems dubious when the entire document is on a single line,
-     * but we leave this here to repduce the behavior of the old `FastWriter`.
-     */
-    Builder& withEnableYAMLCompatibility(bool v);
-
+    virtual ~Factory();
     /// Do not take ownership of sout, but maintain a reference.
-    StreamWriter* newStreamWriter(std::ostream* sout) const;
-  };
-};
+    virtual StreamWriter* newStreamWriter(std::ostream* sout) const = 0;
+  };  // Factory
+};  // StreamWriter
 
 /// \brief Write into stringstream, then return string, for convenience.
-std::string writeString(Value const& root, StreamWriter::Builder const& builder);
+std::string writeString(Value const& root, StreamWriter::Factory const& factory);
 
+
+/** \brief Build a StreamWriter implementation.
+
+Usage:
+\code
+  using namespace Json;
+  Value value = ...;
+  StreamWriter::Builder builder;
+  builder.cs_ = StreamWriter::CommentStyle::None;
+  std::shared_ptr<StreamWriter> writer(
+    builder.newStreamWriter(&std::cout));
+  writer->write(value);
+  std::cout << std::endl;  // add lf and flush
+\endcode
+*/
+class JSON_API StreamWriterBuilder : public StreamWriter::Factory {
+public:
+  // Note: We cannot add data-members to this class without a major version bump.
+  // So these might as well be completely exposed.
+
+  /** \brief How to write comments.
+   * Default: All
+   */
+  StreamWriter::CommentStyle cs_;
+  /** \brief Write in human-friendly style.
+
+      If "", then skip all indentation and newlines.
+      In that case, you probably want CommentStyle::None also.
+      Default: "\t"
+  */
+  std::string indentation_;
+
+  StreamWriterBuilder();
+
+  /// Do not take ownership of sout, but maintain a reference.
+  StreamWriter* newStreamWriter(std::ostream* sout) const;
+};
+
+/** \brief Build a StreamWriter implementation.
+ * Comments are not written, and most whitespace is omitted.
+ * In addition, there are some special settings to allow compatibility
+ * with the old FastWriter.
+ * Usage:
+ * \code
+ *   OldCompressingStreamWriterBuilder b;
+ *   b.dropNullPlaceHolders_ = true; // etc.
+ *   StreamWriter* w = b.newStreamWriter(&std::cout);
+ *   w.write(value);
+ *   delete w;
+ * \endcode
+ */
+class JSON_API OldCompressingStreamWriterBuilder : public StreamWriter::Factory
+{
+public:
+  // Note: We cannot add data-members to this class without a major version bump.
+  // So these might as well be completely exposed.
+
+  /** \brief Drop the "null" string from the writer's output for nullValues.
+  * Strictly speaking, this is not valid JSON. But when the output is being
+  * fed to a browser's Javascript, it makes for smaller output and the
+  * browser can handle the output just fine.
+  */
+  bool dropNullPlaceholders_;
+  /** \brief Do not add \n at end of document.
+    * Normally, we add an extra newline, just because.
+    */
+  bool omitEndingLineFeed_;
+  /** \brief Add a space after ':'.
+    * If indentation is non-empty, we surround colon with whitespace,
+    * e.g. " : "
+    * This will add back the trailing space when there is no indentation.
+    * This seems dubious when the entire document is on a single line,
+    * but we leave this here to repduce the behavior of the old `FastWriter`.
+    */
+  bool enableYAMLCompatibility_;
+
+  OldCompressingStreamWriterBuilder()
+    : dropNullPlaceholders_(false)
+    , omitEndingLineFeed_(false)
+    , enableYAMLCompatibility_(false)
+  {}
+  virtual StreamWriter* newStreamWriter(std::ostream*) const;
+};
 
 /** \brief Abstract class for writers.
  * \deprecated Use StreamWriter::Builder.
