@@ -81,8 +81,8 @@ root["indent"]["use_space"] = getCurrentIndentUseSpace();
 
 // To write into a steam with minimal memory overhead,
 // create a Builder for a StreamWriter.
-Json::StreamWriter::Builder builder;
-builder.withIndentation("   ");  // or whatever you like
+Json::StreamWriterBuilder builder;
+builder.indentation_ = "   ";  // or whatever you like
 
 // Then build a StreamWriter.
 std::shared_ptr<Json::StreamWriter> writer(
