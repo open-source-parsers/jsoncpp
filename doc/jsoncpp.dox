@@ -94,6 +94,9 @@ writer->write( root );
 // If you like the defaults, you can insert directly into a stream.
 std::cout << root;
 
+// If desired, remember to add a linefeed and flush.
+std::cout << std::endl;
+
 // Of course, you can write to `std::ostringstream` if you prefer. Or
 // use `writeString()` for convenience.
 std::string document = Json::writeString( root, builder );
