@@ -27,7 +27,7 @@ class StreamWriterBuilder;
 /**
 
 Usage:
-
+\code
   using namespace Json;
   Value value;
   StreamWriter::Builder builder;
@@ -36,16 +36,18 @@ Usage:
     builder.newStreamWriter(&std::cout));
   writer->write(value);
   std::cout.flush();
+\endcode
 */
 class JSON_API StreamWriter {
 protected:
   std::ostream& sout_;  // not owned; will not delete
 public:
-  /// `All`: Keep all comments.
-  /// `None`: Drop all comments.
-  /// Use `Most` to recover the odd behavior of previous versions.
-  /// Only `All` is currently implemented.
-  enum class CommentStyle {None, Most, All};
+  /// Decide whether to write comments.
+  enum class CommentStyle {
+    None,  ///< Drop all comments.
+    Most,  ///< Recover odd behavior of previous versions (not implemented yet).
+    All  ///< Keep all comments.
+  };
 
   /// Keep a reference, but do not take ownership of `sout`.
   StreamWriter(std::ostream* sout);
