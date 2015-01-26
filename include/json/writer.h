@@ -23,20 +23,18 @@
 namespace Json {
 
 class Value;
-class StreamWriterBuilder;
 
 /**
 
 Usage:
 \code
   using namespace Json;
-  Value value;
-  StreamWriter::Builder builder;
-  builder.withCommentStyle(StreamWriter::CommentStyle::None);
-  std::shared_ptr<StreamWriter> writer(
-    builder.newStreamWriter(&std::cout));
-  writer->write(value);
-  std::cout << std::endl;  // add lf and flush
+  void writeToStdout(StreamWriter::Builder const& builder, Value const& value) {
+    std::unique_ptr<StreamWriter> const writer(
+      builder.newStreamWriter(&std::cout));
+    writer->write(value);
+    std::cout << std::endl;  // add lf and flush
+  }
 \endcode
 */
 class JSON_API StreamWriter {
@@ -73,9 +71,20 @@ std::string writeString(Value const& root, StreamWriter::Factory const& factory)
 
 
 /** \brief Build a StreamWriter implementation.
- */
+
+Usage:
+\code
+  using namespace Json;
+  Value value = ...;
+  StreamWriter::Builder builder;
+  builder.cs_ = StreamWriter::CommentStyle::None;
+  std::shared_ptr<StreamWriter> writer(
+    builder.newStreamWriter(&std::cout));
+  writer->write(value);
+  std::cout << std::endl;  // add lf and flush
+\endcode
+*/
 class JSON_API StreamWriterBuilder : public StreamWriter::Factory {
-  // typedef StreamWriter::CommentStyle CommentStyle;
 public:
   // Note: We cannot add data-members to this class without a major version bump.
   // So these might as well be completely exposed.
