@@ -66,7 +66,7 @@ Alternatively, from the command-line on Unix in the source directory:
 
     mkdir -p build/debug
     cd build/debug
-    cmake -DCMAKE_BUILD_TYPE=debug -DJSONCPP_LIB_BUILD_SHARED=OFF -G "Unix Makefiles" ../..
+    cmake -DCMAKE_BUILD_TYPE=debug -DJSONCPP_LIB_BUILD_STATIC=ON -DJSONCPP_LIB_BUILD_SHARED=OFF -G "Unix Makefiles" ../..
     make
 
 Running `cmake -`" will display the list of available generators (passed using
