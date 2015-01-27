@@ -9,7 +9,12 @@ ADD_EXECUTABLE( jsoncpp_test
                 main.cpp
                 )
 
-TARGET_LINK_LIBRARIES(jsoncpp_test jsoncpp_lib)
+
+IF(JSONCPP_LIB_BUILD_SHARED)
+    TARGET_LINK_LIBRARIES(jsoncpp_test jsoncpp_lib)
+ELSE(JSONCPP_LIB_BUILD_SHARED)
+    TARGET_LINK_LIBRARIES(jsoncpp_test jsoncpp_lib_static)
+ENDIF(JSONCPP_LIB_BUILD_SHARED)
 
 # another way to solve issue #90
 #set_target_properties(jsoncpp_test PROPERTIES COMPILE_FLAGS -ffloat-store)

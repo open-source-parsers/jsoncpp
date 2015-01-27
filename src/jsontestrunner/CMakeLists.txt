@@ -7,7 +7,13 @@ ENDIF(JSONCPP_LIB_BUILD_SHARED)
 ADD_EXECUTABLE(jsontestrunner_exe
                main.cpp
                )
-TARGET_LINK_LIBRARIES(jsontestrunner_exe jsoncpp_lib)
+
+IF(JSONCPP_LIB_BUILD_SHARED)
+    TARGET_LINK_LIBRARIES(jsontestrunner_exe jsoncpp_lib)
+ELSE(JSONCPP_LIB_BUILD_SHARED)
+    TARGET_LINK_LIBRARIES(jsontestrunner_exe jsoncpp_lib_static)
+ENDIF(JSONCPP_LIB_BUILD_SHARED)
+
 SET_TARGET_PROPERTIES(jsontestrunner_exe PROPERTIES OUTPUT_NAME jsontestrunner_exe)
 
 IF(PYTHONINTERP_FOUND)
