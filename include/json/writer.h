@@ -165,8 +165,6 @@ public:
    */
   void dropNullPlaceholders();
 
-  void omitEndingLineFeed();
-
 public: // overridden from Writer
   virtual std::string write(const Value& root);
 
@@ -176,7 +174,6 @@ private:
   std::string document_;
   bool yamlCompatiblityEnabled_;
   bool dropNullPlaceholders_;
-  bool omitEndingLineFeed_;
 };
 
 /** \brief Writes a Value in <a HREF="http://www.json.org">JSON</a> format in a
