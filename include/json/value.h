@@ -133,8 +133,11 @@ public:
   typedef Json::LargestUInt LargestUInt;
   typedef Json::ArrayIndex ArrayIndex;
 
-  static const Value& null;  ///! We regret this reference to a global instance; prefer the simpler Value().
-  static const Value& nullRef;  ///! just a kludge for binary-compatibility; same as null
+  static const Value& nullRef;
+#if !defined(__ARMEL__)
+  /// \deprecated This exists for binary compatibility only. Use nullRef.
+  static const Value null;
+#endif
   /// Minimum signed integer value that can be stored in a Json::Value.
   static const LargestInt minLargestInt;
   /// Maximum signed integer value that can be stored in a Json::Value.
