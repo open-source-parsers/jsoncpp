@@ -192,20 +192,16 @@ Writer::~Writer() {}
 // //////////////////////////////////////////////////////////////////
 
 FastWriter::FastWriter()
-    : yamlCompatiblityEnabled_(false), dropNullPlaceholders_(false),
-      omitEndingLineFeed_(false) {}
+    : yamlCompatiblityEnabled_(false), dropNullPlaceholders_(false) {}
 
 void FastWriter::enableYAMLCompatibility() { yamlCompatiblityEnabled_ = true; }
 
 void FastWriter::dropNullPlaceholders() { dropNullPlaceholders_ = true; }
 
-void FastWriter::omitEndingLineFeed() { omitEndingLineFeed_ = true; }
-
 std::string FastWriter::write(const Value& root) {
   document_ = "";
   writeValue(root);
-  if (!omitEndingLineFeed_)
-    document_ += "\n";
+  document_ += "\n";
   return document_;
 }
 
