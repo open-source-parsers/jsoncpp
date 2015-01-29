@@ -864,45 +864,8 @@ std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
   }
   return allErrors;
 }
-
-bool Reader::pushError(const Value& value, const std::string& message) {
-  size_t length = end_ - begin_;
-  if(value.getOffsetStart() > length
-    || value.getOffsetLimit() > length)
-    return false;
-  Token token;
-  token.type_ = tokenError;
-  token.start_ = begin_ + value.getOffsetStart();
-  token.end_ = end_ + value.getOffsetLimit();
-  ErrorInfo info;
-  info.token_ = token;
-  info.message_ = message;
-  info.extra_ = 0;
-  errors_.push_back(info);
-  return true;
-}
-
-bool Reader::pushError(const Value& value, const std::string& message, const Value& extra) {
-  size_t length = end_ - begin_;
-  if(value.getOffsetStart() > length
-    || value.getOffsetLimit() > length
-    || extra.getOffsetLimit() > length)
-    return false;
-  Token token;
-  token.type_ = tokenError;
-  token.start_ = begin_ + value.getOffsetStart();
-  token.end_ = begin_ + value.getOffsetLimit();
-  ErrorInfo info;
-  info.token_ = token;
-  info.message_ = message;
-  info.extra_ = begin_ + extra.getOffsetStart();
-  errors_.push_back(info);
-  return true;
-}
-
-bool Reader::good() const {
-  return !errors_.size();
-}
+// Reader
+/////////////////////////
 
 // exact copy of Features
 class OurFeatures {
@@ -956,9 +919,6 @@ public:
              bool collectComments = true);
   std::string getFormattedErrorMessages() const;
   std::vector<StructuredError> getStructuredErrors() const;
-  bool pushError(const Value& value, const std::string& message);
-  bool pushError(const Value& value, const std::string& message, const Value& extra);
-  bool good() const;
 
 private:
   OurReader(OurReader const&);  // no impl
@@ -1792,45 +1752,6 @@ std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
     allErrors.push_back(structured);
   }
   return allErrors;
-}
-
-bool OurReader::pushError(const Value& value, const std::string& message) {
-  size_t length = end_ - begin_;
-  if(value.getOffsetStart() > length
-    || value.getOffsetLimit() > length)
-    return false;
-  Token token;
-  token.type_ = tokenError;
-  token.start_ = begin_ + value.getOffsetStart();
-  token.end_ = end_ + value.getOffsetLimit();
-  ErrorInfo info;
-  info.token_ = token;
-  info.message_ = message;
-  info.extra_ = 0;
-  errors_.push_back(info);
-  return true;
-}
-
-bool OurReader::pushError(const Value& value, const std::string& message, const Value& extra) {
-  size_t length = end_ - begin_;
-  if(value.getOffsetStart() > length
-    || value.getOffsetLimit() > length
-    || extra.getOffsetLimit() > length)
-    return false;
-  Token token;
-  token.type_ = tokenError;
-  token.start_ = begin_ + value.getOffsetStart();
-  token.end_ = begin_ + value.getOffsetLimit();
-  ErrorInfo info;
-  info.token_ = token;
-  info.message_ = message;
-  info.extra_ = begin_ + extra.getOffsetStart();
-  errors_.push_back(info);
-  return true;
-}
-
-bool OurReader::good() const {
-  return !errors_.size();
 }
 
 
