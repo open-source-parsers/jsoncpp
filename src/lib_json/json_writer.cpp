@@ -673,7 +673,7 @@ struct BuiltStyledStreamWriter : public StreamWriter
   BuiltStyledStreamWriter(
       std::ostream* sout,
       std::string const& indentation,
-      StreamWriter::CommentStyle cs,
+      StreamWriter::CommentStyle::Enum cs,
       std::string const& colonSymbol,
       std::string const& nullSymbol,
       std::string const& endingLineFeedSymbol);
@@ -697,7 +697,7 @@ private:
   std::string indentString_;
   int rightMargin_;
   std::string indentation_;
-  CommentStyle cs_;
+  CommentStyle::Enum cs_;
   std::string colonSymbol_;
   std::string nullSymbol_;
   std::string endingLineFeedSymbol_;
@@ -707,7 +707,7 @@ private:
 BuiltStyledStreamWriter::BuiltStyledStreamWriter(
       std::ostream* sout,
       std::string const& indentation,
-      StreamWriter::CommentStyle cs,
+      StreamWriter::CommentStyle::Enum cs,
       std::string const& colonSymbol,
       std::string const& nullSymbol,
       std::string const& endingLineFeedSymbol)

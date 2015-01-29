@@ -41,11 +41,14 @@ class JSON_API StreamWriter {
 protected:
   std::ostream& sout_;  // not owned; will not delete
 public:
-  /// Decide whether to write comments.
-  enum class CommentStyle {
-    None,  ///< Drop all comments.
-    Most,  ///< Recover odd behavior of previous versions (not implemented yet).
-    All  ///< Keep all comments.
+  /// Scoped enums are not available until C++11.
+  struct CommentStyle {
+    /// Decide whether to write comments.
+    enum Enum {
+      None,  ///< Drop all comments.
+      Most,  ///< Recover odd behavior of previous versions (not implemented yet).
+      All  ///< Keep all comments.
+    };
   };
 
   /// Keep a reference, but do not take ownership of `sout`.
@@ -92,7 +95,7 @@ public:
   /** \brief How to write comments.
    * Default: All
    */
-  StreamWriter::CommentStyle cs_;
+  StreamWriter::CommentStyle::Enum cs_;
   /** \brief Write in human-friendly style.
 
       If "", then skip all indentation and newlines.
