@@ -31,12 +31,13 @@ namespace Json {
 #if defined(__ARMEL__)
 #define ALIGNAS(byte_alignment) __attribute__((aligned(byte_alignment)))
 #else
+// This exists for binary compatibility only. Use nullRef.
+static const Value null;
 #define ALIGNAS(byte_alignment)
 #endif
 static const unsigned char ALIGNAS(8) kNull[sizeof(Value)] = { 0 };
 const unsigned char& kNullRef = kNull[0];
-const Value& Value::null = reinterpret_cast<const Value&>(kNullRef);
-const Value& Value::nullRef = null;
+const Value& Value::nullRef = reinterpret_cast<const Value&>(kNullRef);
 
 const Int Value::minInt = Int(~(UInt(-1) / 2));
 const Int Value::maxInt = Int(UInt(-1) / 2);
@@ -856,7 +857,7 @@ Value& Value::operator[](ArrayIndex index) {
   if (it != value_.map_->end() && (*it).first == key)
     return (*it).second;
 
-  ObjectValues::value_type defaultValue(key, null);
+  ObjectValues::value_type defaultValue(key, nullRef);
   it = value_.map_->insert(it, defaultValue);
   return (*it).second;
 #else
@@ -876,16 +877,16 @@ const Value& Value::operator[](ArrayIndex index) const {
       type_ == nullValue || type_ == arrayValue,
       "in Json::Value::operator[](ArrayIndex)const: requires arrayValue");
   if (type_ == nullValue)
-    return null;
+    return nullRef;
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
   CZString key(index);
   ObjectValues::const_iterator it = value_.map_->find(key);
   if (it == value_.map_->end())
-    return null;
+    return nullRef;
   return (*it).second;
 #else
   Value* value = value_.array_->find(index);
-  return value ? *value : null;
+  return value ? *value : nullRef;
 #endif
 }
 
@@ -922,7 +923,7 @@ Value& Value::resolveReference(const char* key, bool isStatic) {
   if (it != value_.map_->end() && (*it).first == actualKey)
     return (*it).second;
 
-  ObjectValues::value_type defaultValue(actualKey, null);
+  ObjectValues::value_type defaultValue(actualKey, nullRef);
   it = value_.map_->insert(it, defaultValue);
   Value& value = (*it).second;
   return value;
@@ -933,7 +934,7 @@ Value& Value::resolveReference(const char* key, bool isStatic) {
 
 Value Value::get(ArrayIndex index, const Value& defaultValue) const {
   const Value* value = &((*this)[index]);
-  return value == &null ? defaultValue : *value;
+  return value == &nullRef ? defaultValue : *value;
 }
 
 bool Value::isValidIndex(ArrayIndex index) const { return index < size(); }
@@ -943,16 +944,16 @@ const Value& Value::operator[](const char* key) const {
       type_ == nullValue || type_ == objectValue,
       "in Json::Value::operator[](char const*)const: requires objectValue");
   if (type_ == nullValue)
-    return null;
+    return nullRef;
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
   CZString actualKey(key, CZString::noDuplication);
   ObjectValues::const_iterator it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
-    return null;
+    return nullRef;
   return (*it).second;
 #else
   const Value* value = value_.map_->find(key);
-  return value ? *value : null;
+  return value ? *value : nullRef;
 #endif
 }
 
@@ -982,7 +983,7 @@ Value& Value::append(const Value& value) { return (*this)[size()] = value; }
 
 Value Value::get(const char* key, const Value& defaultValue) const {
   const Value* value = &((*this)[key]);
-  return value == &null ? defaultValue : *value;
+  return value == &nullRef ? defaultValue : *value;
 }
 
 Value Value::get(const std::string& key, const Value& defaultValue) const {
@@ -1018,7 +1019,7 @@ Value Value::removeMember(const char* key) {
   JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == objectValue,
                       "in Json::Value::removeMember(): requires objectValue");
   if (type_ == nullValue)
-    return null;
+    return nullRef;
 
   Value removed;  // null
   removeMember(key, &removed);
@@ -1066,7 +1067,7 @@ Value Value::get(const CppTL::ConstString& key,
 
 bool Value::isMember(const char* key) const {
   const Value* value = &((*this)[key]);
-  return value != &null;
+  return value != &nullRef;
 }
 
 bool Value::isMember(const std::string& key) const {
@@ -1472,7 +1473,7 @@ const Value& Path::resolve(const Value& root) const {
         // Error: unable to resolve path (object value expected at position...)
       }
       node = &((*node)[arg.key_]);
-      if (node == &Value::null) {
+      if (node == &Value::nullRef) {
         // Error: unable to resolve path (object has no member named '' at
         // position...)
       }
@@ -1493,7 +1494,7 @@ Value Path::resolve(const Value& root, const Value& defaultValue) const {
       if (!node->isObject())
         return defaultValue;
       node = &((*node)[arg.key_]);
-      if (node == &Value::null)
+      if (node == &Value::nullRef)
         return defaultValue;
     }
   }
