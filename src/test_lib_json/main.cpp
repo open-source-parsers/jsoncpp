@@ -1499,25 +1499,6 @@ JSONTEST_FIXTURE(ValueTest, typeChecksThrowExceptions) {
 #endif
 }
 
-JSONTEST_FIXTURE(ValueTest, offsetAccessors) {
-  Json::Value x;
-  JSONTEST_ASSERT(x.getOffsetStart() == 0);
-  JSONTEST_ASSERT(x.getOffsetLimit() == 0);
-  x.setOffsetStart(10);
-  x.setOffsetLimit(20);
-  JSONTEST_ASSERT(x.getOffsetStart() == 10);
-  JSONTEST_ASSERT(x.getOffsetLimit() == 20);
-  Json::Value y(x);
-  JSONTEST_ASSERT(y.getOffsetStart() == 10);
-  JSONTEST_ASSERT(y.getOffsetLimit() == 20);
-  Json::Value z;
-  z.swap(y);
-  JSONTEST_ASSERT(z.getOffsetStart() == 10);
-  JSONTEST_ASSERT(z.getOffsetLimit() == 20);
-  JSONTEST_ASSERT(y.getOffsetStart() == 0);
-  JSONTEST_ASSERT(y.getOffsetLimit() == 0);
-}
-
 JSONTEST_FIXTURE(ValueTest, StaticString) {
   char mutant[] = "hello";
   Json::StaticString ss(mutant);
@@ -1690,7 +1671,6 @@ JSONTEST_FIXTURE(ReaderTest, parseWithNoErrors) {
   bool ok = reader.parse("{ \"property\" : \"value\" }", root);
   JSONTEST_ASSERT(ok);
   JSONTEST_ASSERT(reader.getFormattedErrorMessages().size() == 0);
-  JSONTEST_ASSERT(reader.getStructuredErrors().size() == 0);
 }
 
 JSONTEST_FIXTURE(ReaderTest, parseWithNoErrorsTestingOffsets) {
@@ -1702,25 +1682,6 @@ JSONTEST_FIXTURE(ReaderTest, parseWithNoErrorsTestingOffsets) {
                          root);
   JSONTEST_ASSERT(ok);
   JSONTEST_ASSERT(reader.getFormattedErrorMessages().size() == 0);
-  JSONTEST_ASSERT(reader.getStructuredErrors().size() == 0);
-  JSONTEST_ASSERT(root["property"].getOffsetStart() == 15);
-  JSONTEST_ASSERT(root["property"].getOffsetLimit() == 34);
-  JSONTEST_ASSERT(root["property"][0].getOffsetStart() == 16);
-  JSONTEST_ASSERT(root["property"][0].getOffsetLimit() == 23);
-  JSONTEST_ASSERT(root["property"][1].getOffsetStart() == 25);
-  JSONTEST_ASSERT(root["property"][1].getOffsetLimit() == 33);
-  JSONTEST_ASSERT(root["obj"].getOffsetStart() == 44);
-  JSONTEST_ASSERT(root["obj"].getOffsetLimit() == 76);
-  JSONTEST_ASSERT(root["obj"]["nested"].getOffsetStart() == 57);
-  JSONTEST_ASSERT(root["obj"]["nested"].getOffsetLimit() == 60);
-  JSONTEST_ASSERT(root["obj"]["bool"].getOffsetStart() == 71);
-  JSONTEST_ASSERT(root["obj"]["bool"].getOffsetLimit() == 75);
-  JSONTEST_ASSERT(root["null"].getOffsetStart() == 87);
-  JSONTEST_ASSERT(root["null"].getOffsetLimit() == 91);
-  JSONTEST_ASSERT(root["false"].getOffsetStart() == 103);
-  JSONTEST_ASSERT(root["false"].getOffsetLimit() == 108);
-  JSONTEST_ASSERT(root.getOffsetStart() == 0);
-  JSONTEST_ASSERT(root.getOffsetLimit() == 110);
 }
 
 JSONTEST_FIXTURE(ReaderTest, parseWithOneError) {
@@ -1731,13 +1692,6 @@ JSONTEST_FIXTURE(ReaderTest, parseWithOneError) {
   JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
                   "* Line 1, Column 15\n  Syntax error: value, object or array "
                   "expected.\n");
-  std::vector<Json::Reader::StructuredError> errors =
-      reader.getStructuredErrors();
-  JSONTEST_ASSERT(errors.size() == 1);
-  JSONTEST_ASSERT(errors.at(0).offset_start == 14);
-  JSONTEST_ASSERT(errors.at(0).offset_limit == 15);
-  JSONTEST_ASSERT(errors.at(0).message ==
-                  "Syntax error: value, object or array expected.");
 }
 
 JSONTEST_FIXTURE(ReaderTest, parseChineseWithOneError) {
@@ -1748,13 +1702,6 @@ JSONTEST_FIXTURE(ReaderTest, parseChineseWithOneError) {
   JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
                   "* Line 1, Column 19\n  Syntax error: value, object or array "
                   "expected.\n");
-  std::vector<Json::Reader::StructuredError> errors =
-      reader.getStructuredErrors();
-  JSONTEST_ASSERT(errors.size() == 1);
-  JSONTEST_ASSERT(errors.at(0).offset_start == 18);
-  JSONTEST_ASSERT(errors.at(0).offset_limit == 19);
-  JSONTEST_ASSERT(errors.at(0).message ==
-                  "Syntax error: value, object or array expected.");
 }
 
 JSONTEST_FIXTURE(ReaderTest, parseWithDetailError) {
@@ -1765,12 +1712,6 @@ JSONTEST_FIXTURE(ReaderTest, parseWithDetailError) {
   JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
                   "* Line 1, Column 16\n  Bad escape sequence in string\nSee "
                   "Line 1, Column 20 for detail.\n");
-  std::vector<Json::Reader::StructuredError> errors =
-      reader.getStructuredErrors();
-  JSONTEST_ASSERT(errors.size() == 1);
-  JSONTEST_ASSERT(errors.at(0).offset_start == 15);
-  JSONTEST_ASSERT(errors.at(0).offset_limit == 23);
-  JSONTEST_ASSERT(errors.at(0).message == "Bad escape sequence in string");
 }
 
 struct CharReaderTest : JsonTest::TestCase {};
@@ -2303,7 +2244,6 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, compareArray);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, compareObject);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, compareType);
-  JSONTEST_REGISTER_FIXTURE(runner, ValueTest, offsetAccessors);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, typeChecksThrowExceptions);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, StaticString);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, CommentBefore);

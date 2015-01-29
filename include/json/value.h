@@ -503,13 +503,6 @@ Json::Value obj_value(Json::objectValue); // {}
   iterator begin();
   iterator end();
 
-  // Accessors for the [start, limit) range of bytes within the JSON text from
-  // which this value was parsed, if any.
-  void setOffsetStart(size_t start);
-  void setOffsetLimit(size_t limit);
-  size_t getOffsetStart() const;
-  size_t getOffsetLimit() const;
-
 private:
   void initBasic(ValueType type, bool allocated = false);
 
@@ -546,11 +539,6 @@ private:
   unsigned int allocated_ : 1; // Notes: if declared as bool, bitfield is useless.
                                // If not allocated_, string_ must be null-terminated.
   CommentInfo* comments_;
-
-  // [start, limit) byte offsets in the source JSON text from which this Value
-  // was extracted.
-  size_t start_;
-  size_t limit_;
 };
 
 /** \brief Experimental and untested: represents an element of the "path" to
