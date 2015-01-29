@@ -192,11 +192,9 @@ Writer::~Writer() {}
 // //////////////////////////////////////////////////////////////////
 
 FastWriter::FastWriter()
-    : yamlCompatiblityEnabled_(false), dropNullPlaceholders_(false) {}
+    : yamlCompatiblityEnabled_(false) {}
 
 void FastWriter::enableYAMLCompatibility() { yamlCompatiblityEnabled_ = true; }
-
-void FastWriter::dropNullPlaceholders() { dropNullPlaceholders_ = true; }
 
 std::string FastWriter::write(const Value& root) {
   document_ = "";
@@ -208,8 +206,7 @@ std::string FastWriter::write(const Value& root) {
 void FastWriter::writeValue(const Value& value) {
   switch (value.type()) {
   case nullValue:
-    if (!dropNullPlaceholders_)
-      document_ += "null";
+    document_ += "null";
     break;
   case intValue:
     document_ += valueToString(value.asLargestInt());

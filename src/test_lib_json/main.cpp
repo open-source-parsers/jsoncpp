@@ -1497,17 +1497,6 @@ JSONTEST_FIXTURE(ValueTest, typeChecksThrowExceptions) {
 #endif
 }
 
-struct WriterTest : JsonTest::TestCase {};
-
-JSONTEST_FIXTURE(WriterTest, dropNullPlaceholders) {
-  Json::FastWriter writer;
-  Json::Value nullValue;
-  JSONTEST_ASSERT(writer.write(nullValue) == "null\n");
-
-  writer.dropNullPlaceholders();
-  JSONTEST_ASSERT(writer.write(nullValue) == "\n");
-}
-
 struct StreamWriterTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(StreamWriterTest, dropNullPlaceholders) {
@@ -1719,7 +1708,6 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseWithDetailError);
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseWithStackLimit);
 
-  JSONTEST_REGISTER_FIXTURE(runner, WriterTest, dropNullPlaceholders);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, dropNullPlaceholders);
 
   return runner.runCommandLine(argc, argv);
