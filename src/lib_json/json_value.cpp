@@ -332,7 +332,7 @@ Value::Value(const Value& other)
       itemIsUsed_(0)
 #endif
       ,
-      comments_(0), start_(other.start_), limit_(other.limit_) {
+      comments_(0) {
   switch (type_) {
   case nullValue:
   case intValue:
@@ -429,8 +429,6 @@ void Value::swapPayload(Value& other) {
 void Value::swap(Value& other) {
   swapPayload(other);
   std::swap(comments_, other.comments_);
-  std::swap(start_, other.start_);
-  std::swap(limit_, other.limit_);
 }
 
 ValueType Value::type() const { return type_; }
@@ -805,8 +803,6 @@ void Value::clear() {
   JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == arrayValue ||
                           type_ == objectValue,
                       "in Json::Value::clear(): requires complex value");
-  start_ = 0;
-  limit_ = 0;
   switch (type_) {
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
   case arrayValue:
@@ -911,8 +907,6 @@ void Value::initBasic(ValueType type, bool allocated) {
   itemIsUsed_ = 0;
 #endif
   comments_ = 0;
-  start_ = 0;
-  limit_ = 0;
 }
 
 Value& Value::resolveReference(const char* key, bool isStatic) {
@@ -1258,14 +1252,6 @@ std::string Value::getComment(CommentPlacement placement) const {
     return comments_[placement].comment_;
   return "";
 }
-
-void Value::setOffsetStart(size_t start) { start_ = start; }
-
-void Value::setOffsetLimit(size_t limit) { limit_ = limit; }
-
-size_t Value::getOffsetStart() const { return start_; }
-
-size_t Value::getOffsetLimit() const { return limit_; }
 
 std::string Value::toStyledString() const {
   StyledWriter writer;
