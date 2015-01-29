@@ -14,6 +14,7 @@
 #include <iosfwd>
 #include <stack>
 #include <string>
+#include <istream>
 
 // Disable warning C4251: <data member>: <type> needs to have dll-interface to
 // be used by...
@@ -78,7 +79,7 @@ public:
    document to read.
    * \param endDoc Pointer on the end of the UTF-8 encoded string of the
    document to read.
-   \               Must be >= beginDoc.
+   *               Must be >= beginDoc.
    * \param root [out] Contains the root value of the document if it was
    *             successfully parsed.
    * \param collectComments \c true to collect comment and allow writing them
@@ -238,7 +239,68 @@ private:
   std::string commentsBefore_;
   Features features_;
   bool collectComments_;
+};  // Reader
+
+/** Interface for reading JSON from a char array.
+ */
+class JSON_API CharReader {
+public:
+  virtual ~CharReader() {}
+  /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
+   document.
+   * The document must be a UTF-8 encoded string containing the document to read.
+   *
+   * \param beginDoc Pointer on the beginning of the UTF-8 encoded string of the
+   document to read.
+   * \param endDoc Pointer on the end of the UTF-8 encoded string of the
+   document to read.
+   *        Must be >= beginDoc.
+   * \param root [out] Contains the root value of the document if it was
+   *             successfully parsed.
+   * \param errs [out] Formatted error messages (if not NULL)
+   *        a user friendly string that lists errors in the parsed
+   * document.
+   * \return \c true if the document was successfully parsed, \c false if an
+   error occurred.
+   */
+  virtual bool parse(
+      char const* beginDoc, char const* endDoc,
+      Value* root, std::string* errs) = 0;
+
+  class Factory {
+  public:
+    /// \brief Allocate a CharReader via operator new().
+    virtual CharReader* newCharReader() const = 0;
+  };  // Factory
+};  // CharReader
+
+class CharReaderBuilder : public CharReader::Factory {
+  bool collectComments_;
+  Features features_;
+public:
+  CharReaderBuilder();
+
+  CharReaderBuilder& withCollectComments(bool v) {
+    collectComments_ = v;
+    return *this;
+  }
+
+  CharReaderBuilder& withFeatures(Features const& v) {
+    features_ = v;
+    return *this;
+  }
+
+  virtual CharReader* newCharReader() const;
 };
+
+/** Consume entire stream and use its begin/end.
+  * Someday we might have a real StreamReader, but for now this
+  * is convenient.
+  */
+bool parseFromStream(
+    CharReader::Factory const&,
+    std::istream&,
+    Value* root, std::string* errs);
 
 /** \brief Read from 'sin' into 'root'.
 
