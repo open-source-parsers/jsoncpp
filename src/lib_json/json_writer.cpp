@@ -34,6 +34,12 @@
 
 namespace Json {
 
+#if __cplusplus >= 201103L
+typedef std::unique_ptr<StreamWriter> StreamWriterPtr;
+#else
+typedef std::auto_ptr<StreamWriter>   StreamWriterPtr;
+#endif
+
 static bool containsControlCharacter(const char* str) {
   while (*str) {
     if (isControlCharacter(*(str++)))
@@ -1017,14 +1023,14 @@ StreamWriter* OldCompressingStreamWriterBuilder::newStreamWriter(
 
 std::string writeString(Value const& root, StreamWriter::Factory const& builder) {
   std::ostringstream sout;
-  std::unique_ptr<StreamWriter> const sw(builder.newStreamWriter(&sout));
+  StreamWriterPtr const sw(builder.newStreamWriter(&sout));
   sw->write(root);
   return sout.str();
 }
 
 std::ostream& operator<<(std::ostream& sout, Value const& root) {
   StreamWriterBuilder builder;
-  std::shared_ptr<StreamWriter> writer(builder.newStreamWriter(&sout));
+  StreamWriterPtr const writer(builder.newStreamWriter(&sout));
   writer->write(root);
   return sout;
 }
