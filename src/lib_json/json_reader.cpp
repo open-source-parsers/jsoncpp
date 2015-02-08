@@ -42,17 +42,14 @@ typedef std::auto_ptr<CharReader>   CharReaderPtr;
 // ////////////////////////////////
 
 Features::Features()
-    : allowComments_(true), strictRoot_(false),
-      allowDroppedNullPlaceholders_(false), allowNumericKeys_(false) {}
-
+    : allowComments_(true), strictRoot_(false)
+{}
 Features Features::all() { return Features(); }
 
 Features Features::strictMode() {
   Features features;
   features.allowComments_ = false;
   features.strictRoot_ = true;
-  features.allowDroppedNullPlaceholders_ = false;
-  features.allowNumericKeys_ = false;
   return features;
 }
 
@@ -190,17 +187,7 @@ bool Reader::readValue() {
     currentValue().swapPayload(v);
     }
     break;
-  case tokenArraySeparator:
-  case tokenObjectEnd:
-  case tokenArrayEnd:
-    if (features_.allowDroppedNullPlaceholders_) {
-      // "Un-read" the current token and mark the current value as a null
-      // token.
-      current_--;
-      Value v;
-      currentValue().swapPayload(v);
-      break;
-    } // Else, fall through...
+  // Else, fall through...
   default:
     return addError("Syntax error: value, object or array expected.", token);
   }
@@ -446,11 +433,6 @@ bool Reader::readObject(Token& /*tokenStart*/) {
     if (tokenName.type_ == tokenString) {
       if (!decodeString(tokenName, name))
         return recoverFromError(tokenObjectEnd);
-    } else if (tokenName.type_ == tokenNumber && features_.allowNumericKeys_) {
-      Value numberName;
-      if (!decodeNumber(tokenName, numberName))
-        return recoverFromError(tokenObjectEnd);
-      name = numberName.asString();
     } else {
       break;
     }
