@@ -14,6 +14,8 @@
 #include <cassert>
 #include <cstring>
 #include <istream>
+#include <sstream>
+#include <memory>
 
 #if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
 #define snprintf _snprintf
@@ -25,6 +27,12 @@
 #endif
 
 namespace Json {
+
+#if __cplusplus >= 201103L
+typedef std::unique_ptr<CharReader> CharReaderPtr;
+#else
+typedef std::auto_ptr<CharReader>   CharReaderPtr;
+#endif
 
 // Implementation of class Features
 // ////////////////////////////////
@@ -882,13 +890,61 @@ bool Reader::good() const {
   return !errors_.size();
 }
 
+class OldReader : public CharReader {
+  bool const collectComments_;
+  Reader reader_;
+public:
+  OldReader(
+    bool collectComments,
+    Features const& features)
+  : collectComments_(collectComments)
+  , reader_(features)
+  {}
+  virtual bool parse(
+      char const* beginDoc, char const* endDoc,
+      Value* root, std::string* errs) {
+    bool ok = reader_.parse(beginDoc, endDoc, *root, collectComments_);
+    if (errs) {
+      *errs = reader_.getFormattedErrorMessages();
+    }
+    return ok;
+  }
+};
+
+CharReaderBuilder::CharReaderBuilder()
+  : collectComments_(true)
+  , features_(Features::all())
+{}
+CharReader* CharReaderBuilder::newCharReader() const
+{
+  return new OldReader(collectComments_, features_);
+}
+
+//////////////////////////////////
+// global functions
+
+bool parseFromStream(
+    CharReader::Factory const& fact, std::istream& sin,
+    Value* root, std::string* errs)
+{
+  std::ostringstream ssin;
+  ssin << sin.rdbuf();
+  std::string doc = ssin.str();
+  char const* begin = doc.data();
+  char const* end = begin + doc.size();
+  // Note that we do not actually need a null-terminator.
+  CharReaderPtr const reader(fact.newCharReader());
+  return reader->parse(begin, end, root, errs);
+}
+
 std::istream& operator>>(std::istream& sin, Value& root) {
-  Json::Reader reader;
-  bool ok = reader.parse(sin, root, true);
+  CharReaderBuilder b;
+  std::string errs;
+  bool ok = parseFromStream(b, sin, &root, &errs);
   if (!ok) {
     fprintf(stderr,
             "Error from reader: %s",
-            reader.getFormattedErrorMessages().c_str());
+            errs.c_str());
 
     JSON_FAIL_MESSAGE("reader error");
   }

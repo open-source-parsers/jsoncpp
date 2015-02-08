@@ -7,6 +7,7 @@
 #include <json/config.h>
 #include <json/json.h>
 #include <stdexcept>
+#include <cstring>
 
 // Make numeric limits more convenient to talk about.
 // Assumes int type in 32 bits.
@@ -1617,6 +1618,90 @@ JSONTEST_FIXTURE(ReaderTest, parseWithDetailError) {
   JSONTEST_ASSERT(errors.at(0).message == "Bad escape sequence in string");
 }
 
+struct CharReaderTest : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE(CharReaderTest, parseWithNoErrors) {
+  Json::CharReaderBuilder b;
+  Json::CharReader* reader(b.newCharReader());
+  std::string errs;
+  Json::Value root;
+  char const doc[] = "{ \"property\" : \"value\" }";
+  bool ok = reader->parse(
+      doc, doc + std::strlen(doc),
+      &root, &errs);
+  JSONTEST_ASSERT(ok);
+  JSONTEST_ASSERT(errs.size() == 0);
+  delete reader;
+}
+
+JSONTEST_FIXTURE(CharReaderTest, parseWithNoErrorsTestingOffsets) {
+  Json::CharReaderBuilder b;
+  Json::CharReader* reader(b.newCharReader());
+  std::string errs;
+  Json::Value root;
+  char const doc[] =
+                         "{ \"property\" : [\"value\", \"value2\"], \"obj\" : "
+                         "{ \"nested\" : 123, \"bool\" : true}, \"null\" : "
+                         "null, \"false\" : false }";
+  bool ok = reader->parse(
+      doc, doc + std::strlen(doc),
+      &root, &errs);
+  JSONTEST_ASSERT(ok);
+  JSONTEST_ASSERT(errs.size() == 0);
+  delete reader;
+}
+
+JSONTEST_FIXTURE(CharReaderTest, parseWithOneError) {
+  Json::CharReaderBuilder b;
+  Json::CharReader* reader(b.newCharReader());
+  std::string errs;
+  Json::Value root;
+  char const doc[] =
+      "{ \"property\" :: \"value\" }";
+  bool ok = reader->parse(
+      doc, doc + std::strlen(doc),
+      &root, &errs);
+  JSONTEST_ASSERT(!ok);
+  JSONTEST_ASSERT(errs ==
+                  "* Line 1, Column 15\n  Syntax error: value, object or array "
+                  "expected.\n");
+  delete reader;
+}
+
+JSONTEST_FIXTURE(CharReaderTest, parseChineseWithOneError) {
+  Json::CharReaderBuilder b;
+  Json::CharReader* reader(b.newCharReader());
+  std::string errs;
+  Json::Value root;
+  char const doc[] =
+      "{ \"pr佐藤erty\" :: \"value\" }";
+  bool ok = reader->parse(
+      doc, doc + std::strlen(doc),
+      &root, &errs);
+  JSONTEST_ASSERT(!ok);
+  JSONTEST_ASSERT(errs ==
+                  "* Line 1, Column 19\n  Syntax error: value, object or array "
+                  "expected.\n");
+  delete reader;
+}
+
+JSONTEST_FIXTURE(CharReaderTest, parseWithDetailError) {
+  Json::CharReaderBuilder b;
+  Json::CharReader* reader(b.newCharReader());
+  std::string errs;
+  Json::Value root;
+  char const doc[] =
+      "{ \"property\" : \"v\\alue\" }";
+  bool ok = reader->parse(
+      doc, doc + std::strlen(doc),
+      &root, &errs);
+  JSONTEST_ASSERT(!ok);
+  JSONTEST_ASSERT(errs ==
+                  "* Line 1, Column 16\n  Bad escape sequence in string\nSee "
+                  "Line 1, Column 20 for detail.\n");
+  delete reader;
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -1646,6 +1731,13 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseWithOneError);
   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseChineseWithOneError);
   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseWithDetailError);
+
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseWithNoErrors);
+  JSONTEST_REGISTER_FIXTURE(
+      runner, CharReaderTest, parseWithNoErrorsTestingOffsets);
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseWithOneError);
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseChineseWithOneError);
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseWithDetailError);
 
   JSONTEST_REGISTER_FIXTURE(runner, WriterTest, dropNullPlaceholders);
 
