@@ -75,6 +75,8 @@ std::string writeString(Value const& root, StreamWriter::Factory const& factory)
 
 /** \brief Build a StreamWriter implementation.
 
+  \deprecated This is experimental and will be altered before the next release.
+
 Usage:
 \code
   using namespace Json;

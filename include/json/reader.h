@@ -277,6 +277,8 @@ public:
 
 /** \brief Build a CharReader implementation.
 
+  \deprecated This is experimental and will be altered before the next release.
+
 Usage:
 \code
   using namespace Json;
