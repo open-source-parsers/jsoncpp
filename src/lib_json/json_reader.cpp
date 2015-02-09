@@ -16,6 +16,7 @@
 #include <istream>
 #include <sstream>
 #include <memory>
+#include <set>
 
 #if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
 #define snprintf _snprintf
@@ -912,14 +913,48 @@ public:
 };
 
 CharReaderBuilder::CharReaderBuilder()
-  : collectComments_(true)
-  , features_(Features::all())
-{}
+{
+  setDefaults(&settings_);
+}
 CharReaderBuilder::~CharReaderBuilder()
 {}
 CharReader* CharReaderBuilder::newCharReader() const
 {
-  return new OldReader(collectComments_, features_);
+  if (!validate(NULL)) throw std::runtime_error("invalid settings");
+  // TODO: Maybe serialize the invalid settings into the exception.
+
+  bool collectComments = settings_["collectComments"].asBool();
+  Features features = Features::all();
+  // TODO: Fill in features.
+  return new OldReader(collectComments, features);
+}
+static void getValidReaderKeys(std::set<std::string>* valid_keys)
+{
+  valid_keys->clear();
+  valid_keys->insert("collectComments");
+}
+bool CharReaderBuilder::validate(Json::Value* invalid) const
+{
+  Json::Value my_invalid;
+  if (!invalid) invalid = &my_invalid;  // so we do not need to test for NULL
+  Json::Value& inv = *invalid;
+  bool valid = true;
+  std::set<std::string> valid_keys;
+  getValidReaderKeys(&valid_keys);
+  Value::Members keys = settings_.getMemberNames();
+  size_t n = keys.size();
+  for (size_t i = 0; i < n; ++i) {
+    std::string const& key = keys[i];
+    if (valid_keys.find(key) == valid_keys.end()) {
+      inv[key] = settings_[key];
+    }
+  }
+  return valid;
+}
+// static
+void CharReaderBuilder::setDefaults(Json::Value* settings)
+{
+  (*settings)["collectComments"] = true;
 }
 
 //////////////////////////////////

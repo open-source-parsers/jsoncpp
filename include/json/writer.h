@@ -64,7 +64,10 @@ public:
   class JSON_API Factory {
   public:
     virtual ~Factory();
-    /// Do not take ownership of sout, but maintain a reference.
+    /** \brief Allocate a CharReader via operator new().
+     *  Do not take ownership of sout, but maintain a reference.
+     * \throw std::exception if something goes wrong (e.g. invalid settings)
+     */
     virtual StreamWriter* newStreamWriter(std::ostream* sout) const = 0;
   };  // Factory
 };  // StreamWriter
@@ -77,41 +80,49 @@ std::string writeString(StreamWriter::Factory const& factory, Value const& root)
 
 /** \brief Build a StreamWriter implementation.
 
-  \deprecated This is experimental and will be altered before the next release.
-
 Usage:
 \code
   using namespace Json;
   Value value = ...;
   StreamWriterBuilder builder;
-  builder.cs_ = StreamWriter::CommentStyle::None;
-  builder.indentation_ = "   ";  // or whatever you like
+  builder.settings_["commentStyle"] = "None";
+  builder.settings_["indentation"] = "   ";  // or whatever you like
+  std::unique_ptr<Json::StreamWriter> writer(
+      builder.newStreamWriter(&std::cout));
   writer->write(value);
   std::cout << std::endl;  // add lf and flush
 \endcode
 */
 class JSON_API StreamWriterBuilder : public StreamWriter::Factory {
 public:
-  // Note: We cannot add data-members to this class without a major version bump.
-  // So these might as well be completely exposed.
-
-  /** \brief How to write comments.
-   * Default: All
-   */
-  StreamWriter::CommentStyle::Enum cs_;
-  /** \brief Write in human-friendly style.
-
-      If "", then skip all indentation and newlines.
-      In that case, you probably want CommentStyle::None also.
-      Default: "\t"
-  */
-  std::string indentation_;
+  // Note: We use a Json::Value so that we can add data-members to this class
+  // without a major version bump.
+  /** Configuration of this builder.
+    Available settings (case-sensitive):
+    - "commentStyle": "None", "Some", or "All" (default="All")
+    - "indentation":  (default="\t")
+    But don't trust these docs. You can examine 'settings_` yourself
+    to see the defaults. You can also write and read them just like any
+    JSON Value.
+    */
+  Json::Value settings_;
 
   StreamWriterBuilder();
   virtual ~StreamWriterBuilder();
 
-  /// Do not take ownership of sout, but maintain a reference.
+  /** Do not take ownership of sout, but maintain a reference.
+   * \throw std::exception if something goes wrong (e.g. invalid settings)
+   */
   virtual StreamWriter* newStreamWriter(std::ostream* sout) const;
+
+  /** \return true if 'settings' are illegal and consistent;
+   *   otherwise, indicate bad settings via 'invalid'.
+   */
+  bool validate(Json::Value* invalid) const;
+  /** Called by ctor, but you can use this to reset settings_.
+   * \pre 'settings' != NULL (but Json::null is fine)
+   */
+  static void setDefaults(Json::Value* settings);
 };
 
 /** \brief Build a StreamWriter implementation.
@@ -126,6 +137,8 @@ public:
  *   w->write(value);
  *   delete w;
  * \endcode
+ *
+ * \deprecated Use StreamWriterBuilder
  */
 class JSON_API OldCompressingStreamWriterBuilder : public StreamWriter::Factory
 {

@@ -92,13 +92,13 @@ features without losing binary-compatibility.
 \code
 // For convenience, use `writeString()` with a specialized builder.
 Json::StreamWriterBuilder wbuilder;
-wbuilder.settings["indentation"] = "\t";
+wbuilder.settings_["indentation"] = "\t";
 std::string document = Json::writeString(wbuilder, root);
 
 // Here, using a specialized Builder, we discard comments and
 // record errors as we parse.
 Json::CharReaderBuilder rbuilder;
-rbuilder.settings["collectComments"] = false;
+rbuilder.settings_["collectComments"] = false;
 std::string errs;
 bool ok = Json::parseFromStream(rbuilder, std::cin, &root, &errs);
 \endcode

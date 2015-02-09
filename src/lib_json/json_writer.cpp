@@ -11,6 +11,7 @@
 #include <memory>
 #include <sstream>
 #include <utility>
+#include <set>
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -950,23 +951,67 @@ StreamWriter::~StreamWriter()
 StreamWriter::Factory::~Factory()
 {}
 StreamWriterBuilder::StreamWriterBuilder()
-  : cs_(StreamWriter::CommentStyle::All)
-  , indentation_("\t")
-{}
+{
+  setDefaults(&settings_);
+}
 StreamWriterBuilder::~StreamWriterBuilder()
 {}
 StreamWriter* StreamWriterBuilder::newStreamWriter(std::ostream* stream) const
 {
+  if (!validate(NULL)) throw std::runtime_error("invalid settings");
+  // TODO: Maybe serialize the invalid settings into the exception.
+
+  std::string indentation = settings_["indentation"].asString();
+  std::string cs_str = settings_["commentStyle"].asString();
+  StreamWriter::CommentStyle::Enum cs = StreamWriter::CommentStyle::All;
+  if (cs_str == "All") {
+    cs = StreamWriter::CommentStyle::All;
+  } else if (cs_str == "None") {
+    cs = StreamWriter::CommentStyle::None;
+  } else {
+    return NULL;
+  }
   std::string colonSymbol = " : ";
-  if (indentation_.empty()) {
+  if (indentation.empty()) {
     colonSymbol = ":";
   }
   std::string nullSymbol = "null";
   std::string endingLineFeedSymbol = "";
   return new BuiltStyledStreamWriter(stream,
-      indentation_, cs_,
+      indentation, cs,
       colonSymbol, nullSymbol, endingLineFeedSymbol);
 }
+static void getValidWriterKeys(std::set<std::string>* valid_keys)
+{
+  valid_keys->clear();
+  valid_keys->insert("indentation");
+  valid_keys->insert("commentStyle");
+}
+bool StreamWriterBuilder::validate(Json::Value* invalid) const
+{
+  Json::Value my_invalid;
+  if (!invalid) invalid = &my_invalid;  // so we do not need to test for NULL
+  Json::Value& inv = *invalid;
+  bool valid = true;
+  std::set<std::string> valid_keys;
+  getValidWriterKeys(&valid_keys);
+  Value::Members keys = settings_.getMemberNames();
+  size_t n = keys.size();
+  for (size_t i = 0; i < n; ++i) {
+    std::string const& key = keys[i];
+    if (valid_keys.find(key) == valid_keys.end()) {
+      inv[key] = settings_[key];
+    }
+  }
+  return valid;
+}
+// static
+void StreamWriterBuilder::setDefaults(Json::Value* settings)
+{
+  (*settings)["commentStyle"] = "All";
+  (*settings)["indentation"] = "\t";
+}
+
 /*
 // This might become public someday.
 class StreamWriterBuilderFactory {

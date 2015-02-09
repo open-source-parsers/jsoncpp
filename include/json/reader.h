@@ -270,7 +270,9 @@ public:
 
   class Factory {
   public:
-    /// \brief Allocate a CharReader via operator new().
+    /** \brief Allocate a CharReader via operator new().
+     * \throw std::exception if something goes wrong (e.g. invalid settings)
+     */
     virtual CharReader* newCharReader() const = 0;
   };  // Factory
 };  // CharReader
@@ -283,29 +285,39 @@ Usage:
 \code
   using namespace Json;
   CharReaderBuilder builder;
-  builder.collectComments_ = false;
+  builder.settings_["collectComments"] = false;
   Value value;
   std::string errs;
   bool ok = parseFromStream(builder, std::cin, &value, &errs);
 \endcode
 */
-class CharReaderBuilder : public CharReader::Factory {
+class JSON_API CharReaderBuilder : public CharReader::Factory {
 public:
-  /** default: true
-   *
-   * It is possible to "allow" comments but still not "collect" them.
-   */
-  bool collectComments_;
-  /** default: all()
-   *
-   * For historical reasons, Features is a separate structure.
-   */
-  Features features_;
+  // Note: We use a Json::Value so that we can add data-members to this class
+  // without a major version bump.
+  /** Configuration of this builder.
+    Available settings (case-sensitive):
+    - "collectComments": false or true (default=true)
+    - TODO: other features ...
+    But don't trust these docs. You can examine 'settings_` yourself
+    to see the defaults. You can also write and read them just like any
+    JSON Value.
+    */
+  Json::Value settings_;
 
   CharReaderBuilder();
   virtual ~CharReaderBuilder();
 
   virtual CharReader* newCharReader() const;
+
+  /** \return true if 'settings' are illegal and consistent;
+   *   otherwise, indicate bad settings via 'invalid'.
+   */
+  bool validate(Json::Value* invalid) const;
+  /** Called by ctor, but you can use this to reset settings_.
+   * \pre 'settings' != NULL (but Json::null is fine)
+   */
+  static void setDefaults(Json::Value* settings);
 };
 
 /** Consume entire stream and use its begin/end.
