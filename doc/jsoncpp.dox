@@ -50,16 +50,8 @@ preserved.
 \section _example Code example
 
 \code
-Json::Value root;   // will contain the root value after parsing.
-Json::Reader reader;
-bool parsingSuccessful = reader.parse( config_doc, root );
-if ( !parsingSuccessful )
-{
-    // report to the user the failure and their locations in the document.
-    std::cout  << "Failed to parse configuration\n"
-               << reader.getFormattedErrorMessages();
-    return;
-}
+Json::Value root;   // 'root' will contain the root value after parsing.
+std::cin >> root;   // Or see CharReaderBuilder.
 
 // Get the value of the member of root named 'encoding', return 'UTF-8' if there is no
 // such member.
@@ -80,7 +72,7 @@ root["indent"]["length"] = getCurrentIndentLength();
 root["indent"]["use_space"] = getCurrentIndentUseSpace();
 
 // (NEW IN 1.4.0)
-// To write into a steam with minimal memory overhead,
+// To write into a stream with minimal memory overhead,
 // create a Builder for a StreamWriter.
 Json::StreamWriterBuilder builder;
 builder.indentation_ = "   ";  // or whatever you like

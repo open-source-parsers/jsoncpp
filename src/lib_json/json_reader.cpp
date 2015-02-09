@@ -915,6 +915,8 @@ CharReaderBuilder::CharReaderBuilder()
   : collectComments_(true)
   , features_(Features::all())
 {}
+CharReaderBuilder::~CharReaderBuilder()
+{}
 CharReader* CharReaderBuilder::newCharReader() const
 {
   return new OldReader(collectComments_, features_);

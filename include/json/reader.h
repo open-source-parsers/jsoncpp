@@ -274,21 +274,27 @@ public:
   };  // Factory
 };  // CharReader
 
+/** \brief Build a CharReader implementation.
+
+Usage:
+\code
+  using namespace Json;
+  CharReaderBuilder builder;
+  builder.collectComments_ = true;
+  std::shared_ptr<CharReader> reader(
+    builder.newCharReader());
+  Value value;
+  std::string errs;
+  bool ok = parseFromStream(std::cin, &value, &errs);
+\endcode
+*/
 class CharReaderBuilder : public CharReader::Factory {
+public:
   bool collectComments_;
   Features features_;
-public:
+
   CharReaderBuilder();
-
-  CharReaderBuilder& withCollectComments(bool v) {
-    collectComments_ = v;
-    return *this;
-  }
-
-  CharReaderBuilder& withFeatures(Features const& v) {
-    features_ = v;
-    return *this;
-  }
+  virtual ~CharReaderBuilder();
 
   virtual CharReader* newCharReader() const;
 };

@@ -105,9 +105,10 @@ public:
   std::string indentation_;
 
   StreamWriterBuilder();
+  virtual ~StreamWriterBuilder();
 
   /// Do not take ownership of sout, but maintain a reference.
-  StreamWriter* newStreamWriter(std::ostream* sout) const;
+  virtual StreamWriter* newStreamWriter(std::ostream* sout) const;
 };
 
 /** \brief Build a StreamWriter implementation.

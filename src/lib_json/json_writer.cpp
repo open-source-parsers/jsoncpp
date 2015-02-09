@@ -971,6 +971,8 @@ StreamWriterBuilder::StreamWriterBuilder()
   : cs_(StreamWriter::CommentStyle::All)
   , indentation_("\t")
 {}
+StreamWriterBuilder::~StreamWriterBuilder()
+{}
 StreamWriter* StreamWriterBuilder::newStreamWriter(std::ostream* stream) const
 {
   std::string colonSymbol = " : ";
