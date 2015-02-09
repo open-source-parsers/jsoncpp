@@ -71,21 +71,8 @@ root["encoding"] = getCurrentEncoding();
 root["indent"]["length"] = getCurrentIndentLength();
 root["indent"]["use_space"] = getCurrentIndentUseSpace();
 
-// (NEW IN 1.4.0)
-// To write into a stream with minimal memory overhead,
-// create a Builder for a StreamWriter.
-Json::StreamWriterBuilder builder;
-builder.indentation_ = "   ";  // or whatever you like
-
-// Then build a StreamWriter.
-std::shared_ptr<Json::StreamWriter> writer(
-    builder.newStreamWriter( &std::cout ) );
-
-// Make a new JSON document for the configuration. Preserve original comments.
-writer->write( root );
-
 // If you like the defaults, you can insert directly into a stream.
-std::cout << root;
+std::cout << root;  // Or see StreamWriterBuilder.
 
 // If desired, remember to add a linefeed and flush.
 std::cout << std::endl;
@@ -94,8 +81,7 @@ std::cout << std::endl;
 // use `writeString()` for convenience.
 std::string document = Json::writeString( root, builder );
 
-// You can also read from a stream.  This will put the contents of any JSON
-// stream at a particular sub-value, if you'd like.
+// You can also read into a particular sub-value.
 std::cin >> root["subtree"];
 \endcode
 
