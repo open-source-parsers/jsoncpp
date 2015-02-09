@@ -69,8 +69,10 @@ public:
   };  // Factory
 };  // StreamWriter
 
-/// \brief Write into stringstream, then return string, for convenience.
-std::string writeString(Value const& root, StreamWriter::Factory const& factory);
+/** \brief Write into stringstream, then return string, for convenience.
+ * A StreamWriter will be created from the factory, used, and then deleted.
+ */
+std::string writeString(StreamWriter::Factory const& factory, Value const& root);
 
 
 /** \brief Build a StreamWriter implementation.

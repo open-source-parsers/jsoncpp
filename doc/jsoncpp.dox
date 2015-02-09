@@ -53,23 +53,26 @@ preserved.
 Json::Value root;   // 'root' will contain the root value after parsing.
 std::cin >> root;
 
+// You can also read into a particular sub-value.
+std::cin >> root["subtree"];
+
 // Get the value of the member of root named 'encoding', return 'UTF-8' if there is no
 // such member.
 std::string encoding = root.get("encoding", "UTF-8" ).asString();
-// Get the value of the member of root named 'encoding', return a 'null' value if
+// Get the value of the member of root named 'encoding'; return a 'null' value if
 // there is no such member.
 const Json::Value plugins = root["plug-ins"];
 for ( int index = 0; index < plugins.size(); ++index )  // Iterates over the sequence elements.
    loadPlugIn( plugins[index].asString() );
    
-setIndentLength( root["indent"].get("length", 3).asInt() );
-setIndentUseSpace( root["indent"].get("use_space", true).asBool() );
+foo::setIndentLength( root["indent"].get("length", 3).asInt() );
+foo::setIndentUseSpace( root["indent"].get("use_space", true).asBool() );
 
 // Since Json::Value has implicit constructor for all value types, it is not
 // necessary to explicitly construct the Json::Value object:
-root["encoding"] = getCurrentEncoding();
-root["indent"]["length"] = getCurrentIndentLength();
-root["indent"]["use_space"] = getCurrentIndentUseSpace();
+root["encoding"] = foo::getCurrentEncoding();
+root["indent"]["length"] = foo::getCurrentIndentLength();
+root["indent"]["use_space"] = foo::getCurrentIndentUseSpace();
 
 // If you like the defaults, you can insert directly into a stream.
 std::cout << root;
@@ -80,27 +83,24 @@ std::cout << std::endl;
 \endcode
 
 \section _advanced Advanced usage
-We are finalizing the new *Builder* API, which will be in versions
-`1.4.0` and `0.8.0` when released. Until then, you may continue to
-use the old API, include `Writer`, `Reader`, and `Feature`.
+
+Configure *builders* to create *readers* and *writers*. For
+configuration, we use our own `Json::Value` (rather than
+standard setters/getters) so that we can add
+features without losing binary-compatibility.
+
 \code
-
-// EXPERIMENTAL
-// Or use `writeString()` for convenience, with a specialized builder.
+// For convenience, use `writeString()` with a specialized builder.
 Json::StreamWriterBuilder wbuilder;
-builder.indentation_ = "\t";
-std::string document = Json::writeString(root, wbuilder);
+wbuilder.settings["indentation"] = "\t";
+std::string document = Json::writeString(wbuilder, root);
 
-// You can also read into a particular sub-value.
-std::cin >> root["subtree"];
-
-// EXPERIMENTAL
-// Here we use a specialized Builder, discard comments, and
-// record errors.
+// Here, using a specialized Builder, we discard comments and
+// record errors as we parse.
 Json::CharReaderBuilder rbuilder;
-rbuilder.collectComments_ = false;
+rbuilder.settings["collectComments"] = false;
 std::string errs;
-Json::parseFromStream(rbuilder, std::cin, &root["subtree"], &errs);
+bool ok = Json::parseFromStream(rbuilder, std::cin, &root, &errs);
 \endcode
 
 \section _pbuild Build instructions

@@ -185,7 +185,7 @@ static std::string useBuiltStyledStreamWriter(
     Json::Value const& root)
 {
   Json::StreamWriterBuilder builder;
-  return writeString(root, builder);
+  return Json::writeString(builder, root);
 }
 static int rewriteValueTree(
     const std::string& rewritePath,

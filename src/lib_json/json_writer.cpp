@@ -1005,10 +1005,10 @@ StreamWriter* OldCompressingStreamWriterBuilder::newStreamWriter(
       colonSymbol, nullSymbol, endingLineFeedSymbol);
 }
 
-std::string writeString(Value const& root, StreamWriter::Factory const& builder) {
+std::string writeString(StreamWriter::Factory const& builder, Value const& root) {
   std::ostringstream sout;
-  StreamWriterPtr const sw(builder.newStreamWriter(&sout));
-  sw->write(root);
+  StreamWriterPtr const writer(builder.newStreamWriter(&sout));
+  writer->write(root);
   return sout.str();
 }
 
