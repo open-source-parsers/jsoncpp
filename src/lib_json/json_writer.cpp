@@ -947,24 +947,6 @@ StreamWriter::StreamWriter(std::ostream* sout)
 StreamWriter::~StreamWriter()
 {
 }
-struct MyStreamWriter : public StreamWriter {
-public:
-  MyStreamWriter(std::ostream* sout);
-  virtual ~MyStreamWriter();
-  virtual int write(Value const& root) = 0;
-};
-MyStreamWriter::MyStreamWriter(std::ostream* sout)
-    : StreamWriter(sout)
-{
-}
-MyStreamWriter::~MyStreamWriter()
-{
-}
-int MyStreamWriter::write(Value const& root)
-{
-  sout_ << root;
-  return 0;
-}
 StreamWriter::Factory::~Factory()
 {}
 StreamWriterBuilder::StreamWriterBuilder()

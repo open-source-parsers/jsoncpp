@@ -75,14 +75,15 @@ std::string writeString(Value const& root, StreamWriter::Factory const& factory)
 
 /** \brief Build a StreamWriter implementation.
 
+  \deprecated This is experimental and will be altered before the next release.
+
 Usage:
 \code
   using namespace Json;
   Value value = ...;
   StreamWriterBuilder builder;
   builder.cs_ = StreamWriter::CommentStyle::None;
-  std::shared_ptr<StreamWriter> writer(
-    builder.newStreamWriter(&std::cout));
+  builder.indentation_ = "   ";  // or whatever you like
   writer->write(value);
   std::cout << std::endl;  // add lf and flush
 \endcode
@@ -120,7 +121,7 @@ public:
  *   OldCompressingStreamWriterBuilder b;
  *   b.dropNullPlaceHolders_ = true; // etc.
  *   StreamWriter* w = b.newStreamWriter(&std::cout);
- *   w.write(value);
+ *   w->write(value);
  *   delete w;
  * \endcode
  */
