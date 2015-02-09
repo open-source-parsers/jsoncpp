@@ -140,4 +140,6 @@ Basically JsonCpp is licensed under MIT license, or public domain if desired
 and recognized in your jurisdiction.
 
 \author Baptiste Lepilleur <blep@users.sourceforge.net> (originator)
+\version \include version
+\sa version.h
 */
