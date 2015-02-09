@@ -28,6 +28,7 @@ namespace Json {
 /** \brief Unserialize a <a HREF="http://www.json.org">JSON</a> document into a
  *Value.
  *
+ * \deprecated Use CharReader and CharReaderBuilder.
  */
 class JSON_API Reader {
 public:
@@ -280,17 +281,23 @@ Usage:
 \code
   using namespace Json;
   CharReaderBuilder builder;
-  builder.collectComments_ = true;
-  std::shared_ptr<CharReader> reader(
-    builder.newCharReader());
+  builder.collectComments_ = false;
   Value value;
   std::string errs;
-  bool ok = parseFromStream(std::cin, &value, &errs);
+  bool ok = parseFromStream(builder, std::cin, &value, &errs);
 \endcode
 */
 class CharReaderBuilder : public CharReader::Factory {
 public:
+  /** default: true
+   *
+   * It is possible to "allow" comments but still not "collect" them.
+   */
   bool collectComments_;
+  /** default: all()
+   *
+   * For historical reasons, Features is a separate structure.
+   */
   Features features_;
 
   CharReaderBuilder();
