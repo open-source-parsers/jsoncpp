@@ -130,7 +130,7 @@ def build_doc(options,  make_release=False):
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
 
-    do_subst_in_file('doc/doxyfile', 'doc/doxyfile.in', subst_keys)
+    do_subst_in_file('doc/doxyfile', options.doxyfile_input_path, subst_keys)
     run_doxygen(options.doxygen_path, 'doc/doxyfile', 'doc', is_silent=options.silent)
     if not options.silent:
         print(open(warning_log_path, 'r').read())
@@ -169,6 +169,8 @@ def main():
         help="""Path to GraphViz dot tool. Must be full qualified path. [Default: %default]""")
     parser.add_option('--doxygen', dest="doxygen_path", action='store', default=find_program('doxygen'),
         help="""Path to Doxygen tool. [Default: %default]""")
+    parser.add_option('--in', dest="doxyfile_input_path", action='store', default='doc/doxyfile.in',
+        help="""Path to doxygen inputs. [Default: %default]""")
     parser.add_option('--with-html-help', dest="with_html_help", action='store_true', default=False,
         help="""Enable generation of Microsoft HTML HELP""")
     parser.add_option('--no-uml-look', dest="with_uml_look", action='store_false', default=True,
