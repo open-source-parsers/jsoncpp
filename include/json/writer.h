@@ -121,6 +121,8 @@ public:
   bool validate(Json::Value* invalid) const;
   /** Called by ctor, but you can use this to reset settings_.
    * \pre 'settings' != NULL (but Json::null is fine)
+   * \remark Defaults:
+   * \snippet src/lib_json/json_writer.cpp StreamWriterBuilderDefaults
    */
   static void setDefaults(Json::Value* settings);
 };

@@ -103,6 +103,22 @@ std::string errs;
 bool ok = Json::parseFromStream(rbuilder, std::cin, &root, &errs);
 \endcode
 
+Yes, compile-time configuration-checking would be helpful,
+but `Json::Value` lets you
+write and read the builder configuration, which is better! In other words,
+you can configure your JSON parser using JSON.
+
+CharReaders and StreamWriters are not thread-safe, but they are re-usable.
+\code
+Json::CharReaderBuilder rbuilder;
+cfg >> rbuilder.settings_;
+std::unique_ptr<Json::CharReader> const reader(rbuilder.newCharReader());
+reader->parse(start, stop, &value1, &errs);
+// ...
+reader->parse(start, stop, &value2, &errs);
+// etc.
+\endcode
+
 \section _pbuild Build instructions
 The build instructions are located in the file 
 <a HREF="https://github.com/open-source-parsers/jsoncpp/blob/master/README.md">README.md</a> in the top-directory of the project.
@@ -137,5 +153,7 @@ and recognized in your jurisdiction.
 
 \author Baptiste Lepilleur <blep@users.sourceforge.net> (originator)
 \version \include version
+We make strong guarantees about binary-compatibility, consistent with
+<a href="http://apr.apache.org/versioning.html">the Apache versioning scheme</a>.
 \sa version.h
 */

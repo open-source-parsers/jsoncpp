@@ -296,12 +296,14 @@ public:
   // Note: We use a Json::Value so that we can add data-members to this class
   // without a major version bump.
   /** Configuration of this builder.
+    These are case-sensitive.
     Available settings (case-sensitive):
     - "collectComments": false or true (default=true)
     - TODO: other features ...
-    But don't trust these docs. You can examine 'settings_` yourself
+    You can examine 'settings_` yourself
     to see the defaults. You can also write and read them just like any
     JSON Value.
+    \sa setDefaults(Json::Value*)
     */
   Json::Value settings_;
 
@@ -316,8 +318,16 @@ public:
   bool validate(Json::Value* invalid) const;
   /** Called by ctor, but you can use this to reset settings_.
    * \pre 'settings' != NULL (but Json::null is fine)
+   * \remark Defaults:
+   * \snippet src/lib_json/json_reader.cpp CharReaderBuilderStrictMode
    */
   static void setDefaults(Json::Value* settings);
+  /** Same as old Features::strictMode().
+   * \pre 'settings' != NULL (but Json::null is fine)
+   * \remark Defaults:
+   * \snippet src/lib_json/json_reader.cpp CharReaderBuilderDefaults
+   */
+  static void strictMode(Json::Value* settings);
 };
 
 /** Consume entire stream and use its begin/end.

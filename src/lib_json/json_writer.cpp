@@ -1008,8 +1008,10 @@ bool StreamWriterBuilder::validate(Json::Value* invalid) const
 // static
 void StreamWriterBuilder::setDefaults(Json::Value* settings)
 {
+  //! [StreamWriterBuilderDefaults]
   (*settings)["commentStyle"] = "All";
   (*settings)["indentation"] = "\t";
+  //! [StreamWriterBuilderDefaults]
 }
 
 /*

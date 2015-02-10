@@ -952,9 +952,25 @@ bool CharReaderBuilder::validate(Json::Value* invalid) const
   return valid;
 }
 // static
+void CharReaderBuilder::strictMode(Json::Value* settings)
+{
+//! [CharReaderBuilderStrictMode]
+  (*settings)["allowComments"] = false;
+  (*settings)["strictRoot"] = true;
+  (*settings)["allowDroppedNullPlaceholders"] = false;
+  (*settings)["allowNumericKeys"] = false;
+//! [CharReaderBuilderStrictMode]
+}
+// static
 void CharReaderBuilder::setDefaults(Json::Value* settings)
 {
+//! [CharReaderBuilderDefaults]
   (*settings)["collectComments"] = true;
+  (*settings)["allowComments"] = true;
+  (*settings)["strictRoot"] = false;
+  (*settings)["allowDroppedNullPlaceholders"] = false;
+  (*settings)["allowNumericKeys"] = false;
+//! [CharReaderBuilderDefaults]
 }
 
 //////////////////////////////////
