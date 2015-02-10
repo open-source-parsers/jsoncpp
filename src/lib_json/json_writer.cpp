@@ -12,6 +12,7 @@
 #include <sstream>
 #include <utility>
 #include <set>
+#include <stdexcept>
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
