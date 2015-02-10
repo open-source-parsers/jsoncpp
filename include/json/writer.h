@@ -31,85 +31,93 @@ Usage:
   using namespace Json;
   void writeToStdout(StreamWriter::Factory const& factory, Value const& value) {
     std::unique_ptr<StreamWriter> const writer(
-      factory.newStreamWriter(&std::cout));
-    writer->write(value);
+      factory.newStreamWriter());
+    writer->write(value, &std::cout);
     std::cout << std::endl;  // add lf and flush
   }
 \endcode
 */
 class JSON_API StreamWriter {
 protected:
-  std::ostream& sout_;  // not owned; will not delete
+  std::ostream* sout_;  // not owned; will not delete
 public:
-  /// Scoped enums are not available until C++11.
-  struct CommentStyle {
-    /// Decide whether to write comments.
-    enum Enum {
-      None,  ///< Drop all comments.
-      Most,  ///< Recover odd behavior of previous versions (not implemented yet).
-      All  ///< Keep all comments.
-    };
-  };
-
-  /// Keep a reference, but do not take ownership of `sout`.
-  StreamWriter(std::ostream* sout);
+  StreamWriter();
   virtual ~StreamWriter();
-  /// Write Value into document as configured in sub-class.
-  /// \return zero on success
-  /// \throw std::exception possibly, depending on configuration
-  virtual int write(Value const& root) = 0;
+  /** Write Value into document as configured in sub-class.
+      Do not take ownership of sout, but maintain a reference during function.
+      \pre sout != NULL
+      \return zero on success
+      \throw std::exception possibly, depending on configuration
+   */
+  virtual int write(Value const& root, std::ostream* sout) = 0;
 
   /** \brief A simple abstract factory.
    */
   class JSON_API Factory {
   public:
     virtual ~Factory();
-    /// Do not take ownership of sout, but maintain a reference.
-    virtual StreamWriter* newStreamWriter(std::ostream* sout) const = 0;
+    /** \brief Allocate a CharReader via operator new().
+     * \throw std::exception if something goes wrong (e.g. invalid settings)
+     */
+    virtual StreamWriter* newStreamWriter() const = 0;
   };  // Factory
 };  // StreamWriter
 
-/// \brief Write into stringstream, then return string, for convenience.
-std::string writeString(Value const& root, StreamWriter::Factory const& factory);
+/** \brief Write into stringstream, then return string, for convenience.
+ * A StreamWriter will be created from the factory, used, and then deleted.
+ */
+std::string writeString(StreamWriter::Factory const& factory, Value const& root);
 
 
 /** \brief Build a StreamWriter implementation.
-
-  \deprecated This is experimental and will be altered before the next release.
 
 Usage:
 \code
   using namespace Json;
   Value value = ...;
   StreamWriterBuilder builder;
-  builder.cs_ = StreamWriter::CommentStyle::None;
-  builder.indentation_ = "   ";  // or whatever you like
-  writer->write(value);
+  builder.settings_["commentStyle"] = "None";
+  builder.settings_["indentation"] = "   ";  // or whatever you like
+  std::unique_ptr<Json::StreamWriter> writer(
+      builder.newStreamWriter());
+  writer->write(value, &std::cout);
   std::cout << std::endl;  // add lf and flush
 \endcode
 */
 class JSON_API StreamWriterBuilder : public StreamWriter::Factory {
 public:
-  // Note: We cannot add data-members to this class without a major version bump.
-  // So these might as well be completely exposed.
+  // Note: We use a Json::Value so that we can add data-members to this class
+  // without a major version bump.
+  /** Configuration of this builder.
+    Available settings (case-sensitive):
+    - "commentStyle": "None", "Some", or "All"
+    - "indentation":  "<anything>"
 
-  /** \brief How to write comments.
-   * Default: All
-   */
-  StreamWriter::CommentStyle::Enum cs_;
-  /** \brief Write in human-friendly style.
-
-      If "", then skip all indentation and newlines.
-      In that case, you probably want CommentStyle::None also.
-      Default: "\t"
-  */
-  std::string indentation_;
+    You can examine 'settings_` yourself
+    to see the defaults. You can also write and read them just like any
+    JSON Value.
+    \sa setDefaults()
+    */
+  Json::Value settings_;
 
   StreamWriterBuilder();
   virtual ~StreamWriterBuilder();
 
-  /// Do not take ownership of sout, but maintain a reference.
-  virtual StreamWriter* newStreamWriter(std::ostream* sout) const;
+  /**
+   * \throw std::exception if something goes wrong (e.g. invalid settings)
+   */
+  virtual StreamWriter* newStreamWriter() const;
+
+  /** \return true if 'settings' are legal and consistent;
+   *   otherwise, indicate bad settings via 'invalid'.
+   */
+  bool validate(Json::Value* invalid) const;
+  /** Called by ctor, but you can use this to reset settings_.
+   * \pre 'settings' != NULL (but Json::null is fine)
+   * \remark Defaults:
+   * \snippet src/lib_json/json_writer.cpp StreamWriterBuilderDefaults
+   */
+  static void setDefaults(Json::Value* settings);
 };
 
 /** \brief Build a StreamWriter implementation.
@@ -120,10 +128,12 @@ public:
  * \code
  *   OldCompressingStreamWriterBuilder b;
  *   b.dropNullPlaceHolders_ = true; // etc.
- *   StreamWriter* w = b.newStreamWriter(&std::cout);
- *   w->write(value);
+ *   StreamWriter* w = b.newStreamWriter();
+ *   w->write(value, &std::cout);
  *   delete w;
  * \endcode
+ *
+ * \deprecated Use StreamWriterBuilder
  */
 class JSON_API OldCompressingStreamWriterBuilder : public StreamWriter::Factory
 {
@@ -155,7 +165,7 @@ public:
     , omitEndingLineFeed_(false)
     , enableYAMLCompatibility_(false)
   {}
-  virtual StreamWriter* newStreamWriter(std::ostream*) const;
+  virtual StreamWriter* newStreamWriter() const;
 };
 
 /** \brief Abstract class for writers.
