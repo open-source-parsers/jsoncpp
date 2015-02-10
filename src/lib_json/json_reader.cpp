@@ -1865,6 +1865,7 @@ static void getValidReaderKeys(std::set<std::string>* valid_keys)
   valid_keys->insert("strictRoot");
   valid_keys->insert("allowDroppedNullPlaceholders");
   valid_keys->insert("allowNumericKeys");
+  valid_keys->insert("stackLimit");
 }
 bool CharReaderBuilder::validate(Json::Value* invalid) const
 {
@@ -1903,6 +1904,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings)
   (*settings)["strictRoot"] = false;
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
+  (*settings)["stackLimit"] = 1000;
 //! [CharReaderBuilderDefaults]
 }
 
