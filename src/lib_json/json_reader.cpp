@@ -925,13 +925,20 @@ CharReader* CharReaderBuilder::newCharReader() const
 
   bool collectComments = settings_["collectComments"].asBool();
   Features features = Features::all();
-  // TODO: Fill in features.
+  features.allowComments_ = settings_["allowComments"].asBool();
+  features.strictRoot_ = settings_["strictRoot"].asBool();
+  features.allowDroppedNullPlaceholders_ = settings_["allowDroppedNullPlaceholders"].asBool();
+  features.allowNumericKeys_ = settings_["allowNumericKeys"].asBool();
   return new OldReader(collectComments, features);
 }
 static void getValidReaderKeys(std::set<std::string>* valid_keys)
 {
   valid_keys->clear();
   valid_keys->insert("collectComments");
+  valid_keys->insert("allowComments");
+  valid_keys->insert("strictRoot");
+  valid_keys->insert("allowDroppedNullPlaceholders");
+  valid_keys->insert("allowNumericKeys");
 }
 bool CharReaderBuilder::validate(Json::Value* invalid) const
 {

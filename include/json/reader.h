@@ -298,12 +298,16 @@ public:
   /** Configuration of this builder.
     These are case-sensitive.
     Available settings (case-sensitive):
-    - "collectComments": false or true (default=true)
-    - TODO: other features ...
+    - "collectComments": false or true
+    - "allowComments"
+    - "strictRoot"
+    - "allowDroppedNullPlaceholders"
+    - "allowNumericKeys"
+
     You can examine 'settings_` yourself
     to see the defaults. You can also write and read them just like any
     JSON Value.
-    \sa setDefaults(Json::Value*)
+    \sa setDefaults()
     */
   Json::Value settings_;
 
@@ -312,7 +316,7 @@ public:
 
   virtual CharReader* newCharReader() const;
 
-  /** \return true if 'settings' are illegal and consistent;
+  /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
    */
   bool validate(Json::Value* invalid) const;

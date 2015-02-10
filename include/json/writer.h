@@ -99,11 +99,13 @@ public:
   // without a major version bump.
   /** Configuration of this builder.
     Available settings (case-sensitive):
-    - "commentStyle": "None", "Some", or "All" (default="All")
-    - "indentation":  (default="\t")
-    But don't trust these docs. You can examine 'settings_` yourself
+    - "commentStyle": "None", "Some", or "All"
+    - "indentation":  "<anything>"
+
+    You can examine 'settings_` yourself
     to see the defaults. You can also write and read them just like any
     JSON Value.
+    \sa setDefaults()
     */
   Json::Value settings_;
 
@@ -115,7 +117,7 @@ public:
    */
   virtual StreamWriter* newStreamWriter(std::ostream* sout) const;
 
-  /** \return true if 'settings' are illegal and consistent;
+  /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
    */
   bool validate(Json::Value* invalid) const;
