@@ -903,7 +903,7 @@ public:
     std::string message;
   };
 
-  OldReader(OldFeatures const* features);
+  OldReader(Features const& features);
   bool parse(const char* beginDoc,
              const char* endDoc,
              Value& root,
@@ -1000,13 +1000,13 @@ private:
   Location lastValueEnd_;
   Value* lastValue_;
   std::string commentsBefore_;
-  OldFeatures features_;
+  Features features_;
   bool collectComments_;
 };  // OldReader
 
 // complete copy of Read impl, for OldReader
 
-OldReader::Reader(const Features& features)
+OldReader::OldReader(Features const& features)
     : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
       lastValue_(), commentsBefore_(), features_(features), collectComments_() {
 }
@@ -1711,11 +1711,6 @@ std::string OldReader::getLocationLineAndColumn(Location location) const {
   return buffer;
 }
 
-// Deprecated. Preserved for backward compatibility
-std::string OldReader::getFormatedErrorMessages() const {
-  return getFormattedErrorMessages();
-}
-
 std::string OldReader::getFormattedErrorMessages() const {
   std::string formattedMessage;
   for (Errors::const_iterator itError = errors_.begin();
@@ -1793,9 +1788,9 @@ class OldCharReader : public CharReader {
 public:
   OldCharReader(
     bool collectComments,
-    Features const* features)
+    Features const& features)
   : collectComments_(collectComments)
-  , reader_(&features)
+  , reader_(features)
   {}
   virtual bool parse(
       char const* beginDoc, char const* endDoc,
