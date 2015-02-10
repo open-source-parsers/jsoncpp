@@ -31,15 +31,15 @@ Usage:
   using namespace Json;
   void writeToStdout(StreamWriter::Factory const& factory, Value const& value) {
     std::unique_ptr<StreamWriter> const writer(
-      factory.newStreamWriter(&std::cout));
-    writer->write(value);
+      factory.newStreamWriter());
+    writer->write(value, &std::cout);
     std::cout << std::endl;  // add lf and flush
   }
 \endcode
 */
 class JSON_API StreamWriter {
 protected:
-  std::ostream& sout_;  // not owned; will not delete
+  std::ostream* sout_;  // not owned; will not delete
 public:
   /// Scoped enums are not available until C++11.
   struct CommentStyle {
@@ -51,13 +51,15 @@ public:
     };
   };
 
-  /// Keep a reference, but do not take ownership of `sout`.
-  StreamWriter(std::ostream* sout);
+  StreamWriter();
   virtual ~StreamWriter();
-  /// Write Value into document as configured in sub-class.
-  /// \return zero on success
-  /// \throw std::exception possibly, depending on configuration
-  virtual int write(Value const& root) = 0;
+  /** Write Value into document as configured in sub-class.
+      Do not take ownership of sout, but maintain a reference during function.
+      \pre sout != NULL
+      \return zero on success
+      \throw std::exception possibly, depending on configuration
+   */
+  virtual int write(Value const& root, std::ostream* sout) = 0;
 
   /** \brief A simple abstract factory.
    */
@@ -65,10 +67,9 @@ public:
   public:
     virtual ~Factory();
     /** \brief Allocate a CharReader via operator new().
-     *  Do not take ownership of sout, but maintain a reference.
      * \throw std::exception if something goes wrong (e.g. invalid settings)
      */
-    virtual StreamWriter* newStreamWriter(std::ostream* sout) const = 0;
+    virtual StreamWriter* newStreamWriter() const = 0;
   };  // Factory
 };  // StreamWriter
 
@@ -88,8 +89,8 @@ Usage:
   builder.settings_["commentStyle"] = "None";
   builder.settings_["indentation"] = "   ";  // or whatever you like
   std::unique_ptr<Json::StreamWriter> writer(
-      builder.newStreamWriter(&std::cout));
-  writer->write(value);
+      builder.newStreamWriter());
+  writer->write(value, &std::cout);
   std::cout << std::endl;  // add lf and flush
 \endcode
 */
@@ -112,10 +113,10 @@ public:
   StreamWriterBuilder();
   virtual ~StreamWriterBuilder();
 
-  /** Do not take ownership of sout, but maintain a reference.
+  /**
    * \throw std::exception if something goes wrong (e.g. invalid settings)
    */
-  virtual StreamWriter* newStreamWriter(std::ostream* sout) const;
+  virtual StreamWriter* newStreamWriter() const;
 
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
@@ -137,8 +138,8 @@ public:
  * \code
  *   OldCompressingStreamWriterBuilder b;
  *   b.dropNullPlaceHolders_ = true; // etc.
- *   StreamWriter* w = b.newStreamWriter(&std::cout);
- *   w->write(value);
+ *   StreamWriter* w = b.newStreamWriter();
+ *   w->write(value, &std::cout);
  *   delete w;
  * \endcode
  *
@@ -174,7 +175,7 @@ public:
     , omitEndingLineFeed_(false)
     , enableYAMLCompatibility_(false)
   {}
-  virtual StreamWriter* newStreamWriter(std::ostream*) const;
+  virtual StreamWriter* newStreamWriter() const;
 };
 
 /** \brief Abstract class for writers.
