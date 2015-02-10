@@ -892,6 +892,39 @@ bool Reader::good() const {
   return !errors_.size();
 }
 
+// exact copy of Features
+class OldFeatures {
+public:
+  static OldFeatures all();
+  static OldFeatures strictMode();
+  OldFeatures();
+  bool allowComments_;
+  bool strictRoot_;
+  bool allowDroppedNullPlaceholders_;
+  bool allowNumericKeys_;
+};  // OldFeatures
+
+// exact copy of Implementation of class Features
+// ////////////////////////////////
+
+OldFeatures::OldFeatures()
+    : allowComments_(true), strictRoot_(false),
+      allowDroppedNullPlaceholders_(false), allowNumericKeys_(false) {}
+
+OldFeatures OldFeatures::all() { return OldFeatures(); }
+
+OldFeatures OldFeatures::strictMode() {
+  OldFeatures features;
+  features.allowComments_ = false;
+  features.strictRoot_ = true;
+  features.allowDroppedNullPlaceholders_ = false;
+  features.allowNumericKeys_ = false;
+  return features;
+}
+
+// Implementation of class Reader
+// ////////////////////////////////
+
 // exact copy of Reader, renamed to OldReader
 class OldReader {
 public:
@@ -903,7 +936,7 @@ public:
     std::string message;
   };
 
-  OldReader(Features const& features);
+  OldReader(OldFeatures const& features);
   bool parse(const char* beginDoc,
              const char* endDoc,
              Value& root,
@@ -1000,13 +1033,13 @@ private:
   Location lastValueEnd_;
   Value* lastValue_;
   std::string commentsBefore_;
-  Features features_;
+  OldFeatures features_;
   bool collectComments_;
 };  // OldReader
 
 // complete copy of Read impl, for OldReader
 
-OldReader::OldReader(Features const& features)
+OldReader::OldReader(OldFeatures const& features)
     : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
       lastValue_(), commentsBefore_(), features_(features), collectComments_() {
 }
@@ -1788,7 +1821,7 @@ class OldCharReader : public CharReader {
 public:
   OldCharReader(
     bool collectComments,
-    Features const& features)
+    OldFeatures const& features)
   : collectComments_(collectComments)
   , reader_(features)
   {}
@@ -1815,7 +1848,7 @@ CharReader* CharReaderBuilder::newCharReader() const
   // TODO: Maybe serialize the invalid settings into the exception.
 
   bool collectComments = settings_["collectComments"].asBool();
-  Features features = Features::all();
+  OldFeatures features = OldFeatures::all();
   features.allowComments_ = settings_["allowComments"].asBool();
   features.strictRoot_ = settings_["strictRoot"].asBool();
   features.allowDroppedNullPlaceholders_ = settings_["allowDroppedNullPlaceholders"].asBool();
