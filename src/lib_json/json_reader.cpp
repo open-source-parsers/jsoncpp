@@ -897,125 +897,21 @@ class OldReader {
 public:
   typedef char Char;
   typedef const Char* Location;
-
-  /** \brief An error tagged with where in the JSON text it was encountered.
-   *
-   * The offsets give the [start, limit) range of bytes within the text. Note
-   * that this is bytes, not codepoints.
-   *
-   */
   struct StructuredError {
     size_t offset_start;
     size_t offset_limit;
     std::string message;
   };
 
-  /** \brief Constructs a Reader allowing all features
-   * for parsing.
-   */
-  Reader();
-
-  /** \brief Constructs a Reader allowing the specified feature set
-   * for parsing.
-   */
-  Reader(const Features& features);
-
-  /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
-   * document.
-   * \param document UTF-8 encoded string containing the document to read.
-   * \param root [out] Contains the root value of the document if it was
-   *             successfully parsed.
-   * \param collectComments \c true to collect comment and allow writing them
-   * back during
-   *                        serialization, \c false to discard comments.
-   *                        This parameter is ignored if
-   * Features::allowComments_
-   *                        is \c false.
-   * \return \c true if the document was successfully parsed, \c false if an
-   * error occurred.
-   */
-  bool
-  parse(const std::string& document, Value& root, bool collectComments = true);
-
-  /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
-   document.
-   * \param beginDoc Pointer on the beginning of the UTF-8 encoded string of the
-   document to read.
-   * \param endDoc Pointer on the end of the UTF-8 encoded string of the
-   document to read.
-   *               Must be >= beginDoc.
-   * \param root [out] Contains the root value of the document if it was
-   *             successfully parsed.
-   * \param collectComments \c true to collect comment and allow writing them
-   back during
-   *                        serialization, \c false to discard comments.
-   *                        This parameter is ignored if
-   Features::allowComments_
-   *                        is \c false.
-   * \return \c true if the document was successfully parsed, \c false if an
-   error occurred.
-   */
+  OldReader(OldFeatures const* features);
   bool parse(const char* beginDoc,
              const char* endDoc,
              Value& root,
              bool collectComments = true);
-
-  /// \brief Parse from input stream.
-  /// \see Json::operator>>(std::istream&, Json::Value&).
-  bool parse(std::istream& is, Value& root, bool collectComments = true);
-
-  /** \brief Returns a user friendly string that list errors in the parsed
-   * document.
-   * \return Formatted error message with the list of errors with their location
-   * in
-   *         the parsed document. An empty string is returned if no error
-   * occurred
-   *         during parsing.
-   * \deprecated Use getFormattedErrorMessages() instead (typo fix).
-   */
-  JSONCPP_DEPRECATED("Use getFormattedErrorMessages instead")
-  std::string getFormatedErrorMessages() const;
-
-  /** \brief Returns a user friendly string that list errors in the parsed
-   * document.
-   * \return Formatted error message with the list of errors with their location
-   * in
-   *         the parsed document. An empty string is returned if no error
-   * occurred
-   *         during parsing.
-   */
   std::string getFormattedErrorMessages() const;
-
-  /** \brief Returns a vector of structured erros encounted while parsing.
-   * \return A (possibly empty) vector of StructuredError objects. Currently
-   *         only one error can be returned, but the caller should tolerate
-   * multiple
-   *         errors.  This can occur if the parser recovers from a non-fatal
-   *         parse error and then encounters additional errors.
-   */
   std::vector<StructuredError> getStructuredErrors() const;
-
-  /** \brief Add a semantic error message.
-   * \param value JSON Value location associated with the error
-   * \param message The error message.
-   * \return \c true if the error was successfully added, \c false if the
-   * Value offset exceeds the document size.
-   */
   bool pushError(const Value& value, const std::string& message);
-
-  /** \brief Add a semantic error message with extra context.
-   * \param value JSON Value location associated with the error
-   * \param message The error message.
-   * \param extra Additional JSON Value location to contextualize the error
-   * \return \c true if the error was successfully added, \c false if either
-   * Value offset exceeds the document size.
-   */
   bool pushError(const Value& value, const std::string& message, const Value& extra);
-
-  /** \brief Return whether there are any errors.
-   * \return \c true if there are no errors to report \c false if
-   * errors have occurred.
-   */
   bool good() const;
 
 private:
@@ -1101,20 +997,20 @@ private:
   Location lastValueEnd_;
   Value* lastValue_;
   std::string commentsBefore_;
-  Features features_;
+  OldFeatures features_;
   bool collectComments_;
-};  // Reader
+};  // OldReader
 
 
 class OldCharReader : public CharReader {
   bool const collectComments_;
-  Reader reader_;
+  OldReader reader_;
 public:
   OldCharReader(
     bool collectComments,
-    Features const& features)
+    Features const* features)
   : collectComments_(collectComments)
-  , reader_(features)
+  , reader_(&features)
   {}
   virtual bool parse(
       char const* beginDoc, char const* endDoc,
