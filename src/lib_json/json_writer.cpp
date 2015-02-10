@@ -676,11 +676,21 @@ bool StyledStreamWriter::hasCommentForValue(const Value& value) {
 //////////////////////////
 // BuiltStyledStreamWriter
 
+/// Scoped enums are not available until C++11.
+struct CommentStyle {
+  /// Decide whether to write comments.
+  enum Enum {
+    None,  ///< Drop all comments.
+    Most,  ///< Recover odd behavior of previous versions (not implemented yet).
+    All  ///< Keep all comments.
+  };
+};
+
 struct BuiltStyledStreamWriter : public StreamWriter
 {
   BuiltStyledStreamWriter(
       std::string const& indentation,
-      StreamWriter::CommentStyle::Enum cs,
+      CommentStyle::Enum cs,
       std::string const& colonSymbol,
       std::string const& nullSymbol,
       std::string const& endingLineFeedSymbol);
@@ -713,7 +723,7 @@ private:
 };
 BuiltStyledStreamWriter::BuiltStyledStreamWriter(
       std::string const& indentation,
-      StreamWriter::CommentStyle::Enum cs,
+      CommentStyle::Enum cs,
       std::string const& colonSymbol,
       std::string const& nullSymbol,
       std::string const& endingLineFeedSymbol)
@@ -963,11 +973,11 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
 
   std::string indentation = settings_["indentation"].asString();
   std::string cs_str = settings_["commentStyle"].asString();
-  StreamWriter::CommentStyle::Enum cs = StreamWriter::CommentStyle::All;
+  CommentStyle::Enum cs = CommentStyle::All;
   if (cs_str == "All") {
-    cs = StreamWriter::CommentStyle::All;
+    cs = CommentStyle::All;
   } else if (cs_str == "None") {
-    cs = StreamWriter::CommentStyle::None;
+    cs = CommentStyle::None;
   } else {
     return NULL;
   }
@@ -1031,7 +1041,7 @@ StreamWriter* OldCompressingStreamWriterBuilder::newStreamWriter() const
     endingLineFeedSymbol = "";
   }
   return new BuiltStyledStreamWriter(
-      "", StreamWriter::CommentStyle::None,
+      "", CommentStyle::None,
       colonSymbol, nullSymbol, endingLineFeedSymbol);
 }
 

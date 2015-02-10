@@ -41,16 +41,6 @@ class JSON_API StreamWriter {
 protected:
   std::ostream* sout_;  // not owned; will not delete
 public:
-  /// Scoped enums are not available until C++11.
-  struct CommentStyle {
-    /// Decide whether to write comments.
-    enum Enum {
-      None,  ///< Drop all comments.
-      Most,  ///< Recover odd behavior of previous versions (not implemented yet).
-      All  ///< Keep all comments.
-    };
-  };
-
   StreamWriter();
   virtual ~StreamWriter();
   /** Write Value into document as configured in sub-class.
