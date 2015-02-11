@@ -1034,7 +1034,9 @@ private:
   Location lastValueEnd_;
   Value* lastValue_;
   std::string commentsBefore_;
-  OurFeatures features_;
+  int stackDepth_;
+
+  OurFeatures const features_;
   bool collectComments_;
 };  // OurReader
 
@@ -1065,6 +1067,7 @@ bool OurReader::parse(const char* beginDoc,
     nodes_.pop();
   nodes_.push(&root);
 
+  stackDepth_ = 0;
   bool successful = readValue();
   Token token;
   skipCommentTokens(token);
@@ -1087,6 +1090,8 @@ bool OurReader::parse(const char* beginDoc,
 }
 
 bool OurReader::readValue() {
+  if (stackDepth_ >= features_.stackLimit_) throw std::runtime_error("Exceeded stackLimit in readValue().");
+  ++stackDepth_;
   Token token;
   skipCommentTokens(token);
   bool successful = true;
@@ -1158,6 +1163,7 @@ bool OurReader::readValue() {
     lastValue_ = &currentValue();
   }
 
+  --stackDepth_;
   return successful;
 }
 
