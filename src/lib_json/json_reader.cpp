@@ -902,7 +902,8 @@ public:
   bool strictRoot_;
   bool allowDroppedNullPlaceholders_;
   bool allowNumericKeys_;
-};  // OldFeatures
+  int stackLimit_;
+};  // OurFeatures
 
 // exact copy of Implementation of class Features
 // ////////////////////////////////
@@ -1853,6 +1854,7 @@ CharReader* CharReaderBuilder::newCharReader() const
   features.strictRoot_ = settings_["strictRoot"].asBool();
   features.allowDroppedNullPlaceholders_ = settings_["allowDroppedNullPlaceholders"].asBool();
   features.allowNumericKeys_ = settings_["allowNumericKeys"].asBool();
+  features.stackLimit_ = settings_["stackLimit"].asInt();
   return new OurCharReader(collectComments, features);
 }
 static void getValidReaderKeys(std::set<std::string>* valid_keys)
