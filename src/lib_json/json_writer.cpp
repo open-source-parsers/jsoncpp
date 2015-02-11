@@ -968,9 +968,6 @@ StreamWriterBuilder::~StreamWriterBuilder()
 {}
 StreamWriter* StreamWriterBuilder::newStreamWriter() const
 {
-  if (!validate(NULL)) throw std::runtime_error("invalid settings");
-  // TODO: Maybe serialize the invalid settings into the exception.
-
   std::string indentation = settings_["indentation"].asString();
   std::string cs_str = settings_["commentStyle"].asString();
   bool eyc = settings_["enableYAMLCompatibility"].asBool();

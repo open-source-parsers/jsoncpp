@@ -1863,9 +1863,6 @@ CharReaderBuilder::~CharReaderBuilder()
 {}
 CharReader* CharReaderBuilder::newCharReader() const
 {
-  if (!validate(NULL)) throw std::runtime_error("invalid settings");
-  // TODO: Maybe serialize the invalid settings into the exception.
-
   bool collectComments = settings_["collectComments"].asBool();
   OurFeatures features = OurFeatures::all();
   features.allowComments_ = settings_["allowComments"].asBool();
