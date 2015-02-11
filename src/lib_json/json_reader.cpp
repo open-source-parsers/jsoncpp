@@ -28,6 +28,9 @@
 #pragma warning(disable : 4996)
 #endif
 
+static int const stackLimit_g = 1000;
+static int       stackDepth_g = 0;  // see readValue()
+
 namespace Json {
 
 #if __cplusplus >= 201103L
@@ -118,6 +121,7 @@ bool Reader::parse(const char* beginDoc,
     nodes_.pop();
   nodes_.push(&root);
 
+  stackDepth_g = 0;  // Yes, this is bad coding, but options are limited.
   bool successful = readValue();
   Token token;
   skipCommentTokens(token);
@@ -140,6 +144,13 @@ bool Reader::parse(const char* beginDoc,
 }
 
 bool Reader::readValue() {
+  // This is a non-reentrant way to support a stackLimit. Terrible!
+  // But this deprecated class has a security problem: Bad input can
+  // cause a seg-fault. This seems like a fair, binary-compatible way
+  // to prevent the problem.
+  if (stackDepth_g >= stackLimit_g) throw std::runtime_error("Exceeded stackLimit in readValue().");
+  ++stackDepth_g;
+
   Token token;
   skipCommentTokens(token);
   bool successful = true;
@@ -211,6 +222,7 @@ bool Reader::readValue() {
     lastValue_ = &currentValue();
   }
 
+  --stackDepth_g;
   return successful;
 }
 
@@ -902,7 +914,8 @@ public:
   bool strictRoot_;
   bool allowDroppedNullPlaceholders_;
   bool allowNumericKeys_;
-};  // OldFeatures
+  int stackLimit_;
+};  // OurFeatures
 
 // exact copy of Implementation of class Features
 // ////////////////////////////////
@@ -1033,7 +1046,9 @@ private:
   Location lastValueEnd_;
   Value* lastValue_;
   std::string commentsBefore_;
-  OurFeatures features_;
+  int stackDepth_;
+
+  OurFeatures const features_;
   bool collectComments_;
 };  // OurReader
 
@@ -1064,6 +1079,7 @@ bool OurReader::parse(const char* beginDoc,
     nodes_.pop();
   nodes_.push(&root);
 
+  stackDepth_ = 0;
   bool successful = readValue();
   Token token;
   skipCommentTokens(token);
@@ -1086,6 +1102,8 @@ bool OurReader::parse(const char* beginDoc,
 }
 
 bool OurReader::readValue() {
+  if (stackDepth_ >= features_.stackLimit_) throw std::runtime_error("Exceeded stackLimit in readValue().");
+  ++stackDepth_;
   Token token;
   skipCommentTokens(token);
   bool successful = true;
@@ -1157,6 +1175,7 @@ bool OurReader::readValue() {
     lastValue_ = &currentValue();
   }
 
+  --stackDepth_;
   return successful;
 }
 
@@ -1853,6 +1872,7 @@ CharReader* CharReaderBuilder::newCharReader() const
   features.strictRoot_ = settings_["strictRoot"].asBool();
   features.allowDroppedNullPlaceholders_ = settings_["allowDroppedNullPlaceholders"].asBool();
   features.allowNumericKeys_ = settings_["allowNumericKeys"].asBool();
+  features.stackLimit_ = settings_["stackLimit"].asInt();
   return new OurCharReader(collectComments, features);
 }
 static void getValidReaderKeys(std::set<std::string>* valid_keys)
@@ -1863,6 +1883,7 @@ static void getValidReaderKeys(std::set<std::string>* valid_keys)
   valid_keys->insert("strictRoot");
   valid_keys->insert("allowDroppedNullPlaceholders");
   valid_keys->insert("allowNumericKeys");
+  valid_keys->insert("stackLimit");
 }
 bool CharReaderBuilder::validate(Json::Value* invalid) const
 {
@@ -1901,6 +1922,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings)
   (*settings)["strictRoot"] = false;
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
+  (*settings)["stackLimit"] = 1000;
 //! [CharReaderBuilderDefaults]
 }
 

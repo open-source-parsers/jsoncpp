@@ -310,6 +310,9 @@ public:
       - true if dropped null placeholders are allowed. (See StreamWriterBuilder.)
     - "allowNumericKeys": false or true
       - true if numeric object keys are allowed.
+    - "stackLimit": integer
+      - This is a security issue (seg-faults caused by deeply nested JSON),
+        so the default is low.
 
     You can examine 'settings_` yourself
     to see the defaults. You can also write and read them just like any
