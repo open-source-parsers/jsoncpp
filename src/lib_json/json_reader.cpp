@@ -893,11 +893,11 @@ bool Reader::good() const {
 }
 
 // exact copy of Features
-class OldFeatures {
+class OurFeatures {
 public:
-  static OldFeatures all();
-  static OldFeatures strictMode();
-  OldFeatures();
+  static OurFeatures all();
+  static OurFeatures strictMode();
+  OurFeatures();
   bool allowComments_;
   bool strictRoot_;
   bool allowDroppedNullPlaceholders_;
@@ -907,14 +907,14 @@ public:
 // exact copy of Implementation of class Features
 // ////////////////////////////////
 
-OldFeatures::OldFeatures()
+OurFeatures::OurFeatures()
     : allowComments_(true), strictRoot_(false),
       allowDroppedNullPlaceholders_(false), allowNumericKeys_(false) {}
 
-OldFeatures OldFeatures::all() { return OldFeatures(); }
+OurFeatures OurFeatures::all() { return OurFeatures(); }
 
-OldFeatures OldFeatures::strictMode() {
-  OldFeatures features;
+OurFeatures OurFeatures::strictMode() {
+  OurFeatures features;
   features.allowComments_ = false;
   features.strictRoot_ = true;
   features.allowDroppedNullPlaceholders_ = false;
@@ -925,8 +925,8 @@ OldFeatures OldFeatures::strictMode() {
 // Implementation of class Reader
 // ////////////////////////////////
 
-// exact copy of Reader, renamed to OldReader
-class OldReader {
+// exact copy of Reader, renamed to OurReader
+class OurReader {
 public:
   typedef char Char;
   typedef const Char* Location;
@@ -936,7 +936,7 @@ public:
     std::string message;
   };
 
-  OldReader(OldFeatures const& features);
+  OurReader(OurFeatures const& features);
   bool parse(const char* beginDoc,
              const char* endDoc,
              Value& root,
@@ -948,8 +948,8 @@ public:
   bool good() const;
 
 private:
-  OldReader(OldReader const&);  // no impl
-  void operator=(OldReader const&);  // no impl
+  OurReader(OurReader const&);  // no impl
+  void operator=(OurReader const&);  // no impl
 
   enum TokenType {
     tokenEndOfStream = 0,
@@ -1033,18 +1033,18 @@ private:
   Location lastValueEnd_;
   Value* lastValue_;
   std::string commentsBefore_;
-  OldFeatures features_;
+  OurFeatures features_;
   bool collectComments_;
-};  // OldReader
+};  // OurReader
 
-// complete copy of Read impl, for OldReader
+// complete copy of Read impl, for OurReader
 
-OldReader::OldReader(OldFeatures const& features)
+OurReader::OurReader(OurFeatures const& features)
     : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
       lastValue_(), commentsBefore_(), features_(features), collectComments_() {
 }
 
-bool OldReader::parse(const char* beginDoc,
+bool OurReader::parse(const char* beginDoc,
                    const char* endDoc,
                    Value& root,
                    bool collectComments) {
@@ -1085,7 +1085,7 @@ bool OldReader::parse(const char* beginDoc,
   return successful;
 }
 
-bool OldReader::readValue() {
+bool OurReader::readValue() {
   Token token;
   skipCommentTokens(token);
   bool successful = true;
@@ -1160,7 +1160,7 @@ bool OldReader::readValue() {
   return successful;
 }
 
-void OldReader::skipCommentTokens(Token& token) {
+void OurReader::skipCommentTokens(Token& token) {
   if (features_.allowComments_) {
     do {
       readToken(token);
@@ -1170,7 +1170,7 @@ void OldReader::skipCommentTokens(Token& token) {
   }
 }
 
-bool OldReader::readToken(Token& token) {
+bool OurReader::readToken(Token& token) {
   skipSpaces();
   token.start_ = current_;
   Char c = getNextChar();
@@ -1241,7 +1241,7 @@ bool OldReader::readToken(Token& token) {
   return true;
 }
 
-void OldReader::skipSpaces() {
+void OurReader::skipSpaces() {
   while (current_ != end_) {
     Char c = *current_;
     if (c == ' ' || c == '\t' || c == '\r' || c == '\n')
@@ -1251,7 +1251,7 @@ void OldReader::skipSpaces() {
   }
 }
 
-bool OldReader::match(Location pattern, int patternLength) {
+bool OurReader::match(Location pattern, int patternLength) {
   if (end_ - current_ < patternLength)
     return false;
   int index = patternLength;
@@ -1262,7 +1262,7 @@ bool OldReader::match(Location pattern, int patternLength) {
   return true;
 }
 
-bool OldReader::readComment() {
+bool OurReader::readComment() {
   Location commentBegin = current_ - 1;
   Char c = getNextChar();
   bool successful = false;
@@ -1286,7 +1286,7 @@ bool OldReader::readComment() {
 }
 
 void
-OldReader::addComment(Location begin, Location end, CommentPlacement placement) {
+OurReader::addComment(Location begin, Location end, CommentPlacement placement) {
   assert(collectComments_);
   const std::string& normalized = normalizeEOL(begin, end);
   if (placement == commentAfterOnSameLine) {
@@ -1297,7 +1297,7 @@ OldReader::addComment(Location begin, Location end, CommentPlacement placement) 
   }
 }
 
-bool OldReader::readCStyleComment() {
+bool OurReader::readCStyleComment() {
   while (current_ != end_) {
     Char c = getNextChar();
     if (c == '*' && *current_ == '/')
@@ -1306,7 +1306,7 @@ bool OldReader::readCStyleComment() {
   return getNextChar() == '/';
 }
 
-bool OldReader::readCppStyleComment() {
+bool OurReader::readCppStyleComment() {
   while (current_ != end_) {
     Char c = getNextChar();
     if (c == '\n')
@@ -1322,7 +1322,7 @@ bool OldReader::readCppStyleComment() {
   return true;
 }
 
-void OldReader::readNumber() {
+void OurReader::readNumber() {
   const char *p = current_;
   char c = '0'; // stopgap for already consumed character
   // integral part
@@ -1344,7 +1344,7 @@ void OldReader::readNumber() {
   }
 }
 
-bool OldReader::readString() {
+bool OurReader::readString() {
   Char c = 0;
   while (current_ != end_) {
     c = getNextChar();
@@ -1356,7 +1356,7 @@ bool OldReader::readString() {
   return c == '"';
 }
 
-bool OldReader::readObject(Token& tokenStart) {
+bool OurReader::readObject(Token& tokenStart) {
   Token tokenName;
   std::string name;
   Value init(objectValue);
@@ -1412,7 +1412,7 @@ bool OldReader::readObject(Token& tokenStart) {
       "Missing '}' or object member name", tokenName, tokenObjectEnd);
 }
 
-bool OldReader::readArray(Token& tokenStart) {
+bool OurReader::readArray(Token& tokenStart) {
   Value init(arrayValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(tokenStart.start_ - begin_);
@@ -1450,7 +1450,7 @@ bool OldReader::readArray(Token& tokenStart) {
   return true;
 }
 
-bool OldReader::decodeNumber(Token& token) {
+bool OurReader::decodeNumber(Token& token) {
   Value decoded;
   if (!decodeNumber(token, decoded))
     return false;
@@ -1460,7 +1460,7 @@ bool OldReader::decodeNumber(Token& token) {
   return true;
 }
 
-bool OldReader::decodeNumber(Token& token, Value& decoded) {
+bool OurReader::decodeNumber(Token& token, Value& decoded) {
   // Attempts to parse the number as an integer. If the number is
   // larger than the maximum supported value of an integer then
   // we decode the number as a double.
@@ -1500,7 +1500,7 @@ bool OldReader::decodeNumber(Token& token, Value& decoded) {
   return true;
 }
 
-bool OldReader::decodeDouble(Token& token) {
+bool OurReader::decodeDouble(Token& token) {
   Value decoded;
   if (!decodeDouble(token, decoded))
     return false;
@@ -1510,7 +1510,7 @@ bool OldReader::decodeDouble(Token& token) {
   return true;
 }
 
-bool OldReader::decodeDouble(Token& token, Value& decoded) {
+bool OurReader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
   const int bufferSize = 32;
   int count;
@@ -1546,7 +1546,7 @@ bool OldReader::decodeDouble(Token& token, Value& decoded) {
   return true;
 }
 
-bool OldReader::decodeString(Token& token) {
+bool OurReader::decodeString(Token& token) {
   std::string decoded_string;
   if (!decodeString(token, decoded_string))
     return false;
@@ -1557,7 +1557,7 @@ bool OldReader::decodeString(Token& token) {
   return true;
 }
 
-bool OldReader::decodeString(Token& token, std::string& decoded) {
+bool OurReader::decodeString(Token& token, std::string& decoded) {
   decoded.reserve(token.end_ - token.start_ - 2);
   Location current = token.start_ + 1; // skip '"'
   Location end = token.end_ - 1;       // do not include '"'
@@ -1610,7 +1610,7 @@ bool OldReader::decodeString(Token& token, std::string& decoded) {
   return true;
 }
 
-bool OldReader::decodeUnicodeCodePoint(Token& token,
+bool OurReader::decodeUnicodeCodePoint(Token& token,
                                     Location& current,
                                     Location end,
                                     unsigned int& unicode) {
@@ -1639,7 +1639,7 @@ bool OldReader::decodeUnicodeCodePoint(Token& token,
   return true;
 }
 
-bool OldReader::decodeUnicodeEscapeSequence(Token& token,
+bool OurReader::decodeUnicodeEscapeSequence(Token& token,
                                          Location& current,
                                          Location end,
                                          unsigned int& unicode) {
@@ -1668,7 +1668,7 @@ bool OldReader::decodeUnicodeEscapeSequence(Token& token,
 }
 
 bool
-OldReader::addError(const std::string& message, Token& token, Location extra) {
+OurReader::addError(const std::string& message, Token& token, Location extra) {
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
@@ -1677,7 +1677,7 @@ OldReader::addError(const std::string& message, Token& token, Location extra) {
   return false;
 }
 
-bool OldReader::recoverFromError(TokenType skipUntilToken) {
+bool OurReader::recoverFromError(TokenType skipUntilToken) {
   int errorCount = int(errors_.size());
   Token skip;
   for (;;) {
@@ -1690,22 +1690,22 @@ bool OldReader::recoverFromError(TokenType skipUntilToken) {
   return false;
 }
 
-bool OldReader::addErrorAndRecover(const std::string& message,
+bool OurReader::addErrorAndRecover(const std::string& message,
                                 Token& token,
                                 TokenType skipUntilToken) {
   addError(message, token);
   return recoverFromError(skipUntilToken);
 }
 
-Value& OldReader::currentValue() { return *(nodes_.top()); }
+Value& OurReader::currentValue() { return *(nodes_.top()); }
 
-OldReader::Char OldReader::getNextChar() {
+OurReader::Char OurReader::getNextChar() {
   if (current_ == end_)
     return 0;
   return *current_++;
 }
 
-void OldReader::getLocationLineAndColumn(Location location,
+void OurReader::getLocationLineAndColumn(Location location,
                                       int& line,
                                       int& column) const {
   Location current = begin_;
@@ -1728,7 +1728,7 @@ void OldReader::getLocationLineAndColumn(Location location,
   ++line;
 }
 
-std::string OldReader::getLocationLineAndColumn(Location location) const {
+std::string OurReader::getLocationLineAndColumn(Location location) const {
   int line, column;
   getLocationLineAndColumn(location, line, column);
   char buffer[18 + 16 + 16 + 1];
@@ -1744,7 +1744,7 @@ std::string OldReader::getLocationLineAndColumn(Location location) const {
   return buffer;
 }
 
-std::string OldReader::getFormattedErrorMessages() const {
+std::string OurReader::getFormattedErrorMessages() const {
   std::string formattedMessage;
   for (Errors::const_iterator itError = errors_.begin();
        itError != errors_.end();
@@ -1760,13 +1760,13 @@ std::string OldReader::getFormattedErrorMessages() const {
   return formattedMessage;
 }
 
-std::vector<OldReader::StructuredError> OldReader::getStructuredErrors() const {
-  std::vector<OldReader::StructuredError> allErrors;
+std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
+  std::vector<OurReader::StructuredError> allErrors;
   for (Errors::const_iterator itError = errors_.begin();
        itError != errors_.end();
        ++itError) {
     const ErrorInfo& error = *itError;
-    OldReader::StructuredError structured;
+    OurReader::StructuredError structured;
     structured.offset_start = error.token_.start_ - begin_;
     structured.offset_limit = error.token_.end_ - begin_;
     structured.message = error.message_;
@@ -1775,7 +1775,7 @@ std::vector<OldReader::StructuredError> OldReader::getStructuredErrors() const {
   return allErrors;
 }
 
-bool OldReader::pushError(const Value& value, const std::string& message) {
+bool OurReader::pushError(const Value& value, const std::string& message) {
   size_t length = end_ - begin_;
   if(value.getOffsetStart() > length
     || value.getOffsetLimit() > length)
@@ -1792,7 +1792,7 @@ bool OldReader::pushError(const Value& value, const std::string& message) {
   return true;
 }
 
-bool OldReader::pushError(const Value& value, const std::string& message, const Value& extra) {
+bool OurReader::pushError(const Value& value, const std::string& message, const Value& extra) {
   size_t length = end_ - begin_;
   if(value.getOffsetStart() > length
     || value.getOffsetLimit() > length
@@ -1810,18 +1810,18 @@ bool OldReader::pushError(const Value& value, const std::string& message, const 
   return true;
 }
 
-bool OldReader::good() const {
+bool OurReader::good() const {
   return !errors_.size();
 }
 
 
-class OldCharReader : public CharReader {
+class OurCharReader : public CharReader {
   bool const collectComments_;
-  OldReader reader_;
+  OurReader reader_;
 public:
-  OldCharReader(
+  OurCharReader(
     bool collectComments,
-    OldFeatures const& features)
+    OurFeatures const& features)
   : collectComments_(collectComments)
   , reader_(features)
   {}
@@ -1848,12 +1848,12 @@ CharReader* CharReaderBuilder::newCharReader() const
   // TODO: Maybe serialize the invalid settings into the exception.
 
   bool collectComments = settings_["collectComments"].asBool();
-  OldFeatures features = OldFeatures::all();
+  OurFeatures features = OurFeatures::all();
   features.allowComments_ = settings_["allowComments"].asBool();
   features.strictRoot_ = settings_["strictRoot"].asBool();
   features.allowDroppedNullPlaceholders_ = settings_["allowDroppedNullPlaceholders"].asBool();
   features.allowNumericKeys_ = settings_["allowNumericKeys"].asBool();
-  return new OldCharReader(collectComments, features);
+  return new OurCharReader(collectComments, features);
 }
 static void getValidReaderKeys(std::set<std::string>* valid_keys)
 {
