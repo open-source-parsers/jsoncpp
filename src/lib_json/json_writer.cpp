@@ -973,6 +973,8 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
 
   std::string indentation = settings_["indentation"].asString();
   std::string cs_str = settings_["commentStyle"].asString();
+  bool eyc = settings_["enableYAMLCompatibility"].asBool();
+  bool dnp = settings_["dropNullPlaceholders"].asBool();
   CommentStyle::Enum cs = CommentStyle::All;
   if (cs_str == "All") {
     cs = CommentStyle::All;
@@ -982,10 +984,15 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
     return NULL;
   }
   std::string colonSymbol = " : ";
-  if (indentation.empty()) {
+  if (eyc) {
+    colonSymbol = ": ";
+  } else if (indentation.empty()) {
     colonSymbol = ":";
   }
   std::string nullSymbol = "null";
+  if (dnp) {
+    nullSymbol = "";
+  }
   std::string endingLineFeedSymbol = "";
   return new BuiltStyledStreamWriter(
       indentation, cs,
@@ -996,6 +1003,8 @@ static void getValidWriterKeys(std::set<std::string>* valid_keys)
   valid_keys->clear();
   valid_keys->insert("indentation");
   valid_keys->insert("commentStyle");
+  valid_keys->insert("enableYAMLCompatibility");
+  valid_keys->insert("dropNullPlaceholders");
 }
 bool StreamWriterBuilder::validate(Json::Value* invalid) const
 {
@@ -1021,6 +1030,8 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings)
   //! [StreamWriterBuilderDefaults]
   (*settings)["commentStyle"] = "All";
   (*settings)["indentation"] = "\t";
+  (*settings)["enableYAMLCompatibility"] = false;
+  (*settings)["dropNullPlaceholders"] = false;
   //! [StreamWriterBuilderDefaults]
 }
 

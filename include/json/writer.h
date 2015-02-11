@@ -90,8 +90,15 @@ public:
   // without a major version bump.
   /** Configuration of this builder.
     Available settings (case-sensitive):
-    - "commentStyle": "None", "Some", or "All"
+    - "commentStyle": "None" or "All"
     - "indentation":  "<anything>"
+    - "enableYAMLCompatibility": False or True
+      - slightly change the whitespace around colons
+    - "dropNullPlaceholders": False or True
+      - Drop the "null" string from the writer's output for nullValues.
+        Strictly speaking, this is not valid JSON. But when the output is being
+        fed to a browser's Javascript, it makes for smaller output and the
+        browser can handle the output just fine.
 
     You can examine 'settings_` yourself
     to see the defaults. You can also write and read them just like any
