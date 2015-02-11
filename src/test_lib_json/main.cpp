@@ -1713,6 +1713,34 @@ JSONTEST_FIXTURE(CharReaderTest, parseWithDetailError) {
   delete reader;
 }
 
+JSONTEST_FIXTURE(CharReaderTest, parseWithStackLimit) {
+  Json::CharReaderBuilder b;
+  Json::Value root;
+  char const doc[] =
+      "{ \"property\" : \"value\" }";
+  {
+  b.settings_["stackLimit"] = 2;
+  Json::CharReader* reader(b.newCharReader());
+  std::string errs;
+  bool ok = reader->parse(
+      doc, doc + std::strlen(doc),
+      &root, &errs);
+  JSONTEST_ASSERT(ok);
+  JSONTEST_ASSERT(errs == "");
+  JSONTEST_ASSERT_EQUAL("value", root["property"]);
+  delete reader;
+  }
+  {
+  b.settings_["stackLimit"] = 1;
+  Json::CharReader* reader(b.newCharReader());
+  std::string errs;
+  JSONTEST_ASSERT_THROWS(reader->parse(
+      doc, doc + std::strlen(doc),
+      &root, &errs));
+  delete reader;
+  }
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -1749,6 +1777,7 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseWithOneError);
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseChineseWithOneError);
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseWithDetailError);
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseWithStackLimit);
 
   JSONTEST_REGISTER_FIXTURE(runner, WriterTest, dropNullPlaceholders);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, dropNullPlaceholders);
