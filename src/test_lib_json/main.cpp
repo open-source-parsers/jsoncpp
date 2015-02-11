@@ -1527,6 +1527,17 @@ JSONTEST_FIXTURE(WriterTest, dropNullPlaceholders) {
   JSONTEST_ASSERT(writer.write(nullValue) == "\n");
 }
 
+struct StreamWriterTest : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE(StreamWriterTest, dropNullPlaceholders) {
+  Json::StreamWriterBuilder b;
+  Json::Value nullValue;
+  b.settings_["dropNullPlaceholders"] = false;
+  JSONTEST_ASSERT(Json::writeString(b, nullValue) == "null");
+  b.settings_["dropNullPlaceholders"] = true;
+  JSONTEST_ASSERT(Json::writeString(b, nullValue) == "");
+}
+
 struct ReaderTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(ReaderTest, parseWithNoErrors) {
@@ -1740,6 +1751,7 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseWithDetailError);
 
   JSONTEST_REGISTER_FIXTURE(runner, WriterTest, dropNullPlaceholders);
+  JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, dropNullPlaceholders);
 
   return runner.runCommandLine(argc, argv);
 }
