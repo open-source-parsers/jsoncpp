@@ -28,6 +28,9 @@
 #pragma warning(disable : 4996)
 #endif
 
+static int const stackLimit_g = 1000;
+static int       stackDepth_g = 0;  // see readValue()
+
 namespace Json {
 
 #if __cplusplus >= 201103L
@@ -118,6 +121,7 @@ bool Reader::parse(const char* beginDoc,
     nodes_.pop();
   nodes_.push(&root);
 
+  stackDepth_g = 0;  // Yes, this is bad coding, but options are limited.
   bool successful = readValue();
   Token token;
   skipCommentTokens(token);
@@ -140,6 +144,13 @@ bool Reader::parse(const char* beginDoc,
 }
 
 bool Reader::readValue() {
+  // This is a non-reentrant way to support a stackLimit. Terrible!
+  // But this deprecated class has a security problem: Bad input can
+  // cause a seg-fault. This seems like a fair, binary-compatible way
+  // to prevent the problem.
+  if (stackDepth_g >= stackLimit_g) throw std::runtime_error("Exceeded stackLimit in readValue().");
+  ++stackDepth_g;
+
   Token token;
   skipCommentTokens(token);
   bool successful = true;
@@ -211,6 +222,7 @@ bool Reader::readValue() {
     lastValue_ = &currentValue();
   }
 
+  --stackDepth_g;
   return successful;
 }
 
