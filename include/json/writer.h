@@ -92,9 +92,9 @@ public:
     Available settings (case-sensitive):
     - "commentStyle": "None" or "All"
     - "indentation":  "<anything>"
-    - "enableYAMLCompatibility": False or True
+    - "enableYAMLCompatibility": false or true
       - slightly change the whitespace around colons
-    - "dropNullPlaceholders": False or True
+    - "dropNullPlaceholders": false or true
       - Drop the "null" string from the writer's output for nullValues.
         Strictly speaking, this is not valid JSON. But when the output is being
         fed to a browser's Javascript, it makes for smaller output and the

@@ -981,7 +981,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
   } else if (cs_str == "None") {
     cs = CommentStyle::None;
   } else {
-    return NULL;
+    throw std::runtime_error("commentStyle must be 'All' or 'None'");
   }
   std::string colonSymbol = " : ";
   if (eyc) {
