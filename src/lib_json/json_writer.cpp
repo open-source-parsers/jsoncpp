@@ -1035,27 +1035,6 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings)
   //! [StreamWriterBuilderDefaults]
 }
 
-StreamWriter* OldCompressingStreamWriterBuilder::newStreamWriter() const
-{
-  std::string colonSymbol = " : ";
-  if (enableYAMLCompatibility_) {
-    colonSymbol = ": ";
-  } else {
-    colonSymbol = ":";
-  }
-  std::string nullSymbol = "null";
-  if (dropNullPlaceholders_) {
-    nullSymbol = "";
-  }
-  std::string endingLineFeedSymbol = "\n";
-  if (omitEndingLineFeed_) {
-    endingLineFeedSymbol = "";
-  }
-  return new BuiltStyledStreamWriter(
-      "", CommentStyle::None,
-      colonSymbol, nullSymbol, endingLineFeedSymbol);
-}
-
 std::string writeString(StreamWriter::Factory const& builder, Value const& root) {
   std::ostringstream sout;
   StreamWriterPtr const writer(builder.newStreamWriter());

@@ -127,54 +127,6 @@ public:
   static void setDefaults(Json::Value* settings);
 };
 
-/** \brief Build a StreamWriter implementation.
- * Comments are not written, and most whitespace is omitted.
- * In addition, there are some special settings to allow compatibility
- * with the old FastWriter.
- * Usage:
- * \code
- *   OldCompressingStreamWriterBuilder b;
- *   b.dropNullPlaceHolders_ = true; // etc.
- *   StreamWriter* w = b.newStreamWriter();
- *   w->write(value, &std::cout);
- *   delete w;
- * \endcode
- *
- * \deprecated Use StreamWriterBuilder
- */
-class JSON_API OldCompressingStreamWriterBuilder : public StreamWriter::Factory
-{
-public:
-  // Note: We cannot add data-members to this class without a major version bump.
-  // So these might as well be completely exposed.
-
-  /** \brief Drop the "null" string from the writer's output for nullValues.
-  * Strictly speaking, this is not valid JSON. But when the output is being
-  * fed to a browser's Javascript, it makes for smaller output and the
-  * browser can handle the output just fine.
-  */
-  bool dropNullPlaceholders_;
-  /** \brief Do not add \n at end of document.
-    * Normally, we add an extra newline, just because.
-    */
-  bool omitEndingLineFeed_;
-  /** \brief Add a space after ':'.
-    * If indentation is non-empty, we surround colon with whitespace,
-    * e.g. " : "
-    * This will add back the trailing space when there is no indentation.
-    * This seems dubious when the entire document is on a single line,
-    * but we leave this here to repduce the behavior of the old `FastWriter`.
-    */
-  bool enableYAMLCompatibility_;
-
-  OldCompressingStreamWriterBuilder()
-    : dropNullPlaceholders_(false)
-    , omitEndingLineFeed_(false)
-    , enableYAMLCompatibility_(false)
-  {}
-  virtual StreamWriter* newStreamWriter() const;
-};
-
 /** \brief Abstract class for writers.
  * \deprecated Use StreamWriter.
  */
@@ -192,7 +144,7 @@ public:
  *consumption,
  * but may be usefull to support feature such as RPC where bandwith is limited.
  * \sa Reader, Value
- * \deprecated Use OldCompressingStreamWriterBuilder.
+ * \deprecated Use StreamWriterBuilder.
  */
 class JSON_API FastWriter : public Writer {
 public:
