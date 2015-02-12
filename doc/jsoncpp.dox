@@ -152,6 +152,7 @@ Basically JsonCpp is licensed under MIT license, or public domain if desired
 and recognized in your jurisdiction.
 
 \author Baptiste Lepilleur <blep@users.sourceforge.net> (originator)
+\author Christopher Dunn <cdunn2001@gmail.com> (primary maintainer)
 \version \include version
 We make strong guarantees about binary-compatibility, consistent with
 <a href="http://apr.apache.org/versioning.html">the Apache versioning scheme</a>.
