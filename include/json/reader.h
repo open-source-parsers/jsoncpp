@@ -298,19 +298,21 @@ public:
   /** Configuration of this builder.
     These are case-sensitive.
     Available settings (case-sensitive):
-    - "collectComments": false or true
+    - `"collectComments": false or true`
       - true to collect comment and allow writing them
         back during serialization, false to discard comments.
         This parameter is ignored if allowComments is false.
-    - "allowComments": false or true
+    - `"allowComments": false or true`
       - true if comments are allowed.
-    - "strictRoot": false or true
+    - `"strictRoot": false or true`
       - true if root must be either an array or an object value
-    - "allowDroppedNullPlaceholders": false or true
+    - `"allowDroppedNullPlaceholders": false or true`
       - true if dropped null placeholders are allowed. (See StreamWriterBuilder.)
-    - "allowNumericKeys": false or true
+    - `"allowNumericKeys": false or true`
       - true if numeric object keys are allowed.
-    - "stackLimit": integer
+    - `"stackLimit": integer`
+      - Exceeding stackLimit (recursive depth of `readValue()`) will
+        cause an exception.
       - This is a security issue (seg-faults caused by deeply nested JSON),
         so the default is low.
 
