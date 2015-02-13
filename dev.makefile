@@ -1,5 +1,19 @@
-all: build test-amalgamate
+# This is only for jsoncpp developers/contributors.
+# We use this to sign releases, generate documentation, etc.
+VER?=$(shell cat version)
 
+default:
+	@echo "VER=${VER}"
+sign: jsoncpp-${VER}.tar.gz
+	gpg --armor --detach-sign $<
+	gpg --verify $<.asc
+	# Then upload .asc to the release.
+jsoncpp-%.tar.gz:
+	curl https://github.com/open-source-parsers/jsoncpp/archive/$*.tar.gz -o $@
+dox:
+	python doxybuild.py --doxygen=$$(which doxygen) --in doc/web_doxyfile.in
+	rsync -va --delete dist/doxygen/jsoncpp-api-html-${VER}/ ../jsoncpp-docs/doxygen/
+	# Then 'git add -A' and 'git push' in jsoncpp-docs.
 build:
 	mkdir -p build/debug
 	cd build/debug; cmake -DCMAKE_BUILD_TYPE=debug -DJSONCPP_LIB_BUILD_SHARED=ON -G "Unix Makefiles" ../..
@@ -7,8 +21,11 @@ build:
 
 # Currently, this depends on include/json/version.h generated
 # by cmake.
-test-amalgamate: build
+test-amalgamate:
 	python2.7 amalgamate.py
 	python3.4 amalgamate.py
+
+clean:
+	\rm -rf *.gz *.asc dist/
 
 .PHONY: build
