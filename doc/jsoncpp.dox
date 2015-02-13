@@ -56,20 +56,24 @@ std::cin >> root;
 // You can also read into a particular sub-value.
 std::cin >> root["subtree"];
 
-// Get the value of the member of root named 'encoding', return 'UTF-8' if there is no
-// such member.
+// Get the value of the member of root named 'encoding',
+// and return 'UTF-8' if there is no such member.
 std::string encoding = root.get("encoding", "UTF-8" ).asString();
-// Get the value of the member of root named 'encoding'; return a 'null' value if
+
+// Get the value of the member of root named 'plug-ins'; return a 'null' value if
 // there is no such member.
 const Json::Value plugins = root["plug-ins"];
-for ( int index = 0; index < plugins.size(); ++index )  // Iterates over the sequence elements.
+
+// Iterate over the sequence elements.
+for ( int index = 0; index < plugins.size(); ++index )
    loadPlugIn( plugins[index].asString() );
    
+// Try other datatypes. Some are auto-convertible to others.
 foo::setIndentLength( root["indent"].get("length", 3).asInt() );
 foo::setIndentUseSpace( root["indent"].get("use_space", true).asBool() );
 
-// Since Json::Value has implicit constructor for all value types, it is not
-// necessary to explicitly construct the Json::Value object:
+// Since Json::Value has an implicit constructor for all value types, it is not
+// necessary to explicitly construct the Json::Value object.
 root["encoding"] = foo::getCurrentEncoding();
 root["indent"]["length"] = foo::getCurrentIndentLength();
 root["indent"]["use_space"] = foo::getCurrentIndentUseSpace();
@@ -152,6 +156,7 @@ Basically JsonCpp is licensed under MIT license, or public domain if desired
 and recognized in your jurisdiction.
 
 \author Baptiste Lepilleur <blep@users.sourceforge.net> (originator)
+\author Christopher Dunn <cdunn2001@gmail.com> (primary maintainer)
 \version \include version
 We make strong guarantees about binary-compatibility, consistent with
 <a href="http://apr.apache.org/versioning.html">the Apache versioning scheme</a>.

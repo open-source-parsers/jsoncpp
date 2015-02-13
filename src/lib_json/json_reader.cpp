@@ -826,6 +826,7 @@ public:
   bool strictRoot_;
   bool allowDroppedNullPlaceholders_;
   bool allowNumericKeys_;
+  bool failIfExtra_;
   int stackLimit_;
 };  // OurFeatures
 
@@ -991,6 +992,12 @@ bool OurReader::parse(const char* beginDoc,
   bool successful = readValue();
   Token token;
   skipCommentTokens(token);
+  if (features_.failIfExtra_) {
+    if (token.type_ != tokenError && token.type_ != tokenEndOfStream) {
+      addError("Extra non-whitespace after JSON value.", token);
+      return false;
+    }
+  }
   if (collectComments_ && !commentsBefore_.empty())
     root.setComment(commentsBefore_, commentAfter);
   if (features_.strictRoot_) {
@@ -1704,6 +1711,7 @@ CharReader* CharReaderBuilder::newCharReader() const
   features.allowDroppedNullPlaceholders_ = settings_["allowDroppedNullPlaceholders"].asBool();
   features.allowNumericKeys_ = settings_["allowNumericKeys"].asBool();
   features.stackLimit_ = settings_["stackLimit"].asInt();
+  features.failIfExtra_ = settings_["failIfExtra"].asBool();
   return new OurCharReader(collectComments, features);
 }
 static void getValidReaderKeys(std::set<std::string>* valid_keys)
@@ -1715,6 +1723,7 @@ static void getValidReaderKeys(std::set<std::string>* valid_keys)
   valid_keys->insert("allowDroppedNullPlaceholders");
   valid_keys->insert("allowNumericKeys");
   valid_keys->insert("stackLimit");
+  valid_keys->insert("failIfExtra");
 }
 bool CharReaderBuilder::validate(Json::Value* invalid) const
 {
@@ -1742,6 +1751,7 @@ void CharReaderBuilder::strictMode(Json::Value* settings)
   (*settings)["strictRoot"] = true;
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
+  (*settings)["failIfExtra"] = true;
 //! [CharReaderBuilderStrictMode]
 }
 // static
@@ -1754,6 +1764,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings)
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
   (*settings)["stackLimit"] = 1000;
+  (*settings)["failIfExtra"] = false;
 //! [CharReaderBuilderDefaults]
 }
 
