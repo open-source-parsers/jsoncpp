@@ -1741,6 +1741,126 @@ JSONTEST_FIXTURE(CharReaderTest, parseWithStackLimit) {
   }
 }
 
+struct CharReaderFailIfExtraTest : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE(CharReaderFailIfExtraTest, issue164) {
+  // This is interpretted as a string value followed by a colon.
+  Json::CharReaderBuilder b;
+  Json::Value root;
+  char const doc[] =
+      " \"property\" : \"value\" }";
+  {
+  b.settings_["failIfExtra"] = false;
+  Json::CharReader* reader(b.newCharReader());
+  std::string errs;
+  bool ok = reader->parse(
+      doc, doc + std::strlen(doc),
+      &root, &errs);
+  JSONTEST_ASSERT(ok);
+  JSONTEST_ASSERT(errs == "");
+  JSONTEST_ASSERT_EQUAL("property", root);
+  delete reader;
+  }
+  {
+  b.settings_["failIfExtra"] = true;
+  Json::CharReader* reader(b.newCharReader());
+  std::string errs;
+  bool ok = reader->parse(
+      doc, doc + std::strlen(doc),
+      &root, &errs);
+  JSONTEST_ASSERT(!ok);
+  JSONTEST_ASSERT_STRING_EQUAL(errs,
+      "* Line 1, Column 13\n"
+      "  Extra non-whitespace after JSON value.\n");
+  JSONTEST_ASSERT_EQUAL("property", root);
+  delete reader;
+  }
+  {
+  b.settings_["failIfExtra"] = false;
+  b.strictMode(&b.settings_);
+  Json::CharReader* reader(b.newCharReader());
+  std::string errs;
+  bool ok = reader->parse(
+      doc, doc + std::strlen(doc),
+      &root, &errs);
+  JSONTEST_ASSERT(!ok);
+  JSONTEST_ASSERT_STRING_EQUAL(errs,
+      "* Line 1, Column 13\n"
+      "  Extra non-whitespace after JSON value.\n");
+  JSONTEST_ASSERT_EQUAL("property", root);
+  delete reader;
+  }
+}
+JSONTEST_FIXTURE(CharReaderFailIfExtraTest, issue107) {
+  // This is interpretted as an int value followed by a colon.
+  Json::CharReaderBuilder b;
+  Json::Value root;
+  char const doc[] =
+      "1:2:3";
+  b.settings_["failIfExtra"] = true;
+  Json::CharReader* reader(b.newCharReader());
+  std::string errs;
+  bool ok = reader->parse(
+      doc, doc + std::strlen(doc),
+      &root, &errs);
+  JSONTEST_ASSERT(!ok);
+  JSONTEST_ASSERT_STRING_EQUAL(
+      "* Line 1, Column 2\n"
+      "  Extra non-whitespace after JSON value.\n",
+      errs);
+  JSONTEST_ASSERT_EQUAL(1, root.asInt());
+  delete reader;
+}
+JSONTEST_FIXTURE(CharReaderFailIfExtraTest, commentAfterObject) {
+  Json::CharReaderBuilder b;
+  Json::Value root;
+  {
+  char const doc[] =
+      "{ \"property\" : \"value\" } //trailing\n//comment\n";
+  b.settings_["failIfExtra"] = true;
+  Json::CharReader* reader(b.newCharReader());
+  std::string errs;
+  bool ok = reader->parse(
+      doc, doc + std::strlen(doc),
+      &root, &errs);
+  JSONTEST_ASSERT(ok);
+  JSONTEST_ASSERT_STRING_EQUAL("", errs);
+  JSONTEST_ASSERT_EQUAL("value", root["property"]);
+  delete reader;
+  }
+}
+JSONTEST_FIXTURE(CharReaderFailIfExtraTest, commentAfterArray) {
+  Json::CharReaderBuilder b;
+  Json::Value root;
+  char const doc[] =
+      "[ \"property\" , \"value\" ] //trailing\n//comment\n";
+  b.settings_["failIfExtra"] = true;
+  Json::CharReader* reader(b.newCharReader());
+  std::string errs;
+  bool ok = reader->parse(
+      doc, doc + std::strlen(doc),
+      &root, &errs);
+  JSONTEST_ASSERT(ok);
+  JSONTEST_ASSERT_STRING_EQUAL("", errs);
+  JSONTEST_ASSERT_EQUAL("value", root[1u]);
+  delete reader;
+}
+JSONTEST_FIXTURE(CharReaderFailIfExtraTest, commentAfterBool) {
+  Json::CharReaderBuilder b;
+  Json::Value root;
+  char const doc[] =
+      " true /*trailing\ncomment*/";
+  b.settings_["failIfExtra"] = true;
+  Json::CharReader* reader(b.newCharReader());
+  std::string errs;
+  bool ok = reader->parse(
+      doc, doc + std::strlen(doc),
+      &root, &errs);
+  JSONTEST_ASSERT(ok);
+  JSONTEST_ASSERT_STRING_EQUAL("", errs);
+  JSONTEST_ASSERT_EQUAL(true, root.asBool());
+  delete reader;
+}
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -1778,6 +1898,12 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseChineseWithOneError);
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseWithDetailError);
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseWithStackLimit);
+
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, issue164);
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, issue107);
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, commentAfterObject);
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, commentAfterArray);
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, commentAfterBool);
 
   JSONTEST_REGISTER_FIXTURE(runner, WriterTest, dropNullPlaceholders);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, dropNullPlaceholders);

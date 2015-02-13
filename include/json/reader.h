@@ -315,6 +315,9 @@ public:
         cause an exception.
       - This is a security issue (seg-faults caused by deeply nested JSON),
         so the default is low.
+    - `"failIfExtra": false or true`
+      - If true, `parse()` returns false when extra non-whitespace trails
+        the JSON value in the input string.
 
     You can examine 'settings_` yourself
     to see the defaults. You can also write and read them just like any
