@@ -16,7 +16,7 @@
 #if JSON_USE_EXCEPTION
 #include <stdexcept>
 #define JSON_ASSERT(condition)                                                 \
-  assert(condition); // @todo <= change this into an exception throw
+  if (!(condition)) {throw std::runtime_error( "assert json failed" );} // @todo <= add detail about condition in exception
 #define JSON_FAIL_MESSAGE(message) do{std::ostringstream oss; oss << message; throw std::runtime_error(oss.str());}while(0)
 //#define JSON_FAIL_MESSAGE(message) throw std::runtime_error(message)
 #else // JSON_USE_EXCEPTION
