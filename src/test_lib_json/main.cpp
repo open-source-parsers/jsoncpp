@@ -1861,6 +1861,23 @@ JSONTEST_FIXTURE(CharReaderFailIfExtraTest, commentAfterBool) {
   JSONTEST_ASSERT_EQUAL(true, root.asBool());
   delete reader;
 }
+
+struct IteratorTest : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE(IteratorTest, distance) {
+  Json::Value json;
+  json["k1"] = "a";
+  json["k2"] = "b";
+  int dist;
+  std::string str;
+  for (Json::ValueIterator it = json.begin(); it != json.end(); ++it) {
+    dist = it - json.begin();
+    str = it->asString().c_str();
+  }
+  JSONTEST_ASSERT_EQUAL(1, dist);
+  JSONTEST_ASSERT_STRING_EQUAL("b", str);
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -1904,6 +1921,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, commentAfterObject);
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, commentAfterArray);
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, commentAfterBool);
+
+  JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, distance);
 
   JSONTEST_REGISTER_FIXTURE(runner, WriterTest, dropNullPlaceholders);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, dropNullPlaceholders);

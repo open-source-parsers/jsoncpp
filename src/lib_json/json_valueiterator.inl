@@ -77,7 +77,7 @@ ValueIteratorBase::difference_type
 ValueIteratorBase::computeDistance(const SelfType& other) const {
 #ifndef JSON_VALUE_USE_INTERNAL_MAP
 #ifdef JSON_USE_CPPTL_SMALLMAP
-  return current_ - other.current_;
+  return other.current_ - current_;
 #else
   // Iterator for null value are initialized using the default
   // constructor, which initialize current_ to the default
