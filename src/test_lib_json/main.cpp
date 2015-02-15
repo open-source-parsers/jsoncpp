@@ -1901,6 +1901,9 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, offsetAccessors);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, typeChecksThrowExceptions);
 
+  JSONTEST_REGISTER_FIXTURE(runner, WriterTest, dropNullPlaceholders);
+  JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, dropNullPlaceholders);
+
   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseWithNoErrors);
   JSONTEST_REGISTER_FIXTURE(
       runner, ReaderTest, parseWithNoErrorsTestingOffsets);
@@ -1923,9 +1926,6 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, commentAfterBool);
 
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, distance);
-
-  JSONTEST_REGISTER_FIXTURE(runner, WriterTest, dropNullPlaceholders);
-  JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, dropNullPlaceholders);
 
   return runner.runCommandLine(argc, argv);
 }
