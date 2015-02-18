@@ -110,7 +110,7 @@ def amalgamate_source(source_top_dir=None,
     source.add_text("")
     source.add_text('#include "%s"' % header_include_path)
     source.add_text("""
-#ifndef JSON_IS_AMALGAMATED
+#ifndef JSON_IS_AMALGAMATION
 #error "Compile with -I PATH_TO_JSON_DIRECTORY"
 #endif
 """)
