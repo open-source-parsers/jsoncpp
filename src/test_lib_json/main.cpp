@@ -1871,6 +1871,26 @@ JSONTEST_FIXTURE(CharReaderAllowDropNullTest, issue178) {
   std::string errs;
   Json::CharReader* reader(b.newCharReader());
   {
+    char const doc[] = "{\"a\":,\"b\":true}";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(2u, root.size());
+    JSONTEST_ASSERT_EQUAL(Json::nullValue, root.get("a", true));
+  }
+  {
+    char const doc[] = "{\"a\":}";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(1u, root.size());
+    JSONTEST_ASSERT_EQUAL(Json::nullValue, root.get("a", true));
+  }
+  {
     char const doc[] = "[]";
     bool ok = reader->parse(
         doc, doc + std::strlen(doc),
