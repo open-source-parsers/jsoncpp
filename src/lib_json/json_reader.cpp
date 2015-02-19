@@ -1161,6 +1161,7 @@ bool OurReader::readValue() {
     break;
   case tokenArraySeparator:
   case tokenObjectEnd:
+  case tokenArrayEnd:
     if (features_.allowDroppedNullPlaceholders_) {
       // "Un-read" the current token and mark the current value as a null
       // token.
