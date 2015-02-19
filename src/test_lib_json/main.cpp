@@ -1910,6 +1910,33 @@ JSONTEST_FIXTURE(CharReaderAllowDropNullTest, issue178) {
     JSONTEST_ASSERT_EQUAL(1u, root.size());
   }
   {
+    char const doc[] = "[,]";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(2u, root.size());
+  }
+  {
+    char const doc[] = "[,,,]";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(4u, root.size());
+  }
+  {
+    char const doc[] = "[null,]";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(2u, root.size());
+  }
+  {
     char const doc[] = "[,null]";
     bool ok = reader->parse(
         doc, doc + std::strlen(doc),
@@ -1919,6 +1946,33 @@ JSONTEST_FIXTURE(CharReaderAllowDropNullTest, issue178) {
     JSONTEST_ASSERT_EQUAL(2u, root.size());
   }
   {
+    char const doc[] = "[,,]";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(3u, root.size());
+  }
+  {
+    char const doc[] = "[null,,]";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(3u, root.size());
+  }
+  {
+    char const doc[] = "[,null,]";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(3u, root.size());
+  }
+  {
     char const doc[] = "[,,null]";
     bool ok = reader->parse(
         doc, doc + std::strlen(doc),
@@ -1926,6 +1980,26 @@ JSONTEST_FIXTURE(CharReaderAllowDropNullTest, issue178) {
     JSONTEST_ASSERT(ok);
     JSONTEST_ASSERT(errs == "");
     JSONTEST_ASSERT_EQUAL(3u, root.size());
+  }
+  {
+    char const doc[] = "[[],,,]";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(4u, root.size());
+    JSONTEST_ASSERT_EQUAL(Json::arrayValue, root[0u]);
+  }
+  {
+    char const doc[] = "[,[],,]";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(4u, root.size());
+    JSONTEST_ASSERT_EQUAL(Json::arrayValue, root[1u]);
   }
   {
     char const doc[] = "[,,,[]]";
