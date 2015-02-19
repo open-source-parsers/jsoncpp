@@ -200,6 +200,8 @@ bool Reader::readValue() {
     }
     break;
   case tokenArraySeparator:
+  case tokenObjectEnd:
+  case tokenArrayEnd:
     if (features_.allowDroppedNullPlaceholders_) {
       // "Un-read" the current token and mark the current value as a null
       // token.
@@ -209,8 +211,7 @@ bool Reader::readValue() {
       currentValue().setOffsetStart(current_ - begin_ - 1);
       currentValue().setOffsetLimit(current_ - begin_);
       break;
-    }
-  // Else, fall through...
+    } // Else, fall through...
   default:
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
