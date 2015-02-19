@@ -1862,6 +1862,64 @@ JSONTEST_FIXTURE(CharReaderFailIfExtraTest, commentAfterBool) {
   delete reader;
 }
 
+struct CharReaderAllowDropNullTest : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE(CharReaderAllowDropNullTest, issue178) {
+  Json::CharReaderBuilder b;
+  b.settings_["allowDroppedNullPlaceholders"] = true;
+  Json::Value root;
+  std::string errs;
+  Json::CharReader* reader(b.newCharReader());
+  {
+    char const doc[] = "[]";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT(errs == "");
+    JSONTEST_ASSERT_EQUAL(0u, root.size());
+    JSONTEST_ASSERT_EQUAL(Json::arrayValue, root);
+  }
+  {
+    char const doc[] = "[null]";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT(errs == "");
+    JSONTEST_ASSERT_EQUAL(1u, root.size());
+  }
+  {
+    char const doc[] = "[,null]";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT(errs == "");
+    JSONTEST_ASSERT_EQUAL(2u, root.size());
+  }
+  {
+    char const doc[] = "[,,null]";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT(errs == "");
+    JSONTEST_ASSERT_EQUAL(3u, root.size());
+  }
+  {
+    char const doc[] = "[,,,[]]";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT(errs == "");
+    JSONTEST_ASSERT_EQUAL(4u, root.size());
+    JSONTEST_ASSERT_EQUAL(Json::arrayValue, root[3u]);
+  }
+  delete reader;
+}
+
 struct IteratorTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(IteratorTest, distance) {
@@ -1924,6 +1982,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, commentAfterObject);
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, commentAfterArray);
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, commentAfterBool);
+
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderAllowDropNullTest, issue178);
 
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, distance);
 
