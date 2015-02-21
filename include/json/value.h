@@ -518,7 +518,7 @@ private:
     LargestUInt uint_;
     double real_;
     bool bool_;
-    char* string_;
+    char* string_;  // actually ptr to unsigned, followed by str
     ObjectValues* map_;
   } value_;
   ValueType type_ : 8;
