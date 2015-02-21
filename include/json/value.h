@@ -226,8 +226,8 @@ Json::Value obj_value(Json::objectValue); // {}
   Value(UInt64 value);
 #endif // if defined(JSON_HAS_INT64)
   Value(double value);
-  Value(const char* value);
-  Value(const char* beginValue, const char* endValue);
+  Value(const char* value); ///! Copy til first 0. (NULL causes to seg-fault.)
+  Value(const char* beginValue, const char* endValue); ///! Copy all, incl zeroes.
   /** \brief Constructs a value from a static string.
 
    * Like other value string constructor but do not duplicate the string for
@@ -239,7 +239,7 @@ Json::Value obj_value(Json::objectValue); // {}
    * \endcode
    */
   Value(const StaticString& value);
-  Value(const std::string& value);
+  Value(const std::string& value); ///! Copy data() til size(). Embedded zeroes too.
 #ifdef JSON_USE_CPPTL
   Value(const CppTL::ConstString& value);
 #endif
@@ -266,8 +266,8 @@ Json::Value obj_value(Json::objectValue); // {}
   bool operator!=(const Value& other) const;
   int compare(const Value& other) const;
 
-  const char* asCString() const;
-  std::string asString() const;
+  const char* asCString() const; ///! Embedded zeroes could cause you trouble!
+  std::string asString() const; ///! Embedded zeroes are possible.
 #ifdef JSON_USE_CPPTL
   CppTL::ConstString asConstString() const;
 #endif
