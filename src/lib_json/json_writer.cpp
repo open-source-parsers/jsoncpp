@@ -50,6 +50,16 @@ static bool containsControlCharacter(const char* str) {
   return false;
 }
 
+static bool containsControlCharacter0(const char* str, unsigned len) {
+  char const* end = str + len;
+  while (end != str) {
+    if (isControlCharacter(*str) || 0==*str)
+      return true;
+    ++str;
+  }
+  return false;
+}
+
 std::string valueToString(LargestInt value) {
   UIntToStringBuffer buffer;
   char* current = buffer + sizeof(buffer);
@@ -184,6 +194,84 @@ std::string valueToQuotedString(const char* value) {
   return result;
 }
 
+// https://github.com/upcaste/upcaste/blob/master/src/upcore/src/cstring/strnpbrk.cpp
+static char const* strnpbrk(char const* s, char const* accept, size_t n) {
+  assert((s || !n) && accept);
+
+  char const* const end = s + n;
+  for (char const* cur = s; cur < end; ++cur) {
+    int const c = *cur;
+    for (char const* a = accept; *a; ++a) {
+      if (*a == c) {
+        return cur;
+      }
+    }
+  }
+  return NULL;
+}
+static std::string valueToQuotedStringN(const char* value, unsigned length) {
+  if (value == NULL)
+    return "";
+  // Not sure how to handle unicode...
+  if (strnpbrk(value, "\"\\\b\f\n\r\t", length) == NULL &&
+      !containsControlCharacter0(value, length))
+    return std::string("\"") + value + "\"";
+  // We have to walk value and escape any special characters.
+  // Appending to std::string is not efficient, but this should be rare.
+  // (Note: forward slashes are *not* rare, but I am not escaping them.)
+  std::string::size_type maxsize =
+      length * 2 + 3; // allescaped+quotes+NULL
+  std::string result;
+  result.reserve(maxsize); // to avoid lots of mallocs
+  result += "\"";
+  char const* end = value + length;
+  for (const char* c = value; c != end; ++c) {
+    switch (*c) {
+    case '\"':
+      result += "\\\"";
+      break;
+    case '\\':
+      result += "\\\\";
+      break;
+    case '\b':
+      result += "\\b";
+      break;
+    case '\f':
+      result += "\\f";
+      break;
+    case '\n':
+      result += "\\n";
+      break;
+    case '\r':
+      result += "\\r";
+      break;
+    case '\t':
+      result += "\\t";
+      break;
+    // case '/':
+    // Even though \/ is considered a legal escape in JSON, a bare
+    // slash is also legal, so I see no reason to escape it.
+    // (I hope I am not misunderstanding something.)
+    // blep notes: actually escaping \/ may be useful in javascript to avoid </
+    // sequence.
+    // Should add a flag to allow this compatibility mode and prevent this
+    // sequence from occurring.
+    default:
+      if ((isControlCharacter(*c)) || (*c == 0)) {
+        std::ostringstream oss;
+        oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
+            << std::setw(4) << static_cast<int>(*c);
+        result += oss.str();
+      } else {
+        result += *c;
+      }
+      break;
+    }
+  }
+  result += "\"";
+  return result;
+}
+
 // Class Writer
 // //////////////////////////////////////////////////////////////////
 Writer::~Writer() {}
@@ -248,7 +336,7 @@ void FastWriter::writeValue(const Value& value) {
       const std::string& name = *it;
       if (it != members.begin())
         document_ += ',';
-      document_ += valueToQuotedString(name.c_str());
+      document_ += valueToQuotedStringN(name.data(), name.length());
       document_ += yamlCompatiblityEnabled_ ? ": " : ":";
       writeValue(value[name]);
     }
@@ -289,8 +377,15 @@ void StyledWriter::writeValue(const Value& value) {
     pushValue(valueToString(value.asDouble()));
     break;
   case stringValue:
-    pushValue(valueToQuotedString(value.asCString()));
+  {
+    // Is NULL is possible for value.string_?
+    char const* str;
+    char const* end;
+    bool ok = value.getString(&str, &end);
+    if (ok) pushValue(valueToQuotedStringN(str, static_cast<unsigned>(end-str)));
+    else pushValue("");
     break;
+  }
   case booleanValue:
     pushValue(valueToString(value.asBool()));
     break;
@@ -767,8 +862,15 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
     pushValue(valueToString(value.asDouble()));
     break;
   case stringValue:
-    pushValue(valueToQuotedString(value.asCString()));
+  {
+    // Is NULL is possible for value.string_?
+    char const* str;
+    char const* end;
+    bool ok = value.getString(&str, &end);
+    if (ok) pushValue(valueToQuotedStringN(str, static_cast<unsigned>(end-str)));
+    else pushValue("");
     break;
+  }
   case booleanValue:
     pushValue(valueToString(value.asBool()));
     break;
@@ -787,7 +889,7 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
         std::string const& name = *it;
         Value const& childValue = value[name];
         writeCommentBeforeValue(childValue);
-        writeWithIndent(valueToQuotedString(name.c_str()));
+        writeWithIndent(valueToQuotedStringN(name.data(), name.length()));
         *sout_ << colonSymbol_;
         writeValue(childValue);
         if (++it == members.end()) {
