@@ -310,6 +310,8 @@ public:
       - true if dropped null placeholders are allowed. (See StreamWriterBuilder.)
     - `"allowNumericKeys": false or true`
       - true if numeric object keys are allowed.
+    - `"allowSingleQuotes": false or true`
+      - true if '' are allowed for strings (both keys and values)
     - `"stackLimit": integer`
       - Exceeding stackLimit (recursive depth of `readValue()`) will
         cause an exception.
