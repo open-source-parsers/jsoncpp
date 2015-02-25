@@ -1861,7 +1861,6 @@ JSONTEST_FIXTURE(CharReaderFailIfExtraTest, commentAfterBool) {
   JSONTEST_ASSERT_EQUAL(true, root.asBool());
   delete reader;
 }
-
 struct CharReaderAllowDropNullTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(CharReaderAllowDropNullTest, issue178) {
@@ -2014,6 +2013,38 @@ JSONTEST_FIXTURE(CharReaderAllowDropNullTest, issue178) {
   delete reader;
 }
 
+struct CharReaderAllowSingleQuotesTest : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE(CharReaderAllowSingleQuotesTest, issue182) {
+  Json::CharReaderBuilder b;
+  b.settings_["allowSingleQuotes"] = true;
+  Json::Value root;
+  std::string errs;
+  Json::CharReader* reader(b.newCharReader());
+  {
+    char const doc[] = "{'a':true,\"b\":true}";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(2u, root.size());
+    JSONTEST_ASSERT_EQUAL(true, root.get("a", false));
+    JSONTEST_ASSERT_EQUAL(true, root.get("b", false));
+  }
+  {
+    char const doc[] = "{'a': 'x', \"b\":'y'}";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(2u, root.size());
+    JSONTEST_ASSERT_STRING_EQUAL("x", root["a"].asString());
+    JSONTEST_ASSERT_STRING_EQUAL("y", root["b"].asString());
+  }
+}
+
 struct IteratorTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(IteratorTest, distance) {
@@ -2078,6 +2109,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, commentAfterBool);
 
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderAllowDropNullTest, issue178);
+
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderAllowSingleQuotesTest, issue182);
 
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, distance);
 

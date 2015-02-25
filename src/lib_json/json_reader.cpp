@@ -909,12 +909,12 @@ bool Reader::good() const {
 class OurFeatures {
 public:
   static OurFeatures all();
-  static OurFeatures strictMode();
   OurFeatures();
   bool allowComments_;
   bool strictRoot_;
   bool allowDroppedNullPlaceholders_;
   bool allowNumericKeys_;
+  bool allowSingleQuotes_;
   bool failIfExtra_;
   int stackLimit_;
 };  // OurFeatures
@@ -923,19 +923,14 @@ public:
 // ////////////////////////////////
 
 OurFeatures::OurFeatures()
-    : allowComments_(true), strictRoot_(false),
-      allowDroppedNullPlaceholders_(false), allowNumericKeys_(false) {}
+    : allowComments_(true), strictRoot_(false)
+    , allowDroppedNullPlaceholders_(false), allowNumericKeys_(false)
+    , allowSingleQuotes_(false)
+    , failIfExtra_(false)
+{
+}
 
 OurFeatures OurFeatures::all() { return OurFeatures(); }
-
-OurFeatures OurFeatures::strictMode() {
-  OurFeatures features;
-  features.allowComments_ = false;
-  features.strictRoot_ = true;
-  features.allowDroppedNullPlaceholders_ = false;
-  features.allowNumericKeys_ = false;
-  return features;
-}
 
 // Implementation of class Reader
 // ////////////////////////////////
@@ -1006,6 +1001,7 @@ private:
   bool readCStyleComment();
   bool readCppStyleComment();
   bool readString();
+  bool readStringSingleQuote();
   void readNumber();
   bool readValue();
   bool readObject(Token& token);
@@ -1220,6 +1216,12 @@ bool OurReader::readToken(Token& token) {
     token.type_ = tokenString;
     ok = readString();
     break;
+  case '\'':
+    if (features_.allowSingleQuotes_) {
+    token.type_ = tokenString;
+    ok = readStringSingleQuote();
+    break;
+    } // else continue
   case '/':
     token.type_ = tokenComment;
     ok = readComment();
@@ -1371,7 +1373,6 @@ void OurReader::readNumber() {
       c = (current_ = p) < end_ ? *p++ : 0;
   }
 }
-
 bool OurReader::readString() {
   Char c = 0;
   while (current_ != end_) {
@@ -1382,6 +1383,19 @@ bool OurReader::readString() {
       break;
   }
   return c == '"';
+}
+
+
+bool OurReader::readStringSingleQuote() {
+  Char c = 0;
+  while (current_ != end_) {
+    c = getNextChar();
+    if (c == '\\')
+      getNextChar();
+    else if (c == '\'')
+      break;
+  }
+  return c == '\'';
 }
 
 bool OurReader::readObject(Token& tokenStart) {
@@ -1878,6 +1892,7 @@ CharReader* CharReaderBuilder::newCharReader() const
   features.strictRoot_ = settings_["strictRoot"].asBool();
   features.allowDroppedNullPlaceholders_ = settings_["allowDroppedNullPlaceholders"].asBool();
   features.allowNumericKeys_ = settings_["allowNumericKeys"].asBool();
+  features.allowSingleQuotes_ = settings_["allowSingleQuotes"].asBool();
   features.stackLimit_ = settings_["stackLimit"].asInt();
   features.failIfExtra_ = settings_["failIfExtra"].asBool();
   return new OurCharReader(collectComments, features);
@@ -1890,6 +1905,7 @@ static void getValidReaderKeys(std::set<std::string>* valid_keys)
   valid_keys->insert("strictRoot");
   valid_keys->insert("allowDroppedNullPlaceholders");
   valid_keys->insert("allowNumericKeys");
+  valid_keys->insert("allowSingleQuotes");
   valid_keys->insert("stackLimit");
   valid_keys->insert("failIfExtra");
 }
@@ -1919,6 +1935,7 @@ void CharReaderBuilder::strictMode(Json::Value* settings)
   (*settings)["strictRoot"] = true;
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
+  (*settings)["allowSingleQuotes"] = false;
   (*settings)["failIfExtra"] = true;
 //! [CharReaderBuilderStrictMode]
 }
@@ -1931,6 +1948,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings)
   (*settings)["strictRoot"] = false;
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
+  (*settings)["allowSingleQuotes"] = false;
   (*settings)["stackLimit"] = 1000;
   (*settings)["failIfExtra"] = false;
 //! [CharReaderBuilderDefaults]
