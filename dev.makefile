@@ -24,6 +24,7 @@ build:
 test-amalgamate:
 	python2.7 amalgamate.py
 	python3.4 amalgamate.py
+	cd dist; gcc -I. -c jsoncpp.cpp
 
 clean:
 	\rm -rf *.gz *.asc dist/
