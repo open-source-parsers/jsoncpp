@@ -20,7 +20,7 @@ IF(PYTHONINTERP_FOUND)
     # Run end to end parser/writer tests
     SET(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../test)
     SET(RUNJSONTESTS_PATH ${TEST_DIR}/runjsontests.py)
-    ADD_CUSTOM_TARGET(jsoncpp_readerwriter_tests ALL
+    ADD_CUSTOM_TARGET(jsoncpp_readerwriter_tests
                       "${PYTHON_EXECUTABLE}" -B "${RUNJSONTESTS_PATH}" $<TARGET_FILE:jsontestrunner_exe> "${TEST_DIR}/data"
                       DEPENDS jsontestrunner_exe jsoncpp_test
                       )
