@@ -197,8 +197,8 @@ bool Value::CZString::operator<(const CZString& other) const {
   if (!cstr_) return index_ < other.index_;
   //return strcmp(cstr_, other.cstr_) < 0;
   // Assume both are strings.
-  unsigned this_len = strlen(this->cstr_);
-  unsigned other_len = strlen(other.cstr_);
+  unsigned this_len = this->storage_.length_;
+  unsigned other_len = other.storage_.length_;
   unsigned min_len = std::min(this_len, other_len);
   int comp = memcmp(this->cstr_, other.cstr_, min_len);
   if (comp < 0) return true;
@@ -210,8 +210,8 @@ bool Value::CZString::operator==(const CZString& other) const {
   if (!cstr_) return index_ == other.index_;
   //return strcmp(cstr_, other.cstr_) == 0;
   // Assume both are strings.
-  unsigned this_len = strlen(this->cstr_);
-  unsigned other_len = strlen(other.cstr_);
+  unsigned this_len = this->storage_.length_;
+  unsigned other_len = other.storage_.length_;
   if (this_len != other_len) return false;
   int comp = memcmp(this->cstr_, other.cstr_, this_len);
   return comp == 0;
