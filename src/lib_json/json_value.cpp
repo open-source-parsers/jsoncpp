@@ -52,7 +52,7 @@ const LargestInt Value::maxLargestInt = LargestInt(LargestUInt(-1) / 2);
 const LargestUInt Value::maxLargestUInt = LargestUInt(-1);
 
 /// Unknown size marker
-static const unsigned int unknown = (unsigned)-1;
+static const size_t unknown = (size_t)-1;
 
 #if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 template <typename T, typename U>
@@ -82,13 +82,13 @@ static inline bool InRange(double d, T min, U max) {
  * @return Pointer on the duplicate instance of string.
  */
 static inline char* duplicateStringValue(const char* value,
-                                         unsigned int length = unknown) {
+                                         size_t length = unknown) {
   if (length == unknown)
-    length = (unsigned int)strlen(value);
+    length = strlen(value);
 
   // Avoid an integer overflow in the call to malloc below by limiting length
   // to a sane value.
-  if (length >= (unsigned)Value::maxInt)
+  if (length >= (size_t)Value::maxInt)
     length = Value::maxInt - 1;
 
   char* newString = static_cast<char*>(malloc(length + 1));
