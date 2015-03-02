@@ -156,26 +156,30 @@ void Value::CommentInfo::setComment(const char* text, size_t len) {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-// Notes: index_ indicates if the string was allocated when
+// Notes: policy_ indicates if the string was allocated when
 // a string is stored.
+//
+// TODO: Check for length > 1GB, in Reader.
 
 Value::CZString::CZString(ArrayIndex index) : cstr_(0), index_(index) {}
 
 Value::CZString::CZString(const char* cstr, DuplicationPolicy allocate)
     : cstr_(allocate == duplicate ? duplicateStringValue(cstr) : cstr),
-      index_(allocate) {}
+      storage_({allocate, 0})
+{}
 
 Value::CZString::CZString(const CZString& other)
-    : cstr_(other.index_ != noDuplication && other.cstr_ != 0
+    : cstr_(other.storage_.policy_ != noDuplication && other.cstr_ != 0
                 ? duplicateStringValue(other.cstr_)
                 : other.cstr_),
-      index_(other.cstr_
-                 ? static_cast<ArrayIndex>(other.index_ == noDuplication
+      storage_({(other.cstr_
+                 ? (other.storage_.policy_ == noDuplication
                      ? noDuplication : duplicate)
-                 : other.index_) {}
+                 : other.storage_.policy_), 0})
+{}
 
 Value::CZString::~CZString() {
-  if (cstr_ && index_ == duplicate)
+  if (cstr_ && storage_.policy_ == duplicate)
     releaseStringValue(const_cast<char*>(cstr_));
 }
 
@@ -217,7 +221,7 @@ ArrayIndex Value::CZString::index() const { return index_; }
 
 const char* Value::CZString::c_str() const { return cstr_; }
 
-bool Value::CZString::isStaticString() const { return index_ == noDuplication; }
+bool Value::CZString::isStaticString() const { return storage_.policy_ == noDuplication; }
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
