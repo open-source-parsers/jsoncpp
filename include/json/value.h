@@ -164,7 +164,7 @@ private:
       duplicateOnCopy
     };
     CZString(ArrayIndex index);
-    CZString(const char* cstr, DuplicationPolicy allocate);
+    CZString(char const* cstr, unsigned length, DuplicationPolicy allocate);
     CZString(const CZString& other);
     ~CZString();
     CZString& operator=(CZString other);

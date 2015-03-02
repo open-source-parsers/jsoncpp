@@ -163,9 +163,9 @@ void Value::CommentInfo::setComment(const char* text, size_t len) {
 
 Value::CZString::CZString(ArrayIndex index) : cstr_(0), index_(index) {}
 
-Value::CZString::CZString(const char* cstr, DuplicationPolicy allocate)
-    : cstr_(allocate == duplicate ? duplicateStringValue(cstr) : cstr),
-      storage_({allocate, 0})
+Value::CZString::CZString(char const* str, unsigned length, DuplicationPolicy allocate)
+    : cstr_(allocate == duplicate ? duplicateStringValue(str) : str),
+      storage_({allocate, length})
 {}
 
 Value::CZString::CZString(const CZString& other)
@@ -175,7 +175,7 @@ Value::CZString::CZString(const CZString& other)
       storage_({(other.cstr_
                  ? (other.storage_.policy_ == noDuplication
                      ? noDuplication : duplicate)
-                 : other.storage_.policy_), 0})
+                 : other.storage_.policy_), other.storage_.length_})
 {}
 
 Value::CZString::~CZString() {
@@ -849,7 +849,7 @@ Value& Value::resolveReference(const char* key, bool isStatic) {
   if (type_ == nullValue)
     *this = Value(objectValue);
   CZString actualKey(
-      key, isStatic ? CZString::noDuplication : CZString::duplicateOnCopy);
+      key, strlen(key), isStatic ? CZString::noDuplication : CZString::duplicateOnCopy);
   ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
   if (it != value_.map_->end() && (*it).first == actualKey)
     return (*it).second;
@@ -873,7 +873,7 @@ const Value& Value::operator[](const char* key) const {
       "in Json::Value::operator[](char const*)const: requires objectValue");
   if (type_ == nullValue)
     return null;
-  CZString actualKey(key, CZString::noDuplication);
+  CZString actualKey(key, strlen(key), CZString::noDuplication);
   ObjectValues::const_iterator it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
     return null;
@@ -918,7 +918,7 @@ bool Value::removeMember(const char* key, Value* removed) {
   if (type_ != objectValue) {
     return false;
   }
-  CZString actualKey(key, CZString::noDuplication);
+  CZString actualKey(key, strlen(key), CZString::noDuplication);
   ObjectValues::iterator it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
     return false;
