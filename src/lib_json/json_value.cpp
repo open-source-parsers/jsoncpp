@@ -190,15 +190,27 @@ Value::CZString& Value::CZString::operator=(CZString other) {
 }
 
 bool Value::CZString::operator<(const CZString& other) const {
-  if (cstr_)
-    return strcmp(cstr_, other.cstr_) < 0;
-  return index_ < other.index_;
+  if (!cstr_) return index_ < other.index_;
+  //return strcmp(cstr_, other.cstr_) < 0;
+  // Assume both are strings.
+  unsigned this_len = strlen(this->cstr_);
+  unsigned other_len = strlen(other.cstr_);
+  unsigned min_len = std::min(this_len, other_len);
+  int comp = memcmp(this->cstr_, other.cstr_, min_len);
+  if (comp < 0) return true;
+  if (comp > 0) return false;
+  return (this_len < other_len);
 }
 
 bool Value::CZString::operator==(const CZString& other) const {
-  if (cstr_)
-    return strcmp(cstr_, other.cstr_) == 0;
-  return index_ == other.index_;
+  if (!cstr_) return index_ == other.index_;
+  //return strcmp(cstr_, other.cstr_) == 0;
+  // Assume both are strings.
+  unsigned this_len = strlen(this->cstr_);
+  unsigned other_len = strlen(other.cstr_);
+  if (this_len != other_len) return false;
+  int comp = memcmp(this->cstr_, other.cstr_, this_len);
+  return comp == 0;
 }
 
 ArrayIndex Value::CZString::index() const { return index_; }
