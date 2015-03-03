@@ -77,24 +77,34 @@ void ValueIteratorBase::copy(const SelfType& other) {
 
 Value ValueIteratorBase::key() const {
   const Value::CZString czstring = (*current_).first;
-  if (czstring.c_str()) {
+  if (czstring.data()) {
     if (czstring.isStaticString())
-      return Value(StaticString(czstring.c_str()));
-    return Value(czstring.c_str());
+      return Value(StaticString(czstring.data()));
+    return Value(czstring.data(), czstring.data() + czstring.length());
   }
   return Value(czstring.index());
 }
 
 UInt ValueIteratorBase::index() const {
   const Value::CZString czstring = (*current_).first;
-  if (!czstring.c_str())
+  if (!czstring.data())
     return czstring.index();
   return Value::UInt(-1);
 }
 
-const char* ValueIteratorBase::memberName() const {
-  const char* name = (*current_).first.c_str();
+char const* ValueIteratorBase::memberName() const {
+  const char* name = (*current_).first.data();
   return name ? name : "";
+}
+
+char const* ValueIteratorBase::memberName(char const** end) const {
+  const char* name = (*current_).first.data();
+  if (!name) {
+    *end = NULL;
+    return NULL;
+  }
+  *end = name + (*current_).first.length();
+  return name;
 }
 
 // //////////////////////////////////////////////////////////////////

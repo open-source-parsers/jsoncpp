@@ -1430,6 +1430,7 @@ bool OurReader::readObject(Token& tokenStart) {
       return addErrorAndRecover(
           "Missing ':' after object member name", colon, tokenObjectEnd);
     }
+    if (name.length() >= (1U<<30)) throw std::runtime_error("keylength >= 2^30");
     Value& value = currentValue()[name];
     nodes_.push(&value);
     bool ok = readValue();

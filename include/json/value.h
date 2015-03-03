@@ -99,19 +99,24 @@ private:
  * The type of the held value is represented by a #ValueType and
  * can be obtained using type().
  *
- * values of an #objectValue or #arrayValue can be accessed using operator[]()
- *methods.
- * Non const methods will automatically create the a #nullValue element
+ * Values of an #objectValue or #arrayValue can be accessed using operator[]()
+ * methods.
+ * Non-const methods will automatically create the a #nullValue element
  * if it does not exist.
- * The sequence of an #arrayValue will be automatically resize and initialized
+ * The sequence of an #arrayValue will be automatically resized and initialized
  * with #nullValue. resize() can be used to enlarge or truncate an #arrayValue.
  *
- * The get() methods can be used to obtanis default value in the case the
- *required element
- * does not exist.
+ * The get() methods can be used to obtain default value in the case the
+ * required element does not exist.
  *
  * It is possible to iterate over the list of a #objectValue values using
  * the getMemberNames() method.
+ *
+ * \note #Value string-length fit in size_t, but keys must be < 2^30.
+ * (The reason is an implementation detail.) A #CharReader will raise an
+ * exception if a bound is exceeded to avoid security holes in your app,
+ * but the Value API does *not* check bounds. That is the responsibility
+ * of the caller.
  */
 class JSON_API Value {
   friend class ValueIteratorBase;
@@ -164,24 +169,27 @@ private:
       duplicateOnCopy
     };
     CZString(ArrayIndex index);
-    CZString(char const* cstr, unsigned length, DuplicationPolicy allocate);
-    CZString(const CZString& other);
+    CZString(char const* str, unsigned length, DuplicationPolicy allocate);
+    CZString(CZString const& other);
     ~CZString();
     CZString& operator=(CZString other);
-    bool operator<(const CZString& other) const;
-    bool operator==(const CZString& other) const;
+    bool operator<(CZString const& other) const;
+    bool operator==(CZString const& other) const;
     ArrayIndex index() const;
-    const char* c_str() const;
+    //const char* c_str() const; ///< \deprecated
+    char const* data() const;
+    unsigned length() const;
     bool isStaticString() const;
 
   private:
     void swap(CZString& other);
+
     struct StringStorage {
       DuplicationPolicy policy_: 2;
       unsigned length_: 30; // 1GB max
     };
 
-    const char* cstr_;
+    char const* cstr_;  // actually, a prefixed string, unless policy is noDup
     union {
       ArrayIndex index_;
       StringStorage storage_;
@@ -220,20 +228,25 @@ Json::Value obj_value(Json::objectValue); // {}
   Value(UInt64 value);
 #endif // if defined(JSON_HAS_INT64)
   Value(double value);
-  Value(const char* value);
-  Value(const char* beginValue, const char* endValue);
+  Value(const char* value); ///! Copy til first 0. (NULL causes to seg-fault.)
+  Value(const char* beginValue, const char* endValue); ///! Copy all, incl zeroes.
   /** \brief Constructs a value from a static string.
 
    * Like other value string constructor but do not duplicate the string for
    * internal storage. The given string must remain alive after the call to this
    * constructor.
+   * \note This works only for null-terminated strings. (We cannot change the
+   *   size of this class, so we have nowhere to store the length,
+   *   which might be computed later for various operations.)
+   *
    * Example of usage:
    * \code
-   * Json::Value aValue( StaticString("some text") );
+   * static StaticString foo("some text");
+   * Json::Value aValue(foo);
    * \endcode
    */
   Value(const StaticString& value);
-  Value(const std::string& value);
+  Value(const std::string& value); ///! Copy data() til size(). Embedded zeroes too.
 #ifdef JSON_USE_CPPTL
   Value(const CppTL::ConstString& value);
 #endif
@@ -260,8 +273,13 @@ Json::Value obj_value(Json::objectValue); // {}
   bool operator!=(const Value& other) const;
   int compare(const Value& other) const;
 
-  const char* asCString() const;
-  std::string asString() const;
+  const char* asCString() const; ///! Embedded zeroes could cause you trouble!
+  std::string asString() const; ///! Embedded zeroes are possible.
+  /** Get raw char* of string-value.
+   *  \return false if !string. (Seg-fault if str or end are NULL.)
+   */
+  bool getString(
+      char const** str, char const** end) const;
 #ifdef JSON_USE_CPPTL
   CppTL::ConstString asConstString() const;
 #endif
@@ -352,19 +370,23 @@ Json::Value obj_value(Json::objectValue); // {}
   Value& append(const Value& value);
 
   /// Access an object value by name, create a null member if it does not exist.
+  /// \note Because of our implementation, keys are limited to 2^30 -1 chars.
+  ///  Exceeding that will cause an exception.
   Value& operator[](const char* key);
   /// Access an object value by name, returns null if there is no member with
   /// that name.
   const Value& operator[](const char* key) const;
   /// Access an object value by name, create a null member if it does not exist.
+  /// \param key may contain embedded nulls.
   Value& operator[](const std::string& key);
   /// Access an object value by name, returns null if there is no member with
   /// that name.
+  /// \param key may contain embedded nulls.
   const Value& operator[](const std::string& key) const;
   /** \brief Access an object value by name, create a null member if it does not
    exist.
 
-   * If the object as no entry for that name, then the member name used to store
+   * If the object has no entry for that name, then the member name used to store
    * the new entry is not duplicated.
    * Example of use:
    * \code
@@ -384,11 +406,23 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Return the member named key if it exist, defaultValue otherwise.
   Value get(const char* key, const Value& defaultValue) const;
   /// Return the member named key if it exist, defaultValue otherwise.
+  /// \param key may contain embedded nulls.
+  Value get(const char* key, const char* end, const Value& defaultValue) const;
+  /// Return the member named key if it exist, defaultValue otherwise.
+  /// \param key may contain embedded nulls.
   Value get(const std::string& key, const Value& defaultValue) const;
 #ifdef JSON_USE_CPPTL
   /// Return the member named key if it exist, defaultValue otherwise.
   Value get(const CppTL::ConstString& key, const Value& defaultValue) const;
 #endif
+  /// Most general and efficient version of isMember()const, get()const,
+  /// and operator[]const
+  /// \note As stated elsewhere, behavior is undefined if (end-key) >= 2^30
+  Value const* find(char const* key, char const* end) const;
+  /// Most general and efficient version of object-mutators.
+  /// \note As stated elsewhere, behavior is undefined if (end-key) >= 2^30
+  /// \return non-zero, but JSON_ASSERT if this is neither object nor nullValue.
+  Value const* demand(char const* key, char const* end);
   /// \brief Remove and return the named member.
   ///
   /// Do nothing if it did not exist.
@@ -398,14 +432,21 @@ Json::Value obj_value(Json::objectValue); // {}
   /// \deprecated
   Value removeMember(const char* key);
   /// Same as removeMember(const char*)
+  /// \param key may contain embedded nulls.
   /// \deprecated
   Value removeMember(const std::string& key);
+  /// Same as removeMember(const char* key, const char* end, Value* removed),
+  /// but 'key' is null-terminated.
+  bool removeMember(const char* key, Value* removed);
   /** \brief Remove the named map member.
 
       Update 'removed' iff removed.
+      \param key may contain embedded nulls.
       \return true iff removed (no exceptions)
   */
-  bool removeMember(const char* key, Value* removed);
+  bool removeMember(std::string const& key, Value* removed);
+  /// Same as removeMember(std::string const& key, Value* removed)
+  bool removeMember(const char* key, const char* end, Value* removed);
   /** \brief Remove the indexed array element.
 
       O(n) expensive operations.
@@ -415,9 +456,13 @@ Json::Value obj_value(Json::objectValue); // {}
   bool removeIndex(ArrayIndex i, Value* removed);
 
   /// Return true if the object has a member named key.
+  /// \note 'key' must be null-terminated.
   bool isMember(const char* key) const;
   /// Return true if the object has a member named key.
+  /// \param key may contain embedded nulls.
   bool isMember(const std::string& key) const;
+  /// Same as isMember(std::string const& key)const
+  bool isMember(const char* key, const char* end) const;
 #ifdef JSON_USE_CPPTL
   /// Return true if the object has a member named key.
   bool isMember(const CppTL::ConstString& key) const;
@@ -463,7 +508,8 @@ Json::Value obj_value(Json::objectValue); // {}
 private:
   void initBasic(ValueType type, bool allocated = false);
 
-  Value& resolveReference(const char* key, bool isStatic);
+  Value& resolveReference(const char* key);
+  Value& resolveReference(const char* key, const char* end);
 
   struct CommentInfo {
     CommentInfo();
@@ -488,11 +534,12 @@ private:
     LargestUInt uint_;
     double real_;
     bool bool_;
-    char* string_;
+    char* string_;  // actually ptr to unsigned, followed by str, unless !allocated_
     ObjectValues* map_;
   } value_;
   ValueType type_ : 8;
   unsigned int allocated_ : 1; // Notes: if declared as bool, bitfield is useless.
+                               // If not allocated_, string_ must be null-terminated.
   CommentInfo* comments_;
 
   // [start, limit) byte offsets in the source JSON text from which this Value
@@ -594,7 +641,12 @@ public:
 
   /// Return the member name of the referenced Value. "" if it is not an
   /// objectValue.
-  const char* memberName() const;
+  /// \deprecated This cannot be used for UTF-8 strings, since there can be embedded nulls.
+  char const* memberName() const;
+  /// Return the member name of the referenced Value, or NULL if it is not an
+  /// objectValue.
+  /// Better version than memberName(). Allows embedded nulls.
+  char const* memberName(char const** end) const;
 
 protected:
   Value& deref() const;
@@ -623,8 +675,8 @@ class JSON_API ValueConstIterator : public ValueIteratorBase {
 
 public:
   typedef const Value value_type;
-  typedef unsigned int size_t;
-  typedef int difference_type;
+  //typedef unsigned int size_t;
+  //typedef int difference_type;
   typedef const Value& reference;
   typedef const Value* pointer;
   typedef ValueConstIterator SelfType;

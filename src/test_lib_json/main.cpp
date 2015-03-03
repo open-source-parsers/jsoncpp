@@ -1539,6 +1539,56 @@ JSONTEST_FIXTURE(ValueTest, StaticString) {
   }
 }
 
+JSONTEST_FIXTURE(ValueTest, zeroes) {
+  std::string binary("hi", 3);  // include trailing 0
+  JSONTEST_ASSERT_EQUAL(3, binary.length());
+  Json::StreamWriterBuilder b;
+  {
+    Json::Value root;
+    root = binary;
+    JSONTEST_ASSERT_STRING_EQUAL(binary, root.asString());
+  }
+  {
+    char const top[] = "top";
+    Json::Value root;
+    root[top] = binary;
+    JSONTEST_ASSERT_STRING_EQUAL(binary, root[top].asString());
+    Json::Value removed;
+    bool did;
+    did = root.removeMember(top, top + 3U,
+        &removed);
+    JSONTEST_ASSERT(did);
+    JSONTEST_ASSERT_STRING_EQUAL(binary, removed.asString());
+    did = root.removeMember(top, top + 3U,
+        &removed);
+    JSONTEST_ASSERT(!did);
+    JSONTEST_ASSERT_STRING_EQUAL(binary, removed.asString()); // still
+  }
+}
+
+JSONTEST_FIXTURE(ValueTest, zeroesInKeys) {
+  std::string binary("hi", 3);  // include trailing 0
+  JSONTEST_ASSERT_EQUAL(3, binary.length());
+  Json::StreamWriterBuilder b;
+  {
+    Json::Value root;
+    root[binary] = "there";
+    JSONTEST_ASSERT_STRING_EQUAL("there", root[binary].asString());
+    JSONTEST_ASSERT(!root.isMember("hi"));
+    JSONTEST_ASSERT(root.isMember(binary));
+    Json::Value removed;
+    bool did;
+    did = root.removeMember(binary.data(), binary.data() + binary.length(),
+        &removed);
+    JSONTEST_ASSERT(did);
+    JSONTEST_ASSERT_STRING_EQUAL("there", removed.asString());
+    did = root.removeMember(binary.data(), binary.data() + binary.length(),
+        &removed);
+    JSONTEST_ASSERT(!did);
+    JSONTEST_ASSERT_STRING_EQUAL("there", removed.asString()); // still
+  }
+}
+
 struct WriterTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(WriterTest, dropNullPlaceholders) {
@@ -1559,6 +1609,28 @@ JSONTEST_FIXTURE(StreamWriterTest, dropNullPlaceholders) {
   JSONTEST_ASSERT(Json::writeString(b, nullValue) == "null");
   b.settings_["dropNullPlaceholders"] = true;
   JSONTEST_ASSERT(Json::writeString(b, nullValue) == "");
+}
+
+JSONTEST_FIXTURE(StreamWriterTest, writeZeroes) {
+  std::string binary("hi", 3);  // include trailing 0
+  JSONTEST_ASSERT_EQUAL(3, binary.length());
+  std::string expected("\"hi\\u0000\"");  // unicoded zero
+  Json::StreamWriterBuilder b;
+  {
+    Json::Value root;
+    root = binary;
+    JSONTEST_ASSERT_STRING_EQUAL(binary, root.asString());
+    std::string out = Json::writeString(b, root);
+    JSONTEST_ASSERT_EQUAL(expected.size(), out.size());
+    JSONTEST_ASSERT_STRING_EQUAL(expected, out);
+  }
+  {
+    Json::Value root;
+    root["top"] = binary;
+    JSONTEST_ASSERT_STRING_EQUAL(binary, root["top"].asString());
+    std::string out = Json::writeString(b, root["top"]);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, out);
+  }
 }
 
 struct ReaderTest : JsonTest::TestCase {};
@@ -2068,6 +2140,38 @@ JSONTEST_FIXTURE(CharReaderAllowSingleQuotesTest, issue182) {
   }
 }
 
+struct CharReaderAllowZeroesTest : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE(CharReaderAllowZeroesTest, issue176) {
+  Json::CharReaderBuilder b;
+  b.settings_["allowSingleQuotes"] = true;
+  Json::Value root;
+  std::string errs;
+  Json::CharReader* reader(b.newCharReader());
+  {
+    char const doc[] = "{'a':true,\"b\":true}";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(2u, root.size());
+    JSONTEST_ASSERT_EQUAL(true, root.get("a", false));
+    JSONTEST_ASSERT_EQUAL(true, root.get("b", false));
+  }
+  {
+    char const doc[] = "{'a': 'x', \"b\":'y'}";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(2u, root.size());
+    JSONTEST_ASSERT_STRING_EQUAL("x", root["a"].asString());
+    JSONTEST_ASSERT_STRING_EQUAL("y", root["b"].asString());
+  }
+}
+
 struct IteratorTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(IteratorTest, distance) {
@@ -2107,9 +2211,12 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, offsetAccessors);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, typeChecksThrowExceptions);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, StaticString);
+  JSONTEST_REGISTER_FIXTURE(runner, ValueTest, zeroes);
+  JSONTEST_REGISTER_FIXTURE(runner, ValueTest, zeroesInKeys);
 
   JSONTEST_REGISTER_FIXTURE(runner, WriterTest, dropNullPlaceholders);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, dropNullPlaceholders);
+  JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, writeZeroes);
 
   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseWithNoErrors);
   JSONTEST_REGISTER_FIXTURE(
@@ -2135,6 +2242,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderAllowDropNullTest, issue178);
 
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderAllowSingleQuotesTest, issue182);
+
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderAllowZeroesTest, issue176);
 
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, distance);
 
