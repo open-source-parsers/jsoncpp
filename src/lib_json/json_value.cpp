@@ -28,12 +28,13 @@ namespace Json {
 #if defined(__ARMEL__)
 #define ALIGNAS(byte_alignment) __attribute__((aligned(byte_alignment)))
 #else
+// This exists for binary compatibility only. Use nullRef.
+const Value Value::null;
 #define ALIGNAS(byte_alignment)
 #endif
 static const unsigned char ALIGNAS(8) kNull[sizeof(Value)] = { 0 };
 const unsigned char& kNullRef = kNull[0];
-const Value& Value::null = reinterpret_cast<const Value&>(kNullRef);
-const Value& Value::nullRef = null;
+const Value& Value::nullRef = reinterpret_cast<const Value&>(kNullRef);
 
 const Int Value::minInt = Int(~(UInt(-1) / 2));
 const Int Value::maxInt = Int(UInt(-1) / 2);
@@ -195,19 +196,23 @@ void Value::CommentInfo::setComment(const char* text, size_t len) {
 Value::CZString::CZString(ArrayIndex index) : cstr_(0), index_(index) {}
 
 Value::CZString::CZString(char const* str, unsigned length, DuplicationPolicy allocate)
-    : cstr_(allocate == duplicate ? duplicateStringValue(str) : str),
-      storage_({allocate, length})
-{}
+    : cstr_(allocate == duplicate ? duplicateStringValue(str) : str)
+{
+  storage_.policy_ = allocate;
+  storage_.length_ = length;
+}
 
 Value::CZString::CZString(const CZString& other)
     : cstr_(other.storage_.policy_ != noDuplication && other.cstr_ != 0
                 ? duplicateStringValue(other.cstr_)
-                : other.cstr_),
-      storage_({(other.cstr_
+                : other.cstr_)
+{
+  storage_.policy_ = (other.cstr_
                  ? (other.storage_.policy_ == noDuplication
                      ? noDuplication : duplicate)
-                 : other.storage_.policy_), other.storage_.length_})
-{}
+                 : other.storage_.policy_);
+  storage_.length_ = other.storage_.length_;
+}
 
 Value::CZString::~CZString() {
   if (cstr_ && storage_.policy_ == duplicate)
@@ -356,7 +361,7 @@ Value::Value(bool value) {
 Value::Value(Value const& other)
     : type_(other.type_), allocated_(false)
       ,
-      comments_(0), start_(other.start_), limit_(other.limit_)
+      comments_(0)
 {
   switch (type_) {
   case nullValue:
@@ -421,8 +426,9 @@ Value::~Value() {
     delete[] comments_;
 }
 
-Value& Value::operator=(Value other) {
-  swap(other);
+Value &Value::operator=(const Value &other) {
+  Value temp(other);
+  swap(temp);
   return *this;
 }
 
@@ -439,8 +445,6 @@ void Value::swapPayload(Value& other) {
 void Value::swap(Value& other) {
   swapPayload(other);
   std::swap(comments_, other.comments_);
-  std::swap(start_, other.start_);
-  std::swap(limit_, other.limit_);
 }
 
 ValueType Value::type() const { return type_; }
@@ -842,8 +846,6 @@ void Value::clear() {
   JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == arrayValue ||
                           type_ == objectValue,
                       "in Json::Value::clear(): requires complex value");
-  start_ = 0;
-  limit_ = 0;
   switch (type_) {
   case arrayValue:
   case objectValue:
@@ -919,8 +921,6 @@ void Value::initBasic(ValueType type, bool allocated) {
   type_ = type;
   allocated_ = allocated;
   comments_ = 0;
-  start_ = 0;
-  limit_ = 0;
 }
 
 // Access an object value by name, create a null member if it does not exist.
@@ -1289,14 +1289,6 @@ std::string Value::getComment(CommentPlacement placement) const {
     return comments_[placement].comment_;
   return "";
 }
-
-void Value::setOffsetStart(size_t start) { start_ = start; }
-
-void Value::setOffsetLimit(size_t limit) { limit_ = limit; }
-
-size_t Value::getOffsetStart() const { return start_; }
-
-size_t Value::getOffsetLimit() const { return limit_; }
 
 std::string Value::toStyledString() const {
   StyledWriter writer;

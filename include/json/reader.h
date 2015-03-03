@@ -35,18 +35,6 @@ public:
   typedef char Char;
   typedef const Char* Location;
 
-  /** \brief An error tagged with where in the JSON text it was encountered.
-   *
-   * The offsets give the [start, limit) range of bytes within the text. Note
-   * that this is bytes, not codepoints.
-   *
-   */
-  struct StructuredError {
-    size_t offset_start;
-    size_t offset_limit;
-    std::string message;
-  };
-
   /** \brief Constructs a Reader allowing all features
    * for parsing.
    */
@@ -122,38 +110,6 @@ public:
    *         during parsing.
    */
   std::string getFormattedErrorMessages() const;
-
-  /** \brief Returns a vector of structured erros encounted while parsing.
-   * \return A (possibly empty) vector of StructuredError objects. Currently
-   *         only one error can be returned, but the caller should tolerate
-   * multiple
-   *         errors.  This can occur if the parser recovers from a non-fatal
-   *         parse error and then encounters additional errors.
-   */
-  std::vector<StructuredError> getStructuredErrors() const;
-
-  /** \brief Add a semantic error message.
-   * \param value JSON Value location associated with the error
-   * \param message The error message.
-   * \return \c true if the error was successfully added, \c false if the
-   * Value offset exceeds the document size.
-   */
-  bool pushError(const Value& value, const std::string& message);
-
-  /** \brief Add a semantic error message with extra context.
-   * \param value JSON Value location associated with the error
-   * \param message The error message.
-   * \param extra Additional JSON Value location to contextualize the error
-   * \return \c true if the error was successfully added, \c false if either
-   * Value offset exceeds the document size.
-   */
-  bool pushError(const Value& value, const std::string& message, const Value& extra);
-
-  /** \brief Return whether there are any errors.
-   * \return \c true if there are no errors to report \c false if
-   * errors have occurred.
-   */
-  bool good() const;
 
 private:
   enum TokenType {

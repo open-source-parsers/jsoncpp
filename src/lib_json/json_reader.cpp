@@ -43,17 +43,14 @@ typedef std::auto_ptr<CharReader>   CharReaderPtr;
 // ////////////////////////////////
 
 Features::Features()
-    : allowComments_(true), strictRoot_(false),
-      allowDroppedNullPlaceholders_(false), allowNumericKeys_(false) {}
-
+    : allowComments_(true), strictRoot_(false)
+{}
 Features Features::all() { return Features(); }
 
 Features Features::strictMode() {
   Features features;
   features.allowComments_ = false;
   features.strictRoot_ = true;
-  features.allowDroppedNullPlaceholders_ = false;
-  features.allowNumericKeys_ = false;
   return features;
 }
 
@@ -163,11 +160,9 @@ bool Reader::readValue() {
   switch (token.type_) {
   case tokenObjectBegin:
     successful = readObject(token);
-    currentValue().setOffsetLimit(current_ - begin_);
     break;
   case tokenArrayBegin:
     successful = readArray(token);
-    currentValue().setOffsetLimit(current_ - begin_);
     break;
   case tokenNumber:
     successful = decodeNumber(token);
@@ -179,42 +174,22 @@ bool Reader::readValue() {
     {
     Value v(true);
     currentValue().swapPayload(v);
-    currentValue().setOffsetStart(token.start_ - begin_);
-    currentValue().setOffsetLimit(token.end_ - begin_);
     }
     break;
   case tokenFalse:
     {
     Value v(false);
     currentValue().swapPayload(v);
-    currentValue().setOffsetStart(token.start_ - begin_);
-    currentValue().setOffsetLimit(token.end_ - begin_);
     }
     break;
   case tokenNull:
     {
     Value v;
     currentValue().swapPayload(v);
-    currentValue().setOffsetStart(token.start_ - begin_);
-    currentValue().setOffsetLimit(token.end_ - begin_);
     }
     break;
-  case tokenArraySeparator:
-  case tokenObjectEnd:
-  case tokenArrayEnd:
-    if (features_.allowDroppedNullPlaceholders_) {
-      // "Un-read" the current token and mark the current value as a null
-      // token.
-      current_--;
-      Value v;
-      currentValue().swapPayload(v);
-      currentValue().setOffsetStart(current_ - begin_ - 1);
-      currentValue().setOffsetLimit(current_ - begin_);
-      break;
-    } // Else, fall through...
+  // Else, fall through...
   default:
-    currentValue().setOffsetStart(token.start_ - begin_);
-    currentValue().setOffsetLimit(token.end_ - begin_);
     return addError("Syntax error: value, object or array expected.", token);
   }
 
@@ -442,12 +417,11 @@ bool Reader::readString() {
   return c == '"';
 }
 
-bool Reader::readObject(Token& tokenStart) {
+bool Reader::readObject(Token& /*tokenStart*/) {
   Token tokenName;
   std::string name;
   Value init(objectValue);
   currentValue().swapPayload(init);
-  currentValue().setOffsetStart(tokenStart.start_ - begin_);
   while (readToken(tokenName)) {
     bool initialTokenOk = true;
     while (tokenName.type_ == tokenComment && initialTokenOk)
@@ -460,11 +434,6 @@ bool Reader::readObject(Token& tokenStart) {
     if (tokenName.type_ == tokenString) {
       if (!decodeString(tokenName, name))
         return recoverFromError(tokenObjectEnd);
-    } else if (tokenName.type_ == tokenNumber && features_.allowNumericKeys_) {
-      Value numberName;
-      if (!decodeNumber(tokenName, numberName))
-        return recoverFromError(tokenObjectEnd);
-      name = numberName.asString();
     } else {
       break;
     }
@@ -498,10 +467,9 @@ bool Reader::readObject(Token& tokenStart) {
       "Missing '}' or object member name", tokenName, tokenObjectEnd);
 }
 
-bool Reader::readArray(Token& tokenStart) {
+bool Reader::readArray(Token& /*tokenStart*/) {
   Value init(arrayValue);
   currentValue().swapPayload(init);
-  currentValue().setOffsetStart(tokenStart.start_ - begin_);
   skipSpaces();
   if (*current_ == ']') // empty array
   {
@@ -541,8 +509,6 @@ bool Reader::decodeNumber(Token& token) {
   if (!decodeNumber(token, decoded))
     return false;
   currentValue().swapPayload(decoded);
-  currentValue().setOffsetStart(token.start_ - begin_);
-  currentValue().setOffsetLimit(token.end_ - begin_);
   return true;
 }
 
@@ -591,8 +557,6 @@ bool Reader::decodeDouble(Token& token) {
   if (!decodeDouble(token, decoded))
     return false;
   currentValue().swapPayload(decoded);
-  currentValue().setOffsetStart(token.start_ - begin_);
-  currentValue().setOffsetLimit(token.end_ - begin_);
   return true;
 }
 
@@ -638,8 +602,6 @@ bool Reader::decodeString(Token& token) {
     return false;
   Value decoded(decoded_string);
   currentValue().swapPayload(decoded);
-  currentValue().setOffsetStart(token.start_ - begin_);
-  currentValue().setOffsetLimit(token.end_ - begin_);
   return true;
 }
 
@@ -851,59 +813,8 @@ std::string Reader::getFormattedErrorMessages() const {
   return formattedMessage;
 }
 
-std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
-  std::vector<Reader::StructuredError> allErrors;
-  for (Errors::const_iterator itError = errors_.begin();
-       itError != errors_.end();
-       ++itError) {
-    const ErrorInfo& error = *itError;
-    Reader::StructuredError structured;
-    structured.offset_start = error.token_.start_ - begin_;
-    structured.offset_limit = error.token_.end_ - begin_;
-    structured.message = error.message_;
-    allErrors.push_back(structured);
-  }
-  return allErrors;
-}
-
-bool Reader::pushError(const Value& value, const std::string& message) {
-  size_t length = end_ - begin_;
-  if(value.getOffsetStart() > length
-    || value.getOffsetLimit() > length)
-    return false;
-  Token token;
-  token.type_ = tokenError;
-  token.start_ = begin_ + value.getOffsetStart();
-  token.end_ = end_ + value.getOffsetLimit();
-  ErrorInfo info;
-  info.token_ = token;
-  info.message_ = message;
-  info.extra_ = 0;
-  errors_.push_back(info);
-  return true;
-}
-
-bool Reader::pushError(const Value& value, const std::string& message, const Value& extra) {
-  size_t length = end_ - begin_;
-  if(value.getOffsetStart() > length
-    || value.getOffsetLimit() > length
-    || extra.getOffsetLimit() > length)
-    return false;
-  Token token;
-  token.type_ = tokenError;
-  token.start_ = begin_ + value.getOffsetStart();
-  token.end_ = begin_ + value.getOffsetLimit();
-  ErrorInfo info;
-  info.token_ = token;
-  info.message_ = message;
-  info.extra_ = begin_ + extra.getOffsetStart();
-  errors_.push_back(info);
-  return true;
-}
-
-bool Reader::good() const {
-  return !errors_.size();
-}
+// Reader
+/////////////////////////
 
 // exact copy of Features
 class OurFeatures {
@@ -952,10 +863,6 @@ public:
              Value& root,
              bool collectComments = true);
   std::string getFormattedErrorMessages() const;
-  std::vector<StructuredError> getStructuredErrors() const;
-  bool pushError(const Value& value, const std::string& message);
-  bool pushError(const Value& value, const std::string& message, const Value& extra);
-  bool good() const;
 
 private:
   OurReader(OurReader const&);  // no impl
@@ -1120,11 +1027,9 @@ bool OurReader::readValue() {
   switch (token.type_) {
   case tokenObjectBegin:
     successful = readObject(token);
-    currentValue().setOffsetLimit(current_ - begin_);
     break;
   case tokenArrayBegin:
     successful = readArray(token);
-    currentValue().setOffsetLimit(current_ - begin_);
     break;
   case tokenNumber:
     successful = decodeNumber(token);
@@ -1136,24 +1041,18 @@ bool OurReader::readValue() {
     {
     Value v(true);
     currentValue().swapPayload(v);
-    currentValue().setOffsetStart(token.start_ - begin_);
-    currentValue().setOffsetLimit(token.end_ - begin_);
     }
     break;
   case tokenFalse:
     {
     Value v(false);
     currentValue().swapPayload(v);
-    currentValue().setOffsetStart(token.start_ - begin_);
-    currentValue().setOffsetLimit(token.end_ - begin_);
     }
     break;
   case tokenNull:
     {
     Value v;
     currentValue().swapPayload(v);
-    currentValue().setOffsetStart(token.start_ - begin_);
-    currentValue().setOffsetLimit(token.end_ - begin_);
     }
     break;
   case tokenArraySeparator:
@@ -1165,13 +1064,9 @@ bool OurReader::readValue() {
       current_--;
       Value v;
       currentValue().swapPayload(v);
-      currentValue().setOffsetStart(current_ - begin_ - 1);
-      currentValue().setOffsetLimit(current_ - begin_);
       break;
     } // else, fall through ...
   default:
-    currentValue().setOffsetStart(token.start_ - begin_);
-    currentValue().setOffsetLimit(token.end_ - begin_);
     return addError("Syntax error: value, object or array expected.", token);
   }
 
@@ -1403,7 +1298,6 @@ bool OurReader::readObject(Token& tokenStart) {
   std::string name;
   Value init(objectValue);
   currentValue().swapPayload(init);
-  currentValue().setOffsetStart(tokenStart.start_ - begin_);
   while (readToken(tokenName)) {
     bool initialTokenOk = true;
     while (tokenName.type_ == tokenComment && initialTokenOk)
@@ -1458,7 +1352,6 @@ bool OurReader::readObject(Token& tokenStart) {
 bool OurReader::readArray(Token& tokenStart) {
   Value init(arrayValue);
   currentValue().swapPayload(init);
-  currentValue().setOffsetStart(tokenStart.start_ - begin_);
   skipSpaces();
   if (*current_ == ']') // empty array
   {
@@ -1498,8 +1391,6 @@ bool OurReader::decodeNumber(Token& token) {
   if (!decodeNumber(token, decoded))
     return false;
   currentValue().swapPayload(decoded);
-  currentValue().setOffsetStart(token.start_ - begin_);
-  currentValue().setOffsetLimit(token.end_ - begin_);
   return true;
 }
 
@@ -1548,8 +1439,6 @@ bool OurReader::decodeDouble(Token& token) {
   if (!decodeDouble(token, decoded))
     return false;
   currentValue().swapPayload(decoded);
-  currentValue().setOffsetStart(token.start_ - begin_);
-  currentValue().setOffsetLimit(token.end_ - begin_);
   return true;
 }
 
@@ -1595,8 +1484,6 @@ bool OurReader::decodeString(Token& token) {
     return false;
   Value decoded(decoded_string);
   currentValue().swapPayload(decoded);
-  currentValue().setOffsetStart(token.start_ - begin_);
-  currentValue().setOffsetLimit(token.end_ - begin_);
   return true;
 }
 
@@ -1801,60 +1688,6 @@ std::string OurReader::getFormattedErrorMessages() const {
           "See " + getLocationLineAndColumn(error.extra_) + " for detail.\n";
   }
   return formattedMessage;
-}
-
-std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
-  std::vector<OurReader::StructuredError> allErrors;
-  for (Errors::const_iterator itError = errors_.begin();
-       itError != errors_.end();
-       ++itError) {
-    const ErrorInfo& error = *itError;
-    OurReader::StructuredError structured;
-    structured.offset_start = error.token_.start_ - begin_;
-    structured.offset_limit = error.token_.end_ - begin_;
-    structured.message = error.message_;
-    allErrors.push_back(structured);
-  }
-  return allErrors;
-}
-
-bool OurReader::pushError(const Value& value, const std::string& message) {
-  size_t length = end_ - begin_;
-  if(value.getOffsetStart() > length
-    || value.getOffsetLimit() > length)
-    return false;
-  Token token;
-  token.type_ = tokenError;
-  token.start_ = begin_ + value.getOffsetStart();
-  token.end_ = end_ + value.getOffsetLimit();
-  ErrorInfo info;
-  info.token_ = token;
-  info.message_ = message;
-  info.extra_ = 0;
-  errors_.push_back(info);
-  return true;
-}
-
-bool OurReader::pushError(const Value& value, const std::string& message, const Value& extra) {
-  size_t length = end_ - begin_;
-  if(value.getOffsetStart() > length
-    || value.getOffsetLimit() > length
-    || extra.getOffsetLimit() > length)
-    return false;
-  Token token;
-  token.type_ = tokenError;
-  token.start_ = begin_ + value.getOffsetStart();
-  token.end_ = begin_ + value.getOffsetLimit();
-  ErrorInfo info;
-  info.token_ = token;
-  info.message_ = message;
-  info.extra_ = begin_ + extra.getOffsetStart();
-  errors_.push_back(info);
-  return true;
-}
-
-bool OurReader::good() const {
-  return !errors_.size();
 }
 
 
