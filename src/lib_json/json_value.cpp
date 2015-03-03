@@ -156,26 +156,30 @@ void Value::CommentInfo::setComment(const char* text, size_t len) {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-// Notes: index_ indicates if the string was allocated when
+// Notes: policy_ indicates if the string was allocated when
 // a string is stored.
+//
+// TODO: Check for length > 1GB, in Reader.
 
 Value::CZString::CZString(ArrayIndex index) : cstr_(0), index_(index) {}
 
-Value::CZString::CZString(const char* cstr, DuplicationPolicy allocate)
-    : cstr_(allocate == duplicate ? duplicateStringValue(cstr) : cstr),
-      index_(allocate) {}
+Value::CZString::CZString(char const* str, unsigned length, DuplicationPolicy allocate)
+    : cstr_(allocate == duplicate ? duplicateStringValue(str) : str),
+      storage_({allocate, length})
+{}
 
 Value::CZString::CZString(const CZString& other)
-    : cstr_(other.index_ != noDuplication && other.cstr_ != 0
+    : cstr_(other.storage_.policy_ != noDuplication && other.cstr_ != 0
                 ? duplicateStringValue(other.cstr_)
                 : other.cstr_),
-      index_(other.cstr_
-                 ? static_cast<ArrayIndex>(other.index_ == noDuplication
+      storage_({(other.cstr_
+                 ? (other.storage_.policy_ == noDuplication
                      ? noDuplication : duplicate)
-                 : other.index_) {}
+                 : other.storage_.policy_), other.storage_.length_})
+{}
 
 Value::CZString::~CZString() {
-  if (cstr_ && index_ == duplicate)
+  if (cstr_ && storage_.policy_ == duplicate)
     releaseStringValue(const_cast<char*>(cstr_));
 }
 
@@ -190,22 +194,34 @@ Value::CZString& Value::CZString::operator=(CZString other) {
 }
 
 bool Value::CZString::operator<(const CZString& other) const {
-  if (cstr_)
-    return strcmp(cstr_, other.cstr_) < 0;
-  return index_ < other.index_;
+  if (!cstr_) return index_ < other.index_;
+  //return strcmp(cstr_, other.cstr_) < 0;
+  // Assume both are strings.
+  unsigned this_len = this->storage_.length_;
+  unsigned other_len = other.storage_.length_;
+  unsigned min_len = std::min(this_len, other_len);
+  int comp = memcmp(this->cstr_, other.cstr_, min_len);
+  if (comp < 0) return true;
+  if (comp > 0) return false;
+  return (this_len < other_len);
 }
 
 bool Value::CZString::operator==(const CZString& other) const {
-  if (cstr_)
-    return strcmp(cstr_, other.cstr_) == 0;
-  return index_ == other.index_;
+  if (!cstr_) return index_ == other.index_;
+  //return strcmp(cstr_, other.cstr_) == 0;
+  // Assume both are strings.
+  unsigned this_len = this->storage_.length_;
+  unsigned other_len = other.storage_.length_;
+  if (this_len != other_len) return false;
+  int comp = memcmp(this->cstr_, other.cstr_, this_len);
+  return comp == 0;
 }
 
 ArrayIndex Value::CZString::index() const { return index_; }
 
 const char* Value::CZString::c_str() const { return cstr_; }
 
-bool Value::CZString::isStaticString() const { return index_ == noDuplication; }
+bool Value::CZString::isStaticString() const { return storage_.policy_ == noDuplication; }
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
@@ -833,7 +849,7 @@ Value& Value::resolveReference(const char* key, bool isStatic) {
   if (type_ == nullValue)
     *this = Value(objectValue);
   CZString actualKey(
-      key, isStatic ? CZString::noDuplication : CZString::duplicateOnCopy);
+      key, strlen(key), isStatic ? CZString::noDuplication : CZString::duplicateOnCopy);
   ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
   if (it != value_.map_->end() && (*it).first == actualKey)
     return (*it).second;
@@ -857,7 +873,7 @@ const Value& Value::operator[](const char* key) const {
       "in Json::Value::operator[](char const*)const: requires objectValue");
   if (type_ == nullValue)
     return null;
-  CZString actualKey(key, CZString::noDuplication);
+  CZString actualKey(key, strlen(key), CZString::noDuplication);
   ObjectValues::const_iterator it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
     return null;
@@ -902,7 +918,7 @@ bool Value::removeMember(const char* key, Value* removed) {
   if (type_ != objectValue) {
     return false;
   }
-  CZString actualKey(key, CZString::noDuplication);
+  CZString actualKey(key, strlen(key), CZString::noDuplication);
   ObjectValues::iterator it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
     return false;

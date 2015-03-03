@@ -164,7 +164,7 @@ private:
       duplicateOnCopy
     };
     CZString(ArrayIndex index);
-    CZString(const char* cstr, DuplicationPolicy allocate);
+    CZString(char const* cstr, unsigned length, DuplicationPolicy allocate);
     CZString(const CZString& other);
     ~CZString();
     CZString& operator=(CZString other);
@@ -176,8 +176,16 @@ private:
 
   private:
     void swap(CZString& other);
+    struct StringStorage {
+      DuplicationPolicy policy_: 2;
+      unsigned length_: 30; // 1GB max
+    };
+
     const char* cstr_;
-    ArrayIndex index_;
+    union {
+      ArrayIndex index_;
+      StringStorage storage_;
+    };
   };
 
 public:
