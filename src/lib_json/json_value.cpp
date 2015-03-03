@@ -867,28 +867,35 @@ Value Value::get(ArrayIndex index, const Value& defaultValue) const {
 
 bool Value::isValidIndex(ArrayIndex index) const { return index < size(); }
 
-const Value& Value::operator[](const char* key) const {
+Value const* Value::find(char const* key, char const* end) const
+{
   JSON_ASSERT_MESSAGE(
       type_ == nullValue || type_ == objectValue,
-      "in Json::Value::operator[](char const*)const: requires objectValue");
-  if (type_ == nullValue)
-    return null;
-  CZString actualKey(key, strlen(key), CZString::noDuplication);
+      "in Json::Value::find(key, end, found): requires objectValue or nullValue");
+  if (type_ == nullValue) return NULL;
+  CZString actualKey(key, end-key, CZString::noDuplication);
   ObjectValues::const_iterator it = value_.map_->find(actualKey);
-  if (it == value_.map_->end())
-    return null;
-  return (*it).second;
+  if (it == value_.map_->end()) return NULL;
+  return &(*it).second;
 }
-
-Value& Value::operator[](const std::string& key) {
+const Value& Value::operator[](const char* key) const
+{
+  Value const* found = find(key, key + strlen(key));
+  if (!found) return null;
+  return *found;
+}
+Value& Value::operator[](const std::string& key)
+{
   return (*this)[key.c_str()];
 }
-
-const Value& Value::operator[](const std::string& key) const {
-  return (*this)[key.c_str()];
+Value const& Value::operator[](std::string const& key) const
+{
+  Value const* found = find(key.data(), key.data() + key.length());
+  if (!found) return null;
+  return *found;
 }
-
-Value& Value::operator[](const StaticString& key) {
+Value& Value::operator[](const StaticString& key)
+{
   return resolveReference(key, true);
 }
 
@@ -896,29 +903,37 @@ Value& Value::operator[](const StaticString& key) {
 Value& Value::operator[](const CppTL::ConstString& key) {
   return (*this)[key.c_str()];
 }
-
-const Value& Value::operator[](const CppTL::ConstString& key) const {
-  return (*this)[key.c_str()];
+Value const& Value::operator[](CppTL::ConstString const& key) const
+{
+  Value const* found = find(key.c_str(), key.end_c_str());
+  if (!found) return null;
+  return *found;
 }
 #endif
 
 Value& Value::append(const Value& value) { return (*this)[size()] = value; }
 
-Value Value::get(const char* key, const Value& defaultValue) const {
+Value Value::get(char const* key, char const* end, Value const& defaultValue) const
+{
   const Value* value = &((*this)[key]);
   return value == &null ? defaultValue : *value;
 }
-
-Value Value::get(const std::string& key, const Value& defaultValue) const {
+Value Value::get(char const* key, Value const& defaultValue) const
+{
+  return get(key, key + strlen(key), defaultValue);
+}
+Value Value::get(std::string const& key, Value const& defaultValue) const
+{
   return get(key.c_str(), defaultValue);
 }
 
 
-bool Value::removeMember(const char* key, Value* removed) {
+bool Value::removeMember(const char* key, const char* end, Value* removed)
+{
   if (type_ != objectValue) {
     return false;
   }
-  CZString actualKey(key, strlen(key), CZString::noDuplication);
+  CZString actualKey(key, end-key, CZString::noDuplication);
   ObjectValues::iterator it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
     return false;
@@ -926,19 +941,27 @@ bool Value::removeMember(const char* key, Value* removed) {
   value_.map_->erase(it);
   return true;
 }
-
-Value Value::removeMember(const char* key) {
+bool Value::removeMember(const char* key, Value* removed)
+{
+  return removeMember(key, key + strlen(key), removed);
+}
+bool Value::removeMember(std::string const& key, Value* removed)
+{
+  return removeMember(key.data(), key.data() + key.length(), removed);
+}
+Value Value::removeMember(const char* key)
+{
   JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == objectValue,
                       "in Json::Value::removeMember(): requires objectValue");
   if (type_ == nullValue)
     return null;
 
   Value removed;  // null
-  removeMember(key, &removed);
+  removeMember(key, key + strlen(key), &removed);
   return removed; // still null if removeMember() did nothing
 }
-
-Value Value::removeMember(const std::string& key) {
+Value Value::removeMember(const std::string& key)
+{
   return removeMember(key.c_str());
 }
 
@@ -972,13 +995,18 @@ Value Value::get(const CppTL::ConstString& key,
 }
 #endif
 
-bool Value::isMember(const char* key) const {
-  const Value* value = &((*this)[key]);
-  return value != &null;
+bool Value::isMember(char const* key, char const* end) const
+{
+  Value const* value = find(key, end);
+  return NULL != value;
 }
-
-bool Value::isMember(const std::string& key) const {
-  return isMember(key.c_str());
+bool Value::isMember(const char* key) const
+{
+  return isMember(key, key + strlen(key));
+}
+bool Value::isMember(const std::string& key) const
+{
+  return isMember(key.data(), key.data() + key.length());
 }
 
 #ifdef JSON_USE_CPPTL

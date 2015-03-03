@@ -112,6 +112,12 @@ private:
  *
  * It is possible to iterate over the list of a #objectValue values using
  * the getMemberNames() method.
+ *
+ * \note Value string-length fit in size_t, but keys must fit in unsigned.
+ * (The reason is an implementation detail.) The readers will raise an
+ * exception if a bound is exceeded to avoid security holes in your app,
+ * but the Value API does *not* check bounds. That is the responsibility
+ * of the caller.
  */
 class JSON_API Value {
   friend class ValueIteratorBase;
@@ -352,19 +358,25 @@ Json::Value obj_value(Json::objectValue); // {}
   Value& append(const Value& value);
 
   /// Access an object value by name, create a null member if it does not exist.
+  /// \note Because of our implementation, keys are limited to 2^30 -1 chars.
+  ///  Exceeding that will cause an exception.
   Value& operator[](const char* key);
   /// Access an object value by name, returns null if there is no member with
   /// that name.
   const Value& operator[](const char* key) const;
   /// Access an object value by name, create a null member if it does not exist.
+  /// \param key may contain embedded nulls.
   Value& operator[](const std::string& key);
   /// Access an object value by name, returns null if there is no member with
   /// that name.
+  /// \param key may contain embedded nulls.
   const Value& operator[](const std::string& key) const;
   /** \brief Access an object value by name, create a null member if it does not
    exist.
 
-   * If the object as no entry for that name, then the member name used to store
+   * \param key may contain embedded nulls.
+   *
+   * If the object has no entry for that name, then the member name used to store
    * the new entry is not duplicated.
    * Example of use:
    * \code
@@ -384,11 +396,19 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Return the member named key if it exist, defaultValue otherwise.
   Value get(const char* key, const Value& defaultValue) const;
   /// Return the member named key if it exist, defaultValue otherwise.
+  /// \param key may contain embedded nulls.
+  Value get(const char* key, const char* end, const Value& defaultValue) const;
+  /// Return the member named key if it exist, defaultValue otherwise.
+  /// \param key may contain embedded nulls.
   Value get(const std::string& key, const Value& defaultValue) const;
 #ifdef JSON_USE_CPPTL
   /// Return the member named key if it exist, defaultValue otherwise.
   Value get(const CppTL::ConstString& key, const Value& defaultValue) const;
 #endif
+  /// Most general and efficient version of isMember()const, get()const,
+  /// and operator[]const
+  /// \note As stated elsewhere, behavior is undefined if (end-key) >= 2^30
+  Value const* find(char const* key, char const* end) const;
   /// \brief Remove and return the named member.
   ///
   /// Do nothing if it did not exist.
@@ -398,14 +418,21 @@ Json::Value obj_value(Json::objectValue); // {}
   /// \deprecated
   Value removeMember(const char* key);
   /// Same as removeMember(const char*)
+  /// \param key may contain embedded nulls.
   /// \deprecated
   Value removeMember(const std::string& key);
+  /// Same as removeMember(const char* key, const char* end, Value* removed),
+  /// but 'key' is null-terminated.
+  bool removeMember(const char* key, Value* removed);
   /** \brief Remove the named map member.
 
       Update 'removed' iff removed.
+      \param key may contain embedded nulls.
       \return true iff removed (no exceptions)
   */
-  bool removeMember(const char* key, Value* removed);
+  bool removeMember(std::string const& key, Value* removed);
+  /// Same as removeMember(std::string const& key, Value* removed)
+  bool removeMember(const char* key, const char* end, Value* removed);
   /** \brief Remove the indexed array element.
 
       O(n) expensive operations.
@@ -417,7 +444,10 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Return true if the object has a member named key.
   bool isMember(const char* key) const;
   /// Return true if the object has a member named key.
+  /// \param key may contain embedded nulls.
   bool isMember(const std::string& key) const;
+  /// Same as isMember(std::string const& key)const
+  bool isMember(const char* key, const char* end) const;
 #ifdef JSON_USE_CPPTL
   /// Return true if the object has a member named key.
   bool isMember(const CppTL::ConstString& key) const;
