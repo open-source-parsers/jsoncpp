@@ -134,8 +134,8 @@ public:
   typedef Json::LargestUInt LargestUInt;
   typedef Json::ArrayIndex ArrayIndex;
 
-  static const Value& null;  ///! We regret this reference to a global instance; prefer the simpler Value().
-  static const Value& nullRef;  ///! just a kludge for binary-compatibility; same as null
+  static const Value& null;  ///< We regret this reference to a global instance; prefer the simpler Value().
+  static const Value& nullRef;  ///< just a kludge for binary-compatibility; same as null
   /// Minimum signed integer value that can be stored in a Json::Value.
   static const LargestInt minLargestInt;
   /// Maximum signed integer value that can be stored in a Json::Value.
@@ -228,8 +228,8 @@ Json::Value obj_value(Json::objectValue); // {}
   Value(UInt64 value);
 #endif // if defined(JSON_HAS_INT64)
   Value(double value);
-  Value(const char* value); ///! Copy til first 0. (NULL causes to seg-fault.)
-  Value(const char* beginValue, const char* endValue); ///! Copy all, incl zeroes.
+  Value(const char* value); ///< Copy til first 0. (NULL causes to seg-fault.)
+  Value(const char* beginValue, const char* endValue); ///< Copy all, incl zeroes.
   /** \brief Constructs a value from a static string.
 
    * Like other value string constructor but do not duplicate the string for
@@ -246,7 +246,7 @@ Json::Value obj_value(Json::objectValue); // {}
    * \endcode
    */
   Value(const StaticString& value);
-  Value(const std::string& value); ///! Copy data() til size(). Embedded zeroes too.
+  Value(const std::string& value); ///< Copy data() til size(). Embedded zeroes too.
 #ifdef JSON_USE_CPPTL
   Value(const CppTL::ConstString& value);
 #endif
@@ -273,8 +273,8 @@ Json::Value obj_value(Json::objectValue); // {}
   bool operator!=(const Value& other) const;
   int compare(const Value& other) const;
 
-  const char* asCString() const; ///! Embedded zeroes could cause you trouble!
-  std::string asString() const; ///! Embedded zeroes are possible.
+  const char* asCString() const; ///< Embedded zeroes could cause you trouble!
+  std::string asString() const; ///< Embedded zeroes are possible.
   /** Get raw char* of string-value.
    *  \return false if !string. (Seg-fault if str or end are NULL.)
    */
