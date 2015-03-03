@@ -353,10 +353,11 @@ Value::Value(bool value) {
   value_.bool_ = value;
 }
 
-Value::Value(const Value& other)
+Value::Value(Value const& other)
     : type_(other.type_), allocated_(false)
       ,
-      comments_(0), start_(other.start_), limit_(other.limit_) {
+      comments_(0), start_(other.start_), limit_(other.limit_)
+{
   switch (type_) {
   case nullValue:
   case intValue:
@@ -366,7 +367,7 @@ Value::Value(const Value& other)
     value_ = other.value_;
     break;
   case stringValue:
-    if (other.value_.string_) {
+    if (other.value_.string_ && other.allocated_) {
       unsigned len;
       char const* str;
       decodePrefixedString(other.allocated_, other.value_.string_,
@@ -374,7 +375,7 @@ Value::Value(const Value& other)
       value_.string_ = duplicateAndPrefixStringValue(str, len);
       allocated_ = true;
     } else {
-      value_.string_ = 0;
+      value_.string_ = other.value_.string_;
       allocated_ = false;
     }
     break;
