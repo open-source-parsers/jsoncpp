@@ -191,8 +191,6 @@ void Value::CommentInfo::setComment(const char* text, size_t len) {
 
 // Notes: policy_ indicates if the string was allocated when
 // a string is stored.
-//
-// TODO: Check for length > 1GB, in Reader.
 
 Value::CZString::CZString(ArrayIndex index) : cstr_(0), index_(index) {}
 
