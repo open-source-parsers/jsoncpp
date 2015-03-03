@@ -282,6 +282,8 @@ JSONTEST_FIXTURE(ValueTest, null) {
   JSONTEST_ASSERT_EQUAL(0.0, null_.asDouble());
   JSONTEST_ASSERT_EQUAL(0.0, null_.asFloat());
   JSONTEST_ASSERT_STRING_EQUAL("", null_.asString());
+
+  JSONTEST_ASSERT_EQUAL(Json::Value::null, null_);
 }
 
 JSONTEST_FIXTURE(ValueTest, strings) {
