@@ -285,7 +285,7 @@ Usage:
 \code
   using namespace Json;
   CharReaderBuilder builder;
-  builder.settings_["collectComments"] = false;
+  builder["collectComments"] = false;
   Value value;
   std::string errs;
   bool ok = parseFromStream(builder, std::cin, &value, &errs);
@@ -337,6 +337,11 @@ public:
    *   otherwise, indicate bad settings via 'invalid'.
    */
   bool validate(Json::Value* invalid) const;
+
+  /** A simple way to update a specific setting.
+   */
+  Value& operator[](std::string key);
+
   /** Called by ctor, but you can use this to reset settings_.
    * \pre 'settings' != NULL (but Json::null is fine)
    * \remark Defaults:

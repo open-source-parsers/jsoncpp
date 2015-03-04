@@ -2182,7 +2182,7 @@ JSONTEST_FIXTURE(BuilderTest, settings) {
     Json::CharReaderBuilder rb;
     JSONTEST_ASSERT_EQUAL(false, rb.settings_.isMember("foo"));
     JSONTEST_ASSERT_EQUAL(true, rb.validate(&errs));
-    rb.settings_["foo"] = "bar";
+    rb["foo"] = "bar";
     JSONTEST_ASSERT_EQUAL(true, rb.settings_.isMember("foo"));
     JSONTEST_ASSERT_EQUAL(false, rb.validate(&errs));
   }
@@ -2191,7 +2191,7 @@ JSONTEST_FIXTURE(BuilderTest, settings) {
     Json::StreamWriterBuilder wb;
     JSONTEST_ASSERT_EQUAL(false, wb.settings_.isMember("foo"));
     JSONTEST_ASSERT_EQUAL(true, wb.validate(&errs));
-    wb.settings_["foo"] = "bar";
+    wb["foo"] = "bar";
     JSONTEST_ASSERT_EQUAL(true, wb.settings_.isMember("foo"));
     JSONTEST_ASSERT_EQUAL(false, wb.validate(&errs));
   }
