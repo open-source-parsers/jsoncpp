@@ -76,8 +76,8 @@ Usage:
   using namespace Json;
   Value value = ...;
   StreamWriterBuilder builder;
-  builder.settings_["commentStyle"] = "None";
-  builder.settings_["indentation"] = "   ";  // or whatever you like
+  builder["commentStyle"] = "None";
+  builder["indentation"] = "   ";  // or whatever you like
   std::unique_ptr<Json::StreamWriter> writer(
       builder.newStreamWriter());
   writer->write(value, &std::cout);
