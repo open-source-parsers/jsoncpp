@@ -1122,6 +1122,10 @@ bool StreamWriterBuilder::validate(Json::Value* invalid) const
   }
   return 0u == inv.size();
 }
+Value& StreamWriterBuilder::operator[](std::string key)
+{
+  return settings_[key];
+}
 // static
 void StreamWriterBuilder::setDefaults(Json::Value* settings)
 {

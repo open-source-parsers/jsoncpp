@@ -1927,6 +1927,10 @@ bool CharReaderBuilder::validate(Json::Value* invalid) const
   }
   return 0u == inv.size();
 }
+Value& CharReaderBuilder::operator[](std::string key)
+{
+  return settings_[key];
+}
 // static
 void CharReaderBuilder::strictMode(Json::Value* settings)
 {

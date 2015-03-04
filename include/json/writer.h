@@ -76,8 +76,8 @@ Usage:
   using namespace Json;
   Value value = ...;
   StreamWriterBuilder builder;
-  builder.settings_["commentStyle"] = "None";
-  builder.settings_["indentation"] = "   ";  // or whatever you like
+  builder["commentStyle"] = "None";
+  builder["indentation"] = "   ";  // or whatever you like
   std::unique_ptr<Json::StreamWriter> writer(
       builder.newStreamWriter());
   writer->write(value, &std::cout);
@@ -119,6 +119,10 @@ public:
    *   otherwise, indicate bad settings via 'invalid'.
    */
   bool validate(Json::Value* invalid) const;
+  /** A simple way to update a specific setting.
+   */
+  Value& operator[](std::string key);
+
   /** Called by ctor, but you can use this to reset settings_.
    * \pre 'settings' != NULL (but Json::null is fine)
    * \remark Defaults:
