@@ -119,6 +119,10 @@ public:
    *   otherwise, indicate bad settings via 'invalid'.
    */
   bool validate(Json::Value* invalid) const;
+  /** A simple way to update a specific setting.
+   */
+  Value& operator[](std::string key);
+
   /** Called by ctor, but you can use this to reset settings_.
    * \pre 'settings' != NULL (but Json::null is fine)
    * \remark Defaults:
