@@ -1110,7 +1110,6 @@ bool StreamWriterBuilder::validate(Json::Value* invalid) const
   Json::Value my_invalid;
   if (!invalid) invalid = &my_invalid;  // so we do not need to test for NULL
   Json::Value& inv = *invalid;
-  bool valid = true;
   std::set<std::string> valid_keys;
   getValidWriterKeys(&valid_keys);
   Value::Members keys = settings_.getMemberNames();
@@ -1121,7 +1120,7 @@ bool StreamWriterBuilder::validate(Json::Value* invalid) const
       inv[key] = settings_[key];
     }
   }
-  return valid;
+  return 0u == inv.size();
 }
 // static
 void StreamWriterBuilder::setDefaults(Json::Value* settings)
