@@ -1028,8 +1028,8 @@ Value& Value::append(const Value& value) { return (*this)[size()] = value; }
 
 Value Value::get(char const* key, char const* end, Value const& defaultValue) const
 {
-  const Value* value = &((*this)[key]);
-  return value == &nullRef ? defaultValue : *value;
+  Value const* found = find(key, end);
+  return !found ? defaultValue : *found;
 }
 Value Value::get(char const* key, Value const& defaultValue) const
 {
@@ -1104,7 +1104,7 @@ bool Value::removeIndex(ArrayIndex index, Value* removed) {
 #ifdef JSON_USE_CPPTL
 Value Value::get(const CppTL::ConstString& key,
                  const Value& defaultValue) const {
-  return get(key.c_str(), defaultValue);
+  return get(key.c_str(), key.end_c_str(), defaultValue);
 }
 #endif
 

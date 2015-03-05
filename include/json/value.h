@@ -404,15 +404,19 @@ Json::Value obj_value(Json::objectValue); // {}
   const Value& operator[](const CppTL::ConstString& key) const;
 #endif
   /// Return the member named key if it exist, defaultValue otherwise.
+  /// \note deep copy
   Value get(const char* key, const Value& defaultValue) const;
   /// Return the member named key if it exist, defaultValue otherwise.
+  /// \note deep copy
   /// \param key may contain embedded nulls.
   Value get(const char* key, const char* end, const Value& defaultValue) const;
   /// Return the member named key if it exist, defaultValue otherwise.
+  /// \note deep copy
   /// \param key may contain embedded nulls.
   Value get(const std::string& key, const Value& defaultValue) const;
 #ifdef JSON_USE_CPPTL
   /// Return the member named key if it exist, defaultValue otherwise.
+  /// \note deep copy
   Value get(const CppTL::ConstString& key, const Value& defaultValue) const;
 #endif
   /// Most general and efficient version of isMember()const, get()const,
