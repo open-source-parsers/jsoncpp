@@ -1037,7 +1037,7 @@ Value Value::get(char const* key, Value const& defaultValue) const
 }
 Value Value::get(std::string const& key, Value const& defaultValue) const
 {
-  return get(key.c_str(), defaultValue);
+  return get(key.data(), key.data() + key.length(), defaultValue);
 }
 
 

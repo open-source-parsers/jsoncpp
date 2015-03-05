@@ -1578,6 +1578,7 @@ JSONTEST_FIXTURE(ValueTest, zeroesInKeys) {
     JSONTEST_ASSERT_STRING_EQUAL("there", root[binary].asString());
     JSONTEST_ASSERT(!root.isMember("hi"));
     JSONTEST_ASSERT(root.isMember(binary));
+    JSONTEST_ASSERT_STRING_EQUAL("there", root.get(binary, Json::Value::nullRef).asString());
     Json::Value removed;
     bool did;
     did = root.removeMember(binary.data(), binary.data() + binary.length(),
@@ -1588,6 +1589,8 @@ JSONTEST_FIXTURE(ValueTest, zeroesInKeys) {
         &removed);
     JSONTEST_ASSERT(!did);
     JSONTEST_ASSERT_STRING_EQUAL("there", removed.asString()); // still
+    JSONTEST_ASSERT(!root.isMember(binary));
+    JSONTEST_ASSERT_STRING_EQUAL("", root.get(binary, Json::Value::nullRef).asString());
   }
 }
 
