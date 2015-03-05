@@ -360,7 +360,7 @@ public:
   * Someday we might have a real StreamReader, but for now this
   * is convenient.
   */
-bool parseFromStream(
+bool JSON_API parseFromStream(
     CharReader::Factory const&,
     std::istream&,
     Value* root, std::string* errs);
