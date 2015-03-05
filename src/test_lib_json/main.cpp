@@ -2174,6 +2174,29 @@ JSONTEST_FIXTURE(CharReaderAllowZeroesTest, issue176) {
   }
 }
 
+struct BuilderTest : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE(BuilderTest, settings) {
+  {
+    Json::Value errs;
+    Json::CharReaderBuilder rb;
+    JSONTEST_ASSERT_EQUAL(false, rb.settings_.isMember("foo"));
+    JSONTEST_ASSERT_EQUAL(true, rb.validate(&errs));
+    rb.settings_["foo"] = "bar";
+    JSONTEST_ASSERT_EQUAL(true, rb.settings_.isMember("foo"));
+    JSONTEST_ASSERT_EQUAL(false, rb.validate(&errs));
+  }
+  {
+    Json::Value errs;
+    Json::StreamWriterBuilder wb;
+    JSONTEST_ASSERT_EQUAL(false, wb.settings_.isMember("foo"));
+    JSONTEST_ASSERT_EQUAL(true, wb.validate(&errs));
+    wb.settings_["foo"] = "bar";
+    JSONTEST_ASSERT_EQUAL(true, wb.settings_.isMember("foo"));
+    JSONTEST_ASSERT_EQUAL(false, wb.validate(&errs));
+  }
+}
+
 struct IteratorTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(IteratorTest, distance) {
@@ -2246,6 +2269,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderAllowSingleQuotesTest, issue182);
 
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderAllowZeroesTest, issue176);
+
+  JSONTEST_REGISTER_FIXTURE(runner, BuilderTest, settings);
 
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, distance);
 
