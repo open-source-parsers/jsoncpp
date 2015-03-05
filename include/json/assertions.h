@@ -16,11 +16,15 @@
 #if JSON_USE_EXCEPTION
 #include <stdexcept>
 #define JSON_ASSERT(condition)                                                 \
-  if (!(condition)) {throw std::logic_error( "assert json failed" );} // @todo <= add detail about condition in exception
-#define JSON_FAIL_MESSAGE(message) do{std::ostringstream oss; oss << message; throw std::logic_error(oss.str());}while(0)
+  {if (!(condition)) {throw std::logic_error( "assert json failed" );}} // @todo <= add detail about condition in exception
+#define JSON_FAIL_MESSAGE(message)                                             \
+  {                                                                            \
+    std::ostringstream oss; oss << message;                                    \
+    throw std::logic_error(oss.str());                                         \
+  }
 //#define JSON_FAIL_MESSAGE(message) throw std::logic_error(message)
 #else // JSON_USE_EXCEPTION
-#define JSON_ASSERT(condition) assert(condition);
+#define JSON_ASSERT(condition) assert(condition)
 
 // The call to assert() will show the failure message in debug builds. In
 // release bugs we abort, for a core-dump or debugger.
