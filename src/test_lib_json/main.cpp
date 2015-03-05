@@ -2203,7 +2203,7 @@ JSONTEST_FIXTURE(IteratorTest, distance) {
   Json::Value json;
   json["k1"] = "a";
   json["k2"] = "b";
-  int dist;
+  int dist = 0;
   std::string str;
   for (Json::ValueIterator it = json.begin(); it != json.end(); ++it) {
     dist = it - json.begin();
