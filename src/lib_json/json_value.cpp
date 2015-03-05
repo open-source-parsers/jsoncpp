@@ -17,6 +17,7 @@
 #include <cpptl/conststring.h>
 #endif
 #include <cstddef> // size_t
+#include <algorithm> // min()
 
 #define JSON_ASSERT_UNREACHABLE assert(false)
 
@@ -325,19 +326,19 @@ Value::Value(double value) {
 
 Value::Value(const char* value) {
   initBasic(stringValue, true);
-  value_.string_ = duplicateAndPrefixStringValue(value, strlen(value));
+  value_.string_ = duplicateAndPrefixStringValue(value, static_cast<unsigned>(strlen(value)));
 }
 
 Value::Value(const char* beginValue, const char* endValue) {
   initBasic(stringValue, true);
   value_.string_ =
-      duplicateAndPrefixStringValue(beginValue, (unsigned int)(endValue - beginValue));
+      duplicateAndPrefixStringValue(beginValue, static_cast<unsigned>(endValue - beginValue));
 }
 
 Value::Value(const std::string& value) {
   initBasic(stringValue, true);
   value_.string_ =
-      duplicateAndPrefixStringValue(value.data(), (unsigned int)value.length());
+      duplicateAndPrefixStringValue(value.data(), static_cast<unsigned>(value.length()));
 }
 
 Value::Value(const StaticString& value) {
@@ -348,7 +349,7 @@ Value::Value(const StaticString& value) {
 #ifdef JSON_USE_CPPTL
 Value::Value(const CppTL::ConstString& value) {
   initBasic(stringValue, true);
-  value_.string_ = duplicateAndPrefixStringValue(value, value.length());
+  value_.string_ = duplicateAndPrefixStringValue(value, static_cast<unsigned>(value.length()));
 }
 #endif
 
@@ -937,7 +938,7 @@ Value& Value::resolveReference(const char* key) {
   if (type_ == nullValue)
     *this = Value(objectValue);
   CZString actualKey(
-      key, strlen(key), CZString::noDuplication); // NOTE!
+      key, static_cast<unsigned>(strlen(key)), CZString::noDuplication); // NOTE!
   ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
   if (it != value_.map_->end() && (*it).first == actualKey)
     return (*it).second;
@@ -957,7 +958,7 @@ Value& Value::resolveReference(char const* key, char const* end)
   if (type_ == nullValue)
     *this = Value(objectValue);
   CZString actualKey(
-      key, (end-key), CZString::duplicateOnCopy);
+      key, static_cast<unsigned>(end-key), CZString::duplicateOnCopy);
   ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
   if (it != value_.map_->end() && (*it).first == actualKey)
     return (*it).second;
@@ -981,7 +982,7 @@ Value const* Value::find(char const* key, char const* end) const
       type_ == nullValue || type_ == objectValue,
       "in Json::Value::find(key, end, found): requires objectValue or nullValue");
   if (type_ == nullValue) return NULL;
-  CZString actualKey(key, end-key, CZString::noDuplication);
+  CZString actualKey(key, static_cast<unsigned>(end-key), CZString::noDuplication);
   ObjectValues::const_iterator it = value_.map_->find(actualKey);
   if (it == value_.map_->end()) return NULL;
   return &(*it).second;
@@ -1045,7 +1046,7 @@ bool Value::removeMember(const char* key, const char* end, Value* removed)
   if (type_ != objectValue) {
     return false;
   }
-  CZString actualKey(key, end-key, CZString::noDuplication);
+  CZString actualKey(key, static_cast<unsigned>(end-key), CZString::noDuplication);
   ObjectValues::iterator it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
     return false;
