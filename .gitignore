@@ -10,6 +10,7 @@
 /libs/
 /doc/doxyfile
 /dist/
+#/version
 #/include/json/version.h
 
 # MSVC project files:

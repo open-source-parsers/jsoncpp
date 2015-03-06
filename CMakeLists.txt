@@ -1,3 +1,5 @@
+# vim: et ts=4 sts=4 sw=4 tw=0
+
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
 PROJECT(jsoncpp)
 ENABLE_TESTING()
@@ -54,17 +56,24 @@ MACRO(jsoncpp_parse_version VERSION_TEXT OUPUT_PREFIX)
 ENDMACRO(jsoncpp_parse_version)
 
 # Read out version from "version" file
-FILE(STRINGS "version" JSONCPP_VERSION)
-
+#FILE(STRINGS "version" JSONCPP_VERSION)
+#SET( JSONCPP_VERSION_MAJOR X )
+#SET( JSONCPP_VERSION_MINOR Y )
+#SET( JSONCPP_VERSION_PATCH Z )
+SET( JSONCPP_VERSION 1.5.2 )
 jsoncpp_parse_version( ${JSONCPP_VERSION} JSONCPP_VERSION )
-IF(NOT JSONCPP_VERSION_FOUND)
-    MESSAGE(FATAL_ERROR "Failed to parse version string properly. Expect X.Y.Z")
-ENDIF(NOT JSONCPP_VERSION_FOUND)
+#IF(NOT JSONCPP_VERSION_FOUND)
+#    MESSAGE(FATAL_ERROR "Failed to parse version string properly. Expect X.Y.Z")
+#ENDIF(NOT JSONCPP_VERSION_FOUND)
 
 MESSAGE(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
 # File version.h is only regenerated on CMake configure step
 CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/src/lib_json/version.h.in"
-                "${PROJECT_SOURCE_DIR}/include/json/version.h" )
+                "${PROJECT_SOURCE_DIR}/include/json/version.h"
+                NEWLINE_STYLE UNIX )
+CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/version.in"
+                "${PROJECT_SOURCE_DIR}/version"
+                NEWLINE_STYLE UNIX )
 
 macro(UseCompilationWarningAsError)
 	if ( MSVC )
