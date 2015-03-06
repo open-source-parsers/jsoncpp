@@ -1432,6 +1432,11 @@ bool OurReader::readObject(Token& tokenStart) {
           "Missing ':' after object member name", colon, tokenObjectEnd);
     }
     if (name.length() >= (1U<<30)) throw std::runtime_error("keylength >= 2^30");
+    if (features_.rejectDupKeys_ && currentValue().isMember(name)) {
+      std::string msg = "Duplicate key: '" + name + "'";
+      return addErrorAndRecover(
+          msg, tokenName, tokenObjectEnd);
+    }
     Value& value = currentValue()[name];
     nodes_.push(&value);
     bool ok = readValue();
