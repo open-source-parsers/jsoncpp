@@ -74,14 +74,14 @@ enum CommentPlacement {
  */
 class JSON_API StaticString {
 public:
-  explicit StaticString(const char* czstring) : str_(czstring) {}
+  explicit StaticString(const char* czstring) : c_str_(czstring) {}
 
-  operator const char*() const { return str_; }
+  operator const char*() const { return c_str_; }
 
-  const char* c_str() const { return str_; }
+  const char* c_str() const { return c_str_; }
 
 private:
-  const char* str_;
+  const char* c_str_;
 };
 
 /** \brief Represents a <a HREF="http://www.json.org">JSON</a> value.
