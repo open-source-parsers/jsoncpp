@@ -1884,6 +1884,29 @@ JSONTEST_FIXTURE(CharReaderTest, parseWithStackLimit) {
   }
 }
 
+struct CharReaderStrictModeTest : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE(CharReaderStrictModeTest, dupKeys) {
+  Json::CharReaderBuilder b;
+  Json::Value root;
+  char const doc[] =
+      "{ \"property\" : \"value\", \"key\" : \"val1\", \"key\" : \"val2\" }";
+  {
+    b.strictMode(&b.settings_);
+    Json::CharReader* reader(b.newCharReader());
+    std::string errs;
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(!ok);
+    JSONTEST_ASSERT_STRING_EQUAL(
+        "* Line 1, Column 41\n"
+        "  Duplicate key: 'key'\n",
+        errs);
+    JSONTEST_ASSERT_EQUAL("val1", root["key"]); // so far
+    delete reader;
+  }
+}
 struct CharReaderFailIfExtraTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(CharReaderFailIfExtraTest, issue164) {
@@ -2304,6 +2327,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseChineseWithOneError);
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseWithDetailError);
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseWithStackLimit);
+
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderStrictModeTest, dupKeys);
 
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, issue164);
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, issue107);
