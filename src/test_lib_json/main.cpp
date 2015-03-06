@@ -1543,7 +1543,7 @@ JSONTEST_FIXTURE(ValueTest, StaticString) {
 
 JSONTEST_FIXTURE(ValueTest, CommentBefore) {
   Json::Value val; // fill val
-  val.setComment("// this comment should appear before", Json::CommentPlacement::commentBefore);
+  val.setComment("// this comment should appear before", Json::commentBefore);
   Json::StreamWriterBuilder wbuilder;
   wbuilder.settings_["commentStyle"] = "All";
   {
