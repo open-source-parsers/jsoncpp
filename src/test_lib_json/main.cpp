@@ -1544,17 +1544,44 @@ JSONTEST_FIXTURE(ValueTest, StaticString) {
 JSONTEST_FIXTURE(ValueTest, CommentBefore) {
   Json::Value val; // fill val
   val.setComment("// this comment should appear before", Json::CommentPlacement::commentBefore);
-  // Configure the Builder, then ...
   Json::StreamWriterBuilder wbuilder;
   wbuilder.settings_["commentStyle"] = "All";
-  char const expected[] = "// this comment should appear before\nnull";
-  std::string result = Json::writeString(wbuilder, val);
-  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
-  std::string res2 = val.toStyledString();
-  std::string exp2 = "\n";
-  exp2 += expected;
-  exp2 += "\n";
-  JSONTEST_ASSERT_STRING_EQUAL(exp2, res2);
+  {
+    char const expected[] = "// this comment should appear before\nnull";
+    std::string result = Json::writeString(wbuilder, val);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+    std::string res2 = val.toStyledString();
+    std::string exp2 = "\n";
+    exp2 += expected;
+    exp2 += "\n";
+    JSONTEST_ASSERT_STRING_EQUAL(exp2, res2);
+  }
+  Json::Value other = "hello";
+  val.swapPayload(other);
+  {
+    char const expected[] = "// this comment should appear before\n\"hello\"";
+    std::string result = Json::writeString(wbuilder, val);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+    std::string res2 = val.toStyledString();
+    std::string exp2 = "\n";
+    exp2 += expected;
+    exp2 += "\n";
+    JSONTEST_ASSERT_STRING_EQUAL(exp2, res2);
+    JSONTEST_ASSERT_STRING_EQUAL("null\n", other.toStyledString());
+  }
+  val = "hello";
+  // val.setComment("// this comment should appear before", Json::CommentPlacement::commentBefore);
+  // Assignment over-writes comments.
+  {
+    char const expected[] = "\"hello\"";
+    std::string result = Json::writeString(wbuilder, val);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+    std::string res2 = val.toStyledString();
+    std::string exp2 = "";
+    exp2 += expected;
+    exp2 += "\n";
+    JSONTEST_ASSERT_STRING_EQUAL(exp2, res2);
+  }
 }
 
 JSONTEST_FIXTURE(ValueTest, zeroes) {
