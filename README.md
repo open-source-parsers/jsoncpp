@@ -16,7 +16,7 @@ format to store user input files.
 
 ## A note on backward-compatibility
 * `1.y.z` is built with C++11.
-* `0.8.z` can be used with older compilers.
+* `0.y.z` can be used with older compilers.
 * Major versions maintain binary-compatibility.
 
 Using JsonCpp in your project
