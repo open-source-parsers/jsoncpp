@@ -320,6 +320,8 @@ public:
     - `"failIfExtra": false or true`
       - If true, `parse()` returns false when extra non-whitespace trails
         the JSON value in the input string.
+    - `"rejectDupKeys": false or true`
+      - If true, `parse()` returns false when a key is duplicated within an object.
 
     You can examine 'settings_` yourself
     to see the defaults. You can also write and read them just like any
