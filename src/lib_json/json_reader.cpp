@@ -916,6 +916,7 @@ public:
   bool allowNumericKeys_;
   bool allowSingleQuotes_;
   bool failIfExtra_;
+  bool rejectDupKeys_;
   int stackLimit_;
 };  // OurFeatures
 
@@ -1431,6 +1432,11 @@ bool OurReader::readObject(Token& tokenStart) {
           "Missing ':' after object member name", colon, tokenObjectEnd);
     }
     if (name.length() >= (1U<<30)) throw std::runtime_error("keylength >= 2^30");
+    if (features_.rejectDupKeys_ && currentValue().isMember(name)) {
+      std::string msg = "Duplicate key: '" + name + "'";
+      return addErrorAndRecover(
+          msg, tokenName, tokenObjectEnd);
+    }
     Value& value = currentValue()[name];
     nodes_.push(&value);
     bool ok = readValue();
@@ -1896,6 +1902,7 @@ CharReader* CharReaderBuilder::newCharReader() const
   features.allowSingleQuotes_ = settings_["allowSingleQuotes"].asBool();
   features.stackLimit_ = settings_["stackLimit"].asInt();
   features.failIfExtra_ = settings_["failIfExtra"].asBool();
+  features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
   return new OurCharReader(collectComments, features);
 }
 static void getValidReaderKeys(std::set<std::string>* valid_keys)
@@ -1909,6 +1916,7 @@ static void getValidReaderKeys(std::set<std::string>* valid_keys)
   valid_keys->insert("allowSingleQuotes");
   valid_keys->insert("stackLimit");
   valid_keys->insert("failIfExtra");
+  valid_keys->insert("rejectDupKeys");
 }
 bool CharReaderBuilder::validate(Json::Value* invalid) const
 {
@@ -1941,6 +1949,7 @@ void CharReaderBuilder::strictMode(Json::Value* settings)
   (*settings)["allowNumericKeys"] = false;
   (*settings)["allowSingleQuotes"] = false;
   (*settings)["failIfExtra"] = true;
+  (*settings)["rejectDupKeys"] = true;
 //! [CharReaderBuilderStrictMode]
 }
 // static
@@ -1955,6 +1964,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings)
   (*settings)["allowSingleQuotes"] = false;
   (*settings)["stackLimit"] = 1000;
   (*settings)["failIfExtra"] = false;
+  (*settings)["rejectDupKeys"] = false;
 //! [CharReaderBuilderDefaults]
 }
 
