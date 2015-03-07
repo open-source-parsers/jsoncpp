@@ -1,4 +1,3 @@
-#include <iostream>
 // Copyright 2007-2010 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
@@ -214,31 +213,6 @@ JSONTEST_FIXTURE(ValueTest, objects) {
   JSONTEST_ASSERT_EQUAL(false, did);
 }
 
-JSONTEST_FIXTURE(ValueTest, nulls) {
-  static char const keyWithNulls[] = "key\0with\0nulls";
-  std::string const strKeyWithNulls(keyWithNulls, sizeof keyWithNulls);
-  object1_[strKeyWithNulls] = "object1_[keyWithNulls]";
-  Json::Value::Members f = object1_.getMemberNames();
-  std::cout << "size:" << f.size() << "\n";
-  for (int i=0; i<f.size(); ++i) {
-    std::cout << f[i].size() << ":" << f[i] << "\n";
-  }
-  //abort();
-  Json::Value const& o = object1_;
-  Json::Value const& temp = o[strKeyWithNulls];
-  JSONTEST_ASSERT_EQUAL(Json::Value("object1_[keyWithNulls]"), temp);
-  JSONTEST_ASSERT(object1_.isMember(keyWithNulls, keyWithNulls + strKeyWithNulls.length()));
-  //JSONTEST_ASSERT(object1_.isMember(keyWithNulls, keyWithNulls + sizeof(keyWithNulls)));
-  JSONTEST_ASSERT(!object1_.isMember("key"));
-
-  Json::Value got;
-  bool did;
-  did = object1_.removeMember(strKeyWithNulls, &got);
-  JSONTEST_ASSERT_EQUAL(Json::Value("object1_[keyWithNulls]"), got);
-  JSONTEST_ASSERT_EQUAL(true, did);
-  did = object1_.removeMember(strKeyWithNulls, &got);
-  JSONTEST_ASSERT_EQUAL(false, did);
-}
 JSONTEST_FIXTURE(ValueTest, arrays) {
   const unsigned int index0 = 0;
 
