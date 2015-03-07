@@ -1,3 +1,4 @@
+#include <iostream>
 // Copyright 2007-2010 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
@@ -213,6 +214,31 @@ JSONTEST_FIXTURE(ValueTest, objects) {
   JSONTEST_ASSERT_EQUAL(false, did);
 }
 
+JSONTEST_FIXTURE(ValueTest, nulls) {
+  static char const keyWithNulls[] = "key\0with\0nulls";
+  std::string const strKeyWithNulls(keyWithNulls, sizeof keyWithNulls);
+  object1_[strKeyWithNulls] = "object1_[keyWithNulls]";
+  Json::Value::Members f = object1_.getMemberNames();
+  std::cout << "size:" << f.size() << "\n";
+  for (int i=0; i<f.size(); ++i) {
+    std::cout << f[i].size() << ":" << f[i] << "\n";
+  }
+  //abort();
+  Json::Value const& o = object1_;
+  Json::Value const& temp = o[strKeyWithNulls];
+  JSONTEST_ASSERT_EQUAL(Json::Value("object1_[keyWithNulls]"), temp);
+  JSONTEST_ASSERT(object1_.isMember(keyWithNulls, keyWithNulls + strKeyWithNulls.length()));
+  //JSONTEST_ASSERT(object1_.isMember(keyWithNulls, keyWithNulls + sizeof(keyWithNulls)));
+  JSONTEST_ASSERT(!object1_.isMember("key"));
+
+  Json::Value got;
+  bool did;
+  did = object1_.removeMember(strKeyWithNulls, &got);
+  JSONTEST_ASSERT_EQUAL(Json::Value("object1_[keyWithNulls]"), got);
+  JSONTEST_ASSERT_EQUAL(true, did);
+  did = object1_.removeMember(strKeyWithNulls, &got);
+  JSONTEST_ASSERT_EQUAL(false, did);
+}
 JSONTEST_FIXTURE(ValueTest, arrays) {
   const unsigned int index0 = 0;
 
@@ -1585,8 +1611,9 @@ JSONTEST_FIXTURE(ValueTest, CommentBefore) {
 }
 
 JSONTEST_FIXTURE(ValueTest, zeroes) {
-  std::string binary("hi", 3);  // include trailing 0
-  JSONTEST_ASSERT_EQUAL(3, binary.length());
+  char const cstr[] = "h\0i";
+  std::string binary(cstr, sizeof(cstr));  // include trailing 0
+  JSONTEST_ASSERT_EQUAL(4U, binary.length());
   Json::StreamWriterBuilder b;
   {
     Json::Value root;
@@ -1600,11 +1627,11 @@ JSONTEST_FIXTURE(ValueTest, zeroes) {
     JSONTEST_ASSERT_STRING_EQUAL(binary, root[top].asString());
     Json::Value removed;
     bool did;
-    did = root.removeMember(top, top + 3U,
+    did = root.removeMember(top, top + sizeof(top) - 1U,
         &removed);
     JSONTEST_ASSERT(did);
     JSONTEST_ASSERT_STRING_EQUAL(binary, removed.asString());
-    did = root.removeMember(top, top + 3U,
+    did = root.removeMember(top, top + sizeof(top) - 1U,
         &removed);
     JSONTEST_ASSERT(!did);
     JSONTEST_ASSERT_STRING_EQUAL(binary, removed.asString()); // still
@@ -1612,14 +1639,14 @@ JSONTEST_FIXTURE(ValueTest, zeroes) {
 }
 
 JSONTEST_FIXTURE(ValueTest, zeroesInKeys) {
-  std::string binary("hi", 3);  // include trailing 0
-  JSONTEST_ASSERT_EQUAL(3, binary.length());
-  Json::StreamWriterBuilder b;
+  char const cstr[] = "h\0i";
+  std::string binary(cstr, sizeof(cstr));  // include trailing 0
+  JSONTEST_ASSERT_EQUAL(4U, binary.length());
   {
     Json::Value root;
     root[binary] = "there";
     JSONTEST_ASSERT_STRING_EQUAL("there", root[binary].asString());
-    JSONTEST_ASSERT(!root.isMember("hi"));
+    JSONTEST_ASSERT(!root.isMember("h"));
     JSONTEST_ASSERT(root.isMember(binary));
     JSONTEST_ASSERT_STRING_EQUAL("there", root.get(binary, Json::Value::nullRef).asString());
     Json::Value removed;
@@ -2306,6 +2333,7 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, typeChecksThrowExceptions);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, StaticString);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, CommentBefore);
+  //JSONTEST_REGISTER_FIXTURE(runner, ValueTest, nulls);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, zeroes);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, zeroesInKeys);
 
