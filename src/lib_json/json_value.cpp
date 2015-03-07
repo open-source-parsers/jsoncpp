@@ -196,15 +196,16 @@ void Value::CommentInfo::setComment(const char* text, size_t len) {
 Value::CZString::CZString(ArrayIndex index) : cstr_(0), index_(index) {}
 
 Value::CZString::CZString(char const* str, unsigned length, DuplicationPolicy allocate)
-    : cstr_(allocate == duplicate ? duplicateStringValue(str) : str)
+    : cstr_(str)
 {
+  // allocate != duplicate
   storage_.policy_ = allocate;
   storage_.length_ = length;
 }
 
 Value::CZString::CZString(const CZString& other)
     : cstr_(other.storage_.policy_ != noDuplication && other.cstr_ != 0
-                ? duplicateStringValue(other.cstr_)
+                ? duplicateStringValue(other.cstr_, other.storage_.length_)
                 : other.cstr_)
 {
   storage_.policy_ = (other.cstr_
