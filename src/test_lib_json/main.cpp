@@ -201,6 +201,11 @@ JSONTEST_FIXTURE(ValueTest, objects) {
   JSONTEST_ASSERT_EQUAL(Json::Value("foo"), object1_["some other id"]);
   JSONTEST_ASSERT_EQUAL(Json::Value("foo"), object1_["some other id"]);
 
+  static char const keyWithNulls[] = "key\0with\0nulls";
+  std::string const strKeyWithNulls(keyWithNulls, sizeof keyWithNulls);
+  object1_[strKeyWithNulls] = "object1_[keyWithNulls]";
+  JSONTEST_ASSERT_EQUAL(Json::Value("object1_[keyWithNulls]"), object1_[strKeyWithNulls]);
+
   // Remove.
   Json::Value got;
   bool did;
@@ -210,6 +215,12 @@ JSONTEST_FIXTURE(ValueTest, objects) {
   got = Json::Value("bar");
   did = object1_.removeMember("some other id", &got);
   JSONTEST_ASSERT_EQUAL(Json::Value("bar"), got);
+  JSONTEST_ASSERT_EQUAL(false, did);
+
+  did = object1_.removeMember(strKeyWithNulls, &got);
+  JSONTEST_ASSERT_EQUAL(Json::Value("object1_[keyWithNulls]"), got);
+  JSONTEST_ASSERT_EQUAL(true, did);
+  did = object1_.removeMember(strKeyWithNulls, &got);
   JSONTEST_ASSERT_EQUAL(false, did);
 }
 
