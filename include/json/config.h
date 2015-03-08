@@ -70,8 +70,11 @@
 #if defined(_MSC_VER) && _MSC_VER >= 1500 // MSVC 2008
 /// Indicates that the following function is deprecated.
 #define JSONCPP_DEPRECATED(message) __declspec(deprecated(message))
-#elif (defined(__clang__) && __has_attribute(deprecated)) || \
-      (defined(__GNUC__) &&  (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)))
+#elif defined(__clang__) && defined(__has_feature)
+#if __has_feature(attribute_deprecated_with_message)
+#define JSONCPP_DEPRECATED(message)  __attribute__ ((deprecated(message)))
+#endif
+#elif defined(__GNUC__) &&  (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
 #define JSONCPP_DEPRECATED(message)  __attribute__ ((deprecated(message)))
 #elif defined(__GNUC__) &&  (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
 #define JSONCPP_DEPRECATED(message)  __attribute__((__deprecated__))
