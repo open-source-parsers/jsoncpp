@@ -17,7 +17,6 @@
 #include <sstream>
 #include <memory>
 #include <set>
-#include <stdexcept>
 
 #if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
 #define snprintf _snprintf
@@ -148,7 +147,7 @@ bool Reader::readValue() {
   // But this deprecated class has a security problem: Bad input can
   // cause a seg-fault. This seems like a fair, binary-compatible way
   // to prevent the problem.
-  if (stackDepth_g >= stackLimit_g) throw std::runtime_error("Exceeded stackLimit in readValue().");
+  if (stackDepth_g >= stackLimit_g) throwRuntimeError("Exceeded stackLimit in readValue().");
   ++stackDepth_g;
 
   Token token;
@@ -1107,7 +1106,7 @@ bool OurReader::parse(const char* beginDoc,
 }
 
 bool OurReader::readValue() {
-  if (stackDepth_ >= features_.stackLimit_) throw std::runtime_error("Exceeded stackLimit in readValue().");
+  if (stackDepth_ >= features_.stackLimit_) throwRuntimeError("Exceeded stackLimit in readValue().");
   ++stackDepth_;
   Token token;
   skipCommentTokens(token);
@@ -1431,7 +1430,7 @@ bool OurReader::readObject(Token& tokenStart) {
       return addErrorAndRecover(
           "Missing ':' after object member name", colon, tokenObjectEnd);
     }
-    if (name.length() >= (1U<<30)) throw std::runtime_error("keylength >= 2^30");
+    if (name.length() >= (1U<<30)) throwRuntimeError("keylength >= 2^30");
     if (features_.rejectDupKeys_ && currentValue().isMember(name)) {
       std::string msg = "Duplicate key: '" + name + "'";
       return addErrorAndRecover(
@@ -1994,7 +1993,7 @@ std::istream& operator>>(std::istream& sin, Value& root) {
             "Error from reader: %s",
             errs.c_str());
 
-    JSON_FAIL_MESSAGE("reader error");
+    throwRuntimeError("reader error");
   }
   return sin;
 }

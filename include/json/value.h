@@ -11,6 +11,7 @@
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <string>
 #include <vector>
+#include <exception>
 
 #ifndef JSON_USE_CPPTL_SMALLMAP
 #include <map>
@@ -31,6 +32,23 @@
 /** \brief JSON (JavaScript Object Notation).
  */
 namespace Json {
+
+/** Base class for all exceptions we throw.
+ */
+class JSON_API Exception;
+/** Exceptions which the user cannot easily avoid.
+ *
+ * E.g. out-of-memory, stack-overflow, malicious input
+ */
+class JSON_API RuntimeError;
+/** Exceptions throw by JSON_ASSERT/JSON_FAIL macros.
+ *
+ * These are precondition-violations (user bugs) and internal errors (our bugs).
+ */
+class JSON_API LogicError;
+
+JSON_API void throwRuntimeError(std::string const& msg);
+JSON_API void throwLogicError(std::string const& msg);
 
 /** \brief Type of the value held by a Value object.
  */

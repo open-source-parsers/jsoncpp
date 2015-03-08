@@ -87,9 +87,11 @@ static inline char* duplicateStringValue(const char* value,
     length = Value::maxInt - 1;
 
   char* newString = static_cast<char*>(malloc(length + 1));
-  JSON_ASSERT_MESSAGE(newString != 0,
-                      "in Json::Value::duplicateStringValue(): "
-                      "Failed to allocate string value buffer");
+  if (newString == NULL) {
+    throwRuntimeError(
+        "in Json::Value::duplicateStringValue(): "
+        "Failed to allocate string value buffer");
+  }
   memcpy(newString, value, length);
   newString[length] = 0;
   return newString;
@@ -108,9 +110,11 @@ static inline char* duplicateAndPrefixStringValue(
                       "length too big for prefixing");
   unsigned actualLength = length + sizeof(unsigned) + 1U;
   char* newString = static_cast<char*>(malloc(actualLength));
-  JSON_ASSERT_MESSAGE(newString != 0,
-                      "in Json::Value::duplicateAndPrefixStringValue(): "
-                      "Failed to allocate string value buffer");
+  if (newString == 0) {
+    throwRuntimeError(
+        "in Json::Value::duplicateAndPrefixStringValue(): "
+        "Failed to allocate string value buffer");
+  }
   *reinterpret_cast<unsigned*>(newString) = length;
   memcpy(newString + sizeof(unsigned), value, length);
   newString[actualLength - 1U] = 0; // to avoid buffer over-run accidents by users later
@@ -147,6 +151,47 @@ static inline void releaseStringValue(char* value) { free(value); }
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
 namespace Json {
+
+class JSON_API Exception : public std::exception {
+public:
+  Exception(std::string const& msg);
+  virtual ~Exception() throw();
+  virtual char const* what() const throw();
+protected:
+  std::string const& msg_;
+};
+class JSON_API RuntimeError : public Exception {
+public:
+  RuntimeError(std::string const& msg);
+};
+class JSON_API LogicError : public Exception {
+public:
+  LogicError(std::string const& msg);
+};
+
+Exception::Exception(std::string const& msg)
+  : msg_(msg)
+{}
+Exception::~Exception() throw()
+{}
+char const* Exception::what() const throw()
+{
+  return msg_.c_str();
+}
+RuntimeError::RuntimeError(std::string const& msg)
+  : Exception(msg)
+{}
+LogicError::LogicError(std::string const& msg)
+  : Exception(msg)
+{}
+void throwRuntimeError(std::string const& msg)
+{
+  throw RuntimeError(msg);
+}
+void throwLogicError(std::string const& msg)
+{
+  throw LogicError(msg);
+}
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
