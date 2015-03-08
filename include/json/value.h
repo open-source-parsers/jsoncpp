@@ -34,21 +34,29 @@
 namespace Json {
 
 /** Base class for all exceptions we throw.
+ *
+ * We use nothing but these internally. Of course, STL can throw others.
  */
 class JSON_API Exception;
 /** Exceptions which the user cannot easily avoid.
  *
- * E.g. out-of-memory, stack-overflow, malicious input
+ * E.g. out-of-memory (when we use malloc), stack-overflow, malicious input
+ * 
+ * \remark derived from Json::Exception
  */
 class JSON_API RuntimeError;
-/** Exceptions throw by JSON_ASSERT/JSON_FAIL macros.
+/** Exceptions thrown by JSON_ASSERT/JSON_FAIL macros.
  *
  * These are precondition-violations (user bugs) and internal errors (our bugs).
+ * 
+ * \remark derived from Json::Exception
  */
 class JSON_API LogicError;
 
-JSON_API void throwRuntimeError(std::string const& msg);
-JSON_API void throwLogicError(std::string const& msg);
+/// used internally
+void throwRuntimeError(std::string const& msg);
+/// used internally
+void throwLogicError(std::string const& msg);
 
 /** \brief Type of the value held by a Value object.
  */
