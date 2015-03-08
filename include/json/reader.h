@@ -110,7 +110,7 @@ public:
    *         during parsing.
    * \deprecated Use getFormattedErrorMessages() instead (typo fix).
    */
-  JSONCPP_DEPRECATED("Use getFormattedErrorMessages instead")
+  JSONCPP_DEPRECATED("Use getFormattedErrorMessages() instead.")
   std::string getFormatedErrorMessages() const;
 
   /** \brief Returns a user friendly string that list errors in the parsed
@@ -278,8 +278,6 @@ public:
 };  // CharReader
 
 /** \brief Build a CharReader implementation.
-
-  \deprecated This is experimental and will be altered before the next release.
 
 Usage:
 \code

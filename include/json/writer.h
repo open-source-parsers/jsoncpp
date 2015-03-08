@@ -132,7 +132,7 @@ public:
 };
 
 /** \brief Abstract class for writers.
- * \deprecated Use StreamWriter.
+ * \deprecated Use StreamWriter. (And really, this is an implementation detail.)
  */
 class JSON_API Writer {
 public:
@@ -151,6 +151,7 @@ public:
  * \deprecated Use StreamWriterBuilder.
  */
 class JSON_API FastWriter : public Writer {
+
 public:
   FastWriter();
   virtual ~FastWriter() {}

@@ -2282,6 +2282,42 @@ JSONTEST_FIXTURE(IteratorTest, distance) {
   JSONTEST_ASSERT_STRING_EQUAL("b", str);
 }
 
+JSONTEST_FIXTURE(IteratorTest, names) {
+  Json::Value json;
+  json["k1"] = "a";
+  json["k2"] = "b";
+  Json::ValueIterator it = json.begin();
+  JSONTEST_ASSERT(it != json.end());
+  JSONTEST_ASSERT_EQUAL(Json::Value("k1"), it.key());
+  JSONTEST_ASSERT_STRING_EQUAL("k1", it.name());
+  JSONTEST_ASSERT_EQUAL(-1, it.index());
+  ++it;
+  JSONTEST_ASSERT(it != json.end());
+  JSONTEST_ASSERT_EQUAL(Json::Value("k2"), it.key());
+  JSONTEST_ASSERT_STRING_EQUAL("k2", it.name());
+  JSONTEST_ASSERT_EQUAL(-1, it.index());
+  ++it;
+  JSONTEST_ASSERT(it == json.end());
+}
+
+JSONTEST_FIXTURE(IteratorTest, indexes) {
+  Json::Value json;
+  json[0] = "a";
+  json[1] = "b";
+  Json::ValueIterator it = json.begin();
+  JSONTEST_ASSERT(it != json.end());
+  JSONTEST_ASSERT_EQUAL(Json::Value(Json::ArrayIndex(0)), it.key());
+  JSONTEST_ASSERT_STRING_EQUAL("", it.name());
+  JSONTEST_ASSERT_EQUAL(0, it.index());
+  ++it;
+  JSONTEST_ASSERT(it != json.end());
+  JSONTEST_ASSERT_EQUAL(Json::Value(Json::ArrayIndex(1)), it.key());
+  JSONTEST_ASSERT_STRING_EQUAL("", it.name());
+  JSONTEST_ASSERT_EQUAL(1, it.index());
+  ++it;
+  JSONTEST_ASSERT(it == json.end());
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -2346,6 +2382,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, BuilderTest, settings);
 
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, distance);
+  JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, names);
+  JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, indexes);
 
   return runner.runCommandLine(argc, argv);
 }

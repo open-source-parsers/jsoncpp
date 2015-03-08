@@ -667,16 +667,22 @@ public:
   /// Value.
   Value key() const;
 
-  /// Return the index of the referenced Value. -1 if it is not an arrayValue.
+  /// Return the index of the referenced Value, or -1 if it is not an arrayValue.
   UInt index() const;
+
+  /// Return the member name of the referenced Value, or "" if it is not an
+  /// objectValue.
+  /// \note Avoid `c_str()` on result, as embedded zeroes are possible.
+  std::string name() const;
 
   /// Return the member name of the referenced Value. "" if it is not an
   /// objectValue.
   /// \deprecated This cannot be used for UTF-8 strings, since there can be embedded nulls.
+  JSONCPP_DEPRECATED("Use `key = name();` instead.")
   char const* memberName() const;
   /// Return the member name of the referenced Value, or NULL if it is not an
   /// objectValue.
-  /// Better version than memberName(). Allows embedded nulls.
+  /// \note Better version than memberName(). Allows embedded nulls.
   char const* memberName(char const** end) const;
 
 protected:
