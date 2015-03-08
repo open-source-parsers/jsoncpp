@@ -512,6 +512,7 @@ Json::Value obj_value(Json::objectValue); // {}
   //# endif
 
   /// \deprecated Always pass len.
+  JSONCPP_DEPRECATED("Use setComment(std::string const&) instead.")
   void setComment(const char* comment, CommentPlacement placement);
   /// Comments must be //... or /* ... */
   void setComment(const char* comment, size_t len, CommentPlacement placement);
