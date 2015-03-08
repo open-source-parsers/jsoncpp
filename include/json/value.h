@@ -35,15 +35,20 @@ namespace Json {
 
 /** Base class for all exceptions we throw.
  */
-class Exception : public std::exception {
-public:
-  Exception(std::string const& msg);
-  virtual ~Exception() throw();
-  virtual char const* what() const throw();
-protected:
-  std::string const& msg_;
-  void* future_use_;
-};
+class JSON_API Exception;
+/** Exceptions which the user cannot easily avoid.
+ *
+ * E.g. out-of-memory, stack-overflow, malicious input
+ */
+class JSON_API RuntimeError;
+/** Exceptions throw by JSON_ASSERT/JSON_FAIL macros.
+ *
+ * These are precondition-violations (user bugs) and internal errors (our bugs).
+ */
+class JSON_API LogicError;
+
+JSON_API void throwRuntimeError(std::string const& msg);
+JSON_API void throwLogicError(std::string const& msg);
 
 /** \brief Type of the value held by a Value object.
  */
