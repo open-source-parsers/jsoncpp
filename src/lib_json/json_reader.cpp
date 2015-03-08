@@ -1994,7 +1994,7 @@ std::istream& operator>>(std::istream& sin, Value& root) {
             "Error from reader: %s",
             errs.c_str());
 
-    JSON_FAIL_MESSAGE("reader error");
+    throw std::runtime_error("reader error");
   }
   return sin;
 }

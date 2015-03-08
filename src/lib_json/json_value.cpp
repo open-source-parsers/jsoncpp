@@ -87,9 +87,11 @@ static inline char* duplicateStringValue(const char* value,
     length = Value::maxInt - 1;
 
   char* newString = static_cast<char*>(malloc(length + 1));
-  JSON_ASSERT_MESSAGE(newString != 0,
-                      "in Json::Value::duplicateStringValue(): "
-                      "Failed to allocate string value buffer");
+  if (newString == NULL) {
+    throw std::runtime_error(
+        "in Json::Value::duplicateStringValue(): "
+        "Failed to allocate string value buffer");
+  }
   memcpy(newString, value, length);
   newString[length] = 0;
   return newString;
@@ -108,9 +110,11 @@ static inline char* duplicateAndPrefixStringValue(
                       "length too big for prefixing");
   unsigned actualLength = length + sizeof(unsigned) + 1U;
   char* newString = static_cast<char*>(malloc(actualLength));
-  JSON_ASSERT_MESSAGE(newString != 0,
-                      "in Json::Value::duplicateAndPrefixStringValue(): "
-                      "Failed to allocate string value buffer");
+  if (newString == 0) {
+    throw std::runtime_error(
+        "in Json::Value::duplicateAndPrefixStringValue(): "
+        "Failed to allocate string value buffer");
+  }
   *reinterpret_cast<unsigned*>(newString) = length;
   memcpy(newString + sizeof(unsigned), value, length);
   newString[actualLength - 1U] = 0; // to avoid buffer over-run accidents by users later

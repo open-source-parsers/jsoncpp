@@ -13,6 +13,10 @@
 #include "config.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
+/** It should not be possible for a maliciously designed file to
+ *  cause an abort() or seg-fault, so these macros are used only
+ *  for pre-condition violations and internal logic errors.
+ */
 #if JSON_USE_EXCEPTION
 #include <stdexcept>
 #define JSON_ASSERT(condition)                                                 \
@@ -27,7 +31,7 @@
 #define JSON_ASSERT(condition) assert(condition)
 
 // The call to assert() will show the failure message in debug builds. In
-// release bugs we abort, for a core-dump or debugger.
+// release builds we abort, for a core-dump or debugger.
 #define JSON_FAIL_MESSAGE(message)                                             \
   {                                                                            \
     std::ostringstream oss; oss << message;                                    \
