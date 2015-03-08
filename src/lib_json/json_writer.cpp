@@ -12,7 +12,6 @@
 #include <sstream>
 #include <utility>
 #include <set>
-#include <stdexcept>
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -1080,7 +1079,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
   } else if (cs_str == "None") {
     cs = CommentStyle::None;
   } else {
-    throw std::runtime_error("commentStyle must be 'All' or 'None'");
+    throwRuntimeError("commentStyle must be 'All' or 'None'");
   }
   std::string colonSymbol = " : ";
   if (eyc) {

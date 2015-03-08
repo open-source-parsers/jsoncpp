@@ -88,7 +88,7 @@ static inline char* duplicateStringValue(const char* value,
 
   char* newString = static_cast<char*>(malloc(length + 1));
   if (newString == NULL) {
-    throw std::runtime_error(
+    throwRuntimeError(
         "in Json::Value::duplicateStringValue(): "
         "Failed to allocate string value buffer");
   }
@@ -111,7 +111,7 @@ static inline char* duplicateAndPrefixStringValue(
   unsigned actualLength = length + sizeof(unsigned) + 1U;
   char* newString = static_cast<char*>(malloc(actualLength));
   if (newString == 0) {
-    throw std::runtime_error(
+    throwRuntimeError(
         "in Json::Value::duplicateAndPrefixStringValue(): "
         "Failed to allocate string value buffer");
   }

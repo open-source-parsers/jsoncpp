@@ -6,7 +6,6 @@
 #include "jsontest.h"
 #include <json/config.h>
 #include <json/json.h>
-#include <stdexcept>
 #include <cstring>
 
 // Make numeric limits more convenient to talk about.
