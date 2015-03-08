@@ -152,6 +152,18 @@ static inline void releaseStringValue(char* value) { free(value); }
 
 namespace Json {
 
+Exception::Exception(std::string const& msg)
+  : msg_(msg)
+  , future_use_(NULL)
+{
+}
+Exception::~Exception() throw()
+{}
+char const* Exception::what() const throw()
+{
+  return msg_.c_str();
+}
+
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////

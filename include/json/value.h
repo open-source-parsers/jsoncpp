@@ -11,6 +11,7 @@
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <string>
 #include <vector>
+#include <exception>
 
 #ifndef JSON_USE_CPPTL_SMALLMAP
 #include <map>
@@ -31,6 +32,18 @@
 /** \brief JSON (JavaScript Object Notation).
  */
 namespace Json {
+
+/** Base class for all exceptions we throw.
+ */
+class Exception : public std::exception {
+public:
+  Exception(std::string const& msg);
+  virtual ~Exception() throw();
+  virtual char const* what() const throw();
+protected:
+  std::string const& msg_;
+  void* future_use_;
+};
 
 /** \brief Type of the value held by a Value object.
  */
