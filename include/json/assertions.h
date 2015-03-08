@@ -18,21 +18,25 @@
  *  for pre-condition violations and internal logic errors.
  */
 #if JSON_USE_EXCEPTION
-#include <stdexcept>
-#define JSON_ASSERT(condition)                                                 \
-  {if (!(condition)) {throw std::logic_error( "assert json failed" );}} // @todo <= add detail about condition in exception
-#define JSON_FAIL_MESSAGE(message)                                             \
+
+// @todo <= add detail about condition in exception
+# define JSON_ASSERT(condition)                                                \
+  {if (!(condition)) {Json::throwLogicError( "assert json failed" );}}
+
+# define JSON_FAIL_MESSAGE(message)                                            \
   {                                                                            \
     std::ostringstream oss; oss << message;                                    \
-    throw std::logic_error(oss.str());                                         \
+    Json::throwLogicError(oss.str());                                          \
+    abort();                                                                   \
   }
-//#define JSON_FAIL_MESSAGE(message) throw std::logic_error(message)
+
 #else // JSON_USE_EXCEPTION
-#define JSON_ASSERT(condition) assert(condition)
+
+# define JSON_ASSERT(condition) assert(condition)
 
 // The call to assert() will show the failure message in debug builds. In
 // release builds we abort, for a core-dump or debugger.
-#define JSON_FAIL_MESSAGE(message)                                             \
+# define JSON_FAIL_MESSAGE(message)                                            \
   {                                                                            \
     std::ostringstream oss; oss << message;                                    \
     assert(false && oss.str().c_str());                                        \
