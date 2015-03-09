@@ -158,7 +158,7 @@ public:
   virtual ~Exception() throw();
   virtual char const* what() const throw();
 protected:
-  std::string const& msg_;
+  std::string const msg_;
 };
 class JSON_API RuntimeError : public Exception {
 public:
