@@ -16,7 +16,7 @@
 #include <cstring>
 #include <cstdio>
 
-#if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
+#if defined(_MSC_VER) && _MSC_VER >= 1200 // VC++ 6.0 and above
 #include <float.h>
 #define isfinite _finite
 #define snprintf _snprintf
@@ -26,6 +26,11 @@
 #else
 #include <cmath>
 #define isfinite std::isfinite
+#endif
+
+#if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
+#include <float.h>
+#define snprintf _snprintf
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400 // VC++ 8.0
