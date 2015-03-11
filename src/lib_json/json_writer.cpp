@@ -16,10 +16,9 @@
 #include <cstring>
 #include <cstdio>
 
-#if defined(_MSC_VER) && _MSC_VER >= 1200 // VC++ 6.0 and above
+#if defined(_MSC_VER) && _MSC_VER >= 1200 && _MSC_VER < 1800 // Between VC++ 6.0 and VC++ 11.0
 #include <float.h>
 #define isfinite _finite
-#define snprintf _snprintf
 #elif defined(__sun) && defined(__SVR4) //Solaris
 #include <ieeefp.h>
 #define isfinite finite
@@ -29,7 +28,6 @@
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
-#include <float.h>
 #define snprintf _snprintf
 #endif
 
