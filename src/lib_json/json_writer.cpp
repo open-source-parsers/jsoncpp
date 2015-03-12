@@ -12,25 +12,30 @@
 #include <sstream>
 #include <utility>
 #include <set>
-#include <assert.h>
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
+#include <cassert>
+#include <cstring>
+#include <cstdio>
 
-#if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
+#if defined(_MSC_VER) && _MSC_VER >= 1200 && _MSC_VER < 1800 // Between VC++ 6.0 and VC++ 11.0
 #include <float.h>
 #define isfinite _finite
+#elif defined(__sun) && defined(__SVR4) //Solaris
+#include <ieeefp.h>
+#define isfinite finite
+#else
+#include <cmath>
+#define isfinite std::isfinite
+#endif
+
+#if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
 #define snprintf _snprintf
+#else
+#define snprintf std::snprintf
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400 // VC++ 8.0
 // Disable warning about strdup being deprecated.
 #pragma warning(disable : 4996)
-#endif
-
-#if defined(__sun) && defined(__SVR4) //Solaris
-#include <ieeefp.h>
-#define isfinite finite
 #endif
 
 namespace Json {
