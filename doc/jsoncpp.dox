@@ -57,7 +57,7 @@ std::cin >> root;
 std::cin >> root["subtree"];
 
 // Get the value of the member of root named 'encoding',
-// and return 'UTF-8' if there is no such member.
+// or return 'UTF-8' as the default if there is no such member.
 std::string encoding = root.get("encoding", "UTF-8" ).asString();
 
 // Get the value of the member of root named 'plug-ins'; return a 'null' value if
@@ -84,6 +84,15 @@ std::cout << root;
 
 // If desired, remember to add a linefeed and flush.
 std::cout << std::endl;
+
+// To create new JSON code, start with  Json::Value and add using operator[]
+{
+  Jason::Value myroot;
+  myroot["version"] = 1.2;
+  myroot["filename"] = "foo.tmp";
+  cout << myroot;
+  string text = Json::writeString(Json::StreamWriterBuilder(), myroot);
+ }
 \endcode
 
 \section _advanced Advanced usage
