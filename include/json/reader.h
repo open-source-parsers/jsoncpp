@@ -270,6 +270,7 @@ public:
 
   class Factory {
   public:
+    virtual ~Factory() {}
     /** \brief Allocate a CharReader via operator new().
      * \throw std::exception if something goes wrong (e.g. invalid settings)
      */
