@@ -347,6 +347,23 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Return isNull()
   bool operator!() const;
 
+  /** \brief Return ! isNull();
+   *
+   * Example of usage:
+   * \code
+   * Json::Value root;
+   * std::cin >> root;
+   * 
+   * if (auto tag = root["tag"]) {
+   *    // Behavior if tag object with tag key exist
+   * } else {
+   *    // Behavior if tag object with tag key absent
+   * }
+   * \endcode
+   *
+   */
+  explicit operator bool() const;
+
   /// Remove all object members and array elements.
   /// \pre type() is arrayValue, objectValue, or nullValue
   /// \post type() is unchanged

@@ -883,6 +883,8 @@ bool Value::empty() const {
 
 bool Value::operator!() const { return isNull(); }
 
+Value::operator bool() const { return ! isNull(); }
+
 void Value::clear() {
   JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == arrayValue ||
                           type_ == objectValue,
