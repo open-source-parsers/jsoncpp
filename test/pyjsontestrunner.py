@@ -1,4 +1,11 @@
-# Simple implementation of a json test runner to run the test against json-py.
+# Copyright 2007 Baptiste Lepilleur
+# Distributed under MIT license, or public domain if desired and
+# recognized in your jurisdiction.
+# See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+
+"""Simple implementation of a json test runner to run the test against
+json-py."""
+
 from __future__ import print_function
 import sys
 import os.path

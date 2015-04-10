@@ -1,3 +1,8 @@
+# Copyright 2010 Baptiste Lepilleur
+# Distributed under MIT license, or public domain if desired and
+# recognized in your jurisdiction.
+# See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+
 """Tag the sandbox for release, make source and doc tarballs.
 
 Requires Python 2.6
@@ -14,6 +19,7 @@ python makerelease.py 0.5.0 0.6.0-dev
 Note: This was for Subversion. Now that we are in GitHub, we do not
 need to build versioned tarballs anymore, so makerelease.py is defunct.
 """
+
 from __future__ import print_function
 import os.path
 import subprocess
