@@ -40,11 +40,7 @@
 
 namespace Json {
 
-#if __cplusplus >= 201103L
-typedef std::unique_ptr<StreamWriter> StreamWriterPtr;
-#else
 typedef std::auto_ptr<StreamWriter>   StreamWriterPtr;
-#endif
 
 static bool containsControlCharacter(const char* str) {
   while (*str) {
