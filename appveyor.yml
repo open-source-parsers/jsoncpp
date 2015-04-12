@@ -4,19 +4,21 @@ os: Windows Server 2012 R2
 
 clone_folder: c:\projects\jsoncpp
 
-#platform: Any CPU
+platform:
+    - Win32
+    - x64
+
 configuration:
     - Debug
     - Release
-
-install:
-    # by default, all script lines are interpreted as batch
 
 # scripts to run before build
 before_build:
     - echo "Running cmake..."
     - cd c:\projects\jsoncpp
-    - cmake .
+    - cmake --version
+    - if %PLATFORM% == Win32 cmake .
+    - if %PLATFORM% == x64 cmake -G "Visual Studio 12 2013 Win64" .
 
 build:
     project: jsoncpp.sln        # path to Visual Studio solution or project
