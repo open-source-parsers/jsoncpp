@@ -23,3 +23,11 @@ before_build:
 build:
     project: jsoncpp.sln        # path to Visual Studio solution or project
 
+deploy:
+    provider: GitHub
+    auth_token:
+        secure: K2Tp1q8pIZ7rs0Ot24ZMWuwr12Ev6Tc6QkhMjGQxoQG3ng1pXtgPasiJ45IDXGdg
+    on:
+        branch: master
+        appveyor_repo_tag: true
+
