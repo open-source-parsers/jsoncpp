@@ -7,6 +7,7 @@
 #include <json/config.h>
 #include <json/json.h>
 #include <cstring>
+#include <limits>
 
 // Make numeric limits more convenient to talk about.
 // Assumes int type in 32 bits.
@@ -1637,6 +1638,26 @@ JSONTEST_FIXTURE(ValueTest, zeroesInKeys) {
   }
 }
 
+JSONTEST_FIXTURE(ValueTest, specialFloats) {
+  Json::StreamWriterBuilder b;
+  b.settings_["useSpecialFloats"] = true;
+
+  Json::Value v = std::numeric_limits<double>::quiet_NaN();
+  std::string expected = "NaN";
+  std::string result = Json::writeString(b, v);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+
+  v = std::numeric_limits<double>::infinity();
+  expected = "Infinity";
+  result = Json::writeString(b, v);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+
+  v = -std::numeric_limits<double>::infinity();
+  expected = "-Infinity";
+  result = Json::writeString(b, v);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+}
+
 struct WriterTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(WriterTest, dropNullPlaceholders) {
@@ -1910,7 +1931,7 @@ JSONTEST_FIXTURE(CharReaderStrictModeTest, dupKeys) {
 struct CharReaderFailIfExtraTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(CharReaderFailIfExtraTest, issue164) {
-  // This is interpretted as a string value followed by a colon.
+  // This is interpreted as a string value followed by a colon.
   Json::CharReaderBuilder b;
   Json::Value root;
   char const doc[] =
@@ -2243,6 +2264,40 @@ JSONTEST_FIXTURE(CharReaderAllowZeroesTest, issue176) {
   }
 }
 
+struct CharReaderAllowSpecialFloatsTest : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
+  Json::CharReaderBuilder b;
+  b.settings_["allowSpecialFloats"] = true;
+  Json::Value root;
+  std::string errs;
+  Json::CharReader* reader(b.newCharReader());
+  {
+    char const doc[] = "{\"a\":NaN,\"b\":Infinity,\"c\":-Infinity}";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(3u, root.size());
+	double n = root["a"].asDouble();
+    JSONTEST_ASSERT(n != n);
+	JSONTEST_ASSERT_EQUAL(std::numeric_limits<double>::infinity(), root.get("b", 0.0));
+	JSONTEST_ASSERT_EQUAL(-std::numeric_limits<double>::infinity(), root.get("c", 0.0));
+  }
+  {
+    char const doc[] = "{\"posInf\": Infinity, \"NegInf\": -Infinity}";
+    bool ok = reader->parse(
+        doc, doc + std::strlen(doc),
+        &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(2u, root.size());
+    JSONTEST_ASSERT_EQUAL(std::numeric_limits<double>::infinity(), root["posInf"].asDouble());
+    JSONTEST_ASSERT_EQUAL(-std::numeric_limits<double>::infinity(), root["NegInf"].asDouble());
+  }
+}
+
 struct BuilderTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(BuilderTest, settings) {
@@ -2345,6 +2400,7 @@ int main(int argc, const char* argv[]) {
   //JSONTEST_REGISTER_FIXTURE(runner, ValueTest, nulls);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, zeroes);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, zeroesInKeys);
+  JSONTEST_REGISTER_FIXTURE(runner, ValueTest, specialFloats);
 
   JSONTEST_REGISTER_FIXTURE(runner, WriterTest, dropNullPlaceholders);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, dropNullPlaceholders);
@@ -2378,6 +2434,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderAllowSingleQuotesTest, issue182);
 
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderAllowZeroesTest, issue176);
+
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderAllowSpecialFloatsTest, issue209);
 
   JSONTEST_REGISTER_FIXTURE(runner, BuilderTest, settings);
 
