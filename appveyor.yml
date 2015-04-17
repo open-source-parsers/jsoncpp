@@ -1,6 +1,6 @@
 # This is a comment.
 
-version: {build}
+version: build.{build}
 
 os: Windows Server 2012 R2
 
