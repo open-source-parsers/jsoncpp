@@ -1128,6 +1128,7 @@ static void getValidWriterKeys(std::set<std::string>* valid_keys)
   valid_keys->insert("commentStyle");
   valid_keys->insert("enableYAMLCompatibility");
   valid_keys->insert("dropNullPlaceholders");
+  valid_keys->insert("useSpecialFloats");
 }
 bool StreamWriterBuilder::validate(Json::Value* invalid) const
 {
