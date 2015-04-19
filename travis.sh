@@ -17,6 +17,9 @@ set -vex
 
 env | sort
 
+echo ${CXX}
+${CXX} --version
+python3 --version
 meson --version
 ninja --version
 meson --buildtype ${BUILD_TYPE} --default-library ${LIB_TYPE} . build-${LIB_TYPE}
