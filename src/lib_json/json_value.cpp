@@ -376,6 +376,15 @@ Value::Value(const Value& other)
   }
 }
 
+#ifdef JSON_HAS_RVALUE_REFERENCES
+// Move constructor
+Value::Value(Value&& other)
+{
+	initBasic(nullValue);
+	swap(other);
+}
+#endif 
+
 Value::~Value() {
   switch (type_) {
   case nullValue:

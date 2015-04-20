@@ -238,6 +238,10 @@ Json::Value obj_value(Json::objectValue); // {}
   Value(bool value);
   /// Deep copy.
   Value(const Value& other);
+#ifdef JSON_HAS_RVALUE_REFERENCES
+  /// Move constructor
+  Value(Value&& other);
+#endif 
   ~Value();
 
   // Deep copy, then swap(other).
