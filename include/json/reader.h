@@ -346,13 +346,13 @@ public:
   /** Called by ctor, but you can use this to reset settings_.
    * \pre 'settings' != NULL (but Json::null is fine)
    * \remark Defaults:
-   * \snippet src/lib_json/json_reader.cpp CharReaderBuilderStrictMode
+   * \snippet src/lib_json/json_reader.cpp CharReaderBuilderDefaults
    */
   static void setDefaults(Json::Value* settings);
   /** Same as old Features::strictMode().
    * \pre 'settings' != NULL (but Json::null is fine)
    * \remark Defaults:
-   * \snippet src/lib_json/json_reader.cpp CharReaderBuilderDefaults
+   * \snippet src/lib_json/json_reader.cpp CharReaderBuilderStrictMode
    */
   static void strictMode(Json::Value* settings);
 };
