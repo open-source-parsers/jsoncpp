@@ -2497,6 +2497,19 @@ JSONTEST_FIXTURE(IteratorTest, const) {
   JSONTEST_ASSERT_STRING_EQUAL(expected, out.str());
 }
 
+struct RValueTest : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE(RValueTest, moveConstruction) {
+#if JSON_HAS_RVALUE_REFERENCES
+  Json::Value json;
+  json["key"] = "value";
+  Json::Value moved = std::move(json);
+  JSONTEST_ASSERT(moved != json); // Possibly not nullValue; definitely not equal.
+  JSONTEST_ASSERT_EQUAL(Json::objectValue, moved.type());
+  JSONTEST_ASSERT_EQUAL(Json::stringValue, moved["key"].type());
+#endif
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -2569,6 +2582,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, names);
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, indexes);
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, const);
+
+  JSONTEST_REGISTER_FIXTURE(runner, RValueTest, moveConstruction);
 
   return runner.runCommandLine(argc, argv);
 }

@@ -237,6 +237,15 @@ Value::CZString::CZString(const CZString& other)
   storage_.length_ = other.storage_.length_;
 }
 
+#if JSON_HAS_RVALUE_REFERENCES
+Value::CZString::CZString(CZString&& other)
+  : cstr_(other.cstr_),
+  index_(other.index_)
+{
+  other.cstr_ = 0;
+}
+#endif
+
 Value::CZString::~CZString() {
   if (cstr_ && storage_.policy_ == duplicate)
     releaseStringValue(const_cast<char*>(cstr_));
@@ -424,6 +433,15 @@ Value::Value(Value const& other)
     }
   }
 }
+
+#if JSON_HAS_RVALUE_REFERENCES
+// Move constructor
+Value::Value(Value&& other)
+{
+	initBasic(nullValue);
+	swap(other);
+}
+#endif
 
 Value::~Value() {
   switch (type_) {
