@@ -26,6 +26,9 @@ test-amalgamate:
 	python3.4 amalgamate.py
 	cd dist; gcc -I. -c jsoncpp.cpp
 
+valgrind:
+	valgrind --error-exitcode=42 --leak-check=full ./build/debug/src/test_lib_json/jsoncpp_test
+
 clean:
 	\rm -rf *.gz *.asc dist/
 
