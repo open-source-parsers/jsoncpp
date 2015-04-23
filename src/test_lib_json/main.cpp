@@ -2209,6 +2209,7 @@ JSONTEST_FIXTURE(CharReaderAllowSingleQuotesTest, issue182) {
     JSONTEST_ASSERT_STRING_EQUAL("x", root["a"].asString());
     JSONTEST_ASSERT_STRING_EQUAL("y", root["b"].asString());
   }
+  delete reader;
 }
 
 struct CharReaderAllowZeroesTest : JsonTest::TestCase {};
@@ -2241,6 +2242,7 @@ JSONTEST_FIXTURE(CharReaderAllowZeroesTest, issue176) {
     JSONTEST_ASSERT_STRING_EQUAL("x", root["a"].asString());
     JSONTEST_ASSERT_STRING_EQUAL("y", root["b"].asString());
   }
+  delete reader;
 }
 
 struct BuilderTest : JsonTest::TestCase {};
