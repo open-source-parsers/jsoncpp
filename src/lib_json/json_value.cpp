@@ -182,6 +182,15 @@ Value::CZString::CZString(const CZString& other)
                      ? noDuplication : duplicate)
                  : other.index_) {}
 
+#ifdef JSON_HAS_RVALUE_REFERENCES
+Value::CZString::CZString(CZString&& other)
+	: cstr_(other.cstr_)
+	, index_(other.index_)
+{
+	other.cstr_ = nullptr;
+}
+#endif
+
 Value::CZString::~CZString() {
   if (cstr_ && index_ == duplicate)
     releaseStringValue(const_cast<char*>(cstr_));

@@ -171,6 +171,9 @@ private:
     CZString(ArrayIndex index);
     CZString(const char* cstr, DuplicationPolicy allocate);
     CZString(const CZString& other);
+#ifdef JSON_HAS_RVALUE_REFERENCES
+	CZString(CZString&& other);
+#endif
     ~CZString();
     CZString& operator=(CZString other);
     bool operator<(const CZString& other) const;
