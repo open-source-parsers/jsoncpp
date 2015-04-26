@@ -1878,6 +1878,23 @@ JSONTEST_FIXTURE(IteratorTest, distance) {
   JSONTEST_ASSERT_STRING_EQUAL("b", str);
 }
 
+struct RValueTest : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE(RValueTest, moveConstruction) {
+	Json::Value json;
+	json["key"] = "value";	
+#ifdef JSON_HAS_RVALUE_REFERENCES
+	Json::Value moved = std::move(json);
+	JSONTEST_ASSERT_EQUAL(Json::nullValue, json); // Doesn't have to be 'null' but I can't find a JSONTEST_ASSERT_NOT_EQUAL
+#else
+	Json::Value moved = json;
+	JSONTEST_ASSERT_EQUAL(Json::objectValue, json.type());
+	JSONTEST_ASSERT_EQUAL(Json::stringValue, json["key"].type());
+#endif
+	JSONTEST_ASSERT_EQUAL(Json::objectValue, moved.type());
+	JSONTEST_ASSERT_EQUAL(Json::stringValue, moved["key"].type());
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -1926,6 +1943,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, commentAfterBool);
 
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, distance);
+
+  JSONTEST_REGISTER_FIXTURE(runner, RValueTest, moveConstruction);
 
   return runner.runCommandLine(argc, argv);
 }
