@@ -211,7 +211,7 @@ private:
     void swap(CZString& other);
 
     struct StringStorage {
-      DuplicationPolicy policy_: 2;
+      unsigned policy_: 2;
       unsigned length_: 30; // 1GB max
     };
 
