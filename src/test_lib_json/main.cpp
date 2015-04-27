@@ -1881,18 +1881,14 @@ JSONTEST_FIXTURE(IteratorTest, distance) {
 struct RValueTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(RValueTest, moveConstruction) {
-	Json::Value json;
-	json["key"] = "value";	
-#ifdef JSON_HAS_RVALUE_REFERENCES
-	Json::Value moved = std::move(json);
-	JSONTEST_ASSERT_EQUAL(Json::nullValue, json); // Doesn't have to be 'null' but I can't find a JSONTEST_ASSERT_NOT_EQUAL
-#else
-	Json::Value moved = json;
-	JSONTEST_ASSERT_EQUAL(Json::objectValue, json.type());
-	JSONTEST_ASSERT_EQUAL(Json::stringValue, json["key"].type());
+#if JSON_HAS_RVALUE_REFERENCES
+  Json::Value json;
+  json["key"] = "value";	
+  Json::Value moved = std::move(json);
+  JSONTEST_ASSERT_EQUAL(Json::nullValue, json); // Doesn't have to be 'null' but I can't find a JSONTEST_ASSERT_NOT_EQUAL
+  JSONTEST_ASSERT_EQUAL(Json::objectValue, moved.type());
+  JSONTEST_ASSERT_EQUAL(Json::stringValue, moved["key"].type());
 #endif
-	JSONTEST_ASSERT_EQUAL(Json::objectValue, moved.type());
-	JSONTEST_ASSERT_EQUAL(Json::stringValue, moved["key"].type());
 }
 
 int main(int argc, const char* argv[]) {

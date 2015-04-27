@@ -171,7 +171,7 @@ private:
     CZString(ArrayIndex index);
     CZString(const char* cstr, DuplicationPolicy allocate);
     CZString(const CZString& other);
-#ifdef JSON_HAS_RVALUE_REFERENCES
+#if JSON_HAS_RVALUE_REFERENCES
     CZString(CZString&& other);
 #endif
     ~CZString();
@@ -241,7 +241,7 @@ Json::Value obj_value(Json::objectValue); // {}
   Value(bool value);
   /// Deep copy.
   Value(const Value& other);
-#ifdef JSON_HAS_RVALUE_REFERENCES
+#if JSON_HAS_RVALUE_REFERENCES
   /// Move constructor
   Value(Value&& other);
 #endif 

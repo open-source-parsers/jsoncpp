@@ -182,7 +182,7 @@ Value::CZString::CZString(const CZString& other)
                      ? noDuplication : duplicate)
                  : other.index_) {}
 
-#ifdef JSON_HAS_RVALUE_REFERENCES
+#if JSON_HAS_RVALUE_REFERENCES
 Value::CZString::CZString(CZString&& other)
   : cstr_(other.cstr_),
   index_(other.index_)
@@ -385,7 +385,7 @@ Value::Value(const Value& other)
   }
 }
 
-#ifdef JSON_HAS_RVALUE_REFERENCES
+#if JSON_HAS_RVALUE_REFERENCES
 // Move constructor
 Value::Value(Value&& other)
 {

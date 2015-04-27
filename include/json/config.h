@@ -83,6 +83,28 @@
 #define JSONCPP_DEPRECATED(message) __declspec(deprecated(message))
 #endif
 
+#ifndef JSON_HAS_RVALUE_REFERENCES
+
+#if defined(_MSC_VER) && _MSC_VER >= 1600 // MSVC >= 2010
+#define JSON_HAS_RVALUE_REFERENCES 1
+#endif // MSVC >= 2010
+
+#ifdef __clang__
+#if __has_feature(cxx_rvalue_references)
+#define JSON_HAS_RVALUE_REFERENCES 1
+#endif 
+#elif defined __GNUC__ // not clang (gcc comes later since clang emulates gcc)
+#if defined(__GXX_EXPERIMENTAL_CXX0X__) || (__cplusplus >= 201103L)
+#define JSON_HAS_RVALUE_REFERENCES 1
+#endif
+#endif // __clang__ || __GNUC__
+
+#endif // not defined JSON_HAS_RVALUE_REFERENCES
+
+#ifndef JSON_HAS_RVALUE_REFERENCES
+#define JSON_HAS_RVALUE_REFERENCES 0
+#endif 
+
 #if !defined(JSONCPP_DEPRECATED)
 #define JSONCPP_DEPRECATED(message)
 #endif // if !defined(JSONCPP_DEPRECATED)
