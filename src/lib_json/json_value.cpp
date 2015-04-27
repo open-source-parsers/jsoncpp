@@ -184,10 +184,10 @@ Value::CZString::CZString(const CZString& other)
 
 #ifdef JSON_HAS_RVALUE_REFERENCES
 Value::CZString::CZString(CZString&& other)
-	: cstr_(other.cstr_)
-	, index_(other.index_)
+  : cstr_(other.cstr_),
+  index_(other.index_)
 {
-	other.cstr_ = nullptr;
+  other.cstr_ = 0;
 }
 #endif
 
