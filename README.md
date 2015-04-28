@@ -58,7 +58,7 @@ Steps for generating solution/makefiles using `cmake-gui`:
 * Make "source code" point to the source directory.
 * Make "where to build the binary" point to the directory to use for the build.
 * Click on the "Grouped" check box.
-* Review JsonCpp build options (tick `JSONCPP_LIB_BUILD_SHARED` to build as a
+* Review JsonCpp build options (tick `BUILD_SHARED_LIBS` to build as a
   dynamic library).
 * Click the configure button at the bottom, then the generate button.
 * The generated solution/makefiles can be found in the binary directory.
@@ -67,7 +67,7 @@ Alternatively, from the command-line on Unix in the source directory:
 
     mkdir -p build/debug
     cd build/debug
-    cmake -DCMAKE_BUILD_TYPE=debug -DJSONCPP_LIB_BUILD_STATIC=ON -DJSONCPP_LIB_BUILD_SHARED=OFF -G "Unix Makefiles" ../..
+    cmake -DCMAKE_BUILD_TYPE=debug -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -G "Unix Makefiles" ../..
     make
 
 Running `cmake -`" will display the list of available generators (passed using
