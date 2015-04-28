@@ -644,9 +644,6 @@ public:
   typedef int difference_type;
   typedef ValueIteratorBase SelfType;
 
-  ValueIteratorBase();
-  explicit ValueIteratorBase(const Value::ObjectValues::iterator& current);
-
   bool operator==(const SelfType& other) const { return isEqual(other); }
 
   bool operator!=(const SelfType& other) const { return !isEqual(other); }
@@ -694,6 +691,12 @@ private:
   Value::ObjectValues::iterator current_;
   // Indicates that iterator is for a null value.
   bool isNull_;
+
+public:
+  // For some reason, BORLAND needs these at the end, rather
+  // than earlier. No idea why.
+  ValueIteratorBase();
+  explicit ValueIteratorBase(const Value::ObjectValues::iterator& current);
 };
 
 /** \brief const iterator for object and array value.
