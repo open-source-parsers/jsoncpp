@@ -257,6 +257,20 @@ JSONTEST_FIXTURE(ValueTest, arrays) {
   JSONTEST_ASSERT_EQUAL(Json::Value(17), got);
   JSONTEST_ASSERT_EQUAL(false, array1_.removeIndex(2, &got)); // gone now
 }
+JSONTEST_FIXTURE(ValueTest, arrayIssue252)
+{
+  int count = 5;
+  Json::Value root;
+  Json::Value item;
+  root["array"] = Json::Value::nullRef;
+  for (int i = 0; i < count; i++)
+  {
+    item["a"] = i;
+    item["b"] = i;
+    root["array"][i] = item;
+  }
+  //JSONTEST_ASSERT_EQUAL(5, root["array"].size());
+}
 
 JSONTEST_FIXTURE(ValueTest, null) {
   JSONTEST_ASSERT_EQUAL(Json::nullValue, null_.type());
@@ -2326,6 +2340,7 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, memberCount);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, objects);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, arrays);
+  JSONTEST_REGISTER_FIXTURE(runner, ValueTest, arrayIssue252);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, null);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, strings);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, bools);
