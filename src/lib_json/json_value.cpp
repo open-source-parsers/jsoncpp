@@ -18,6 +18,9 @@
 #endif
 #include <cstddef> // size_t
 #include <algorithm> // min()
+#include <climits>
+#include <cerrno>
+#include <stdlib.h>
 
 #define JSON_ASSERT_UNREACHABLE assert(false)
 
@@ -53,10 +56,15 @@ const LargestInt Value::minLargestInt = LargestInt(~(LargestUInt(-1) / 2));
 const LargestInt Value::maxLargestInt = LargestInt(LargestUInt(-1) / 2);
 const LargestUInt Value::maxLargestUInt = LargestUInt(-1);
 
+template <typename A, typename T, typename U>
+static inline bool IsInRange(A d, T min, U max) {
+  return d >= min && d <= max;
+}
+
 #if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 template <typename T, typename U>
 static inline bool InRange(double d, T min, U max) {
-  return d >= min && d <= max;
+  return IsInRange(d, min, max);
 }
 #else  // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 static inline double integerToDouble(Json::UInt64 value) {
@@ -69,7 +77,7 @@ template <typename T> static inline double integerToDouble(T value) {
 
 template <typename T, typename U>
 static inline bool InRange(double d, T min, U max) {
-  return d >= integerToDouble(min) && d <= integerToDouble(max);
+  return IsInRange(d, integerToDouble(min), integerToDouble(max));
 }
 #endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 
@@ -650,6 +658,32 @@ CppTL::ConstString Value::asConstString() const {
 }
 #endif
 
+static bool
+converToInt (const char *str, long int *_ret)
+{
+  char *endptr = NULL;
+  long int val;
+
+  errno = 0; /* To distinguish success/failure after call */
+  val = strtol(str, &endptr, 0);
+
+  if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN))
+      || (errno != 0 && val == 0)) {
+    return false;
+  }
+
+  if (str == endptr) {
+    /* Nothing parsed from the string */
+    return false;
+  }
+
+  if (_ret != NULL) {
+    *_ret = val;
+  }
+
+  return true;
+}
+
 Value::Int Value::asInt() const {
   switch (type_) {
   case intValue:
@@ -666,10 +700,46 @@ Value::Int Value::asInt() const {
     return 0;
   case booleanValue:
     return value_.bool_ ? 1 : 0;
+  case stringValue: {
+    long int val;
+
+    if (!converToInt (asString().c_str(), &val)) {
+      break;
+    }
+
+    JSON_ASSERT_MESSAGE(IsInRange (val, minInt, maxInt),
+                        "LargestInt out of Int range");
+    return Int(val);
+  }
   default:
     break;
   }
   JSON_FAIL_MESSAGE("Value is not convertible to Int.");
+}
+
+static bool
+converToUInt (const char *str, unsigned long int *_ret)
+{
+  unsigned long int val;
+  char *endptr = NULL;
+
+  errno = 0; /* To distinguish success/failure after call */
+  val = strtoul(str, &endptr, 0);
+
+  if ((errno == ERANGE && val == ULONG_MAX) || (errno != 0 && val == 0)) {
+    return false;
+  }
+
+  if (str == endptr) {
+    /* Nothing parsed from the string */
+    return false;
+  }
+
+  if (_ret != NULL) {
+    *_ret = val;
+  }
+
+  return true;
 }
 
 Value::UInt Value::asUInt() const {
@@ -688,6 +758,17 @@ Value::UInt Value::asUInt() const {
     return 0;
   case booleanValue:
     return value_.bool_ ? 1 : 0;
+  case stringValue: {
+    unsigned long int val;
+
+    if (!converToUInt (asString().c_str(), &val)) {
+      break;
+    }
+
+    JSON_ASSERT_MESSAGE(IsInRange (val, 0, maxUInt),
+                        "LargestInt out of UInt range");
+    return UInt(val);
+  }
   default:
     break;
   }
@@ -695,6 +776,32 @@ Value::UInt Value::asUInt() const {
 }
 
 #if defined(JSON_HAS_INT64)
+
+static bool
+converToInt64 (const char *str, long long int *_ret)
+{
+  char *endptr = NULL;
+  long long int val;
+
+  errno = 0; /* To distinguish success/failure after call */
+  val = strtoll(str, &endptr, 0);
+
+  if ((errno == ERANGE && (val == LLONG_MAX || val == LLONG_MIN))
+      || (errno != 0 && val == 0)) {
+    return false;
+  }
+
+  if (str == endptr) {
+    /* Nothing parsed from the string */
+    return false;
+  }
+
+  if (_ret != NULL) {
+    *_ret = val;
+  }
+
+  return true;
+}
 
 Value::Int64 Value::asInt64() const {
   switch (type_) {
@@ -711,10 +818,46 @@ Value::Int64 Value::asInt64() const {
     return 0;
   case booleanValue:
     return value_.bool_ ? 1 : 0;
+  case stringValue: {
+    long long int val;
+
+    if (!converToInt64 (asString().c_str(), &val)) {
+      break;
+    }
+
+    JSON_ASSERT_MESSAGE(IsInRange (val, minInt64, maxInt64),
+                        "LargestUInt out of Int64 range");
+    return Int64(val);
+  }
   default:
     break;
   }
   JSON_FAIL_MESSAGE("Value is not convertible to Int64.");
+}
+
+static bool
+converToUInt64 (const char *str, unsigned long long int *_ret)
+{
+  unsigned long long int val;
+  char *endptr = NULL;
+
+  errno = 0; /* To distinguish success/failure after call */
+  val = strtoull(str, &endptr, 0);
+
+  if ((errno == ERANGE && val == ULLONG_MAX) || (errno != 0 && val == 0)) {
+    return false;
+  }
+
+  if (str == endptr) {
+    /* Nothing parsed from the string */
+    return false;
+  }
+
+  if (_ret != NULL) {
+    *_ret = val;
+  }
+
+  return true;
 }
 
 Value::UInt64 Value::asUInt64() const {
@@ -732,6 +875,17 @@ Value::UInt64 Value::asUInt64() const {
     return 0;
   case booleanValue:
     return value_.bool_ ? 1 : 0;
+  case stringValue: {
+    unsigned long long int val;
+
+    if (!converToUInt64(asString().c_str(), &val)) {
+      break;
+    }
+
+    JSON_ASSERT_MESSAGE(IsInRange (val, 0, maxUInt64),
+                        "LargestInt out of UInt64 range");
+    return UInt64(val);
+  }
   default:
     break;
   }
@@ -755,6 +909,32 @@ LargestUInt Value::asLargestUInt() const {
 #endif
 }
 
+static bool
+convertToDouble (const char *str, double *_ret)
+{
+  char *endptr = NULL;
+  double val;
+
+  errno = 0; /* To distinguish success/failure after call */
+  val = strtod(str, &endptr);
+
+  if ((errno == ERANGE && (val == HUGE_VAL || val == -HUGE_VAL))
+      || (errno != 0 && val == 0)) {
+    return false;
+  }
+
+  if (str == endptr) {
+    /* Nothing parsed from the string */
+    return false;
+  }
+
+  if (_ret != NULL) {
+    *_ret = val;
+  }
+
+  return true;
+}
+
 double Value::asDouble() const {
   switch (type_) {
   case intValue:
@@ -771,10 +951,45 @@ double Value::asDouble() const {
     return 0.0;
   case booleanValue:
     return value_.bool_ ? 1.0 : 0.0;
+  case stringValue: {
+    double val;
+
+    if (!convertToDouble(asString().c_str(), &val)) {
+      break;
+    }
+
+    return val;
+  }
   default:
     break;
   }
   JSON_FAIL_MESSAGE("Value is not convertible to double.");
+}
+
+static float
+converToFloat(const char *str, float *_ret)
+{
+  char *endptr = NULL;
+  float val;
+
+  errno = 0; /* To distinguish success/failure after call */
+  val = strtof(str, &endptr);
+
+  if ((errno == ERANGE && (val == HUGE_VALF || val == -HUGE_VALF))
+      || (errno != 0 && val == 0)) {
+    return false;
+  }
+
+  if (str == endptr) {
+    /* Nothing parsed from the string */
+    return false;
+  }
+
+  if (_ret != NULL) {
+    *_ret = val;
+  }
+
+  return true;
 }
 
 float Value::asFloat() const {
@@ -793,6 +1008,15 @@ float Value::asFloat() const {
     return 0.0;
   case booleanValue:
     return value_.bool_ ? 1.0f : 0.0f;
+  case stringValue: {
+    float val;
+
+    if (!converToFloat(asString().c_str(), &val)) {
+      break;
+    }
+
+    return val;
+  }
   default:
     break;
   }
@@ -1224,6 +1448,14 @@ bool Value::isInt() const {
   case realValue:
     return value_.real_ >= minInt && value_.real_ <= maxInt &&
            IsIntegral(value_.real_);
+  case stringValue:
+    long int val;
+
+    if (!converToInt (asString().c_str(), &val)) {
+      break;
+    }
+
+    return IsInRange (val, minInt, maxInt);
   default:
     break;
   }
@@ -1239,6 +1471,14 @@ bool Value::isUInt() const {
   case realValue:
     return value_.real_ >= 0 && value_.real_ <= maxUInt &&
            IsIntegral(value_.real_);
+  case stringValue:
+    unsigned long int val;
+
+    if (!converToUInt (asString().c_str(), &val)) {
+      break;
+    }
+
+    return IsInRange (val, 0, maxUInt);
   default:
     break;
   }
@@ -1258,6 +1498,14 @@ bool Value::isInt64() const {
     // require the value to be strictly less than the limit.
     return value_.real_ >= double(minInt64) &&
            value_.real_ < double(maxInt64) && IsIntegral(value_.real_);
+  case stringValue:
+    long long int val;
+
+    if (!converToInt64 (asString().c_str(), &val)) {
+      break;
+    }
+
+    return IsInRange (val, minInt64, maxInt64);
   default:
     break;
   }
@@ -1278,6 +1526,14 @@ bool Value::isUInt64() const {
     // require the value to be strictly less than the limit.
     return value_.real_ >= 0 && value_.real_ < maxUInt64AsDouble &&
            IsIntegral(value_.real_);
+  case stringValue:
+    unsigned long long int val;
+
+    if (!converToUInt64 (asString().c_str(), &val)) {
+      break;
+    }
+
+    return IsInRange (val, 0, maxUInt64);
   default:
     break;
   }
@@ -1293,7 +1549,18 @@ bool Value::isIntegral() const {
 #endif
 }
 
-bool Value::isDouble() const { return type_ == realValue || isIntegral(); }
+bool Value::isDouble() const {
+  switch (type_) {
+  case realValue:
+    return true;
+  case stringValue:
+    return convertToDouble(asString().c_str(), NULL);
+  default:
+    break;
+  }
+
+  return isIntegral();
+}
 
 bool Value::isNumeric() const { return isIntegral() || isDouble(); }
 

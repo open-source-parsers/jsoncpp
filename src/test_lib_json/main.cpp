@@ -393,6 +393,43 @@ JSONTEST_FIXTURE(ValueTest, integers) {
   JSONTEST_ASSERT(!Json::Value(17.0).isConvertibleTo(Json::arrayValue));
   JSONTEST_ASSERT(!Json::Value(17.0).isConvertibleTo(Json::objectValue));
 
+  JSONTEST_ASSERT(Json::Value("17").isConvertibleTo(Json::intValue));
+  JSONTEST_ASSERT(Json::Value("17").isConvertibleTo(Json::uintValue));
+  JSONTEST_ASSERT(Json::Value("17").isConvertibleTo(Json::realValue));
+
+  JSONTEST_ASSERT(Json::Value("17abc").isConvertibleTo(Json::intValue));
+  JSONTEST_ASSERT(Json::Value("17abc").isConvertibleTo(Json::uintValue));
+  JSONTEST_ASSERT(Json::Value("17abc").isConvertibleTo(Json::realValue));
+
+  JSONTEST_ASSERT_EQUAL(17, Json::Value("17abc").asInt());
+  JSONTEST_ASSERT_EQUAL(17, Json::Value("17abc").asUInt());
+  JSONTEST_ASSERT_EQUAL(17.0, Json::Value("17abc").asDouble());
+  JSONTEST_ASSERT_EQUAL(17.0, Json::Value("17abc").asFloat());
+
+  JSONTEST_ASSERT(!Json::Value("abc").isConvertibleTo(Json::intValue));
+  JSONTEST_ASSERT(!Json::Value("abc").isConvertibleTo(Json::uintValue));
+  JSONTEST_ASSERT(!Json::Value("abc").isConvertibleTo(Json::realValue));
+
+#if defined(JSON_NO_INT64)
+  JSONTEST_ASSERT_EQUAL(kint32max, Json::Value("2147483647").asInt());
+  JSONTEST_ASSERT_THROWS (Json::Value("2147483648").asInt());
+
+  JSONTEST_ASSERT_EQUAL(kint32min, Json::Value("-2147483648").asInt());
+  JSONTEST_ASSERT_THROWS (Json::Value("-2147483649").asInt());
+
+  JSONTEST_ASSERT_EQUAL(kuint32max, Json::Value("4294967295").asUInt());
+  JSONTEST_ASSERT_THROWS (Json::Value("4294967296").asUInt());
+#else
+  JSONTEST_ASSERT_EQUAL(kint64max, Json::Value("9223372036854775807").asInt64());
+  JSONTEST_ASSERT_THROWS (Json::Value("9223372036854775808").asInt64());
+
+  JSONTEST_ASSERT_EQUAL(kint64min, Json::Value("-9223372036854775808").asInt64());
+  JSONTEST_ASSERT_THROWS (Json::Value("-9223372036854775809").asInt64());
+
+  JSONTEST_ASSERT_EQUAL(kuint64max, Json::Value("18446744073709551615").asUInt64());
+  JSONTEST_ASSERT_THROWS (Json::Value("18446744073709551616").asUInt());
+#endif
+
   // Default int
   val = Json::Value(Json::intValue);
 
