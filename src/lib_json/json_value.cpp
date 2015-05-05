@@ -22,13 +22,26 @@
 #define JSON_ASSERT_UNREACHABLE assert(false)
 
 namespace Json {
-
+#if __cplusplus >= 201103L
 //Aligned memory template. Fixes earlier workaround for ARM compilers.
 template<typename T>
 using byte_align_memory = typename std::aligned_storage<sizeof(T),
       std::alignment_of<T>::value>::type;
 // Initialize memory for Value Object to zero.
 static const byte_align_memory<Value> kNull {};
+#else
+// This is a walkaround to avoid the static initialization of Value::null.
+// kNull must be word-aligned to avoid crashing on ARM.  We use an alignment of
+// 8 (instead of 4) as a bit of future-proofing.
+#if defined(__ARMEL__)
+#define ALIGNAS(byte_alignment) __attribute__((aligned(byte_alignment)))
+#else
+#define ALIGNAS(byte_alignment)
+#endif
+static const unsigned char ALIGNAS(8) kNull[sizeof(Value)] = { 0 };
+const unsigned char& kNullRef = kNull[0];
+const Value& Value::null = reinterpret_cast<const Value&>(kNullRef);
+#endif
 static const void* kNullRef = &kNull;
 //Typecast to Json Value Object.
 const Value& Value::null = *static_cast<const Value*>(kNullRef);
