@@ -29,6 +29,9 @@ using byte_align_memory = typename std::aligned_storage<sizeof(T),
       std::alignment_of<T>::value>::type;
 // Initialize memory for Value Object to zero.
 static const byte_align_memory<Value> kNull {};
+static const void* kNullRef = &kNull;
+//Typecast to Json Value Object.
+const Value& Value::null = *static_cast<const Value*>(kNullRef);
 #else
 // This is a walkaround to avoid the static initialization of Value::null.
 // kNull must be word-aligned to avoid crashing on ARM.  We use an alignment of
@@ -42,9 +45,6 @@ static const unsigned char ALIGNAS(8) kNull[sizeof(Value)] = { 0 };
 const unsigned char& kNullRef = kNull[0];
 const Value& Value::null = reinterpret_cast<const Value&>(kNullRef);
 #endif
-static const void* kNullRef = &kNull;
-//Typecast to Json Value Object.
-const Value& Value::null = *static_cast<const Value*>(kNullRef);
 const Value& Value::nullRef = null;
 
 const Int Value::minInt = Int(~(UInt(-1) / 2));
