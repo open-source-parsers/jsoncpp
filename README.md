@@ -67,7 +67,7 @@ Alternatively, from the command-line on Unix in the source directory:
 
     mkdir -p build/debug
     cd build/debug
-    cmake -DCMAKE_BUILD_TYPE=debug -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -G "Unix Makefiles" ../..
+    cmake -DCMAKE_BUILD_TYPE=debug -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DARCHIVE_INSTALL_DIR=. -G "Unix Makefiles" ../..
     make
 
 Running `cmake -`" will display the list of available generators (passed using
