@@ -32,9 +32,8 @@ namespace Json {
 #define ALIGNAS(byte_alignment)
 #endif
 static const unsigned char ALIGNAS(8) kNull[sizeof(Value)] = { 0 };
-const unsigned char& kNullRef = kNull[0];
-const Value& Value::null = reinterpret_cast<const Value&>(kNullRef);
-const Value& Value::nullRef = null;
+const Value& Value::null = reinterpret_cast<const Value&>(kNull[0]);
+const Value& Value::nullRef = reinterpret_cast<const Value&>(kNull[0]);
 
 const Int Value::minInt = Int(~(UInt(-1) / 2));
 const Int Value::maxInt = Int(UInt(-1) / 2);
