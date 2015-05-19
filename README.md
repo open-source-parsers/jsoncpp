@@ -70,7 +70,7 @@ Alternatively, from the command-line on Unix in the source directory:
     cmake -DCMAKE_BUILD_TYPE=debug -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -G "Unix Makefiles" ../..
     make
 
-Running `cmake -`" will display the list of available generators (passed using
+Running `cmake -h` will display the list of available generators (passed using
 the `-G` option).
 
 By default CMake hides compilation commands. This can be modified by specifying
