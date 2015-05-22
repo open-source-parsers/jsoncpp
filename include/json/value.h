@@ -246,6 +246,8 @@ Json::Value arr_value(Json::arrayValue); // []
 Json::Value obj_value(Json::objectValue); // {}
 \endcode
   */
+  struct StaticInitTag {};
+  Value(StaticInitTag);
   Value(ValueType type = nullValue);
   Value(Int value);
   Value(UInt value);

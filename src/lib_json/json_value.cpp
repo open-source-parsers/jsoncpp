@@ -31,9 +31,9 @@ namespace Json {
 #else
 #define ALIGNAS(byte_alignment)
 #endif
-static const unsigned char ALIGNAS(8) kNull[sizeof(Value)] = { 0 };
-const Value& Value::null = reinterpret_cast<const Value&>(kNull[0]);
-const Value& Value::nullRef = reinterpret_cast<const Value&>(kNull[0]);
+static const Value kNull((Value::StaticInitTag()));
+const Value& Value::null = kNull;
+const Value& Value::nullRef = kNull;
 
 const Int Value::minInt = Int(~(UInt(-1) / 2));
 const Int Value::maxInt = Int(UInt(-1) / 2);
@@ -306,6 +306,8 @@ bool Value::CZString::isStaticString() const { return storage_.policy_ == noDupl
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
+
+Value::Value(Value::StaticInitTag) {}
 
 /*! \internal Default constructor initialization must be equivalent to:
  * memset( this, 0, sizeof(Value) )
