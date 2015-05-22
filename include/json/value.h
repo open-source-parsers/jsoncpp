@@ -230,9 +230,12 @@ public:
 #endif // ifndef JSON_USE_CPPTL_SMALLMAP
 #endif // ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
 
-public:
+private:
   struct StaticInitTag {};
-  Value(StaticInitTag); ///< A special constructor for Value::null.
+  Value(StaticInitTag); ///< A special constructor for Value::kNull.
+  static const Value kNull;
+
+public:
   /** \brief Create a default Value of the given type.
 
     This is a very useful constructor.

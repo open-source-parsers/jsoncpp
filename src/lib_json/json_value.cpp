@@ -23,9 +23,9 @@
 
 namespace Json {
 
-static const Value kNull((Value::StaticInitTag()));
-const Value& Value::null = kNull;
-const Value& Value::nullRef = kNull;
+const Value  Value::kNull((Value::StaticInitTag()));
+const Value& Value::null = Value::kNull;
+const Value& Value::nullRef = Value::kNull;
 
 const Int Value::minInt = Int(~(UInt(-1) / 2));
 const Int Value::maxInt = Int(UInt(-1) / 2);
