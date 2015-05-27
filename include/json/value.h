@@ -232,7 +232,7 @@ public:
 
 private:
   struct StaticInitTag {};
-  Value(StaticInitTag); ///< A special constructor for Value::kNull.
+  explicit Value(StaticInitTag) {} ///< A special constructor for Value::kNull.
   static const Value kNull;
 
 public:
