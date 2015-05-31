@@ -25,14 +25,13 @@ struct Options
 };
 
 static std::string normalizeFloatingPointStr(double value) {
-  char buffer[32];
-#if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__)
-  sprintf_s(buffer, sizeof(buffer), "%.16g", value);
-#else
-  snprintf(buffer, sizeof(buffer), "%.16g", value);
-#endif
-  buffer[sizeof(buffer) - 1] = 0;
-  std::string s(buffer);
+  std::stringstream str;
+  // Use stringstream with "C" locale so we always use "." as decimal point.
+  str.imbue(std::locale::classic());
+  str.precision(17);
+  str << value;
+  
+  std::string s = str.str();
   std::string::size_type index = s.find_last_of("eE");
   if (index != std::string::npos) {
     std::string::size_type hasSign =
