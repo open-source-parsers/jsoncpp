@@ -68,20 +68,6 @@ static inline void uintToString(LargestUInt value, char*& current) {
   } while (value != 0);
 }
 
-/** Change ',' to '.' everywhere in buffer.
- *
- * We had a sophisticated way, but it did not work in WinCE.
- * @see https://github.com/open-source-parsers/jsoncpp/pull/9
- */
-static inline void fixNumericLocale(char* begin, char* end) {
-  while (begin < end) {
-    if (*begin == ',') {
-      *begin = '.';
-    }
-    ++begin;
-  }
-}
-
 } // namespace Json {
 
 #endif // LIB_JSONCPP_JSON_TOOL_H_INCLUDED
