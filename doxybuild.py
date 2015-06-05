@@ -72,7 +72,7 @@ def run_cmd(cmd, silent=False):
     if silent:
         status, output = getstatusoutput(cmd)
     else:
-        status, output = os.system(' '.join(cmd)), ''
+        status, output = subprocess.call(cmd), ''
     if status:
         msg = 'Error while %s ...\n\terror=%d, output="""%s"""' %(info, status, output)
         raise Exception(msg)
