@@ -296,7 +296,10 @@ JSONTEST_FIXTURE(ValueTest, null) {
   JSONTEST_ASSERT_EQUAL(0.0, null_.asFloat());
   JSONTEST_ASSERT_STRING_EQUAL("", null_.asString());
 
+#if !defined(__ARMEL__)
+  // See line #165 of include/json/value.h
   JSONTEST_ASSERT_EQUAL(Json::Value::null, null_);
+#endif
 }
 
 JSONTEST_FIXTURE(ValueTest, strings) {
