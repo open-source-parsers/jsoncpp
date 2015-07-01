@@ -21,6 +21,7 @@ IF(NOT WIN32)
     ENDIF(NOT CMAKE_BUILD_TYPE)
 ENDIF(NOT WIN32)
 
+SET(DEBUG_LIBNAME_SUFFIX "" CACHE STRING "Optional suffix to append to the library name for a debug build")
 SET(LIB_SUFFIX "" CACHE STRING "Optional arch-dependent suffix for the library installation directory")
 
 SET(RUNTIME_INSTALL_DIR bin
