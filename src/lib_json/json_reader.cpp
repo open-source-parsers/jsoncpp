@@ -1265,7 +1265,7 @@ bool OurReader::readStringSingleQuote() {
   return c == '\'';
 }
 
-bool OurReader::readObject(Token& tokenStart) {
+bool OurReader::readObject(Token& /*tokenStart*/) {
   Token tokenName;
   std::string name;
   Value init(objectValue);
@@ -1326,7 +1326,7 @@ bool OurReader::readObject(Token& tokenStart) {
       "Missing '}' or object member name", tokenName, tokenObjectEnd);
 }
 
-bool OurReader::readArray(Token& tokenStart) {
+bool OurReader::readArray(Token& /*tokenStart*/) {
   Value init(arrayValue);
   currentValue().swapPayload(init);
   skipSpaces();
