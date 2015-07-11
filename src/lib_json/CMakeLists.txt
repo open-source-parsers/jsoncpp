@@ -2,7 +2,7 @@ if( CMAKE_COMPILER_IS_GNUCXX )
   #Get compiler version.
   execute_process( COMMAND ${CMAKE_CXX_COMPILER} -dumpversion
                    OUTPUT_VARIABLE GNUCXX_VERSION )
- 
+
   #-Werror=* was introduced -after- GCC 4.1.2
   if( GNUCXX_VERSION VERSION_GREATER 4.1.2 )
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=strict-aliasing")
@@ -43,7 +43,8 @@ IF(BUILD_SHARED_LIBS)
     ADD_DEFINITIONS( -DJSON_DLL_BUILD )
     ADD_LIBRARY(jsoncpp_lib SHARED ${PUBLIC_HEADERS} ${jsoncpp_sources})
     SET_TARGET_PROPERTIES( jsoncpp_lib PROPERTIES VERSION ${JSONCPP_VERSION} SOVERSION ${JSONCPP_VERSION_MAJOR})
-    SET_TARGET_PROPERTIES( jsoncpp_lib PROPERTIES OUTPUT_NAME jsoncpp )
+    SET_TARGET_PROPERTIES( jsoncpp_lib PROPERTIES OUTPUT_NAME jsoncpp
+                           DEBUG_OUTPUT_NAME jsoncpp${DEBUG_LIBNAME_SUFFIX} )
 
     INSTALL( TARGETS jsoncpp_lib ${INSTALL_EXPORT}
          RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
@@ -61,7 +62,8 @@ ENDIF()
 IF(BUILD_STATIC_LIBS)
     ADD_LIBRARY(jsoncpp_lib_static STATIC ${PUBLIC_HEADERS} ${jsoncpp_sources})
     SET_TARGET_PROPERTIES( jsoncpp_lib_static PROPERTIES VERSION ${JSONCPP_VERSION} SOVERSION ${JSONCPP_VERSION_MAJOR})
-    SET_TARGET_PROPERTIES( jsoncpp_lib_static PROPERTIES OUTPUT_NAME jsoncpp )
+    SET_TARGET_PROPERTIES( jsoncpp_lib_static PROPERTIES OUTPUT_NAME jsoncpp
+                           DEBUG_OUTPUT_NAME jsoncpp${DEBUG_LIBNAME_SUFFIX} )
 
     INSTALL( TARGETS jsoncpp_lib_static ${INSTALL_EXPORT}
          RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}

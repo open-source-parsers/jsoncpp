@@ -21,6 +21,7 @@ IF(NOT WIN32)
     ENDIF(NOT CMAKE_BUILD_TYPE)
 ENDIF(NOT WIN32)
 
+SET(DEBUG_LIBNAME_SUFFIX "" CACHE STRING "Optional suffix to append to the library name for a debug build")
 SET(LIB_SUFFIX "" CACHE STRING "Optional arch-dependent suffix for the library installation directory")
 
 SET(RUNTIME_INSTALL_DIR bin
@@ -62,7 +63,7 @@ ENDMACRO(jsoncpp_parse_version)
 #SET( JSONCPP_VERSION_MAJOR X )
 #SET( JSONCPP_VERSION_MINOR Y )
 #SET( JSONCPP_VERSION_PATCH Z )
-SET( JSONCPP_VERSION 0.10.2 )
+SET( JSONCPP_VERSION 0.10.3 )
 jsoncpp_parse_version( ${JSONCPP_VERSION} JSONCPP_VERSION )
 #IF(NOT JSONCPP_VERSION_FOUND)
 #    MESSAGE(FATAL_ERROR "Failed to parse version string properly. Expect X.Y.Z")
@@ -96,7 +97,7 @@ endif( MSVC )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   # using regular Clang or AppleClang
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wshorten-64-to-32")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   # using GCC
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Wno-long-long")
