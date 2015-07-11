@@ -2,13 +2,21 @@
 # http://about.travis-ci.org/docs/user/build-configuration/
 # This file can be validated on:
 # http://lint.travis-ci.org/
+# See also
+# http://stackoverflow.com/questions/22111549/travis-ci-with-clang-3-4-and-c11/30925448#30925448
+# to allow C++11, though we are not yet building with -std=c++11
 
-#before_install: sudo apt-get install -y cmake
-# cmake is pre-installed in Travis for both linux and osx
-
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq valgrind
+install:
+- if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.8
+    - g++-4.8
+    - clang
+    - valgrind
 os:
   - linux
 language: cpp
@@ -23,3 +31,4 @@ env:
 notifications:
   email:
     - aaronjjacobs@gmail.com
+sudo: false
