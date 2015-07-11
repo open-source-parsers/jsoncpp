@@ -19,6 +19,7 @@ before_build:
     - echo "Running cmake..."
     - cd c:\projects\jsoncpp
     - cmake --version
+    - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
     - if %PLATFORM% == Win32 cmake .
     - if %PLATFORM% == x64 cmake -G "Visual Studio 12 2013 Win64" .
 
