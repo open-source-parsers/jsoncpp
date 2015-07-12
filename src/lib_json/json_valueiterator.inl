@@ -93,26 +93,26 @@ UInt ValueIteratorBase::index() const {
 }
 
 std::string ValueIteratorBase::name() const {
-  char const* key;
+  char const* keey;
   char const* end;
-  key = memberName(&end);
-  if (!key) return std::string();
-  return std::string(key, end);
+  keey = memberName(&end);
+  if (!keey) return std::string();
+  return std::string(keey, end);
 }
 
 char const* ValueIteratorBase::memberName() const {
-  const char* name = (*current_).first.data();
-  return name ? name : "";
+  const char* cname = (*current_).first.data();
+  return cname ? cname : "";
 }
 
 char const* ValueIteratorBase::memberName(char const** end) const {
-  const char* name = (*current_).first.data();
-  if (!name) {
+  const char* cname = (*current_).first.data();
+  if (!cname) {
     *end = NULL;
     return NULL;
   }
-  *end = name + (*current_).first.length();
-  return name;
+  *end = cname + (*current_).first.length();
+  return cname;
 }
 
 // //////////////////////////////////////////////////////////////////
