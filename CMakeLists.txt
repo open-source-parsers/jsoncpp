@@ -97,10 +97,10 @@ endif( MSVC )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   # using regular Clang or AppleClang
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wshorten-64-to-32")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wconversion -Wshadow")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   # using GCC
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -pedantic")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wconversion -Wshadow -Wextra -Wsign-conversion -pedantic")
 endif()
 
 IF(JSONCPP_WITH_WARNING_AS_ERROR)
