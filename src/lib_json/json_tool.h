@@ -43,7 +43,7 @@ static inline std::string codePointToUTF8(unsigned int cp) {
   return result;
 }
 
-/// Returns true if ch is a control character (in range [0,32[).
+/// Returns true if ch is a control character (in range [1,31]).
 static inline bool isControlCharacter(char ch) { return ch > 0 && ch <= 0x1F; }
 
 enum {
