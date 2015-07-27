@@ -71,12 +71,15 @@ static bool containsControlCharacter0(const char* str, unsigned len) {
 std::string valueToString(LargestInt value) {
   UIntToStringBuffer buffer;
   char* current = buffer + sizeof(buffer);
-  bool isNegative = value < 0;
-  if (isNegative)
-    value = -value;
-  uintToString(LargestUInt(value), current);
-  if (isNegative)
+  if (value == Value::minLargestInt) {
+    uintToString(LargestUInt(Value::maxLargestInt) + 1, current);
     *--current = '-';
+  } else if (value < 0) {
+    uintToString(LargestUInt(-value), current);
+    *--current = '-';
+  } else {
+    uintToString(LargestUInt(value), current);
+  }
   assert(current >= buffer);
   return current;
 }
