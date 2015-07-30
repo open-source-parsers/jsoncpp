@@ -213,7 +213,7 @@ private:
     CZString(char const* str, unsigned length, DuplicationPolicy allocate);
     CZString(CZString const& other);
     ~CZString();
-    CZString& operator=(CZString other);
+    CZString& operator=(CZString& other);
     bool operator<(CZString const& other) const;
     bool operator==(CZString const& other) const;
     ArrayIndex index() const;
