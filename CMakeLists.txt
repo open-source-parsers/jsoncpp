@@ -101,7 +101,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   # using GCC
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wshadow -Wextra -pedantic -Wno-long-long")
-  # not yet ready for -Wconversion
+  # not yet ready for -Wsign-conversion
 endif()
 
 IF(JSONCPP_WITH_WARNING_AS_ERROR)
