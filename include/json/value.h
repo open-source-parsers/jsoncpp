@@ -171,7 +171,7 @@ private:
     CZString(const char* cstr, DuplicationPolicy allocate);
     CZString(const CZString& other);
     ~CZString();
-    CZString& operator=(CZString other);
+    CZString& operator=(CZString& other);
     bool operator<(const CZString& other) const;
     bool operator==(const CZString& other) const;
     ArrayIndex index() const;
