@@ -1215,7 +1215,7 @@ JSONTEST_FIXTURE(ValueTest, nonIntegers) {
   JSONTEST_ASSERT_EQUAL(-2147483648.5, val.asDouble());
   JSONTEST_ASSERT_EQUAL(float(-2147483648.5), val.asFloat());
 #ifdef JSON_HAS_INT64
-  JSONTEST_ASSERT_EQUAL(-Json::Int64(1) << 31, val.asLargestInt());
+  JSONTEST_ASSERT_EQUAL(-(Json::Int64(1) << 31), val.asLargestInt());
 #endif
   JSONTEST_ASSERT_EQUAL(true, val.asBool());
   JSONTEST_ASSERT_EQUAL("-2147483648.5",
