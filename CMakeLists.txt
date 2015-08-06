@@ -18,8 +18,8 @@ IF(NOT WIN32)
         SET(CMAKE_BUILD_TYPE Release CACHE STRING
             "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Coverage."
             FORCE)
-    ENDIF(NOT CMAKE_BUILD_TYPE)
-ENDIF(NOT WIN32)
+    ENDIF()
+ENDIF()
 
 SET(DEBUG_LIBNAME_SUFFIX "" CACHE STRING "Optional suffix to append to the library name for a debug build")
 SET(LIB_SUFFIX "" CACHE STRING "Optional arch-dependent suffix for the library installation directory")
@@ -39,7 +39,7 @@ MARK_AS_ADVANCED( RUNTIME_INSTALL_DIR ARCHIVE_INSTALL_DIR INCLUDE_INSTALL_DIR PA
 # Set variable named ${VAR_NAME} to value ${VALUE}
 FUNCTION(set_using_dynamic_name VAR_NAME VALUE)
     SET( "${VAR_NAME}" "${VALUE}" PARENT_SCOPE)
-ENDFUNCTION(set_using_dynamic_name)
+ENDFUNCTION()
 
 # Extract major, minor, patch from version text
 # Parse a version string "X.Y.Z" and outputs
@@ -55,8 +55,8 @@ MACRO(jsoncpp_parse_version VERSION_TEXT OUPUT_PREFIX)
         set_using_dynamic_name( "${OUPUT_PREFIX}_FOUND" TRUE )
     ELSE( ${VERSION_TEXT} MATCHES ${VERSION_REGEX} )
         set_using_dynamic_name( "${OUPUT_PREFIX}_FOUND" FALSE )
-    ENDIF( ${VERSION_TEXT} MATCHES ${VERSION_REGEX} )
-ENDMACRO(jsoncpp_parse_version)
+    ENDIF()
+ENDMACRO()
 
 # Read out version from "version" file
 #FILE(STRINGS "version" JSONCPP_VERSION)
@@ -83,7 +83,7 @@ macro(UseCompilationWarningAsError)
         # Only enabled in debug because some old versions of VS STL generate
         # warnings when compiled in release configuration.
 		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /WX ")
-	endif( MSVC )
+	endif()
 endmacro()
 
 # Include our configuration header
@@ -93,12 +93,12 @@ if ( MSVC )
     # Only enabled in debug because some old versions of VS STL generate
     # unreachable code warning when compiled in release configuration.
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /W4 ")
-endif( MSVC )
+endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   # using regular Clang or AppleClang
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Werror -Wall -Wshadow -Wshorten-64-to-32")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # using GCC
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wshadow -Wextra -pedantic -Wno-long-long")
   # not yet ready for -Wsign-conversion
@@ -106,7 +106,7 @@ endif()
 
 IF(JSONCPP_WITH_WARNING_AS_ERROR)
     UseCompilationWarningAsError()
-ENDIF(JSONCPP_WITH_WARNING_AS_ERROR)
+ENDIF()
 
 IF(JSONCPP_WITH_PKGCONFIG_SUPPORT)
 	CONFIGURE_FILE(
@@ -115,13 +115,13 @@ IF(JSONCPP_WITH_PKGCONFIG_SUPPORT)
 		@ONLY)
 	INSTALL(FILES "${CMAKE_BINARY_DIR}/pkg-config/jsoncpp.pc"
 		DESTINATION "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/pkgconfig")
-ENDIF(JSONCPP_WITH_PKGCONFIG_SUPPORT)
+ENDIF()
 
 IF(JSONCPP_WITH_CMAKE_PACKAGE)
         INSTALL(EXPORT jsoncpp
                 DESTINATION ${PACKAGE_INSTALL_DIR}/jsoncpp
                 FILE        jsoncppConfig.cmake)
-ENDIF(JSONCPP_WITH_CMAKE_PACKAGE)
+ENDIF()
 
 # Build the different applications
 ADD_SUBDIRECTORY( src )
