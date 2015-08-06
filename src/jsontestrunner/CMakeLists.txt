@@ -9,7 +9,7 @@ IF(BUILD_SHARED_LIBS)
     TARGET_LINK_LIBRARIES(jsontestrunner_exe jsoncpp_lib)
 ELSE(BUILD_SHARED_LIBS)
     TARGET_LINK_LIBRARIES(jsontestrunner_exe jsoncpp_lib_static)
-ENDIF(BUILD_SHARED_LIBS)
+ENDIF()
 
 SET_TARGET_PROPERTIES(jsontestrunner_exe PROPERTIES OUTPUT_NAME jsontestrunner_exe)
 
@@ -22,4 +22,4 @@ IF(PYTHONINTERP_FOUND)
                       DEPENDS jsontestrunner_exe jsoncpp_test
                       )
     ADD_CUSTOM_TARGET(jsoncpp_check DEPENDS jsoncpp_readerwriter_tests)
-ENDIF(PYTHONINTERP_FOUND)
+ENDIF()
