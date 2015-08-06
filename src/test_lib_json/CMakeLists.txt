@@ -12,7 +12,7 @@ IF(BUILD_SHARED_LIBS)
     TARGET_LINK_LIBRARIES(jsoncpp_test jsoncpp_lib)
 ELSE(BUILD_SHARED_LIBS)
     TARGET_LINK_LIBRARIES(jsoncpp_test jsoncpp_lib_static)
-ENDIF(BUILD_SHARED_LIBS)
+ENDIF()
 
 # another way to solve issue #90
 #set_target_properties(jsoncpp_test PROPERTIES COMPILE_FLAGS -ffloat-store)
@@ -32,7 +32,7 @@ IF(JSONCPP_WITH_POST_BUILD_UNITTEST)
         ADD_CUSTOM_COMMAND( TARGET jsoncpp_test
                             POST_BUILD
                             COMMAND $<TARGET_FILE:jsoncpp_test>)
-    ENDIF(BUILD_SHARED_LIBS)
-ENDIF(JSONCPP_WITH_POST_BUILD_UNITTEST)
+    ENDIF()
+ENDIF()
 
 SET_TARGET_PROPERTIES(jsoncpp_test PROPERTIES OUTPUT_NAME jsoncpp_test) 
