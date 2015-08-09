@@ -6,9 +6,9 @@
                 "Visual Studio 6",
                 "Visual Studio 7",
                 "Visual Studio 8 2005"
-                ] 
+                ]
             }
-         ] 
+         ]
         },
         {"name": "shared_dll",
          "variables": [
@@ -18,8 +18,8 @@
         },
         {"name": "build_type",
          "build_types": [
-            "debug", 
-            "release" 
+            "debug",
+            "release"
             ]
         }
     ]
