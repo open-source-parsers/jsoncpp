@@ -1,0 +1,8 @@
+* text=auto
+*.h text
+*.cpp text
+*.json text
+*.in text
+*.sh eol=lf
+*.bat eol=crlf
+devtools/agent_vm* eol=crlf
