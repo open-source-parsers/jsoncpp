@@ -4,12 +4,11 @@ ADD_EXECUTABLE(jsontestrunner_exe
                main.cpp
                )
 
-IF(BUILD_SHARED_LIBS)
+IF(JSONCPP_LIBRARY_TYPE STREQUAL "SHARED")
     ADD_DEFINITIONS( -DJSON_DLL )
-    TARGET_LINK_LIBRARIES(jsontestrunner_exe jsoncpp_lib)
-ELSE(BUILD_SHARED_LIBS)
-    TARGET_LINK_LIBRARIES(jsontestrunner_exe jsoncpp_lib_static)
 ENDIF()
+
+TARGET_LINK_LIBRARIES(jsontestrunner_exe jsoncpp)
 
 SET_TARGET_PROPERTIES(jsontestrunner_exe PROPERTIES OUTPUT_NAME jsontestrunner_exe)
 
