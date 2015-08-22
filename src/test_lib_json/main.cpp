@@ -1254,7 +1254,7 @@ JSONTEST_FIXTURE(ValueTest, nonIntegers) {
 
   // A 16-digit floating point number.
   val = Json::Value(2199023255552000.0f);
-  JSONTEST_ASSERT_EQUAL(float(2199023255552000), val.asFloat());
+  JSONTEST_ASSERT_EQUAL(float(2199023255552000.0f), val.asFloat());
   JSONTEST_ASSERT_STRING_EQUAL("2199023255552000",
                                normalizeFloatingPointStr(val.asString()));
 
