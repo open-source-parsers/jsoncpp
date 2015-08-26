@@ -17,6 +17,7 @@
 #include <sstream>
 #include <memory>
 #include <set>
+#include <limits>
 
 #if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
 #define snprintf _snprintf
@@ -894,6 +895,7 @@ public:
   bool allowSingleQuotes_;
   bool failIfExtra_;
   bool rejectDupKeys_;
+  bool allowSpecialFloats_;
   int stackLimit_;
 };  // OurFeatures
 
@@ -901,10 +903,13 @@ public:
 // ////////////////////////////////
 
 OurFeatures::OurFeatures()
-    : allowComments_(true), strictRoot_(false)
-    , allowDroppedNullPlaceholders_(false), allowNumericKeys_(false)
+    : allowComments_(true)
+	, strictRoot_(false)
+    , allowDroppedNullPlaceholders_(false)
+	, allowNumericKeys_(false)
     , allowSingleQuotes_(false)
     , failIfExtra_(false)
+	, allowSpecialFloats_(false)
 {
 }
 
@@ -950,6 +955,9 @@ private:
     tokenTrue,
     tokenFalse,
     tokenNull,
+	tokenNaN,
+	tokenPosInf,
+	tokenNegInf,
     tokenArraySeparator,
     tokenMemberSeparator,
     tokenComment,
@@ -980,7 +988,7 @@ private:
   bool readCppStyleComment();
   bool readString();
   bool readStringSingleQuote();
-  void readNumber();
+  bool readNumber();
   bool readValue();
   bool readObject(Token& token);
   bool readArray(Token& token);
@@ -1134,6 +1142,30 @@ bool OurReader::readValue() {
     currentValue().setOffsetLimit(token.end_ - begin_);
     }
     break;
+  case tokenNaN:
+    {
+	Value v(std::numeric_limits<double>::quiet_NaN());
+    currentValue().swapPayload(v);
+    currentValue().setOffsetStart(token.start_ - begin_);
+    currentValue().setOffsetLimit(token.end_ - begin_);
+    }
+    break;
+  case tokenPosInf:
+    {
+	Value v(std::numeric_limits<double>::infinity());
+    currentValue().swapPayload(v);
+    currentValue().setOffsetStart(token.start_ - begin_);
+    currentValue().setOffsetLimit(token.end_ - begin_);
+    }
+    break;
+  case tokenNegInf:
+    {
+	Value v(-std::numeric_limits<double>::infinity());
+    currentValue().swapPayload(v);
+    currentValue().setOffsetStart(token.start_ - begin_);
+    currentValue().setOffsetLimit(token.end_ - begin_);
+    }
+    break;
   case tokenArraySeparator:
   case tokenObjectEnd:
   case tokenArrayEnd:
@@ -1196,9 +1228,9 @@ bool OurReader::readToken(Token& token) {
     break;
   case '\'':
     if (features_.allowSingleQuotes_) {
-    token.type_ = tokenString;
-    ok = readStringSingleQuote();
-    break;
+      token.type_ = tokenString;
+      ok = readStringSingleQuote();
+      break;
     } // else continue
   case '/':
     token.type_ = tokenComment;
@@ -1215,8 +1247,12 @@ bool OurReader::readToken(Token& token) {
   case '8':
   case '9':
   case '-':
-    token.type_ = tokenNumber;
-    readNumber();
+    if (readNumber()) {
+	  token.type_ = tokenNumber;
+    } else {
+	  token.type_ = tokenNegInf;
+      ok = features_.allowSpecialFloats_ && match("nfinity", 7);
+	}
     break;
   case 't':
     token.type_ = tokenTrue;
@@ -1229,6 +1265,22 @@ bool OurReader::readToken(Token& token) {
   case 'n':
     token.type_ = tokenNull;
     ok = match("ull", 3);
+    break;
+  case 'N':
+	if (features_.allowSpecialFloats_) {
+	  token.type_ = tokenNaN;
+      ok = match("aN", 2);
+	} else {
+	  ok = false;
+	}
+    break;
+  case 'I':
+	if (features_.allowSpecialFloats_) {
+	  token.type_ = tokenPosInf;
+      ok = match("nfinity", 7);
+	} else {
+	  ok = false;
+	}
     break;
   case ',':
     token.type_ = tokenArraySeparator;
@@ -1330,8 +1382,12 @@ bool OurReader::readCppStyleComment() {
   return true;
 }
 
-void OurReader::readNumber() {
-  const char *p = current_;
+bool OurReader::readNumber() {
+  const char* p = current_;
+  if (p != end_ && *p == 'I') {
+	current_ = ++p;
+	return false;
+  }
   char c = '0'; // stopgap for already consumed character
   // integral part
   while (c >= '0' && c <= '9')
@@ -1350,6 +1406,7 @@ void OurReader::readNumber() {
     while (c >= '0' && c <= '9')
       c = (current_ = p) < end_ ? *p++ : 0;
   }
+  return true;
 }
 bool OurReader::readString() {
   Char c = 0;
@@ -1880,6 +1937,7 @@ CharReader* CharReaderBuilder::newCharReader() const
   features.stackLimit_ = settings_["stackLimit"].asInt();
   features.failIfExtra_ = settings_["failIfExtra"].asBool();
   features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
+  features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
   return new OurCharReader(collectComments, features);
 }
 static void getValidReaderKeys(std::set<std::string>* valid_keys)
@@ -1894,6 +1952,7 @@ static void getValidReaderKeys(std::set<std::string>* valid_keys)
   valid_keys->insert("stackLimit");
   valid_keys->insert("failIfExtra");
   valid_keys->insert("rejectDupKeys");
+  valid_keys->insert("allowSpecialFloats");
 }
 bool CharReaderBuilder::validate(Json::Value* invalid) const
 {
@@ -1927,6 +1986,7 @@ void CharReaderBuilder::strictMode(Json::Value* settings)
   (*settings)["allowSingleQuotes"] = false;
   (*settings)["failIfExtra"] = true;
   (*settings)["rejectDupKeys"] = true;
+  (*settings)["allowSpecialFloats"] = false;
 //! [CharReaderBuilderStrictMode]
 }
 // static
@@ -1942,6 +2002,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings)
   (*settings)["stackLimit"] = 1000;
   (*settings)["failIfExtra"] = false;
   (*settings)["rejectDupKeys"] = false;
+  (*settings)["allowSpecialFloats"] = false;
 //! [CharReaderBuilderDefaults]
 }
 

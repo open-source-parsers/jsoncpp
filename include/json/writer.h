@@ -142,11 +142,11 @@ public:
 };
 
 /** \brief Outputs a Value in <a HREF="http://www.json.org">JSON</a> format
- *without formatting (not human friendly).
+ * without formatting (not human friendly).
  *
  * The JSON document is written in a single line. It is not intended for 'human'
- *consumption,
- * but may be usefull to support feature such as RPC where bandwith is limited.
+ * consumption, but may be useful to support feature such as RPC where bandwith
+ * is limited.
  * \sa Reader, Value
  * \deprecated Use StreamWriterBuilder.
  */

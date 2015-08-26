@@ -321,6 +321,9 @@ public:
         the JSON value in the input string.
     - `"rejectDupKeys": false or true`
       - If true, `parse()` returns false when a key is duplicated within an object.
+	- `"allowSpecialFloats": false or true`
+      - If true, special float values (NaNs and infinities) are allowed
+        and their values are lossfree restorable.
 
     You can examine 'settings_` yourself
     to see the defaults. You can also write and read them just like any

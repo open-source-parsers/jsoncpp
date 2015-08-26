@@ -108,7 +108,7 @@ std::string valueToString(UInt value) {
 
 #endif // # if defined(JSON_HAS_INT64)
 
-std::string valueToString(double value) {
+std::string valueToString(double value, bool useSpecialFloats) {
   // Allocate a buffer that is more than large enough to store the 16 digits of
   // precision requested below.
   char buffer[32];
@@ -131,11 +131,11 @@ std::string valueToString(double value) {
   } else {
     // IEEE standard states that NaN values will not compare to themselves
     if (value != value) {
-      len = snprintf(buffer, sizeof(buffer), "null");
+      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "NaN" : "null");
     } else if (value < 0) {
-      len = snprintf(buffer, sizeof(buffer), "-1e+9999");
+      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "-Infinity" : "-1e+9999");
     } else {
-      len = snprintf(buffer, sizeof(buffer), "1e+9999");
+      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "Infinity" : "1e+9999");
     }
     // For those, we do not need to call fixNumLoc, but it is fast.
   }
@@ -144,6 +144,8 @@ std::string valueToString(double value) {
   fixNumericLocale(buffer, buffer + len);
   return buffer;
 }
+
+std::string valueToString(double value) { return valueToString(value, false); }
 
 std::string valueToString(bool value) { return value ? "true" : "false"; }
 
@@ -816,7 +818,8 @@ struct BuiltStyledStreamWriter : public StreamWriter
       CommentStyle::Enum cs,
       std::string const& colonSymbol,
       std::string const& nullSymbol,
-      std::string const& endingLineFeedSymbol);
+      std::string const& endingLineFeedSymbol,
+	  bool useSpecialFloats);
   virtual int write(Value const& root, std::ostream* sout);
 private:
   void writeValue(Value const& value);
@@ -843,13 +846,15 @@ private:
   std::string endingLineFeedSymbol_;
   bool addChildValues_ : 1;
   bool indented_ : 1;
+  bool useSpecialFloats_ : 1;
 };
 BuiltStyledStreamWriter::BuiltStyledStreamWriter(
       std::string const& indentation,
       CommentStyle::Enum cs,
       std::string const& colonSymbol,
       std::string const& nullSymbol,
-      std::string const& endingLineFeedSymbol)
+      std::string const& endingLineFeedSymbol,
+	  bool useSpecialFloats)
   : rightMargin_(74)
   , indentation_(indentation)
   , cs_(cs)
@@ -858,6 +863,7 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
   , endingLineFeedSymbol_(endingLineFeedSymbol)
   , addChildValues_(false)
   , indented_(false)
+  , useSpecialFloats_(useSpecialFloats)
 {
 }
 int BuiltStyledStreamWriter::write(Value const& root, std::ostream* sout)
@@ -887,7 +893,7 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
     pushValue(valueToString(value.asLargestUInt()));
     break;
   case realValue:
-    pushValue(valueToString(value.asDouble()));
+    pushValue(valueToString(value.asDouble(), useSpecialFloats_));
     break;
   case stringValue:
   {
@@ -1102,6 +1108,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
   std::string cs_str = settings_["commentStyle"].asString();
   bool eyc = settings_["enableYAMLCompatibility"].asBool();
   bool dnp = settings_["dropNullPlaceholders"].asBool();
+  bool usf = settings_["useSpecialFloats"].asBool();
   CommentStyle::Enum cs = CommentStyle::All;
   if (cs_str == "All") {
     cs = CommentStyle::All;
@@ -1123,7 +1130,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
   std::string endingLineFeedSymbol = "";
   return new BuiltStyledStreamWriter(
       indentation, cs,
-      colonSymbol, nullSymbol, endingLineFeedSymbol);
+      colonSymbol, nullSymbol, endingLineFeedSymbol, usf);
 }
 static void getValidWriterKeys(std::set<std::string>* valid_keys)
 {
@@ -1132,6 +1139,7 @@ static void getValidWriterKeys(std::set<std::string>* valid_keys)
   valid_keys->insert("commentStyle");
   valid_keys->insert("enableYAMLCompatibility");
   valid_keys->insert("dropNullPlaceholders");
+  valid_keys->insert("useSpecialFloats");
 }
 bool StreamWriterBuilder::validate(Json::Value* invalid) const
 {
@@ -1162,6 +1170,7 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings)
   (*settings)["indentation"] = "\t";
   (*settings)["enableYAMLCompatibility"] = false;
   (*settings)["dropNullPlaceholders"] = false;
+  (*settings)["useSpecialFloats"] = false;
   //! [StreamWriterBuilderDefaults]
 }
 
