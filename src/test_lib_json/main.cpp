@@ -2312,6 +2312,7 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
     JSONTEST_ASSERT_EQUAL(std::numeric_limits<double>::infinity(), root["posInf"].asDouble());
     JSONTEST_ASSERT_EQUAL(-std::numeric_limits<double>::infinity(), root["NegInf"].asDouble());
   }
+  delete reader;
 }
 
 struct BuilderTest : JsonTest::TestCase {};
