@@ -108,12 +108,12 @@ public:
   Json::Value settings_;
 
   StreamWriterBuilder();
-  virtual ~StreamWriterBuilder();
+  ~StreamWriterBuilder() override;
 
   /**
    * \throw std::exception if something goes wrong (e.g. invalid settings)
    */
-  virtual StreamWriter* newStreamWriter() const;
+  StreamWriter* newStreamWriter() const override;
 
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
@@ -154,7 +154,7 @@ class JSON_API FastWriter : public Writer {
 
 public:
   FastWriter();
-  virtual ~FastWriter() {}
+  ~FastWriter() override {}
 
   void enableYAMLCompatibility();
 
@@ -168,7 +168,7 @@ public:
   void omitEndingLineFeed();
 
 public: // overridden from Writer
-  virtual std::string write(const Value& root);
+  std::string write(const Value& root) override;
 
 private:
   void writeValue(const Value& value);
@@ -206,14 +206,14 @@ private:
 class JSON_API StyledWriter : public Writer {
 public:
   StyledWriter();
-  virtual ~StyledWriter() {}
+  ~StyledWriter() override {}
 
 public: // overridden from Writer
   /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
    * \param root Value to serialize.
    * \return String containing the JSON document that represents the root value.
    */
-  virtual std::string write(const Value& root);
+  std::string write(const Value& root) override;
 
 private:
   void writeValue(const Value& value);
