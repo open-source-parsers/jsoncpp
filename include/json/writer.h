@@ -99,6 +99,10 @@ public:
         Strictly speaking, this is not valid JSON. But when the output is being
         fed to a browser's Javascript, it makes for smaller output and the
         browser can handle the output just fine.
+    - "useSpecialFloats": false or true
+      - If true, outputs non-finite floating point values in the following way:
+        NaN values as "NaN", positive infinity as "Infinity", and negative infinity
+        as "-Infinity".
 
     You can examine 'settings_` yourself
     to see the defaults. You can also write and read them just like any
