@@ -322,6 +322,17 @@ Value::Value(ValueType vtype) {
   }
 }
 
+<<<<<<< HEAD
+Value::Value(const char* value)
+    : type_(stringValue), allocated_(true)
+#ifdef JSON_VALUE_USE_INTERNAL_MAP
+      ,
+      itemIsUsed_(0)
+#endif
+      ,
+      comments_(0), start_(0), limit_(0) {
+  value_.string_ = duplicateStringValue(value);
+=======
 Value::Value(Int value) {
   initBasic(intValue);
   value_.int_ = value;
@@ -350,6 +361,7 @@ Value::Value(double value) {
 Value::Value(const char* value) {
   initBasic(stringValue, true);
   value_.string_ = duplicateAndPrefixStringValue(value, static_cast<unsigned>(strlen(value)));
+>>>>>>> open-source-parsers/master
 }
 
 Value::Value(const char* beginValue, const char* endValue) {

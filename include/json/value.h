@@ -9,6 +9,7 @@
 #if !defined(JSON_IS_AMALGAMATION)
 #include "forwards.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
+#include <limits>
 #include <string>
 #include <vector>
 #include <exception>
@@ -124,6 +125,29 @@ public:
 private:
   const char* c_str_;
 };
+
+// Some Json::Value helpers in lieu of C++11 <type_traits>.
+namespace Detail {
+
+template <typename T>
+struct IsIntegral {
+  enum { value = std::numeric_limits<T>::is_integer };
+};
+
+template <typename T>
+struct IsFloatingPoint {
+  enum { value = std::numeric_limits<T>::is_specialized &&
+                 !std::numeric_limits<T>::is_integer };
+};
+
+template <bool C, typename T = void> struct EnableIf { };
+template <typename T> struct EnableIf<true, T> { typedef T type; };
+
+template <typename T>
+struct EnableIfArithmetic
+    : EnableIf<IsIntegral<T>::value || IsFloatingPoint<T>::value, int> {};
+
+} // namespace Detail
 
 /** \brief Represents a <a HREF="http://www.json.org">JSON</a> value.
  *
@@ -262,6 +286,45 @@ Json::Value obj_value(Json::objectValue); // {}
 \endcode
   */
   Value(ValueType type = nullValue);
+<<<<<<< HEAD
+
+  /** \brief Accept any arithmetic 'T'.
+   *
+   * Selected by substitution failure (sfinae) on dummy argument.
+   * Arithmetic means built-in integral or floating point type.
+   * This is currently determined with std::numeric_traits.
+   * Example:
+   * \code
+   * Json::Value v[] = {
+   *   Json::Value(my_vector.size()),
+   *   Json::Value(array_last - array_first),
+   *   Json::Value('x'),
+   *   Json::Value(3.14)
+   * };
+   * \endcode
+   */
+  template <typename T>
+  Value(T value, typename Detail::EnableIfArithmetic<T>::type = 0)
+    : allocated_(false),
+#ifdef JSON_VALUE_USE_INTERNAL_MAP
+      itemIsUsed_(0),
+#endif
+      comments_(0), start_(0), limit_(0) {
+    if (Detail::IsFloatingPoint<T>::value) {
+      type_ = realValue;
+      value_.real_ = value;
+    } else if (std::numeric_limits<T>::is_signed) {
+      type_ = intValue;
+      value_.int_ = value;
+    } else {
+      type_ = uintValue;
+      value_.uint_ = value;
+    }
+  }
+
+  Value(const char* value);
+  Value(const char* beginValue, const char* endValue);
+=======
   Value(Int value);
   Value(UInt value);
 #if defined(JSON_HAS_INT64)
@@ -271,6 +334,7 @@ Json::Value obj_value(Json::objectValue); // {}
   Value(double value);
   Value(const char* value); ///< Copy til first 0. (NULL causes to seg-fault.)
   Value(const char* begin, const char* end); ///< Copy all, incl zeroes.
+>>>>>>> open-source-parsers/master
   /** \brief Constructs a value from a static string.
 
    * Like other value string constructor but do not duplicate the string for
