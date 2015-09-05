@@ -265,8 +265,8 @@ TestResult& checkStringEqual(TestResult& result,
     }                                                                          \
                                                                                \
   public: /* overidden from TestCase */                                        \
-    virtual const char* testName() const { return #FixtureType "/" #name; }    \
-    virtual void runTestCase();                                                \
+    const char* testName() const override { return #FixtureType "/" #name; }    \
+    void runTestCase() override;                                                \
   };                                                                           \
                                                                                \
   void Test##FixtureType##name::runTestCase()
