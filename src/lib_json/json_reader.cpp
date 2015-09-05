@@ -988,7 +988,7 @@ private:
   bool readCppStyleComment();
   bool readString();
   bool readStringSingleQuote();
-  bool readNumber();
+  bool readNumber(bool checkInf);
   bool readValue();
   bool readObject(Token& token);
   bool readArray(Token& token);
@@ -1246,8 +1246,11 @@ bool OurReader::readToken(Token& token) {
   case '7':
   case '8':
   case '9':
+    token.type_ = tokenNumber;
+    readNumber(false);
+    break;
   case '-':
-    if (readNumber()) {
+    if (readNumber(true)) {
       token.type_ = tokenNumber;
     } else {
       token.type_ = tokenNegInf;
@@ -1382,9 +1385,9 @@ bool OurReader::readCppStyleComment() {
   return true;
 }
 
-bool OurReader::readNumber() {
+bool OurReader::readNumber(bool checkInf) {
   const char *p = current_;
-  if (p != end_ && *p == 'I') {
+  if (checkInf && p != end_ && *p == 'I') {
     current_ = ++p;
     return false;
   }
