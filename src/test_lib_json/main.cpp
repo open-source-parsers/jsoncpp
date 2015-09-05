@@ -2306,7 +2306,6 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
     int line;
     bool ok;
     std::string in;
-    std::string out;
   };
   const TestData test_data[] = {
     {__LINE__, 1, "{\"a\":9}"},
