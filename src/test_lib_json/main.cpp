@@ -2304,39 +2304,42 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
 
   struct TestData {
     int line;
-    bool ok_expected;
+    bool ok;
     std::string in;
     std::string out;
   };
   const TestData test_data[] = {
-    { __LINE__, 1, "9"},
-    { __LINE__, 0, "0Infinity"},
-    { __LINE__, 0, "1Infinity"},
-    { __LINE__, 0, "9Infinity"},
-
-    { __LINE__, 0, "0nfinity"},
-    { __LINE__, 0, "1nfinity"},
-    { __LINE__, 0, "9nfinity"},
-
-    { __LINE__, 0, "nfinity"},
-    { __LINE__, 0, ".nfinity"},
-    { __LINE__, 0, "9nfinity"},
-    { __LINE__, 0, "-nfinity"},
-    { __LINE__, 1, "Infinity"},
-    { __LINE__, 0, ".Infinity"},
-    { __LINE__, 0, "_Infinity"},
-    { __LINE__, 0, "_nfinity"},
-    { __LINE__, 1, "-Infinity"},
+    {__LINE__, 1, "{\"a\":9}"},
+    {__LINE__, 0, "{\"a\":0Infinity}"},
+    {__LINE__, 0, "{\"a\":1Infinity}"},
+    {__LINE__, 0, "{\"a\":9Infinity}"},
+    {__LINE__, 0, "{\"a\":0nfinity}"},
+    {__LINE__, 0, "{\"a\":1nfinity}"},
+    {__LINE__, 0, "{\"a\":9nfinity}"},
+    {__LINE__, 0, "{\"a\":nfinity}"},
+    {__LINE__, 0, "{\"a\":.nfinity}"},
+    {__LINE__, 0, "{\"a\":9nfinity}"},
+    {__LINE__, 0, "{\"a\":-nfinity}"},
+    {__LINE__, 1, "{\"a\":Infinity}"},
+    {__LINE__, 0, "{\"a\":.Infinity}"},
+    {__LINE__, 0, "{\"a\":_Infinity}"},
+    {__LINE__, 0, "{\"a\":_nfinity}"},
+    {__LINE__, 1, "{\"a\":-Infinity}"}
   };
   for (size_t tdi = 0; tdi < sizeof(test_data) / sizeof(*test_data); ++tdi) {
     const TestData& td = test_data[tdi];
-    std::string s = std::string("{\"a\":") + td.in + std::string("}");
-    bool ok = reader->parse(&*s.begin(),
-                            &*s.begin() + s.size(),
+    bool ok = reader->parse(&*td.in.begin(),
+                            &*td.in.begin() + td.in.size(),
                             &root, &errs);
-    JSONTEST_ASSERT_EQUAL(td.ok_expected, ok)
-        << " s:{" << s << "}, "
-        << "line:" << td.line << "\n";
+    JSONTEST_ASSERT(td.ok == ok)
+        << "line:" << td.line << "\n"
+        << "  expected: {"
+        << "ok:" << td.ok
+        << ", in:\'" << td.in << "\'"
+        << "}\n"
+        << "  actual: {"
+        << "ok:" << ok
+        << "}\n";
   }
 
   {
