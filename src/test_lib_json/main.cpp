@@ -2301,6 +2301,46 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
 	JSONTEST_ASSERT_EQUAL(std::numeric_limits<double>::infinity(), root.get("b", 0.0));
 	JSONTEST_ASSERT_EQUAL(-std::numeric_limits<double>::infinity(), root.get("c", 0.0));
   }
+
+  struct TestData {
+    int line;
+    bool ok;
+    std::string in;
+  };
+  const TestData test_data[] = {
+    {__LINE__, 1, "{\"a\":9}"},
+    {__LINE__, 0, "{\"a\":0Infinity}"},
+    {__LINE__, 0, "{\"a\":1Infinity}"},
+    {__LINE__, 0, "{\"a\":9Infinity}"},
+    {__LINE__, 0, "{\"a\":0nfinity}"},
+    {__LINE__, 0, "{\"a\":1nfinity}"},
+    {__LINE__, 0, "{\"a\":9nfinity}"},
+    {__LINE__, 0, "{\"a\":nfinity}"},
+    {__LINE__, 0, "{\"a\":.nfinity}"},
+    {__LINE__, 0, "{\"a\":9nfinity}"},
+    {__LINE__, 0, "{\"a\":-nfinity}"},
+    {__LINE__, 1, "{\"a\":Infinity}"},
+    {__LINE__, 0, "{\"a\":.Infinity}"},
+    {__LINE__, 0, "{\"a\":_Infinity}"},
+    {__LINE__, 0, "{\"a\":_nfinity}"},
+    {__LINE__, 1, "{\"a\":-Infinity}"}
+  };
+  for (size_t tdi = 0; tdi < sizeof(test_data) / sizeof(*test_data); ++tdi) {
+    const TestData& td = test_data[tdi];
+    bool ok = reader->parse(&*td.in.begin(),
+                            &*td.in.begin() + td.in.size(),
+                            &root, &errs);
+    JSONTEST_ASSERT(td.ok == ok)
+        << "line:" << td.line << "\n"
+        << "  expected: {"
+        << "ok:" << td.ok
+        << ", in:\'" << td.in << "\'"
+        << "}\n"
+        << "  actual: {"
+        << "ok:" << ok
+        << "}\n";
+  }
+
   {
     char const doc[] = "{\"posInf\": Infinity, \"NegInf\": -Infinity}";
     bool ok = reader->parse(
