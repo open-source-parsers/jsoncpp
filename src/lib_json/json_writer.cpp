@@ -816,7 +816,7 @@ struct BuiltStyledStreamWriter : public StreamWriter
       std::string const& nullSymbol,
       std::string const& endingLineFeedSymbol,
       bool useSpecialFloats);
-  virtual int write(Value const& root, std::ostream* sout);
+  int write(Value const& root, std::ostream* sout) override;
 private:
   void writeValue(Value const& value);
   void writeArrayValue(Value const& value);
