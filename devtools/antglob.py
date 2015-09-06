@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
-# Baptiste Lepilleur, 2009
+# Copyright 2009 Baptiste Lepilleur
+# Distributed under MIT license, or public domain if desired and
+# recognized in your jurisdiction.
+# See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
 from __future__ import print_function
 from dircache import listdir

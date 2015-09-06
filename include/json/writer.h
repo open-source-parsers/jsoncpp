@@ -31,43 +31,42 @@ Usage:
   using namespace Json;
   void writeToStdout(StreamWriter::Factory const& factory, Value const& value) {
     std::unique_ptr<StreamWriter> const writer(
-      factory.newStreamWriter(&std::cout));
-    writer->write(value);
+      factory.newStreamWriter());
+    writer->write(value, &std::cout);
     std::cout << std::endl;  // add lf and flush
   }
 \endcode
 */
 class JSON_API StreamWriter {
 protected:
-  std::ostream& sout_;  // not owned; will not delete
+  std::ostream* sout_;  // not owned; will not delete
 public:
-  /// Decide whether to write comments.
-  enum class CommentStyle {
-    None,  ///< Drop all comments.
-    Most,  ///< Recover odd behavior of previous versions (not implemented yet).
-    All  ///< Keep all comments.
-  };
-
-  /// Keep a reference, but do not take ownership of `sout`.
-  StreamWriter(std::ostream* sout);
+  StreamWriter();
   virtual ~StreamWriter();
-  /// Write Value into document as configured in sub-class.
-  /// \return zero on success
-  /// \throw std::exception possibly, depending on configuration
-  virtual int write(Value const& root) = 0;
+  /** Write Value into document as configured in sub-class.
+      Do not take ownership of sout, but maintain a reference during function.
+      \pre sout != NULL
+      \return zero on success (For now, we always return zero, so check the stream instead.)
+      \throw std::exception possibly, depending on configuration
+   */
+  virtual int write(Value const& root, std::ostream* sout) = 0;
 
   /** \brief A simple abstract factory.
    */
   class JSON_API Factory {
   public:
     virtual ~Factory();
-    /// Do not take ownership of sout, but maintain a reference.
-    virtual StreamWriter* newStreamWriter(std::ostream* sout) const = 0;
+    /** \brief Allocate a CharReader via operator new().
+     * \throw std::exception if something goes wrong (e.g. invalid settings)
+     */
+    virtual StreamWriter* newStreamWriter() const = 0;
   };  // Factory
 };  // StreamWriter
 
-/// \brief Write into stringstream, then return string, for convenience.
-std::string writeString(Value const& root, StreamWriter::Factory const& factory);
+/** \brief Write into stringstream, then return string, for convenience.
+ * A StreamWriter will be created from the factory, used, and then deleted.
+ */
+std::string JSON_API writeString(StreamWriter::Factory const& factory, Value const& root);
 
 
 /** \brief Build a StreamWriter implementation.
@@ -77,84 +76,67 @@ Usage:
   using namespace Json;
   Value value = ...;
   StreamWriterBuilder builder;
-  builder.cs_ = StreamWriter::CommentStyle::None;
-  std::shared_ptr<StreamWriter> writer(
-    builder.newStreamWriter(&std::cout));
-  writer->write(value);
+  builder["commentStyle"] = "None";
+  builder["indentation"] = "   ";  // or whatever you like
+  std::unique_ptr<Json::StreamWriter> writer(
+      builder.newStreamWriter());
+  writer->write(value, &std::cout);
   std::cout << std::endl;  // add lf and flush
 \endcode
 */
 class JSON_API StreamWriterBuilder : public StreamWriter::Factory {
 public:
-  // Note: We cannot add data-members to this class without a major version bump.
-  // So these might as well be completely exposed.
+  // Note: We use a Json::Value so that we can add data-members to this class
+  // without a major version bump.
+  /** Configuration of this builder.
+    Available settings (case-sensitive):
+    - "commentStyle": "None" or "All"
+    - "indentation":  "<anything>"
+    - "enableYAMLCompatibility": false or true
+      - slightly change the whitespace around colons
+    - "dropNullPlaceholders": false or true
+      - Drop the "null" string from the writer's output for nullValues.
+        Strictly speaking, this is not valid JSON. But when the output is being
+        fed to a browser's Javascript, it makes for smaller output and the
+        browser can handle the output just fine.
+    - "useSpecialFloats": false or true
+      - If true, outputs non-finite floating point values in the following way:
+        NaN values as "NaN", positive infinity as "Infinity", and negative infinity
+        as "-Infinity".
 
-  /** \brief How to write comments.
-   * Default: All
-   */
-  StreamWriter::CommentStyle cs_;
-  /** \brief Write in human-friendly style.
-
-      If "", then skip all indentation and newlines.
-      In that case, you probably want CommentStyle::None also.
-      Default: "\t"
-  */
-  std::string indentation_;
+    You can examine 'settings_` yourself
+    to see the defaults. You can also write and read them just like any
+    JSON Value.
+    \sa setDefaults()
+    */
+  Json::Value settings_;
 
   StreamWriterBuilder();
+  ~StreamWriterBuilder() override;
 
-  /// Do not take ownership of sout, but maintain a reference.
-  StreamWriter* newStreamWriter(std::ostream* sout) const;
-};
+  /**
+   * \throw std::exception if something goes wrong (e.g. invalid settings)
+   */
+  StreamWriter* newStreamWriter() const override;
 
-/** \brief Build a StreamWriter implementation.
- * Comments are not written, and most whitespace is omitted.
- * In addition, there are some special settings to allow compatibility
- * with the old FastWriter.
- * Usage:
- * \code
- *   OldCompressingStreamWriterBuilder b;
- *   b.dropNullPlaceHolders_ = true; // etc.
- *   StreamWriter* w = b.newStreamWriter(&std::cout);
- *   w.write(value);
- *   delete w;
- * \endcode
- */
-class JSON_API OldCompressingStreamWriterBuilder : public StreamWriter::Factory
-{
-public:
-  // Note: We cannot add data-members to this class without a major version bump.
-  // So these might as well be completely exposed.
+  /** \return true if 'settings' are legal and consistent;
+   *   otherwise, indicate bad settings via 'invalid'.
+   */
+  bool validate(Json::Value* invalid) const;
+  /** A simple way to update a specific setting.
+   */
+  Value& operator[](std::string key);
 
-  /** \brief Drop the "null" string from the writer's output for nullValues.
-  * Strictly speaking, this is not valid JSON. But when the output is being
-  * fed to a browser's Javascript, it makes for smaller output and the
-  * browser can handle the output just fine.
-  */
-  bool dropNullPlaceholders_;
-  /** \brief Do not add \n at end of document.
-    * Normally, we add an extra newline, just because.
-    */
-  bool omitEndingLineFeed_;
-  /** \brief Add a space after ':'.
-    * If indentation is non-empty, we surround colon with whitespace,
-    * e.g. " : "
-    * This will add back the trailing space when there is no indentation.
-    * This seems dubious when the entire document is on a single line,
-    * but we leave this here to repduce the behavior of the old `FastWriter`.
-    */
-  bool enableYAMLCompatibility_;
-
-  OldCompressingStreamWriterBuilder()
-    : dropNullPlaceholders_(false)
-    , omitEndingLineFeed_(false)
-    , enableYAMLCompatibility_(false)
-  {}
-  virtual StreamWriter* newStreamWriter(std::ostream*) const;
+  /** Called by ctor, but you can use this to reset settings_.
+   * \pre 'settings' != NULL (but Json::null is fine)
+   * \remark Defaults:
+   * \snippet src/lib_json/json_writer.cpp StreamWriterBuilderDefaults
+   */
+  static void setDefaults(Json::Value* settings);
 };
 
 /** \brief Abstract class for writers.
- * \deprecated Use StreamWriter.
+ * \deprecated Use StreamWriter. (And really, this is an implementation detail.)
  */
 class JSON_API Writer {
 public:
@@ -170,12 +152,13 @@ public:
  *consumption,
  * but may be usefull to support feature such as RPC where bandwith is limited.
  * \sa Reader, Value
- * \deprecated Use OldCompressingStreamWriterBuilder.
+ * \deprecated Use StreamWriterBuilder.
  */
 class JSON_API FastWriter : public Writer {
+
 public:
   FastWriter();
-  virtual ~FastWriter() {}
+  ~FastWriter() override {}
 
   void enableYAMLCompatibility();
 
@@ -189,7 +172,7 @@ public:
   void omitEndingLineFeed();
 
 public: // overridden from Writer
-  virtual std::string write(const Value& root);
+  std::string write(const Value& root) override;
 
 private:
   void writeValue(const Value& value);
@@ -227,14 +210,14 @@ private:
 class JSON_API StyledWriter : public Writer {
 public:
   StyledWriter();
-  virtual ~StyledWriter() {}
+  ~StyledWriter() override {}
 
 public: // overridden from Writer
   /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
    * \param root Value to serialize.
    * \return String containing the JSON document that represents the root value.
    */
-  virtual std::string write(const Value& root);
+  std::string write(const Value& root) override;
 
 private:
   void writeValue(const Value& value);

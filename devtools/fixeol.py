@@ -1,5 +1,11 @@
+# Copyright 2010 Baptiste Lepilleur
+# Distributed under MIT license, or public domain if desired and
+# recognized in your jurisdiction.
+# See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+
 from __future__ import print_function
 import os.path
+import sys
 
 def fix_source_eol(path, is_dry_run = True, verbose = True, eol = '\n'):
     """Makes sure that all sources have the specified eol sequence (default: unix)."""

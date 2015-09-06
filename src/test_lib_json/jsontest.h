@@ -214,7 +214,7 @@ TestResult& checkStringEqual(TestResult& result,
 #define JSONTEST_ASSERT_PRED(expr)                                             \
   {                                                                            \
     JsonTest::PredicateContext _minitest_Context = {                           \
-      result_->predicateId_, __FILE__, __LINE__, #expr, nullptr, nullptr       \
+      result_->predicateId_, __FILE__, __LINE__, #expr, NULL, NULL             \
     };                                                                         \
     result_->predicateStackTail_->next_ = &_minitest_Context;                  \
     result_->predicateId_ += 1;                                                \
@@ -265,8 +265,8 @@ TestResult& checkStringEqual(TestResult& result,
     }                                                                          \
                                                                                \
   public: /* overidden from TestCase */                                        \
-    virtual const char* testName() const { return #FixtureType "/" #name; }    \
-    virtual void runTestCase();                                                \
+    const char* testName() const override { return #FixtureType "/" #name; }    \
+    void runTestCase() override;                                                \
   };                                                                           \
                                                                                \
   void Test##FixtureType##name::runTestCase()

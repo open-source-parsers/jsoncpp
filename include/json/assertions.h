@@ -13,18 +13,30 @@
 #include "config.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
+/** It should not be possible for a maliciously designed file to
+ *  cause an abort() or seg-fault, so these macros are used only
+ *  for pre-condition violations and internal logic errors.
+ */
 #if JSON_USE_EXCEPTION
-#include <stdexcept>
-#define JSON_ASSERT(condition)                                                 \
-  assert(condition); // @todo <= change this into an exception throw
-#define JSON_FAIL_MESSAGE(message) do{std::ostringstream oss; oss << message; throw std::runtime_error(oss.str());}while(0)
-//#define JSON_FAIL_MESSAGE(message) throw std::runtime_error(message)
+
+// @todo <= add detail about condition in exception
+# define JSON_ASSERT(condition)                                                \
+  {if (!(condition)) {Json::throwLogicError( "assert json failed" );}}
+
+# define JSON_FAIL_MESSAGE(message)                                            \
+  {                                                                            \
+    std::ostringstream oss; oss << message;                                    \
+    Json::throwLogicError(oss.str());                                          \
+    abort();                                                                   \
+  }
+
 #else // JSON_USE_EXCEPTION
-#define JSON_ASSERT(condition) assert(condition);
+
+# define JSON_ASSERT(condition) assert(condition)
 
 // The call to assert() will show the failure message in debug builds. In
-// release bugs we abort, for a core-dump or debugger.
-#define JSON_FAIL_MESSAGE(message)                                             \
+// release builds we abort, for a core-dump or debugger.
+# define JSON_FAIL_MESSAGE(message)                                            \
   {                                                                            \
     std::ostringstream oss; oss << message;                                    \
     assert(false && oss.str().c_str());                                        \

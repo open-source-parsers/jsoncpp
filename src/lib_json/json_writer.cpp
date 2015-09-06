@@ -11,12 +11,37 @@
 #include <memory>
 #include <sstream>
 #include <utility>
-#include <assert.h>
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
+#include <set>
+#include <cassert>
+#include <cstring>
+#include <cstdio>
 
-#if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
+#if defined(_MSC_VER) && _MSC_VER >= 1200 && _MSC_VER < 1800 // Between VC++ 6.0 and VC++ 11.0
+#include <float.h>
+#define isfinite _finite
+#elif defined(__sun) && defined(__SVR4) //Solaris
+#include <ieeefp.h>
+#define isfinite finite
+#else
+#include <cmath>
+#define isfinite std::isfinite
+#endif
+
+#if defined(_MSC_VER)
+#if !defined(WINCE) && defined(__STDC_SECURE_LIB__) && _MSC_VER >= 1500 // VC++ 9.0 and above 
+#define snprintf sprintf_s
+#elif _MSC_VER >= 1900 // VC++ 14.0 and above
+#define snprintf std::snprintf
+#else
+#define snprintf _snprintf
+#endif
+#elif defined(__ANDROID__)
+#define snprintf snprintf
+#elif __cplusplus >= 201103L
+#define snprintf std::snprintf
+#endif
+
+#if defined(__BORLANDC__)  
 #include <float.h>
 #define isfinite _finite
 #define snprintf _snprintf
@@ -27,12 +52,13 @@
 #pragma warning(disable : 4996)
 #endif
 
-#if defined(__sun) && defined(__SVR4) //Solaris
-#include <ieeefp.h>
-#define isfinite finite
-#endif
-
 namespace Json {
+
+#if __cplusplus >= 201103L
+typedef std::unique_ptr<StreamWriter> StreamWriterPtr;
+#else
+typedef std::auto_ptr<StreamWriter>   StreamWriterPtr;
+#endif
 
 static bool containsControlCharacter(const char* str) {
   while (*str) {
@@ -42,15 +68,28 @@ static bool containsControlCharacter(const char* str) {
   return false;
 }
 
+static bool containsControlCharacter0(const char* str, unsigned len) {
+  char const* end = str + len;
+  while (end != str) {
+    if (isControlCharacter(*str) || 0==*str)
+      return true;
+    ++str;
+  }
+  return false;
+}
+
 std::string valueToString(LargestInt value) {
   UIntToStringBuffer buffer;
   char* current = buffer + sizeof(buffer);
-  bool isNegative = value < 0;
-  if (isNegative)
-    value = -value;
-  uintToString(LargestUInt(value), current);
-  if (isNegative)
+  if (value == Value::minLargestInt) {
+    uintToString(LargestUInt(Value::maxLargestInt) + 1, current);
     *--current = '-';
+  } else if (value < 0) {
+    uintToString(LargestUInt(-value), current);
+    *--current = '-';
+  } else {
+    uintToString(LargestUInt(value), current);
+  }
   assert(current >= buffer);
   return current;
 }
@@ -75,42 +114,34 @@ std::string valueToString(UInt value) {
 
 #endif // # if defined(JSON_HAS_INT64)
 
-std::string valueToString(double value) {
+std::string valueToString(double value, bool useSpecialFloats) {
   // Allocate a buffer that is more than large enough to store the 16 digits of
   // precision requested below.
   char buffer[32];
   int len = -1;
 
-// Print into the buffer. We need not request the alternative representation
-// that always has a decimal point because JSON doesn't distingish the
-// concepts of reals and integers.
-#if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__) // Use secure version with
-                                                      // visual studio 2005 to
-                                                      // avoid warning.
-#if defined(WINCE)
-  len = _snprintf(buffer, sizeof(buffer), "%.17g", value);
-#else
-  len = sprintf_s(buffer, sizeof(buffer), "%.17g", value);
-#endif
-#else
+  // Print into the buffer. We need not request the alternative representation
+  // that always has a decimal point because JSON doesn't distingish the
+  // concepts of reals and integers.
   if (isfinite(value)) {
     len = snprintf(buffer, sizeof(buffer), "%.17g", value);
   } else {
     // IEEE standard states that NaN values will not compare to themselves
     if (value != value) {
-      len = snprintf(buffer, sizeof(buffer), "null");
+      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "NaN" : "null");
     } else if (value < 0) {
-      len = snprintf(buffer, sizeof(buffer), "-1e+9999");
+      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "-Infinity" : "-1e+9999");
     } else {
-      len = snprintf(buffer, sizeof(buffer), "1e+9999");
+      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "Infinity" : "1e+9999");
     }
     // For those, we do not need to call fixNumLoc, but it is fast.
   }
-#endif
   assert(len >= 0);
   fixNumericLocale(buffer, buffer + len);
   return buffer;
 }
+
+std::string valueToString(double value) { return valueToString(value, false); }
 
 std::string valueToString(bool value) { return value ? "true" : "false"; }
 
@@ -176,6 +207,84 @@ std::string valueToQuotedString(const char* value) {
   return result;
 }
 
+// https://github.com/upcaste/upcaste/blob/master/src/upcore/src/cstring/strnpbrk.cpp
+static char const* strnpbrk(char const* s, char const* accept, size_t n) {
+  assert((s || !n) && accept);
+
+  char const* const end = s + n;
+  for (char const* cur = s; cur < end; ++cur) {
+    int const c = *cur;
+    for (char const* a = accept; *a; ++a) {
+      if (*a == c) {
+        return cur;
+      }
+    }
+  }
+  return NULL;
+}
+static std::string valueToQuotedStringN(const char* value, unsigned length) {
+  if (value == NULL)
+    return "";
+  // Not sure how to handle unicode...
+  if (strnpbrk(value, "\"\\\b\f\n\r\t", length) == NULL &&
+      !containsControlCharacter0(value, length))
+    return std::string("\"") + value + "\"";
+  // We have to walk value and escape any special characters.
+  // Appending to std::string is not efficient, but this should be rare.
+  // (Note: forward slashes are *not* rare, but I am not escaping them.)
+  std::string::size_type maxsize =
+      length * 2 + 3; // allescaped+quotes+NULL
+  std::string result;
+  result.reserve(maxsize); // to avoid lots of mallocs
+  result += "\"";
+  char const* end = value + length;
+  for (const char* c = value; c != end; ++c) {
+    switch (*c) {
+    case '\"':
+      result += "\\\"";
+      break;
+    case '\\':
+      result += "\\\\";
+      break;
+    case '\b':
+      result += "\\b";
+      break;
+    case '\f':
+      result += "\\f";
+      break;
+    case '\n':
+      result += "\\n";
+      break;
+    case '\r':
+      result += "\\r";
+      break;
+    case '\t':
+      result += "\\t";
+      break;
+    // case '/':
+    // Even though \/ is considered a legal escape in JSON, a bare
+    // slash is also legal, so I see no reason to escape it.
+    // (I hope I am not misunderstanding something.)
+    // blep notes: actually escaping \/ may be useful in javascript to avoid </
+    // sequence.
+    // Should add a flag to allow this compatibility mode and prevent this
+    // sequence from occurring.
+    default:
+      if ((isControlCharacter(*c)) || (*c == 0)) {
+        std::ostringstream oss;
+        oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
+            << std::setw(4) << static_cast<int>(*c);
+        result += oss.str();
+      } else {
+        result += *c;
+      }
+      break;
+    }
+  }
+  result += "\"";
+  return result;
+}
+
 // Class Writer
 // //////////////////////////////////////////////////////////////////
 Writer::~Writer() {}
@@ -217,8 +326,14 @@ void FastWriter::writeValue(const Value& value) {
     document_ += valueToString(value.asDouble());
     break;
   case stringValue:
-    document_ += valueToQuotedString(value.asCString());
+  {
+    // Is NULL possible for value.string_?
+    char const* str;
+    char const* end;
+    bool ok = value.getString(&str, &end);
+    if (ok) document_ += valueToQuotedStringN(str, static_cast<unsigned>(end-str));
     break;
+  }
   case booleanValue:
     document_ += valueToString(value.asBool());
     break;
@@ -240,7 +355,7 @@ void FastWriter::writeValue(const Value& value) {
       const std::string& name = *it;
       if (it != members.begin())
         document_ += ',';
-      document_ += valueToQuotedString(name.c_str());
+      document_ += valueToQuotedStringN(name.data(), static_cast<unsigned>(name.length()));
       document_ += yamlCompatiblityEnabled_ ? ": " : ":";
       writeValue(value[name]);
     }
@@ -281,8 +396,15 @@ void StyledWriter::writeValue(const Value& value) {
     pushValue(valueToString(value.asDouble()));
     break;
   case stringValue:
-    pushValue(valueToQuotedString(value.asCString()));
+  {
+    // Is NULL possible for value.string_?
+    char const* str;
+    char const* end;
+    bool ok = value.getString(&str, &end);
+    if (ok) pushValue(valueToQuotedStringN(str, static_cast<unsigned>(end-str)));
+    else pushValue("");
     break;
+  }
   case booleanValue:
     pushValue(valueToString(value.asBool()));
     break;
@@ -492,8 +614,15 @@ void StyledStreamWriter::writeValue(const Value& value) {
     pushValue(valueToString(value.asDouble()));
     break;
   case stringValue:
-    pushValue(valueToQuotedString(value.asCString()));
+  {
+    // Is NULL possible for value.string_?
+    char const* str;
+    char const* end;
+    bool ok = value.getString(&str, &end);
+    if (ok) pushValue(valueToQuotedStringN(str, static_cast<unsigned>(end-str)));
+    else pushValue("");
     break;
+  }
   case booleanValue:
     pushValue(valueToString(value.asBool()));
     break;
@@ -668,16 +797,26 @@ bool StyledStreamWriter::hasCommentForValue(const Value& value) {
 //////////////////////////
 // BuiltStyledStreamWriter
 
+/// Scoped enums are not available until C++11.
+struct CommentStyle {
+  /// Decide whether to write comments.
+  enum Enum {
+    None,  ///< Drop all comments.
+    Most,  ///< Recover odd behavior of previous versions (not implemented yet).
+    All  ///< Keep all comments.
+  };
+};
+
 struct BuiltStyledStreamWriter : public StreamWriter
 {
   BuiltStyledStreamWriter(
-      std::ostream* sout,
       std::string const& indentation,
-      StreamWriter::CommentStyle cs,
+      CommentStyle::Enum cs,
       std::string const& colonSymbol,
       std::string const& nullSymbol,
-      std::string const& endingLineFeedSymbol);
-  virtual int write(Value const& root);
+      std::string const& endingLineFeedSymbol,
+      bool useSpecialFloats);
+  int write(Value const& root, std::ostream* sout) override;
 private:
   void writeValue(Value const& value);
   void writeArrayValue(Value const& value);
@@ -697,22 +836,22 @@ private:
   std::string indentString_;
   int rightMargin_;
   std::string indentation_;
-  CommentStyle cs_;
+  CommentStyle::Enum cs_;
   std::string colonSymbol_;
   std::string nullSymbol_;
   std::string endingLineFeedSymbol_;
   bool addChildValues_ : 1;
   bool indented_ : 1;
+  bool useSpecialFloats_ : 1;
 };
 BuiltStyledStreamWriter::BuiltStyledStreamWriter(
-      std::ostream* sout,
       std::string const& indentation,
-      StreamWriter::CommentStyle cs,
+      CommentStyle::Enum cs,
       std::string const& colonSymbol,
       std::string const& nullSymbol,
-      std::string const& endingLineFeedSymbol)
-  : StreamWriter(sout)
-  , rightMargin_(74)
+      std::string const& endingLineFeedSymbol,
+      bool useSpecialFloats)
+  : rightMargin_(74)
   , indentation_(indentation)
   , cs_(cs)
   , colonSymbol_(colonSymbol)
@@ -720,10 +859,12 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
   , endingLineFeedSymbol_(endingLineFeedSymbol)
   , addChildValues_(false)
   , indented_(false)
+  , useSpecialFloats_(useSpecialFloats)
 {
 }
-int BuiltStyledStreamWriter::write(Value const& root)
+int BuiltStyledStreamWriter::write(Value const& root, std::ostream* sout)
 {
+  sout_ = sout;
   addChildValues_ = false;
   indented_ = true;
   indentString_ = "";
@@ -732,7 +873,8 @@ int BuiltStyledStreamWriter::write(Value const& root)
   indented_ = true;
   writeValue(root);
   writeCommentAfterValueOnSameLine(root);
-  sout_ << endingLineFeedSymbol_;
+  *sout_ << endingLineFeedSymbol_;
+  sout_ = NULL;
   return 0;
 }
 void BuiltStyledStreamWriter::writeValue(Value const& value) {
@@ -747,11 +889,18 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
     pushValue(valueToString(value.asLargestUInt()));
     break;
   case realValue:
-    pushValue(valueToString(value.asDouble()));
+    pushValue(valueToString(value.asDouble(), useSpecialFloats_));
     break;
   case stringValue:
-    pushValue(valueToQuotedString(value.asCString()));
+  {
+    // Is NULL is possible for value.string_?
+    char const* str;
+    char const* end;
+    bool ok = value.getString(&str, &end);
+    if (ok) pushValue(valueToQuotedStringN(str, static_cast<unsigned>(end-str)));
+    else pushValue("");
     break;
+  }
   case booleanValue:
     pushValue(valueToString(value.asBool()));
     break;
@@ -770,14 +919,14 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
         std::string const& name = *it;
         Value const& childValue = value[name];
         writeCommentBeforeValue(childValue);
-        writeWithIndent(valueToQuotedString(name.c_str()));
-        sout_ << colonSymbol_;
+        writeWithIndent(valueToQuotedStringN(name.data(), static_cast<unsigned>(name.length())));
+        *sout_ << colonSymbol_;
         writeValue(childValue);
         if (++it == members.end()) {
           writeCommentAfterValueOnSameLine(childValue);
           break;
         }
-        sout_ << ",";
+        *sout_ << ",";
         writeCommentAfterValueOnSameLine(childValue);
       }
       unindent();
@@ -813,7 +962,7 @@ void BuiltStyledStreamWriter::writeArrayValue(Value const& value) {
           writeCommentAfterValueOnSameLine(childValue);
           break;
         }
-        sout_ << ",";
+        *sout_ << ",";
         writeCommentAfterValueOnSameLine(childValue);
       }
       unindent();
@@ -821,15 +970,15 @@ void BuiltStyledStreamWriter::writeArrayValue(Value const& value) {
     } else // output on a single line
     {
       assert(childValues_.size() == size);
-      sout_ << "[";
-      if (!indentation_.empty()) sout_ << " ";
+      *sout_ << "[";
+      if (!indentation_.empty()) *sout_ << " ";
       for (unsigned index = 0; index < size; ++index) {
         if (index > 0)
-          sout_ << ", ";
-        sout_ << childValues_[index];
+          *sout_ << ", ";
+        *sout_ << childValues_[index];
       }
-      if (!indentation_.empty()) sout_ << " ";
-      sout_ << "]";
+      if (!indentation_.empty()) *sout_ << " ";
+      *sout_ << "]";
     }
   }
 }
@@ -866,7 +1015,7 @@ void BuiltStyledStreamWriter::pushValue(std::string const& value) {
   if (addChildValues_)
     childValues_.push_back(value);
   else
-    sout_ << value;
+    *sout_ << value;
 }
 
 void BuiltStyledStreamWriter::writeIndent() {
@@ -877,13 +1026,13 @@ void BuiltStyledStreamWriter::writeIndent() {
 
   if (!indentation_.empty()) {
     // In this case, drop newlines too.
-    sout_ << '\n' << indentString_;
+    *sout_ << '\n' << indentString_;
   }
 }
 
 void BuiltStyledStreamWriter::writeWithIndent(std::string const& value) {
   if (!indented_) writeIndent();
-  sout_ << value;
+  *sout_ << value;
   indented_ = false;
 }
 
@@ -903,11 +1052,11 @@ void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
   const std::string& comment = root.getComment(commentBefore);
   std::string::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
-    sout_ << *iter;
+    *sout_ << *iter;
     if (*iter == '\n' &&
        (iter != comment.end() && *(iter + 1) == '/'))
       // writeIndent();  // would write extra newline
-      sout_ << indentString_;
+      *sout_ << indentString_;
     ++iter;
   }
   indented_ = false;
@@ -916,11 +1065,11 @@ void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
 void BuiltStyledStreamWriter::writeCommentAfterValueOnSameLine(Value const& root) {
   if (cs_ == CommentStyle::None) return;
   if (root.hasComment(commentAfterOnSameLine))
-    sout_ << " " + root.getComment(commentAfterOnSameLine);
+    *sout_ << " " + root.getComment(commentAfterOnSameLine);
 
   if (root.hasComment(commentAfter)) {
     writeIndent();
-    sout_ << root.getComment(commentAfter);
+    *sout_ << root.getComment(commentAfter);
   }
 }
 
@@ -934,98 +1083,104 @@ bool BuiltStyledStreamWriter::hasCommentForValue(const Value& value) {
 ///////////////
 // StreamWriter
 
-StreamWriter::StreamWriter(std::ostream* sout)
-    : sout_(*sout)
+StreamWriter::StreamWriter()
+    : sout_(NULL)
 {
 }
 StreamWriter::~StreamWriter()
 {
 }
-struct MyStreamWriter : public StreamWriter {
-public:
-  MyStreamWriter(std::ostream* sout);
-  virtual ~MyStreamWriter();
-  virtual int write(Value const& root) = 0;
-};
-MyStreamWriter::MyStreamWriter(std::ostream* sout)
-    : StreamWriter(sout)
-{
-}
-MyStreamWriter::~MyStreamWriter()
-{
-}
-int MyStreamWriter::write(Value const& root)
-{
-  sout_ << root;
-  return 0;
-}
 StreamWriter::Factory::~Factory()
 {}
 StreamWriterBuilder::StreamWriterBuilder()
-  : cs_(StreamWriter::CommentStyle::All)
-  , indentation_("\t")
+{
+  setDefaults(&settings_);
+}
+StreamWriterBuilder::~StreamWriterBuilder()
 {}
-StreamWriter* StreamWriterBuilder::newStreamWriter(std::ostream* stream) const
+StreamWriter* StreamWriterBuilder::newStreamWriter() const
 {
-  std::string colonSymbol = " : ";
-  if (indentation_.empty()) {
-    colonSymbol = ":";
-  }
-  std::string nullSymbol = "null";
-  std::string endingLineFeedSymbol = "";
-  return new BuiltStyledStreamWriter(stream,
-      indentation_, cs_,
-      colonSymbol, nullSymbol, endingLineFeedSymbol);
-}
-/*
-// This might become public someday.
-class StreamWriterBuilderFactory {
-public:
-  virtual ~StreamWriterBuilderFactory();
-  virtual StreamWriterBuilder* newStreamWriterBuilder() const;
-};
-StreamWriterBuilderFactory::~StreamWriterBuilderFactory()
-{
-}
-StreamWriterBuilder* StreamWriterBuilderFactory::newStreamWriterBuilder() const
-{
-  return new StreamWriterBuilder;
-}
-*/
-
-StreamWriter* OldCompressingStreamWriterBuilder::newStreamWriter(
-    std::ostream* stream) const
-{
-  std::string colonSymbol = " : ";
-  if (enableYAMLCompatibility_) {
-    colonSymbol = ": ";
+  std::string indentation = settings_["indentation"].asString();
+  std::string cs_str = settings_["commentStyle"].asString();
+  bool eyc = settings_["enableYAMLCompatibility"].asBool();
+  bool dnp = settings_["dropNullPlaceholders"].asBool();
+  bool usf = settings_["useSpecialFloats"].asBool(); 
+  CommentStyle::Enum cs = CommentStyle::All;
+  if (cs_str == "All") {
+    cs = CommentStyle::All;
+  } else if (cs_str == "None") {
+    cs = CommentStyle::None;
   } else {
+    throwRuntimeError("commentStyle must be 'All' or 'None'");
+  }
+  std::string colonSymbol = " : ";
+  if (eyc) {
+    colonSymbol = ": ";
+  } else if (indentation.empty()) {
     colonSymbol = ":";
   }
   std::string nullSymbol = "null";
-  if (dropNullPlaceholders_) {
+  if (dnp) {
     nullSymbol = "";
   }
-  std::string endingLineFeedSymbol = "\n";
-  if (omitEndingLineFeed_) {
-    endingLineFeedSymbol = "";
+  std::string endingLineFeedSymbol = "";
+  return new BuiltStyledStreamWriter(
+      indentation, cs,
+      colonSymbol, nullSymbol, endingLineFeedSymbol, usf);
+}
+static void getValidWriterKeys(std::set<std::string>* valid_keys)
+{
+  valid_keys->clear();
+  valid_keys->insert("indentation");
+  valid_keys->insert("commentStyle");
+  valid_keys->insert("enableYAMLCompatibility");
+  valid_keys->insert("dropNullPlaceholders");
+  valid_keys->insert("useSpecialFloats");
+}
+bool StreamWriterBuilder::validate(Json::Value* invalid) const
+{
+  Json::Value my_invalid;
+  if (!invalid) invalid = &my_invalid;  // so we do not need to test for NULL
+  Json::Value& inv = *invalid;
+  std::set<std::string> valid_keys;
+  getValidWriterKeys(&valid_keys);
+  Value::Members keys = settings_.getMemberNames();
+  size_t n = keys.size();
+  for (size_t i = 0; i < n; ++i) {
+    std::string const& key = keys[i];
+    if (valid_keys.find(key) == valid_keys.end()) {
+      inv[key] = settings_[key];
+    }
   }
-  return new BuiltStyledStreamWriter(stream,
-      "", StreamWriter::CommentStyle::None,
-      colonSymbol, nullSymbol, endingLineFeedSymbol);
+  return 0u == inv.size();
+}
+Value& StreamWriterBuilder::operator[](std::string key)
+{
+  return settings_[key];
+}
+// static
+void StreamWriterBuilder::setDefaults(Json::Value* settings)
+{
+  //! [StreamWriterBuilderDefaults]
+  (*settings)["commentStyle"] = "All";
+  (*settings)["indentation"] = "\t";
+  (*settings)["enableYAMLCompatibility"] = false;
+  (*settings)["dropNullPlaceholders"] = false;
+  (*settings)["useSpecialFloats"] = false;
+  //! [StreamWriterBuilderDefaults]
 }
 
-std::string writeString(Value const& root, StreamWriter::Factory const& builder) {
+std::string writeString(StreamWriter::Factory const& builder, Value const& root) {
   std::ostringstream sout;
-  std::unique_ptr<StreamWriter> const sw(builder.newStreamWriter(&sout));
-  sw->write(root);
+  StreamWriterPtr const writer(builder.newStreamWriter());
+  writer->write(root, &sout);
   return sout.str();
 }
 
 std::ostream& operator<<(std::ostream& sout, Value const& root) {
   StreamWriterBuilder builder;
-  std::shared_ptr<StreamWriter> writer(builder.newStreamWriter(&sout));
-  writer->write(root);
+  StreamWriterPtr const writer(builder.newStreamWriter());
+  writer->write(root, &sout);
   return sout;
 }
 
