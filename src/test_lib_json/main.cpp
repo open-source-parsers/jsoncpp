@@ -1275,8 +1275,7 @@ JSONTEST_FIXTURE(ValueTest, nonIntegers) {
 void ValueTest::checkConstMemberCount(const Json::Value& value,
                                       unsigned int expectedCount) {
   unsigned int count = 0;
-  Json::Value::const_iterator itEnd = value.end();
-  for (Json::Value::const_iterator it = value.begin(); it != itEnd; ++it) {
+  for (const auto it : value) {
     ++count;
   }
   JSONTEST_ASSERT_EQUAL(expectedCount, count) << "Json::Value::const_iterator";
@@ -1287,8 +1286,7 @@ void ValueTest::checkMemberCount(Json::Value& value,
   JSONTEST_ASSERT_EQUAL(expectedCount, value.size());
 
   unsigned int count = 0;
-  Json::Value::iterator itEnd = value.end();
-  for (Json::Value::iterator it = value.begin(); it != itEnd; ++it) {
+  for (const auto it : value) {
     ++count;
   }
   JSONTEST_ASSERT_EQUAL(expectedCount, count) << "Json::Value::iterator";
