@@ -161,8 +161,7 @@ void TestResult::printFailure(bool printTestName) const {
 
   // Print in reverse to display the callstack in the right order
   Failures::const_iterator itEnd = failures_.end();
-  for (Failures::const_iterator it = failures_.begin(); it != itEnd; ++it) {
-    const Failure& failure = *it;
+  for (const auto& failure : failures_) {
     std::string indent(failure.nestingLevel_ * 2, ' ');
     if (failure.file_) {
       printf("%s%s(%d): ", indent.c_str(), failure.file_, failure.line_);
