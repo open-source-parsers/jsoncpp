@@ -910,6 +910,7 @@ OurFeatures::OurFeatures()
     , allowSingleQuotes_(false)
     , failIfExtra_(false)
     , allowSpecialFloats_(false)
+    , stackLimit_(1000)
 {
 }
 
@@ -1979,6 +1980,7 @@ void CharReaderBuilder::strictMode(Json::Value* settings)
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
   (*settings)["allowSingleQuotes"] = false;
+  (*settings)["stackLimit"] = 1000;
   (*settings)["failIfExtra"] = true;
   (*settings)["rejectDupKeys"] = true;
   (*settings)["allowSpecialFloats"] = false;
