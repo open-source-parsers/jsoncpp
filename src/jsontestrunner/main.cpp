@@ -310,12 +310,12 @@ static int runTest(Options const& opts)
 }
 int main(int argc, const char* argv[]) {
   Options opts;
+  try {
   int exitCode = parseCommandLine(argc, argv, &opts);
   if (exitCode != 0) {
     printf("Failed to parse command-line.");
     return exitCode;
   }
-  try {
     return runTest(opts);
   }
   catch (const std::exception& e) {
