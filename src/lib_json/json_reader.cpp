@@ -889,7 +889,7 @@ bool Reader::good() const {
 class OurFeatures {
 public:
   static OurFeatures all();
-  OurFeatures();
+  OurFeatures() = default;
   bool allowComments_;
   bool strictRoot_;
   bool allowDroppedNullPlaceholders_;
@@ -903,15 +903,6 @@ public:
 
 // exact copy of Implementation of class Features
 // ////////////////////////////////
-
-OurFeatures::OurFeatures()
-    : allowComments_(true), strictRoot_(false)
-    , allowDroppedNullPlaceholders_(false), allowNumericKeys_(false)
-    , allowSingleQuotes_(false)
-    , failIfExtra_(false)
-    , allowSpecialFloats_(false)
-{
-}
 
 OurFeatures OurFeatures::all() { return OurFeatures(); }
 
@@ -1979,6 +1970,7 @@ void CharReaderBuilder::strictMode(Json::Value* settings)
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
   (*settings)["allowSingleQuotes"] = false;
+  (*settings)["stackLimit"] = 1000;
   (*settings)["failIfExtra"] = true;
   (*settings)["rejectDupKeys"] = true;
   (*settings)["allowSpecialFloats"] = false;
