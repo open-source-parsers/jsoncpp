@@ -889,7 +889,7 @@ bool Reader::good() const {
 class OurFeatures {
 public:
   static OurFeatures all();
-  OurFeatures();
+  OurFeatures() = default;
   bool allowComments_;
   bool strictRoot_;
   bool allowDroppedNullPlaceholders_;
@@ -903,16 +903,6 @@ public:
 
 // exact copy of Implementation of class Features
 // ////////////////////////////////
-
-OurFeatures::OurFeatures()
-    : allowComments_(true), strictRoot_(false)
-    , allowDroppedNullPlaceholders_(false), allowNumericKeys_(false)
-    , allowSingleQuotes_(false)
-    , failIfExtra_(false)
-    , allowSpecialFloats_(false)
-    , stackLimit_(1000)
-{
-}
 
 OurFeatures OurFeatures::all() { return OurFeatures(); }
 
