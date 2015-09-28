@@ -43,7 +43,7 @@ public:
   ~Exception() throw() override;
   char const* what() const throw() override;
 protected:
-  std::string const msg_;
+  std::string msg_;
 };
 
 /** Exceptions which the user cannot easily avoid.
