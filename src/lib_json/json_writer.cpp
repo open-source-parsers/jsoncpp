@@ -41,18 +41,20 @@
 #endif
 #else
 #include <cmath>
+#if !(defined(__QNXNTO__)) // QNX already defines isfinite
 #define isfinite std::isfinite
+#endif
 #endif
 
 #if defined(_MSC_VER)
-#if !defined(WINCE) && defined(__STDC_SECURE_LIB__) && _MSC_VER >= 1500 // VC++ 9.0 and above 
+#if !defined(WINCE) && defined(__STDC_SECURE_LIB__) && _MSC_VER >= 1500 // VC++ 9.0 and above
 #define snprintf sprintf_s
 #elif _MSC_VER >= 1900 // VC++ 14.0 and above
 #define snprintf std::snprintf
 #else
 #define snprintf _snprintf
 #endif
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) || defined(__QNXNTO__)
 #define snprintf snprintf
 #elif __cplusplus >= 201103L
 #define snprintf std::snprintf
