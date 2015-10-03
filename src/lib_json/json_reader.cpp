@@ -889,7 +889,6 @@ bool Reader::good() const {
 class OurFeatures {
 public:
   static OurFeatures all();
-  OurFeatures() = default;
   bool allowComments_;
   bool strictRoot_;
   bool allowDroppedNullPlaceholders_;
