@@ -20,8 +20,25 @@
 #include <float.h>
 #define isfinite _finite
 #elif defined(__sun) && defined(__SVR4) //Solaris
+#if !defined(isfinite)
 #include <ieeefp.h>
 #define isfinite finite
+#endif
+#elif defined(_AIX)
+#if !defined(isfinite)
+#include <math.h>
+#define isfinite finite
+#endif
+#elif defined(__hpux)
+#if !defined(isfinite)
+#if defined(__ia64) && !defined(finite)
+#define isfinite(x) ((sizeof(x) == sizeof(float) ? \
+                     _Isfinitef(x) : _IsFinite(x)))
+#else
+#include <math.h>
+#define isfinite finite
+#endif
+#endif
 #else
 #include <cmath>
 #define isfinite std::isfinite
