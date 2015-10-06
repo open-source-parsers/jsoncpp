@@ -2436,7 +2436,7 @@ JSONTEST_FIXTURE(IteratorTest, indexes) {
 
 JSONTEST_FIXTURE(IteratorTest, const) {
   Json::Value const v;
-  Json::Value::iterator it = v.begin(); // This *should not* compile, but does.
+  // Json::Value::iterator it = v.begin(); // This *should not* compile.
 
   Json::Value value;
 

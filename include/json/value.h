@@ -738,6 +738,7 @@ public:
   typedef ValueConstIterator SelfType;
 
   ValueConstIterator();
+  ValueConstIterator(ValueIterator const& other);
 
 private:
 /*! \internal Use by Value to create an iterator.
@@ -787,7 +788,6 @@ public:
   typedef ValueIterator SelfType;
 
   ValueIterator();
-  ValueIterator(const ValueConstIterator& other);
   ValueIterator(const ValueIterator& other);
 
 private:
