@@ -129,6 +129,9 @@ ValueConstIterator::ValueConstIterator(
     const Value::ObjectValues::iterator& current)
     : ValueIteratorBase(current) {}
 
+ValueConstIterator::ValueConstIterator(ValueIterator const& other)
+    : ValueIteratorBase(other) {}
+
 ValueConstIterator& ValueConstIterator::
 operator=(const ValueIteratorBase& other) {
   copy(other);
@@ -149,7 +152,9 @@ ValueIterator::ValueIterator(const Value::ObjectValues::iterator& current)
     : ValueIteratorBase(current) {}
 
 ValueIterator::ValueIterator(const ValueConstIterator& other)
-    : ValueIteratorBase(other) {}
+    : ValueIteratorBase(other) {
+  throwRuntimeError("ConstIterator to Iterator should never be allowed.");
+}
 
 ValueIterator::ValueIterator(const ValueIterator& other)
     : ValueIteratorBase(other) {}

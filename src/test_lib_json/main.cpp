@@ -10,7 +10,6 @@
 #include <limits>
 #include <sstream>
 #include <string>
-#include <iostream>
 #include <iomanip>
 
 // Make numeric limits more convenient to talk about.
@@ -2436,7 +2435,9 @@ JSONTEST_FIXTURE(IteratorTest, indexes) {
 
 JSONTEST_FIXTURE(IteratorTest, const) {
   Json::Value const v;
-  Json::Value::iterator it = v.begin(); // This *should not* compile, but does.
+  JSONTEST_ASSERT_THROWS(
+    Json::Value::iterator it(v.begin()) // Compile, but throw.
+  );
 
   Json::Value value;
 
