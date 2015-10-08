@@ -8,6 +8,10 @@
 #include <json/json.h>
 #include <cstring>
 #include <limits>
+#include <sstream>
+#include <string>
+#include <iostream>
+#include <iomanip>
 
 // Make numeric limits more convenient to talk about.
 // Assumes int type in 32 bits.
@@ -2430,6 +2434,31 @@ JSONTEST_FIXTURE(IteratorTest, indexes) {
   JSONTEST_ASSERT(it == json.end());
 }
 
+JSONTEST_FIXTURE(IteratorTest, const) {
+  Json::Value const v;
+  Json::Value::iterator it = v.begin(); // This *should not* compile, but does.
+
+  Json::Value value;
+
+  for(int i = 9; i < 12; ++i)
+  {
+    std::ostringstream out;
+    out << std::setw(2) << i;
+    std::string str = out.str();
+    value[str] = str;
+  }
+
+  std::ostringstream out;
+  //in old code, this will get a compile error
+  Json::Value::const_iterator iter = value.begin();
+  for(; iter != value.end(); ++iter)
+  {
+    out << *iter << ',';
+  }
+  std::string expected = "\" 9\",\"10\",\"11\",";
+  JSONTEST_ASSERT_STRING_EQUAL(expected, out.str());
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -2500,6 +2529,7 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, distance);
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, names);
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, indexes);
+  JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, const);
 
   return runner.runCommandLine(argc, argv);
 }
