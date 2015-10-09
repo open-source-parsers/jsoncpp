@@ -2430,6 +2430,31 @@ JSONTEST_FIXTURE(IteratorTest, indexes) {
   JSONTEST_ASSERT(it == json.end());
 }
 
+JSONTEST_FIXTURE(IteratorTest, convert)
+{
+	Json::Value json;
+	const char* key1 = "key1";
+	const char* value1 = "value1";
+	json[key1] = value1;
+
+	const char* key2 = "key2";
+	const char* value2 = "value2";
+	json[key2] = value2;
+	
+	Json::Value::const_iterator it = json.begin();
+	JSONTEST_ASSERT(it != json.end());
+	JSONTEST_ASSERT_STRING_EQUAL(key1, it.name());
+	JSONTEST_ASSERT_STRING_EQUAL(value1, it->asCString());
+	
+	++it;
+	JSONTEST_ASSERT(it != json.end());
+	JSONTEST_ASSERT_STRING_EQUAL(key2, it.name());
+	JSONTEST_ASSERT_STRING_EQUAL(value2, it->asCString());
+
+	++it;
+	JSONTEST_ASSERT(it == json.end());
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -2500,6 +2525,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, distance);
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, names);
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, indexes);
+  JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, convert);
 
   return runner.runCommandLine(argc, argv);
 }
+
