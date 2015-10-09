@@ -129,6 +129,12 @@ ValueConstIterator::ValueConstIterator(
     const Value::ObjectValues::iterator& current)
     : ValueIteratorBase(current) {}
 
+//+
+ValueConstIterator::ValueConstIterator(const ValueIterator& other) 
+	: ValueIteratorBase(other)
+{	
+}
+
 ValueConstIterator& ValueConstIterator::
 operator=(const ValueIteratorBase& other) {
   copy(other);
@@ -148,8 +154,9 @@ ValueIterator::ValueIterator() {}
 ValueIterator::ValueIterator(const Value::ObjectValues::iterator& current)
     : ValueIteratorBase(current) {}
 
-ValueIterator::ValueIterator(const ValueConstIterator& other)
-    : ValueIteratorBase(other) {}
+//-
+//ValueIterator::ValueIterator(const ValueConstIterator& other)
+//    : ValueIteratorBase(other) {}
 
 ValueIterator::ValueIterator(const ValueIterator& other)
     : ValueIteratorBase(other) {}
