@@ -1656,6 +1656,43 @@ JSONTEST_FIXTURE(ValueTest, specialFloats) {
   JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 }
 
+JSONTEST_FIXTURE(ValueTest, precision) {
+    Json::StreamWriterBuilder b;
+    b.settings_["precision"] = 5;
+
+    Json::Value v = 100.0/3;
+    std::string expected = "33.333";
+    std::string result = Json::writeString(b, v);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+
+    v = 0.25000000;
+    expected = "0.25";
+    result = Json::writeString(b, v);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+
+    v = 0.2563456;
+    expected = "0.25635";
+    result = Json::writeString(b, v);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+
+    b.settings_["precision"] = 1;
+    expected = "0.3";
+    result = Json::writeString(b, v);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+
+    b.settings_["precision"] = 17;
+    v = 1234857476305.256345694873740545068;
+    expected = "1234857476305.2563";
+    result = Json::writeString(b, v);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+
+    b.settings_["precision"] = 24;
+    v = 0.256345694873740545068;
+    expected = "0.25634569487374054";
+    result = Json::writeString(b, v);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+}
+
 struct StreamWriterTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(StreamWriterTest, dropNullPlaceholders) {
@@ -2391,6 +2428,7 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, zeroes);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, zeroesInKeys);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, specialFloats);
+  JSONTEST_REGISTER_FIXTURE(runner, ValueTest, precision);
 
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, dropNullPlaceholders);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, writeZeroes);
