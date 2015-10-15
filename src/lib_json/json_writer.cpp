@@ -114,17 +114,20 @@ std::string valueToString(UInt value) {
 
 #endif // # if defined(JSON_HAS_INT64)
 
-std::string valueToString(double value, bool useSpecialFloats) {
+std::string valueToString(double value, bool useSpecialFloats, int precision) {
   // Allocate a buffer that is more than large enough to store the 16 digits of
   // precision requested below.
   char buffer[32];
   int len = -1;
 
+  char formatString[6];
+  sprintf(formatString, "%%.%dg", precision);
+
   // Print into the buffer. We need not request the alternative representation
   // that always has a decimal point because JSON doesn't distingish the
   // concepts of reals and integers.
   if (isfinite(value)) {
-    len = snprintf(buffer, sizeof(buffer), "%.17g", value);
+    len = snprintf(buffer, sizeof(buffer), formatString, value);
   } else {
     // IEEE standard states that NaN values will not compare to themselves
     if (value != value) {
@@ -141,7 +144,7 @@ std::string valueToString(double value, bool useSpecialFloats) {
   return buffer;
 }
 
-std::string valueToString(double value) { return valueToString(value, false); }
+std::string valueToString(double value) { return valueToString(value, false, 17); }
 
 std::string valueToString(bool value) { return value ? "true" : "false"; }
 
@@ -882,7 +885,7 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
     pushValue(valueToString(value.asLargestUInt()));
     break;
   case realValue:
-    pushValue(valueToString(value.asDouble(), useSpecialFloats_));
+    pushValue(valueToString(value.asDouble(), useSpecialFloats_, 17));
     break;
   case stringValue:
   {
