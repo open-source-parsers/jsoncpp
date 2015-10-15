@@ -133,7 +133,7 @@ std::string valueToString(UInt value) {
 
 #endif // # if defined(JSON_HAS_INT64)
 
-std::string valueToString(double value, bool useSpecialFloats, int precision) {
+std::string valueToString(double value, bool useSpecialFloats, unsigned int precision) {
   // Allocate a buffer that is more than large enough to store the 16 digits of
   // precision requested below.
   char buffer[32];
@@ -835,7 +835,8 @@ struct BuiltStyledStreamWriter : public StreamWriter
       std::string const& colonSymbol,
       std::string const& nullSymbol,
       std::string const& endingLineFeedSymbol,
-      bool useSpecialFloats);
+      bool useSpecialFloats,
+      unsigned int precision);
   int write(Value const& root, std::ostream* sout) override;
 private:
   void writeValue(Value const& value);
@@ -863,6 +864,7 @@ private:
   bool addChildValues_ : 1;
   bool indented_ : 1;
   bool useSpecialFloats_ : 1;
+  unsigned int precision_;
 };
 BuiltStyledStreamWriter::BuiltStyledStreamWriter(
       std::string const& indentation,
@@ -870,7 +872,8 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
       std::string const& colonSymbol,
       std::string const& nullSymbol,
       std::string const& endingLineFeedSymbol,
-      bool useSpecialFloats)
+      bool useSpecialFloats,
+      unsigned int precision)
   : rightMargin_(74)
   , indentation_(indentation)
   , cs_(cs)
@@ -880,6 +883,7 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
   , addChildValues_(false)
   , indented_(false)
   , useSpecialFloats_(useSpecialFloats)
+  , precision_(precision)
 {
 }
 int BuiltStyledStreamWriter::write(Value const& root, std::ostream* sout)
@@ -909,7 +913,7 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
     pushValue(valueToString(value.asLargestUInt()));
     break;
   case realValue:
-    pushValue(valueToString(value.asDouble(), useSpecialFloats_, 17));
+    pushValue(valueToString(value.asDouble(), useSpecialFloats_, precision_));
     break;
   case stringValue:
   {
@@ -1124,6 +1128,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
   bool eyc = settings_["enableYAMLCompatibility"].asBool();
   bool dnp = settings_["dropNullPlaceholders"].asBool();
   bool usf = settings_["useSpecialFloats"].asBool(); 
+  unsigned int pre = settings_["precision"].asUInt();
   CommentStyle::Enum cs = CommentStyle::All;
   if (cs_str == "All") {
     cs = CommentStyle::All;
@@ -1142,10 +1147,11 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
   if (dnp) {
     nullSymbol = "";
   }
+  if (pre > 17) pre = 17;
   std::string endingLineFeedSymbol = "";
   return new BuiltStyledStreamWriter(
       indentation, cs,
-      colonSymbol, nullSymbol, endingLineFeedSymbol, usf);
+      colonSymbol, nullSymbol, endingLineFeedSymbol, usf, pre);
 }
 static void getValidWriterKeys(std::set<std::string>* valid_keys)
 {
@@ -1155,6 +1161,7 @@ static void getValidWriterKeys(std::set<std::string>* valid_keys)
   valid_keys->insert("enableYAMLCompatibility");
   valid_keys->insert("dropNullPlaceholders");
   valid_keys->insert("useSpecialFloats");
+  valid_keys->insert("precision");
 }
 bool StreamWriterBuilder::validate(Json::Value* invalid) const
 {
@@ -1186,6 +1193,7 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings)
   (*settings)["enableYAMLCompatibility"] = false;
   (*settings)["dropNullPlaceholders"] = false;
   (*settings)["useSpecialFloats"] = false;
+  (*settings)["precision"] = 17;
   //! [StreamWriterBuilderDefaults]
 }
 
