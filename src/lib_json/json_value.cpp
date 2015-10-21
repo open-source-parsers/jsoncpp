@@ -218,8 +218,7 @@ void Value::CommentInfo::setComment(const char* text, size_t len) {
 Value::CZString::CZString(ArrayIndex aindex) : cstr_(0), index_(aindex) {}
 
 Value::CZString::CZString(char const* str, unsigned ulength, DuplicationPolicy allocate)
-    : cstr_(str)
-{
+    : cstr_(str) {
   // allocate != duplicate
   storage_.policy_ = allocate & 0x3;
   storage_.length_ = ulength & 0x3FFFFFFF;
@@ -228,14 +227,20 @@ Value::CZString::CZString(char const* str, unsigned ulength, DuplicationPolicy a
 Value::CZString::CZString(const CZString& other)
     : cstr_(other.storage_.policy_ != noDuplication && other.cstr_ != 0
                 ? duplicateStringValue(other.cstr_, other.storage_.length_)
-                : other.cstr_)
-{
+                : other.cstr_) {
   storage_.policy_ = (other.cstr_
                  ? (static_cast<DuplicationPolicy>(other.storage_.policy_) == noDuplication
                      ? noDuplication : duplicate)
                  : static_cast<DuplicationPolicy>(other.storage_.policy_));
   storage_.length_ = other.storage_.length_;
 }
+
+#if JSON_HAS_RVALUE_REFERENCES
+Value::CZString::CZString(CZString&& other)
+  : cstr_(other.cstr_), index_(other.index_) {
+  other.cstr_ = nullptr;
+}
+#endif
 
 Value::CZString::~CZString() {
   if (cstr_ && storage_.policy_ == duplicate)
@@ -424,6 +429,14 @@ Value::Value(Value const& other)
     }
   }
 }
+
+#if JSON_HAS_RVALUE_REFERENCES
+// Move constructor
+Value::Value(Value&& other) {
+  initBasic(nullValue);
+  swap(other);
+}
+#endif
 
 Value::~Value() {
   switch (type_) {
