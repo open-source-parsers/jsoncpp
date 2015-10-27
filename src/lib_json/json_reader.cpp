@@ -2024,7 +2024,7 @@ std::istream& operator>>(std::istream& sin, Value& root) {
             "Error from reader: %s",
             errs.c_str());
 
-    throwRuntimeError("reader error");
+    throwRuntimeError(errs);
   }
   return sin;
 }
