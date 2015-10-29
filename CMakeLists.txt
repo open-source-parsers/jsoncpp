@@ -85,6 +85,7 @@ macro(UseCompilationWarningAsError)
         # warnings when compiled in release configuration.
 		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /WX ")
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
     if (JSONCPP_WITH_STRICT_ISO)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic-errors")
     endif ()
