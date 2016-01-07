@@ -147,6 +147,9 @@ std::string valueToString(double value, bool useSpecialFloats, unsigned int prec
   // concepts of reals and integers.
   if (isfinite(value)) {
     len = snprintf(buffer, sizeof(buffer), formatString, value);
+    if (len == 1) {
+      len = snprintf(buffer, sizeof(buffer), "%.1f", value);
+    }
   } else {
     // IEEE standard states that NaN values will not compare to themselves
     if (value != value) {
