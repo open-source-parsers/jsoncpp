@@ -479,7 +479,7 @@ JSONTEST_FIXTURE(ValueTest, integers) {
   JSONTEST_ASSERT_EQUAL(0.0, val.asDouble());
   JSONTEST_ASSERT_EQUAL(0.0, val.asFloat());
   JSONTEST_ASSERT_EQUAL(false, val.asBool());
-  JSONTEST_ASSERT_STRING_EQUAL("0", val.asString());
+  JSONTEST_ASSERT_STRING_EQUAL("0.0", val.asString());
 
   // Zero (signed constructor arg)
   val = Json::Value(0);
@@ -563,7 +563,7 @@ JSONTEST_FIXTURE(ValueTest, integers) {
   JSONTEST_ASSERT_EQUAL(0.0, val.asDouble());
   JSONTEST_ASSERT_EQUAL(0.0, val.asFloat());
   JSONTEST_ASSERT_EQUAL(false, val.asBool());
-  JSONTEST_ASSERT_STRING_EQUAL("0", val.asString());
+  JSONTEST_ASSERT_STRING_EQUAL("0.0", val.asString());
 
   // 2^20 (signed constructor arg)
   val = Json::Value(1 << 20);
