@@ -113,6 +113,13 @@
 #define JSONCPP_DEPRECATED(message)
 #endif // if !defined(JSONCPP_DEPRECATED)
 
+//We may want to have different presets for the default allocator and
+//string
+//#define JSONCPP_DEFAULT_CHAR_TRAITS = std::char_traits<char>
+//#define JSONCPP_DEFAULT_ALLOCATOR = std::allocator<char>
+#define JSONCPP_DEFAULT_CHAR_TRAITS
+#define JSONCPP_DEFAULT_ALLOCATOR
+
 namespace Json {
 typedef int Int;
 typedef unsigned int UInt;

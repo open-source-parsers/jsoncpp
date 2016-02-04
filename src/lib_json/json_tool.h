@@ -14,6 +14,8 @@
 
 namespace Json {
 
+class JsonTool {
+public:
 /// Converts a unicode code-point to UTF-8.
 static inline std::string codePointToUTF8(unsigned int cp) {
   std::string result;
@@ -81,7 +83,7 @@ static inline void fixNumericLocale(char* begin, char* end) {
     ++begin;
   }
 }
-
+};
 } // namespace Json {
 
 #endif // LIB_JSONCPP_JSON_TOOL_H_INCLUDED
