@@ -1567,8 +1567,6 @@ JSONTEST_FIXTURE(ValueTest, StaticString) {
   }
 }
 
-#include <iostream>
-
 JSONTEST_FIXTURE(ValueTest, CommentBefore) {
   TestValue val; // fill val
   val.setComment(std::string("// this comment should appear before"), Json::commentBefore);
