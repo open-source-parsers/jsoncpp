@@ -115,10 +115,8 @@
 
 //We may want to have different presets for the default allocator and
 //string
-//#define JSONCPP_DEFAULT_CHAR_TRAITS = std::char_traits<char>
-//#define JSONCPP_DEFAULT_ALLOCATOR = std::allocator<char>
-#define JSONCPP_DEFAULT_CHAR_TRAITS
-#define JSONCPP_DEFAULT_ALLOCATOR
+#define JSONCPP_DEFAULT_CHAR_TRAITS = std::char_traits<char>
+#define JSONCPP_DEFAULT_ALLOCATOR = std::allocator<char>
 
 namespace Json {
 typedef int Int;
