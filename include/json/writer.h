@@ -62,7 +62,7 @@ std::basic_string<char, _Traits, _Alloc> valueToQuotedStringN(const char* value,
     // sequence from occurring.
     default:
       if ((WriterUtils::isControlCharacter(*c)) || (*c == 0)) {
-        std::ostringstream oss;
+    	  std::basic_ostringstream<char, _Traits, _Alloc> oss;
         oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
             << std::setw(4) << static_cast<int>(*c);
         result += oss.str();
@@ -201,7 +201,7 @@ std::basic_string<char, _Traits, _Alloc> valueToQuotedString(const char* value) 
     // sequence from occurring.
     default:
       if (WriterUtils::isControlCharacter(*c)) {
-        std::ostringstream oss;
+    	std::basic_ostringstream<char, _Traits, _Alloc> oss;
         oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
             << std::setw(4) << static_cast<int>(*c);
         result += oss.str();
@@ -241,7 +241,7 @@ std::basic_string<char, _Traits, _Alloc> JSON_API writeString(typename StreamWri
 #else
   typedef std::auto_ptr<StreamWriter<_Traits, _Alloc>>   StreamWriterPtr;
 #endif
-  std::ostringstream sout;
+  std::basic_ostringstream<char, _Traits, _Alloc> sout;
   StreamWriterPtr const writer(builder.newStreamWriter());
   writer->write(root, &sout);
   return sout.str();

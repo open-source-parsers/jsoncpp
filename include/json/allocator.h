@@ -5,6 +5,7 @@
 #ifndef CPPTL_JSON_ALLOCATOR_H_INCLUDED
 #define CPPTL_JSON_ALLOCATOR_H_INCLUDED
 
+#include <algorithm> //std::filln
 #include <cstring> // std::memset
 #include <cstddef> // std::size_t, std::ptrdiff_t
 #include <utility> // std::forward
@@ -33,16 +34,47 @@ class JSON_API SecureAllocator {
     using difference_type = std::ptrdiff_t;
 
     /**
-     * Release memory which was allocated for N items at pointer P.
-     *
-     * The memory block is filled with zeroes before being released.
-     * The pointer argument is tagged as "volatile" to prevent the
-     * compiler optimizing out this critical step.
-     */
-    void deallocate(volatile pointer p, size_type n) {
-      std::fill_n((volatile char*)p, n * sizeof(value_type), 0);
-      std::allocator<T>::deallocate(p, n);
-    }
+	 * Allocate memory for N items using the standard allocator.
+	 */
+	pointer allocate(size_type n) {
+		// allocate using "global operator new"
+		return static_cast<pointer>(::operator new(n * sizeof(T)));
+	}
+
+	/**
+	 * Release memory which was allocated for N items at pointer P.
+	 *
+	 * The memory block is filled with zeroes before being released.
+	 * The pointer argument is tagged as "volatile" to prevent the
+	 * compiler optimizing out this critical step.
+	 */
+	void deallocate(volatile pointer p, size_type n) {
+		std::fill_n((volatile char*)p, n * sizeof(value_type), 0);
+		// free using "global operator delete"
+		::operator delete(p);
+	}
+
+	/**
+	 * Construct an item in-place at pointer P.
+	 */
+	template<typename... Args>
+	void construct(pointer p, Args&&... args) {
+		// construct using "placement new" and "perfect forwarding"
+		::new (static_cast<void*>(p)) T(std::forward<Args>(args)...);
+	}
+
+	/**
+	 * Destroy an item in-place at pointer P.
+	 */
+	void destroy(pointer p) {
+		// destroy using "explicit destructor"
+		p->~T();
+	}
+
+	// Boilerplate
+	SecureAllocator() {}
+	template<typename U> SecureAllocator(const SecureAllocator<U>&) {}
+	template<typename U> struct rebind { using other = SecureAllocator<U>; };
 };
 
 template<typename T, typename U>

@@ -2519,6 +2519,20 @@ JSONTEST_FIXTURE(RValueTest, moveConstruction) {
 #endif
 }
 
+struct TestSecureAllocator : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE(TestSecureAllocator, secureDestruction) {
+	using TestSecureValue = Json::Value<std::char_traits<char>, Json::SecureAllocator<char>>;
+
+	TestSecureValue myValue;
+	myValue["foo"] = "bar baz";
+	JSONTEST_ASSERT_EQUAL(Json::stringValue, myValue["foo"]);
+	JSONTEST_ASSERT_EQUAL(TestSecureValue("bar baz"), myValue["foo"]);
+
+	myValue["bar"] = 1234;
+	JSONTEST_ASSERT_EQUAL(TestSecureValue(1234), myValue["bar"]);
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -2593,6 +2607,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, const);
 
   JSONTEST_REGISTER_FIXTURE(runner, RValueTest, moveConstruction);
+
+  JSONTEST_REGISTER_FIXTURE(runner, TestSecureAllocator, secureDestruction);
 
   return runner.runCommandLine(argc, argv);
 }
