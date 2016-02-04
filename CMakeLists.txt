@@ -129,7 +129,7 @@ IF(JSONCPP_WITH_PKGCONFIG_SUPPORT)
 		"pkg-config/jsoncpp.pc.in"
 		"pkg-config/jsoncpp.pc"
 		@ONLY)
-	INSTALL(FILES "${CMAKE_BINARY_DIR}/pkg-config/jsoncpp.pc"
+	INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/pkg-config/jsoncpp.pc"
 		DESTINATION "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/pkgconfig")
 ENDIF()
 
