@@ -251,7 +251,7 @@ private:
 
 /** Interface for reading JSON from a char array.
  */
-template<typename _Traits, typename _Alloc>
+template<typename _Traits JSONCPP_DEFAULT_CHAR_TRAITS, typename _Alloc JSONCPP_DEFAULT_ALLOCATOR>
 class JSON_API CharReader {
 public:
   virtual ~CharReader() {}
@@ -298,7 +298,7 @@ Usage:
   bool ok = parseFromStream(builder, std::cin, &value, &errs);
 \endcode
 */
-template<typename _Traits, typename _Alloc>
+template<typename _Traits JSONCPP_DEFAULT_CHAR_TRAITS, typename _Alloc JSONCPP_DEFAULT_ALLOCATOR>
 class JSON_API CharReaderBuilder : public CharReader<_Traits, _Alloc>::Factory {
 public:
   // Note: We use a Json::Value<_Traits, _Alloc> so that we can add data-members to this class
