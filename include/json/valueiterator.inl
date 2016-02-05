@@ -15,26 +15,32 @@ namespace Json {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
+template<class _Value>
 ValueIteratorBase::ValueIteratorBase()
     : current_(), isNull_(true) {
 }
 
+template<class _Value>
 ValueIteratorBase::ValueIteratorBase(
     const Value::ObjectValues::iterator& current)
     : current_(current), isNull_(false) {}
 
+template<class _Value>
 Value& ValueIteratorBase::deref() const {
   return current_->second;
 }
 
+template<class _Value>
 void ValueIteratorBase::increment() {
   ++current_;
 }
 
+template<class _Value>
 void ValueIteratorBase::decrement() {
   --current_;
 }
 
+template<class _Value>
 ValueIteratorBase::difference_type
 ValueIteratorBase::computeDistance(const SelfType& other) const {
 #ifdef JSON_USE_CPPTL_SMALLMAP
@@ -63,6 +69,7 @@ ValueIteratorBase::computeDistance(const SelfType& other) const {
 #endif
 }
 
+template<class _Value>
 bool ValueIteratorBase::isEqual(const SelfType& other) const {
   if (isNull_) {
     return other.isNull_;
@@ -70,11 +77,13 @@ bool ValueIteratorBase::isEqual(const SelfType& other) const {
   return current_ == other.current_;
 }
 
+template<class _Value>
 void ValueIteratorBase::copy(const SelfType& other) {
   current_ = other.current_;
   isNull_ = other.isNull_;
 }
 
+template<class _Value>
 Value ValueIteratorBase::key() const {
   const Value::CZString czstring = (*current_).first;
   if (czstring.data()) {
@@ -85,6 +94,7 @@ Value ValueIteratorBase::key() const {
   return Value(czstring.index());
 }
 
+template<class _Value>
 UInt ValueIteratorBase::index() const {
   const Value::CZString czstring = (*current_).first;
   if (!czstring.data())
@@ -92,6 +102,7 @@ UInt ValueIteratorBase::index() const {
   return Value::UInt(-1);
 }
 
+template<class _Value>
 std::string ValueIteratorBase::name() const {
   char const* keey;
   char const* end;
@@ -100,11 +111,13 @@ std::string ValueIteratorBase::name() const {
   return std::string(keey, end);
 }
 
+template<class _Value>
 char const* ValueIteratorBase::memberName() const {
   const char* cname = (*current_).first.data();
   return cname ? cname : "";
 }
 
+template<class _Value>
 char const* ValueIteratorBase::memberName(char const** end) const {
   const char* cname = (*current_).first.data();
   if (!cname) {
@@ -123,15 +136,19 @@ char const* ValueIteratorBase::memberName(char const** end) const {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
+template<class _Value>
 ValueConstIterator::ValueConstIterator() {}
 
+template<class _Value>
 ValueConstIterator::ValueConstIterator(
     const Value::ObjectValues::iterator& current)
     : ValueIteratorBase(current) {}
 
+template<class _Value>
 ValueConstIterator::ValueConstIterator(ValueIterator const& other)
     : ValueIteratorBase(other) {}
 
+template<class _Value>
 ValueConstIterator& ValueConstIterator::
 operator=(const ValueIteratorBase& other) {
   copy(other);
@@ -146,19 +163,24 @@ operator=(const ValueIteratorBase& other) {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
+template<class _Value>
 ValueIterator::ValueIterator() {}
 
+template<class _Value>
 ValueIterator::ValueIterator(const Value::ObjectValues::iterator& current)
     : ValueIteratorBase(current) {}
 
+template<class _Value>
 ValueIterator::ValueIterator(const ValueConstIterator& other)
     : ValueIteratorBase(other) {
   throwRuntimeError("ConstIterator to Iterator should never be allowed.");
 }
 
+template<class _Value>
 ValueIterator::ValueIterator(const ValueIterator& other)
     : ValueIteratorBase(other) {}
 
+template<class _Value>
 ValueIterator& ValueIterator::operator=(const SelfType& other) {
   copy(other);
   return *this;

@@ -4,9 +4,9 @@
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
 #if !defined(JSON_IS_AMALGAMATION)
-#include <json/assertions.h>
-#include <json/reader.h>
-#include <json/value.h>
+#include "assertions.h"
+#include "reader.h"
+#include "value.h"
 #include "json_tool.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <utility>
@@ -56,6 +56,7 @@ typedef std::auto_ptr<CharReader>   CharReaderPtr;
 // Implementation of class Reader
 // ////////////////////////////////
 
+template<class _Value>
 static bool containsNewLine(Reader::Location begin, Reader::Location end) {
   for (; begin < end; ++begin)
     if (*begin == '\n' || *begin == '\r')
@@ -66,16 +67,19 @@ static bool containsNewLine(Reader::Location begin, Reader::Location end) {
 // Class Reader
 // //////////////////////////////////////////////////////////////////
 
+template<class _Value>
 Reader::Reader()
     : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
       lastValue_(), commentsBefore_(), features_(Features::all()),
       collectComments_() {}
 
+template<class _Value>
 Reader::Reader(const Features& features)
     : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
       lastValue_(), commentsBefore_(), features_(features), collectComments_() {
 }
 
+template<class _Value>
 bool
 Reader::parse(const std::string& document, Value& root, bool collectComments) {
   document_ = document;
@@ -84,6 +88,7 @@ Reader::parse(const std::string& document, Value& root, bool collectComments) {
   return parse(begin, end, root, collectComments);
 }
 
+template<class _Value>
 bool Reader::parse(std::istream& sin, Value& root, bool collectComments) {
   // std::istream_iterator<char> begin(sin);
   // std::istream_iterator<char> end;
@@ -97,6 +102,7 @@ bool Reader::parse(std::istream& sin, Value& root, bool collectComments) {
   return parse(doc, root, collectComments);
 }
 
+template<class _Value>
 bool Reader::parse(const char* beginDoc,
                    const char* endDoc,
                    Value& root,
@@ -139,6 +145,7 @@ bool Reader::parse(const char* beginDoc,
   return successful;
 }
 
+template<class _Value>
 bool Reader::readValue() {
   // This is a non-reentrant way to support a stackLimit. Terrible!
   // But this deprecated class has a security problem: Bad input can
@@ -223,6 +230,7 @@ bool Reader::readValue() {
   return successful;
 }
 
+template<class _Value>
 void Reader::skipCommentTokens(Token& token) {
   if (features_.allowComments_) {
     do {
@@ -233,6 +241,7 @@ void Reader::skipCommentTokens(Token& token) {
   }
 }
 
+template<class _Value>
 bool Reader::readToken(Token& token) {
   skipSpaces();
   token.start_ = current_;
@@ -314,6 +323,7 @@ void Reader::skipSpaces() {
   }
 }
 
+template<class _Value>
 bool Reader::match(Location pattern, int patternLength) {
   if (end_ - current_ < patternLength)
     return false;
@@ -325,6 +335,7 @@ bool Reader::match(Location pattern, int patternLength) {
   return true;
 }
 
+template<class _Value>
 bool Reader::readComment() {
   Location commentBegin = current_ - 1;
   Char c = getNextChar();
@@ -348,6 +359,7 @@ bool Reader::readComment() {
   return true;
 }
 
+template<class _Value>
 static std::string normalizeEOL(Reader::Location begin, Reader::Location end) {
   std::string normalized;
   normalized.reserve(end - begin);
@@ -367,6 +379,7 @@ static std::string normalizeEOL(Reader::Location begin, Reader::Location end) {
   return normalized;
 }
 
+template<class _Value>
 void
 Reader::addComment(Location begin, Location end, CommentPlacement placement) {
   assert(collectComments_);
@@ -379,6 +392,7 @@ Reader::addComment(Location begin, Location end, CommentPlacement placement) {
   }
 }
 
+template<class _Value>
 bool Reader::readCStyleComment() {
   while (current_ != end_) {
     Char c = getNextChar();
@@ -388,6 +402,7 @@ bool Reader::readCStyleComment() {
   return getNextChar() == '/';
 }
 
+template<class _Value>
 bool Reader::readCppStyleComment() {
   while (current_ != end_) {
     Char c = getNextChar();
@@ -404,6 +419,7 @@ bool Reader::readCppStyleComment() {
   return true;
 }
 
+template<class _Value>
 void Reader::readNumber() {
   const char *p = current_;
   char c = '0'; // stopgap for already consumed character
@@ -426,6 +442,7 @@ void Reader::readNumber() {
   }
 }
 
+template<class _Value>
 bool Reader::readString() {
   Char c = 0;
   while (current_ != end_) {
@@ -438,6 +455,7 @@ bool Reader::readString() {
   return c == '"';
 }
 
+template<class _Value>
 bool Reader::readObject(Token& tokenStart) {
   Token tokenName;
   std::string name;
@@ -494,6 +512,7 @@ bool Reader::readObject(Token& tokenStart) {
       "Missing '}' or object member name", tokenName, tokenObjectEnd);
 }
 
+template<class _Value>
 bool Reader::readArray(Token& tokenStart) {
   Value init(arrayValue);
   currentValue().swapPayload(init);
@@ -532,6 +551,7 @@ bool Reader::readArray(Token& tokenStart) {
   return true;
 }
 
+template<class _Value>
 bool Reader::decodeNumber(Token& token) {
   Value decoded;
   if (!decodeNumber(token, decoded))
@@ -542,6 +562,7 @@ bool Reader::decodeNumber(Token& token) {
   return true;
 }
 
+template<class _Value>
 bool Reader::decodeNumber(Token& token, Value& decoded) {
   // Attempts to parse the number as an integer. If the number is
   // larger than the maximum supported value of an integer then
@@ -584,6 +605,7 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
   return true;
 }
 
+template<class _Value>
 bool Reader::decodeDouble(Token& token) {
   Value decoded;
   if (!decodeDouble(token, decoded))
@@ -594,6 +616,7 @@ bool Reader::decodeDouble(Token& token) {
   return true;
 }
 
+template<class _Value>
 bool Reader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
   std::string buffer(token.start_, token.end_);
@@ -606,6 +629,7 @@ bool Reader::decodeDouble(Token& token, Value& decoded) {
   return true;
 }
 
+template<class _Value>
 bool Reader::decodeString(Token& token) {
   std::string decoded_string;
   if (!decodeString(token, decoded_string))
@@ -617,6 +641,7 @@ bool Reader::decodeString(Token& token) {
   return true;
 }
 
+template<class _Value>
 bool Reader::decodeString(Token& token, std::string& decoded) {
   decoded.reserve(token.end_ - token.start_ - 2);
   Location current = token.start_ + 1; // skip '"'
@@ -670,6 +695,7 @@ bool Reader::decodeString(Token& token, std::string& decoded) {
   return true;
 }
 
+template<class _Value>
 bool Reader::decodeUnicodeCodePoint(Token& token,
                                     Location& current,
                                     Location end,
@@ -699,6 +725,7 @@ bool Reader::decodeUnicodeCodePoint(Token& token,
   return true;
 }
 
+template<class _Value>
 bool Reader::decodeUnicodeEscapeSequence(Token& token,
                                          Location& current,
                                          Location end,
@@ -727,6 +754,7 @@ bool Reader::decodeUnicodeEscapeSequence(Token& token,
   return true;
 }
 
+template<class _Value>
 bool
 Reader::addError(const std::string& message, Token& token, Location extra) {
   ErrorInfo info;
@@ -737,6 +765,7 @@ Reader::addError(const std::string& message, Token& token, Location extra) {
   return false;
 }
 
+template<class _Value>
 bool Reader::recoverFromError(TokenType skipUntilToken) {
   int errorCount = int(errors_.size());
   Token skip;
@@ -750,6 +779,7 @@ bool Reader::recoverFromError(TokenType skipUntilToken) {
   return false;
 }
 
+template<class _Value>
 bool Reader::addErrorAndRecover(const std::string& message,
                                 Token& token,
                                 TokenType skipUntilToken) {
@@ -757,14 +787,17 @@ bool Reader::addErrorAndRecover(const std::string& message,
   return recoverFromError(skipUntilToken);
 }
 
+template<class _Value>
 Value& Reader::currentValue() { return *(nodes_.top()); }
 
+template<class _Value>
 Reader::Char Reader::getNextChar() {
   if (current_ == end_)
     return 0;
   return *current_++;
 }
 
+template<class _Value>
 void Reader::getLocationLineAndColumn(Location location,
                                       int& line,
                                       int& column) const {
@@ -788,6 +821,7 @@ void Reader::getLocationLineAndColumn(Location location,
   ++line;
 }
 
+template<class _Value>
 std::string Reader::getLocationLineAndColumn(Location location) const {
   int line, column;
   getLocationLineAndColumn(location, line, column);
@@ -797,10 +831,12 @@ std::string Reader::getLocationLineAndColumn(Location location) const {
 }
 
 // Deprecated. Preserved for backward compatibility
+template<class _Value>
 std::string Reader::getFormatedErrorMessages() const {
   return getFormattedErrorMessages();
 }
 
+template<class _Value>
 std::string Reader::getFormattedErrorMessages() const {
   std::string formattedMessage;
   for (Errors::const_iterator itError = errors_.begin();
@@ -817,6 +853,7 @@ std::string Reader::getFormattedErrorMessages() const {
   return formattedMessage;
 }
 
+template<class _Value>
 std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
   std::vector<Reader::StructuredError> allErrors;
   for (Errors::const_iterator itError = errors_.begin();
@@ -832,6 +869,7 @@ std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
   return allErrors;
 }
 
+template<class _Value>
 bool Reader::pushError(const Value& value, const std::string& message) {
   size_t length = end_ - begin_;
   if(value.getOffsetStart() > length
@@ -849,6 +887,7 @@ bool Reader::pushError(const Value& value, const std::string& message) {
   return true;
 }
 
+template<class _Value>
 bool Reader::pushError(const Value& value, const std::string& message, const Value& extra) {
   size_t length = end_ - begin_;
   if(value.getOffsetStart() > length
@@ -867,6 +906,7 @@ bool Reader::pushError(const Value& value, const std::string& message, const Val
   return true;
 }
 
+template<class _Value>
 bool Reader::good() const {
   return !errors_.size();
 }
@@ -890,6 +930,7 @@ public:
 // ////////////////////////////////
 
 // exact copy of Reader, renamed to OurReader
+template<class _Value>
 class OurReader {
 public:
   typedef char Char;
@@ -1009,6 +1050,7 @@ private:
 
 // complete copy of Read impl, for OurReader
 
+template<class _Value>
 OurReader::OurReader(OurFeatures const& features)
     : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
       lastValue_(), commentsBefore_(),
@@ -1016,6 +1058,7 @@ OurReader::OurReader(OurFeatures const& features)
       features_(features), collectComments_() {
 }
 
+template<class _Value>
 bool OurReader::parse(const char* beginDoc,
                    const char* endDoc,
                    Value& root,
@@ -1064,6 +1107,7 @@ bool OurReader::parse(const char* beginDoc,
   return successful;
 }
 
+template<class _Value>
 bool OurReader::readValue() {
   if (stackDepth_ >= features_.stackLimit_) throwRuntimeError("Exceeded stackLimit in readValue().");
   ++stackDepth_;
@@ -1167,6 +1211,7 @@ bool OurReader::readValue() {
   return successful;
 }
 
+template<class _Value>
 void OurReader::skipCommentTokens(Token& token) {
   if (features_.allowComments_) {
     do {
@@ -1177,6 +1222,7 @@ void OurReader::skipCommentTokens(Token& token) {
   }
 }
 
+template<class _Value>
 bool OurReader::readToken(Token& token) {
   skipSpaces();
   token.start_ = current_;
@@ -1277,6 +1323,7 @@ bool OurReader::readToken(Token& token) {
   return true;
 }
 
+template<class _Value>
 void OurReader::skipSpaces() {
   while (current_ != end_) {
     Char c = *current_;
@@ -1287,6 +1334,7 @@ void OurReader::skipSpaces() {
   }
 }
 
+template<class _Value>
 bool OurReader::match(Location pattern, int patternLength) {
   if (end_ - current_ < patternLength)
     return false;
@@ -1298,6 +1346,7 @@ bool OurReader::match(Location pattern, int patternLength) {
   return true;
 }
 
+template<class _Value>
 bool OurReader::readComment() {
   Location commentBegin = current_ - 1;
   Char c = getNextChar();
@@ -1321,6 +1370,7 @@ bool OurReader::readComment() {
   return true;
 }
 
+template<class _Value>
 void
 OurReader::addComment(Location begin, Location end, CommentPlacement placement) {
   assert(collectComments_);
@@ -1333,6 +1383,7 @@ OurReader::addComment(Location begin, Location end, CommentPlacement placement) 
   }
 }
 
+template<class _Value>
 bool OurReader::readCStyleComment() {
   while (current_ != end_) {
     Char c = getNextChar();
@@ -1342,6 +1393,7 @@ bool OurReader::readCStyleComment() {
   return getNextChar() == '/';
 }
 
+template<class _Value>
 bool OurReader::readCppStyleComment() {
   while (current_ != end_) {
     Char c = getNextChar();
@@ -1358,6 +1410,7 @@ bool OurReader::readCppStyleComment() {
   return true;
 }
 
+template<class _Value>
 bool OurReader::readNumber(bool checkInf) {
   const char *p = current_;
   if (checkInf && p != end_ && *p == 'I') {
@@ -1384,6 +1437,7 @@ bool OurReader::readNumber(bool checkInf) {
   }
   return true;
 }
+template<class _Value>
 bool OurReader::readString() {
   Char c = 0;
   while (current_ != end_) {
@@ -1397,6 +1451,7 @@ bool OurReader::readString() {
 }
 
 
+template<class _Value>
 bool OurReader::readStringSingleQuote() {
   Char c = 0;
   while (current_ != end_) {
@@ -1409,6 +1464,7 @@ bool OurReader::readStringSingleQuote() {
   return c == '\'';
 }
 
+template<class _Value>
 bool OurReader::readObject(Token& tokenStart) {
   Token tokenName;
   std::string name;
@@ -1471,6 +1527,7 @@ bool OurReader::readObject(Token& tokenStart) {
       "Missing '}' or object member name", tokenName, tokenObjectEnd);
 }
 
+template<class _Value>
 bool OurReader::readArray(Token& tokenStart) {
   Value init(arrayValue);
   currentValue().swapPayload(init);
@@ -1509,6 +1566,7 @@ bool OurReader::readArray(Token& tokenStart) {
   return true;
 }
 
+template<class _Value>
 bool OurReader::decodeNumber(Token& token) {
   Value decoded;
   if (!decodeNumber(token, decoded))
@@ -1519,6 +1577,7 @@ bool OurReader::decodeNumber(Token& token) {
   return true;
 }
 
+template<class _Value>
 bool OurReader::decodeNumber(Token& token, Value& decoded) {
   // Attempts to parse the number as an integer. If the number is
   // larger than the maximum supported value of an integer then
@@ -1559,6 +1618,7 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   return true;
 }
 
+template<class _Value>
 bool OurReader::decodeDouble(Token& token) {
   Value decoded;
   if (!decodeDouble(token, decoded))
@@ -1569,6 +1629,7 @@ bool OurReader::decodeDouble(Token& token) {
   return true;
 }
 
+template<class _Value>
 bool OurReader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
   const int bufferSize = 32;
@@ -1605,6 +1666,7 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
   return true;
 }
 
+template<class _Value>
 bool OurReader::decodeString(Token& token) {
   std::string decoded_string;
   if (!decodeString(token, decoded_string))
@@ -1616,6 +1678,7 @@ bool OurReader::decodeString(Token& token) {
   return true;
 }
 
+template<class _Value>
 bool OurReader::decodeString(Token& token, std::string& decoded) {
   decoded.reserve(token.end_ - token.start_ - 2);
   Location current = token.start_ + 1; // skip '"'
@@ -1669,6 +1732,7 @@ bool OurReader::decodeString(Token& token, std::string& decoded) {
   return true;
 }
 
+template<class _Value>
 bool OurReader::decodeUnicodeCodePoint(Token& token,
                                     Location& current,
                                     Location end,
@@ -1698,6 +1762,7 @@ bool OurReader::decodeUnicodeCodePoint(Token& token,
   return true;
 }
 
+template<class _Value>
 bool OurReader::decodeUnicodeEscapeSequence(Token& token,
                                          Location& current,
                                          Location end,
@@ -1726,6 +1791,7 @@ bool OurReader::decodeUnicodeEscapeSequence(Token& token,
   return true;
 }
 
+template<class _Value>
 bool
 OurReader::addError(const std::string& message, Token& token, Location extra) {
   ErrorInfo info;
@@ -1736,6 +1802,7 @@ OurReader::addError(const std::string& message, Token& token, Location extra) {
   return false;
 }
 
+template<class _Value>
 bool OurReader::recoverFromError(TokenType skipUntilToken) {
   int errorCount = int(errors_.size());
   Token skip;
@@ -1756,14 +1823,17 @@ bool OurReader::addErrorAndRecover(const std::string& message,
   return recoverFromError(skipUntilToken);
 }
 
+template<class _Value>
 Value& OurReader::currentValue() { return *(nodes_.top()); }
 
+template<class _Value>
 OurReader::Char OurReader::getNextChar() {
   if (current_ == end_)
     return 0;
   return *current_++;
 }
 
+template<class _Value>
 void OurReader::getLocationLineAndColumn(Location location,
                                       int& line,
                                       int& column) const {
@@ -1787,6 +1857,7 @@ void OurReader::getLocationLineAndColumn(Location location,
   ++line;
 }
 
+template<class _Value>
 std::string OurReader::getLocationLineAndColumn(Location location) const {
   int line, column;
   getLocationLineAndColumn(location, line, column);
@@ -1795,6 +1866,7 @@ std::string OurReader::getLocationLineAndColumn(Location location) const {
   return buffer;
 }
 
+template<class _Value>
 std::string OurReader::getFormattedErrorMessages() const {
   std::string formattedMessage;
   for (Errors::const_iterator itError = errors_.begin();
@@ -1811,6 +1883,7 @@ std::string OurReader::getFormattedErrorMessages() const {
   return formattedMessage;
 }
 
+template<class _Value>
 std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
   std::vector<OurReader::StructuredError> allErrors;
   for (Errors::const_iterator itError = errors_.begin();
@@ -1826,6 +1899,7 @@ std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
   return allErrors;
 }
 
+template<class _Value>
 bool OurReader::pushError(const Value& value, const std::string& message) {
   size_t length = end_ - begin_;
   if(value.getOffsetStart() > length
@@ -1843,6 +1917,7 @@ bool OurReader::pushError(const Value& value, const std::string& message) {
   return true;
 }
 
+template<class _Value>
 bool OurReader::pushError(const Value& value, const std::string& message, const Value& extra) {
   size_t length = end_ - begin_;
   if(value.getOffsetStart() > length
@@ -1861,11 +1936,13 @@ bool OurReader::pushError(const Value& value, const std::string& message, const 
   return true;
 }
 
+template<class _Value>
 bool OurReader::good() const {
   return !errors_.size();
 }
 
 
+template<class _Value>
 class OurCharReader : public CharReader {
   bool const collectComments_;
   OurReader reader_;
@@ -1887,12 +1964,15 @@ public:
   }
 };
 
+template<class _Value>
 CharReaderBuilder::CharReaderBuilder()
 {
   setDefaults(&settings_);
 }
+template<class _Value>
 CharReaderBuilder::~CharReaderBuilder()
 {}
+template<class _Value>
 CharReader* CharReaderBuilder::newCharReader() const
 {
   bool collectComments = settings_["collectComments"].asBool();
@@ -1908,6 +1988,7 @@ CharReader* CharReaderBuilder::newCharReader() const
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
   return new OurCharReader(collectComments, features);
 }
+template<class _Value>
 static void getValidReaderKeys(std::set<std::string>* valid_keys)
 {
   valid_keys->clear();
@@ -1922,6 +2003,7 @@ static void getValidReaderKeys(std::set<std::string>* valid_keys)
   valid_keys->insert("rejectDupKeys");
   valid_keys->insert("allowSpecialFloats");
 }
+template<class _Value>
 bool CharReaderBuilder::validate(Json::Value* invalid) const
 {
   Json::Value my_invalid;
@@ -1939,11 +2021,13 @@ bool CharReaderBuilder::validate(Json::Value* invalid) const
   }
   return 0u == inv.size();
 }
+template<class _Value>
 Value& CharReaderBuilder::operator[](std::string key)
 {
   return settings_[key];
 }
 // static
+template<class _Value>
 void CharReaderBuilder::strictMode(Json::Value* settings)
 {
 //! [CharReaderBuilderStrictMode]
@@ -1959,6 +2043,7 @@ void CharReaderBuilder::strictMode(Json::Value* settings)
 //! [CharReaderBuilderStrictMode]
 }
 // static
+template<class _Value>
 void CharReaderBuilder::setDefaults(Json::Value* settings)
 {
 //! [CharReaderBuilderDefaults]
@@ -1978,6 +2063,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings)
 //////////////////////////////////
 // global functions
 
+template<class _Value>
 bool parseFromStream(
     CharReader::Factory const& fact, std::istream& sin,
     Value* root, std::string* errs)
@@ -1992,6 +2078,7 @@ bool parseFromStream(
   return reader->parse(begin, end, root, errs);
 }
 
+template<class _Value>
 std::istream& operator>>(std::istream& sin, Value& root) {
   CharReaderBuilder b;
   std::string errs;

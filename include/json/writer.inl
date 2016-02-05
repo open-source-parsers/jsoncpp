@@ -79,6 +79,7 @@ typedef std::unique_ptr<StreamWriter> StreamWriterPtr;
 typedef std::auto_ptr<StreamWriter>   StreamWriterPtr;
 #endif
 
+template<class _Value>
 std::string valueToString(LargestInt value) {
   UIntToStringBuffer buffer;
   char* current = buffer + sizeof(buffer);
@@ -95,6 +96,7 @@ std::string valueToString(LargestInt value) {
   return current;
 }
 
+template<class _Value>
 std::string valueToString(LargestUInt value) {
   UIntToStringBuffer buffer;
   char* current = buffer + sizeof(buffer);
@@ -105,16 +107,19 @@ std::string valueToString(LargestUInt value) {
 
 #if defined(JSON_HAS_INT64)
 
+template<class _Value>
 std::string valueToString(Int value) {
   return valueToString(LargestInt(value));
 }
 
+template<class _Value>
 std::string valueToString(UInt value) {
   return valueToString(LargestUInt(value));
 }
 
 #endif // # if defined(JSON_HAS_INT64)
 
+template<class _Value>
 std::string valueToString(double value, bool useSpecialFloats, unsigned int precision) {
   // Allocate a buffer that is more than large enough to store the 16 digits of
   // precision requested below.
@@ -145,10 +150,13 @@ std::string valueToString(double value, bool useSpecialFloats, unsigned int prec
   return buffer;
 }
 
+template<class _Value>
 std::string valueToString(double value) { return valueToString(value, false, 17); }
 
+template<class _Value>
 std::string valueToString(bool value) { return value ? "true" : "false"; }
 
+template<class _Value>
 std::string valueToQuotedString(const char* value) {
   if (value == NULL)
     return "";
@@ -211,6 +219,7 @@ std::string valueToQuotedString(const char* value) {
   return result;
 }
 
+template<class _Value>
 static std::string valueToQuotedStringN(const char* value, unsigned length) {
   if (value == NULL)
     return "";
@@ -276,21 +285,27 @@ static std::string valueToQuotedStringN(const char* value, unsigned length) {
 
 // Class Writer
 // //////////////////////////////////////////////////////////////////
+template<class _Value>
 Writer::~Writer() {}
 
 // Class FastWriter
 // //////////////////////////////////////////////////////////////////
 
+template<class _Value>
 FastWriter::FastWriter()
     : yamlCompatiblityEnabled_(false), dropNullPlaceholders_(false),
       omitEndingLineFeed_(false) {}
 
+template<class _Value>
 void FastWriter::enableYAMLCompatibility() { yamlCompatiblityEnabled_ = true; }
 
+template<class _Value>
 void FastWriter::dropNullPlaceholders() { dropNullPlaceholders_ = true; }
 
+template<class _Value>
 void FastWriter::omitEndingLineFeed() { omitEndingLineFeed_ = true; }
 
+template<class _Value>
 std::string FastWriter::write(const Value& root) {
   document_ = "";
   writeValue(root);
@@ -299,6 +314,7 @@ std::string FastWriter::write(const Value& root) {
   return document_;
 }
 
+template<class _Value>
 void FastWriter::writeValue(const Value& value) {
   switch (value.type()) {
   case nullValue:
@@ -356,9 +372,11 @@ void FastWriter::writeValue(const Value& value) {
 // Class StyledWriter
 // //////////////////////////////////////////////////////////////////
 
+template<class _Value>
 StyledWriter::StyledWriter()
     : rightMargin_(74), indentSize_(3), addChildValues_() {}
 
+template<class _Value>
 std::string StyledWriter::write(const Value& root) {
   document_ = "";
   addChildValues_ = false;
@@ -370,6 +388,7 @@ std::string StyledWriter::write(const Value& root) {
   return document_;
 }
 
+template<class _Value>
 void StyledWriter::writeValue(const Value& value) {
   switch (value.type()) {
   case nullValue:
@@ -429,6 +448,7 @@ void StyledWriter::writeValue(const Value& value) {
   }
 }
 
+template<class _Value>
 void StyledWriter::writeArrayValue(const Value& value) {
   unsigned size = value.size();
   if (size == 0)
@@ -472,6 +492,7 @@ void StyledWriter::writeArrayValue(const Value& value) {
   }
 }
 
+template<class _Value>
 bool StyledWriter::isMultineArray(const Value& value) {
   int size = value.size();
   bool isMultiLine = size * 3 >= rightMargin_;
@@ -499,6 +520,7 @@ bool StyledWriter::isMultineArray(const Value& value) {
   return isMultiLine;
 }
 
+template<class _Value>
 void StyledWriter::pushValue(const std::string& value) {
   if (addChildValues_)
     childValues_.push_back(value);
@@ -506,6 +528,7 @@ void StyledWriter::pushValue(const std::string& value) {
     document_ += value;
 }
 
+template<class _Value>
 void StyledWriter::writeIndent() {
   if (!document_.empty()) {
     char last = document_[document_.length() - 1];
@@ -517,18 +540,22 @@ void StyledWriter::writeIndent() {
   document_ += indentString_;
 }
 
+template<class _Value>
 void StyledWriter::writeWithIndent(const std::string& value) {
   writeIndent();
   document_ += value;
 }
 
+template<class _Value>
 void StyledWriter::indent() { indentString_ += std::string(indentSize_, ' '); }
 
+template<class _Value>
 void StyledWriter::unindent() {
   assert(int(indentString_.size()) >= indentSize_);
   indentString_.resize(indentString_.size() - indentSize_);
 }
 
+template<class _Value>
 void StyledWriter::writeCommentBeforeValue(const Value& root) {
   if (!root.hasComment(commentBefore))
     return;
@@ -549,6 +576,7 @@ void StyledWriter::writeCommentBeforeValue(const Value& root) {
   document_ += "\n";
 }
 
+template<class _Value>
 void StyledWriter::writeCommentAfterValueOnSameLine(const Value& root) {
   if (root.hasComment(commentAfterOnSameLine))
     document_ += " " + root.getComment(commentAfterOnSameLine);
@@ -560,6 +588,7 @@ void StyledWriter::writeCommentAfterValueOnSameLine(const Value& root) {
   }
 }
 
+template<class _Value>
 bool StyledWriter::hasCommentForValue(const Value& value) {
   return value.hasComment(commentBefore) ||
          value.hasComment(commentAfterOnSameLine) ||
@@ -569,10 +598,12 @@ bool StyledWriter::hasCommentForValue(const Value& value) {
 // Class StyledStreamWriter
 // //////////////////////////////////////////////////////////////////
 
+template<class _Value>
 StyledStreamWriter::StyledStreamWriter(std::string indentation)
     : document_(NULL), rightMargin_(74), indentation_(indentation),
       addChildValues_() {}
 
+template<class _Value>
 void StyledStreamWriter::write(std::ostream& out, const Value& root) {
   document_ = &out;
   addChildValues_ = false;
@@ -587,6 +618,7 @@ void StyledStreamWriter::write(std::ostream& out, const Value& root) {
   document_ = NULL; // Forget the stream, for safety.
 }
 
+template<class _Value>
 void StyledStreamWriter::writeValue(const Value& value) {
   switch (value.type()) {
   case nullValue:
@@ -646,6 +678,7 @@ void StyledStreamWriter::writeValue(const Value& value) {
   }
 }
 
+template<class _Value>
 void StyledStreamWriter::writeArrayValue(const Value& value) {
   unsigned size = value.size();
   if (size == 0)
@@ -691,6 +724,7 @@ void StyledStreamWriter::writeArrayValue(const Value& value) {
   }
 }
 
+template<class _Value>
 bool StyledStreamWriter::isMultineArray(const Value& value) {
   int size = value.size();
   bool isMultiLine = size * 3 >= rightMargin_;
@@ -718,6 +752,7 @@ bool StyledStreamWriter::isMultineArray(const Value& value) {
   return isMultiLine;
 }
 
+template<class _Value>
 void StyledStreamWriter::pushValue(const std::string& value) {
   if (addChildValues_)
     childValues_.push_back(value);
@@ -725,6 +760,7 @@ void StyledStreamWriter::pushValue(const std::string& value) {
     *document_ << value;
 }
 
+template<class _Value>
 void StyledStreamWriter::writeIndent() {
   // blep intended this to look at the so-far-written string
   // to determine whether we are already indented, but
@@ -733,19 +769,23 @@ void StyledStreamWriter::writeIndent() {
   *document_ << '\n' << indentString_;
 }
 
+template<class _Value>
 void StyledStreamWriter::writeWithIndent(const std::string& value) {
   if (!indented_) writeIndent();
   *document_ << value;
   indented_ = false;
 }
 
+template<class _Value>
 void StyledStreamWriter::indent() { indentString_ += indentation_; }
 
+template<class _Value>
 void StyledStreamWriter::unindent() {
   assert(indentString_.size() >= indentation_.size());
   indentString_.resize(indentString_.size() - indentation_.size());
 }
 
+template<class _Value>
 void StyledStreamWriter::writeCommentBeforeValue(const Value& root) {
   if (!root.hasComment(commentBefore))
     return;
@@ -764,6 +804,7 @@ void StyledStreamWriter::writeCommentBeforeValue(const Value& root) {
   indented_ = false;
 }
 
+template<class _Value>
 void StyledStreamWriter::writeCommentAfterValueOnSameLine(const Value& root) {
   if (root.hasComment(commentAfterOnSameLine))
     *document_ << ' ' << root.getComment(commentAfterOnSameLine);
@@ -775,6 +816,7 @@ void StyledStreamWriter::writeCommentAfterValueOnSameLine(const Value& root) {
   indented_ = false;
 }
 
+template<class _Value>
 bool StyledStreamWriter::hasCommentForValue(const Value& value) {
   return value.hasComment(commentBefore) ||
          value.hasComment(commentAfterOnSameLine) ||
@@ -794,6 +836,7 @@ struct CommentStyle {
   };
 };
 
+template<class _Value>
 struct BuiltStyledStreamWriter : public StreamWriter
 {
   BuiltStyledStreamWriter(
@@ -833,6 +876,7 @@ private:
   bool useSpecialFloats_ : 1;
   unsigned int precision_;
 };
+template<class _Value>
 BuiltStyledStreamWriter::BuiltStyledStreamWriter(
       std::string const& indentation,
       CommentStyle::Enum cs,
@@ -853,6 +897,7 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
   , precision_(precision)
 {
 }
+template<class _Value>
 int BuiltStyledStreamWriter::write(Value const& root, std::ostream* sout)
 {
   sout_ = sout;
@@ -868,6 +913,7 @@ int BuiltStyledStreamWriter::write(Value const& root, std::ostream* sout)
   sout_ = NULL;
   return 0;
 }
+template<class _Value>
 void BuiltStyledStreamWriter::writeValue(Value const& value) {
   switch (value.type()) {
   case nullValue:
@@ -927,6 +973,7 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
   }
 }
 
+template<class _Value>
 void BuiltStyledStreamWriter::writeArrayValue(Value const& value) {
   unsigned size = value.size();
   if (size == 0)
@@ -974,6 +1021,7 @@ void BuiltStyledStreamWriter::writeArrayValue(Value const& value) {
   }
 }
 
+template<class _Value>
 bool BuiltStyledStreamWriter::isMultineArray(Value const& value) {
   int size = value.size();
   bool isMultiLine = size * 3 >= rightMargin_;
@@ -1001,6 +1049,7 @@ bool BuiltStyledStreamWriter::isMultineArray(Value const& value) {
   return isMultiLine;
 }
 
+template<class _Value>
 void BuiltStyledStreamWriter::pushValue(std::string const& value) {
   if (addChildValues_)
     childValues_.push_back(value);
@@ -1008,6 +1057,7 @@ void BuiltStyledStreamWriter::pushValue(std::string const& value) {
     *sout_ << value;
 }
 
+template<class _Value>
 void BuiltStyledStreamWriter::writeIndent() {
   // blep intended this to look at the so-far-written string
   // to determine whether we are already indented, but
@@ -1020,19 +1070,23 @@ void BuiltStyledStreamWriter::writeIndent() {
   }
 }
 
+template<class _Value>
 void BuiltStyledStreamWriter::writeWithIndent(std::string const& value) {
   if (!indented_) writeIndent();
   *sout_ << value;
   indented_ = false;
 }
 
+template<class _Value>
 void BuiltStyledStreamWriter::indent() { indentString_ += indentation_; }
 
+template<class _Value>
 void BuiltStyledStreamWriter::unindent() {
   assert(indentString_.size() >= indentation_.size());
   indentString_.resize(indentString_.size() - indentation_.size());
 }
 
+template<class _Value>
 void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
   if (cs_ == CommentStyle::None) return;
   if (!root.hasComment(commentBefore))
@@ -1052,6 +1106,7 @@ void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
   indented_ = false;
 }
 
+template<class _Value>
 void BuiltStyledStreamWriter::writeCommentAfterValueOnSameLine(Value const& root) {
   if (cs_ == CommentStyle::None) return;
   if (root.hasComment(commentAfterOnSameLine))
@@ -1064,6 +1119,7 @@ void BuiltStyledStreamWriter::writeCommentAfterValueOnSameLine(Value const& root
 }
 
 // static
+template<class _Value>
 bool BuiltStyledStreamWriter::hasCommentForValue(const Value& value) {
   return value.hasComment(commentBefore) ||
          value.hasComment(commentAfterOnSameLine) ||
@@ -1073,21 +1129,27 @@ bool BuiltStyledStreamWriter::hasCommentForValue(const Value& value) {
 ///////////////
 // StreamWriter
 
+template<class _Value>
 StreamWriter::StreamWriter()
     : sout_(NULL)
 {
 }
+template<class _Value>
 StreamWriter::~StreamWriter()
 {
 }
+template<class _Value>
 StreamWriter::Factory::~Factory()
 {}
+template<class _Value>
 StreamWriterBuilder::StreamWriterBuilder()
 {
   setDefaults(&settings_);
 }
+template<class _Value>
 StreamWriterBuilder::~StreamWriterBuilder()
 {}
+template<class _Value>
 StreamWriter* StreamWriterBuilder::newStreamWriter() const
 {
   std::string indentation = settings_["indentation"].asString();
@@ -1120,6 +1182,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
       indentation, cs,
       colonSymbol, nullSymbol, endingLineFeedSymbol, usf, pre);
 }
+template<class _Value>
 static void getValidWriterKeys(std::set<std::string>* valid_keys)
 {
   valid_keys->clear();
@@ -1130,6 +1193,7 @@ static void getValidWriterKeys(std::set<std::string>* valid_keys)
   valid_keys->insert("useSpecialFloats");
   valid_keys->insert("precision");
 }
+template<class _Value>
 bool StreamWriterBuilder::validate(Json::Value* invalid) const
 {
   Json::Value my_invalid;
@@ -1147,11 +1211,13 @@ bool StreamWriterBuilder::validate(Json::Value* invalid) const
   }
   return 0u == inv.size();
 }
+template<class _Value>
 Value& StreamWriterBuilder::operator[](std::string key)
 {
   return settings_[key];
 }
 // static
+template<class _Value>
 void StreamWriterBuilder::setDefaults(Json::Value* settings)
 {
   //! [StreamWriterBuilderDefaults]
@@ -1164,6 +1230,7 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings)
   //! [StreamWriterBuilderDefaults]
 }
 
+template<class _Value>
 std::string writeString(StreamWriter::Factory const& builder, Value const& root) {
   std::ostringstream sout;
   StreamWriterPtr const writer(builder.newStreamWriter());
@@ -1171,6 +1238,7 @@ std::string writeString(StreamWriter::Factory const& builder, Value const& root)
   return sout.str();
 }
 
+template<class _Value>
 std::ostream& operator<<(std::ostream& sout, Value const& root) {
   StreamWriterBuilder builder;
   StreamWriterPtr const writer(builder.newStreamWriter());
