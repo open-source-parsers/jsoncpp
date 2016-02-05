@@ -92,28 +92,29 @@ static inline bool InRange(double d, T min, U max) {
  * @return Pointer on the duplicate instance of string.
  */
 template<class _Value>
-static inline char* duplicateStringValue(const char* value,
+static inline typename _Value::StringDataPtr duplicateStringValue(const char* value,
                                          size_t length) {
   // Avoid an integer overflow in the call to malloc below by limiting length
   // to a sane value.
   if (length >= (size_t)_Value::maxInt)
     length = _Value::maxInt - 1;
 
-  char* newString = static_cast<char*>(malloc(length + 1));
-  if (newString == NULL) {
+  try {
+	  typename _Value::StringDataPtr newString(new typename _Value::StringData(value, value + length));
+	  newString->push_back(0);
+	  return newString;
+  } catch (...) {
     throwRuntimeError(
         "in Json::Value::duplicateStringValue(): "
         "Failed to allocate string value buffer");
   }
-  memcpy(newString, value, length);
-  newString[length] = 0;
-  return newString;
+  return typename _Value::StringDataPtr(); //Not reachable but compiler warns if not here
 }
 
 /* Record the length as a prefix.
  */
 template<class _Value>
-static inline char* duplicateAndPrefixStringValue(
+static inline typename _Value::StringDataPtr duplicateAndPrefixStringValue(
     const char* value,
     unsigned int length)
 {
@@ -122,17 +123,20 @@ static inline char* duplicateAndPrefixStringValue(
   JSON_ASSERT_MESSAGE(length <= (unsigned)_Value::maxInt - sizeof(unsigned) - 1U,
                       "in Json::Value::duplicateAndPrefixStringValue(): "
                       "length too big for prefixing");
-  unsigned actualLength = length + static_cast<unsigned>(sizeof(unsigned)) + 1U;
-  char* newString = static_cast<char*>(malloc(actualLength));
-  if (newString == 0) {
+
+  try {
+	typename  _Value::StringDataPtr newString(new typename _Value::StringData(value, value + length));
+    for (unsigned int i=0; i<sizeof(unsigned); i++)
+      newString->push_back(reinterpret_cast<char*>(&length)[i]);
+    newString->insert(newString->end(), value, value+length);
+    newString->push_back(0);
+    return newString;
+  } catch (...) {
     throwRuntimeError(
         "in Json::Value::duplicateAndPrefixStringValue(): "
         "Failed to allocate string value buffer");
   }
-  *reinterpret_cast<unsigned*>(newString) = length;
-  memcpy(newString + sizeof(unsigned), value, length);
-  newString[actualLength - 1U] = 0; // to avoid buffer over-run accidents by users later
-  return newString;
+  return typename _Value::StringDataPtr(); //Not reachable but compiler warns if not here
 }
 template<class _Value>
 inline static void decodePrefixedString(
@@ -150,7 +154,7 @@ inline static void decodePrefixedString(
 /** Free the string duplicated by duplicateStringValue()/duplicateAndPrefixStringValue().
  */
 template<class _Value>
-static inline void releaseStringValue(char* value) { free(value); }
+static inline void releaseStringValue(char* value) { /* Unused */ } //FIXME Remove!
 
 } // namespace detail
 } // namespace Json
@@ -183,22 +187,22 @@ Value<_Alloc, _String>::CommentInfo::CommentInfo() : comment_(0) {}
 
 template<class _Alloc, class _String>
 Value<_Alloc, _String>::CommentInfo::~CommentInfo() {
-  if (comment_)
-    releaseStringValue<Value<_Alloc, _String>>(comment_);
+  if (comment_.GetString())
+    releaseStringValue<Value<_Alloc, _String>>(comment_.GetString());
 }
 
 template<class _Alloc, class _String>
 void Value<_Alloc, _String>::CommentInfo::setComment(const char* text, size_t len) {
-  if (comment_) {
-    releaseStringValue<Value<_Alloc, _String>>(comment_);
-    comment_ = 0;
+  if (comment_.GetString()) {
+    releaseStringValue<Value<_Alloc, _String>>(comment_.GetString());
+    comment_.SetString(0);
   }
   JSON_ASSERT(text != 0);
   JSON_ASSERT_MESSAGE(
       text[0] == '\0' || text[0] == '/',
       "in Json::Value::setComment(): Comments must start with /");
   // It seems that /**/ style comments are acceptable as well.
-  comment_ = duplicateStringValue<Value<_Alloc, _String>>(text, len);
+  comment_.SetString(duplicateStringValue<Value<_Alloc, _String>>(text, len));
 }
 
 // //////////////////////////////////////////////////////////////////
@@ -213,22 +217,24 @@ void Value<_Alloc, _String>::CommentInfo::setComment(const char* text, size_t le
 // a string is stored.
 
 template<class _Alloc, class _String>
-Value<_Alloc, _String>::CZString::CZString(ArrayIndex aindex) : cstr_(0), index_(aindex) {}
+Value<_Alloc, _String>::CZString::CZString(ArrayIndex aindex) : index_(aindex) {}
 
 template<class _Alloc, class _String>
 Value<_Alloc, _String>::CZString::CZString(char const* str, unsigned ulength, DuplicationPolicy allocate)
-    : cstr_(str) {
+    : cstr_(const_cast<char*>(str)) {
   // allocate != duplicate
   storage_.policy_ = allocate & 0x3;
   storage_.length_ = ulength & 0x3FFFFFFF;
 }
 
 template<class _Alloc, class _String>
-Value<_Alloc, _String>::CZString::CZString(const CZString& other)
-    : cstr_(other.storage_.policy_ != noDuplication && other.cstr_ != 0
-                ? duplicateStringValue<Value<_Alloc, _String>>(other.cstr_, other.storage_.length_)
-                : other.cstr_) {
-  storage_.policy_ = (other.cstr_
+Value<_Alloc, _String>::CZString::CZString(const CZString& other) {
+  if (other.storage_.policy_ != noDuplication && other.cstr_.GetString() != 0) {
+	  cstr_.SetString(std::move(duplicateStringValue<Value<_Alloc, _String>>(other.cstr_.GetString(), other.storage_.length_)));
+  } else {
+	  cstr_.SetString(const_cast<char*>(other.cstr_.GetString()));
+  }
+  storage_.policy_ = (other.cstr_.GetString()
                  ? (static_cast<DuplicationPolicy>(other.storage_.policy_) == noDuplication
                      ? noDuplication : duplicate)
                  : static_cast<DuplicationPolicy>(other.storage_.policy_));
@@ -245,8 +251,8 @@ Value<_Alloc, _String>::CZString::CZString(CZString&& other)
 
 template<class _Alloc, class _String>
 Value<_Alloc, _String>::CZString::~CZString() {
-  if (cstr_ && storage_.policy_ == duplicate)
-    releaseStringValue<Value<_Alloc, _String>>(const_cast<char*>(cstr_));
+  if (cstr_.GetString() && storage_.policy_ == duplicate)
+    releaseStringValue<Value<_Alloc, _String>>(const_cast<char*>(cstr_.GetString()));
 }
 
 template<class _Alloc, class _String>
@@ -263,13 +269,13 @@ typename Value<_Alloc, _String>::CZString& Value<_Alloc, _String>::CZString::ope
 
 template<class _Alloc, class _String>
 bool Value<_Alloc, _String>::CZString::operator<(const CZString& other) const {
-  if (!cstr_) return index_ < other.index_;
+  if (!cstr_.GetString()) return index_ < other.index_;
   //return strcmp(cstr_, other.cstr_) < 0;
   // Assume both are strings.
   unsigned this_len = this->storage_.length_;
   unsigned other_len = other.storage_.length_;
   unsigned min_len = std::min(this_len, other_len);
-  int comp = memcmp(this->cstr_, other.cstr_, min_len);
+  int comp = memcmp(this->cstr_.GetString(), other.cstr_.GetString(), min_len);
   if (comp < 0) return true;
   if (comp > 0) return false;
   return (this_len < other_len);
@@ -277,13 +283,13 @@ bool Value<_Alloc, _String>::CZString::operator<(const CZString& other) const {
 
 template<class _Alloc, class _String>
 bool Value<_Alloc, _String>::CZString::operator==(const CZString& other) const {
-  if (!cstr_) return index_ == other.index_;
+  if (!cstr_.GetString()) return index_ == other.index_;
   //return strcmp(cstr_, other.cstr_) == 0;
   // Assume both are strings.
   unsigned this_len = this->storage_.length_;
   unsigned other_len = other.storage_.length_;
   if (this_len != other_len) return false;
-  int comp = memcmp(this->cstr_, other.cstr_, this_len);
+  int comp = memcmp(this->cstr_.GetString(), other.cstr_.GetString(), this_len);
   return comp == 0;
 }
 
@@ -292,7 +298,7 @@ ArrayIndex Value<_Alloc, _String>::CZString::index() const { return index_; }
 
 //const char* Value::CZString::c_str() const { return cstr_; }
 template<class _Alloc, class _String>
-const char* Value<_Alloc, _String>::CZString::data() const { return cstr_; }
+const char* Value<_Alloc, _String>::CZString::data() const { return cstr_.GetString(); }
 template<class _Alloc, class _String>
 unsigned Value<_Alloc, _String>::CZString::length() const { return storage_.length_; }
 template<class _Alloc, class _String>
@@ -324,7 +330,7 @@ Value<_Alloc, _String>::Value(ValueType vtype) {
     value_.real_ = 0.0;
     break;
   case stringValue:
-    value_.string_ = 0;
+    //Unused
     break;
   case arrayValue:
   case objectValue:
@@ -371,27 +377,27 @@ Value<_Alloc, _String>::Value(double value) {
 template<class _Alloc, class _String>
 Value<_Alloc, _String>::Value(const char* value) {
   initBasic(stringValue, true);
-  value_.string_ = duplicateAndPrefixStringValue<Value<_Alloc, _String>>(value, static_cast<unsigned>(strlen(value)));
+  stringValue_.SetString(duplicateAndPrefixStringValue<Value<_Alloc, _String>>(value, static_cast<unsigned>(strlen(value))));
 }
 
 template<class _Alloc, class _String>
 Value<_Alloc, _String>::Value(const char* beginValue, const char* endValue) {
   initBasic(stringValue, true);
-  value_.string_ =
-      duplicateAndPrefixStringValue<Value<_Alloc, _String>>(beginValue, static_cast<unsigned>(endValue - beginValue));
+  stringValue_.SetString(
+      duplicateAndPrefixStringValue<Value<_Alloc, _String>>(beginValue, static_cast<unsigned>(endValue - beginValue)));
 }
 
 template<class _Alloc, class _String>
 Value<_Alloc, _String>::Value(const String& value) {
   initBasic(stringValue, true);
-  value_.string_ =
-      duplicateAndPrefixStringValue<Value<_Alloc, _String>>(value.data(), static_cast<unsigned>(value.length()));
+  stringValue_.SetString(
+      duplicateAndPrefixStringValue<Value<_Alloc, _String>>(value.data(), static_cast<unsigned>(value.length())));
 }
 
 template<class _Alloc, class _String>
 Value<_Alloc, _String>::Value(const StaticString& value) {
   initBasic(stringValue);
-  value_.string_ = const_cast<char*>(value.c_str());
+  stringValue_.SetString(const_cast<char*>(value.c_str()));
 }
 
 #ifdef JSON_USE_CPPTL
@@ -423,15 +429,15 @@ Value<_Alloc, _String>::Value(Value const& other)
     value_ = other.value_;
     break;
   case stringValue:
-    if (other.value_.string_ && other.allocated_) {
+    if (other.stringValue_.GetString() && other.allocated_) {
       unsigned len;
       char const* str;
-      decodePrefixedString<Value<_Alloc, _String>>(other.allocated_, other.value_.string_,
+      decodePrefixedString<Value<_Alloc, _String>>(other.allocated_, other.stringValue_.GetString(),
           &len, &str);
-      value_.string_ = duplicateAndPrefixStringValue<Value<_Alloc, _String>>(str, len);
+      stringValue_.SetString(duplicateAndPrefixStringValue<Value<_Alloc, _String>>(str, len));
       allocated_ = true;
     } else {
-      value_.string_ = other.value_.string_;
+	  stringValue_.SetString(const_cast<char*>(other.stringValue_.GetString()));
       allocated_ = false;
     }
     break;
@@ -446,9 +452,9 @@ Value<_Alloc, _String>::Value(Value const& other)
     comments_ = new CommentInfo[numberOfCommentPlacement];
     for (int comment = 0; comment < numberOfCommentPlacement; ++comment) {
       const CommentInfo& otherComment = other.comments_[comment];
-      if (otherComment.comment_)
+      if (otherComment.comment_.GetString())
         comments_[comment].setComment(
-            otherComment.comment_, strlen(otherComment.comment_));
+            otherComment.comment_.GetString(), strlen(otherComment.comment_.GetString()));
     }
   }
 }
@@ -472,8 +478,8 @@ Value<_Alloc, _String>::~Value() {
   case booleanValue:
     break;
   case stringValue:
-    if (allocated_)
-      releaseStringValue<Value<_Alloc, _String>>(value_.string_);
+    if (allocated_ && !(stringValue_.IsRaw()))
+      releaseStringValue<Value<_Alloc, _String>>(stringValue_.GetString());
     break;
   case arrayValue:
   case objectValue:
@@ -542,16 +548,16 @@ bool Value<_Alloc, _String>::operator<(const Value<_Alloc, _String>& other) cons
     return value_.bool_ < other.value_.bool_;
   case stringValue:
   {
-    if ((value_.string_ == 0) || (other.value_.string_ == 0)) {
-      if (other.value_.string_) return true;
+    if ((stringValue_.GetString() == 0) || (other.stringValue_.GetString() == 0)) {
+      if (other.stringValue_.GetString()) return true;
       else return false;
     }
     unsigned this_len;
     unsigned other_len;
     char const* this_str;
     char const* other_str;
-    decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, this->value_.string_, &this_len, &this_str);
-    decodePrefixedString<Value<_Alloc, _String>>(other.allocated_, other.value_.string_, &other_len, &other_str);
+    decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, this->stringValue_.GetString(), &this_len, &this_str);
+    decodePrefixedString<Value<_Alloc, _String>>(other.allocated_, other.stringValue_.GetString(), &other_len, &other_str);
     unsigned min_len = std::min(this_len, other_len);
     int comp = memcmp(this_str, other_str, min_len);
     if (comp < 0) return true;
@@ -602,15 +608,15 @@ bool Value<_Alloc, _String>::operator==(const Value<_Alloc, _String>& other) con
     return value_.bool_ == other.value_.bool_;
   case stringValue:
   {
-    if ((value_.string_ == 0) || (other.value_.string_ == 0)) {
-      return (value_.string_ == other.value_.string_);
+    if ((stringValue_.GetString() == 0) || (other.stringValue_.GetString() == 0)) {
+      return (stringValue_.GetString() == other.stringValue_.GetString());
     }
     unsigned this_len;
     unsigned other_len;
     char const* this_str;
     char const* other_str;
-    decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, this->value_.string_, &this_len, &this_str);
-    decodePrefixedString<Value<_Alloc, _String>>(other.allocated_, other.value_.string_, &other_len, &other_str);
+    decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, this->stringValue_.GetString(), &this_len, &this_str);
+    decodePrefixedString<Value<_Alloc, _String>>(other.allocated_, other.stringValue_.GetString(), &other_len, &other_str);
     if (this_len != other_len) return false;
     int comp = memcmp(this_str, other_str, this_len);
     return comp == 0;
@@ -632,19 +638,19 @@ template<class _Alloc, class _String>
 const char* Value<_Alloc, _String>::asCString() const {
   JSON_ASSERT_MESSAGE(type_ == stringValue,
                       "in Json::Value::asCString(): requires stringValue");
-  if (value_.string_ == 0) return 0;
+  if (stringValue_.GetString() == 0) return 0;
   unsigned this_len;
   char const* this_str;
-  decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, this->value_.string_, &this_len, &this_str);
+  decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, this->stringValue_.GetString(), &this_len, &this_str);
   return this_str;
 }
 
 template<class _Alloc, class _String>
 bool Value<_Alloc, _String>::getString(char const** str, char const** cend) const {
   if (type_ != stringValue) return false;
-  if (value_.string_ == 0) return false;
+  if (stringValue_.GetString() == 0) return false;
   unsigned length;
-  decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, this->value_.string_, &length, str);
+  decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, stringValue_.GetString(), &length, str);
   *cend = *str + length;
   return true;
 }
@@ -656,10 +662,10 @@ _String Value<_Alloc, _String>::asString() const {
     return "";
   case stringValue:
   {
-    if (value_.string_ == 0) return "";
+    if (stringValue_.GetString() == 0) return "";
     unsigned this_len;
     char const* this_str;
-    decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, this->value_.string_, &this_len, &this_str);
+    decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, this->stringValue_.GetString(), &this_len, &this_str);
     return String(this_str, this_len);
   }
   case booleanValue:
@@ -1427,13 +1433,13 @@ void Value<_Alloc, _String>::setComment(const String& comment, CommentPlacement 
 
 template<class _Alloc, class _String>
 bool Value<_Alloc, _String>::hasComment(CommentPlacement placement) const {
-  return comments_ != 0 && comments_[placement].comment_ != 0;
+  return comments_ != 0 && comments_[placement].comment_.GetString() != 0;
 }
 
 template<class _Alloc, class _String>
 _String Value<_Alloc, _String>::getComment(CommentPlacement placement) const {
   if (hasComment(placement))
-    return comments_[placement].comment_;
+    return comments_[placement].comment_.GetString();
   return "";
 }
 
@@ -1509,6 +1515,65 @@ typename Value<_Alloc, _String>::iterator Value<_Alloc, _String>::end() {
     break;
   }
   return iterator();
+}
+
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::StringValueHolder::StringValueHolder() {
+  /* Not used */
+}
+
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::StringValueHolder::StringValueHolder(StringDataPtr&& value) {
+  SetString(std::move(value));
+}
+
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::StringValueHolder::StringValueHolder(char* value) {
+  SetString(value);
+}
+
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::StringValueHolder::~StringValueHolder() {
+  /* Not used */
+}
+
+template<class _Alloc, class _String>
+char* Value<_Alloc, _String>::StringValueHolder::GetString() {
+  if (raw_) {
+	return valueStringRaw_;
+  } else if (valueStringCopy_) {
+	return valueStringCopy_->data();
+  } else {
+	return nullptr;
+  }
+}
+
+template<class _Alloc, class _String>
+const char* Value<_Alloc, _String>::StringValueHolder::GetString() const {
+  if (raw_) {
+	return valueStringRaw_;
+  } else if (valueStringCopy_) {
+	return valueStringCopy_->data();
+  } else {
+	return nullptr;
+  }
+}
+
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::StringValueHolder::SetString(char* value) {
+  valueStringRaw_ = value;
+  raw_ = true;
+}
+
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::StringValueHolder::SetString(StringDataPtr&& value) {
+  std::swap(valueStringCopy_, value);
+  raw_ = false;
+}
+
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::StringValueHolder::IsRaw() const {
+  return raw_;
 }
 
 // class PathArgument

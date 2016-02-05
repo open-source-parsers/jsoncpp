@@ -181,6 +181,12 @@ public:
   typedef Json::LargestInt LargestInt;
   typedef Json::LargestUInt LargestUInt;
   typedef Json::ArrayIndex ArrayIndex;
+  typedef std::vector<char, _Alloc> StringData;
+  #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
+  typedef std::unique_ptr<StringData> StringDataPtr;
+  #else
+  typedef std::auto_ptr<StringData>   StringDataPtr;
+  #endif
 
   static const Value& null;  ///< We regret this reference to a global instance; prefer the simpler Value().
   static const Value& nullRef;  ///< just a kludge for binary-compatibility; same as null
@@ -209,6 +215,23 @@ public:
 
 private:
 #ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
+  class StringValueHolder {
+    public:
+      StringValueHolder();
+      StringValueHolder(StringDataPtr&& value);
+      StringValueHolder(char* value);
+      ~StringValueHolder();
+      char* GetString();
+      const char* GetString() const;
+      void SetString(StringDataPtr&& value);
+      void SetString(char* value);
+      bool IsRaw() const;
+
+    private:
+  	  char* valueStringRaw_ = nullptr;          // the value that was passed in, this does not belong to value
+      StringDataPtr valueStringCopy_; // a copy of the value that was passed in
+      bool raw_ = true;
+  };
   class CZString {
   public:
     enum DuplicationPolicy {
@@ -240,7 +263,7 @@ private:
       unsigned length_: 30; // 1GB max
     };
 
-    char const* cstr_;  // actually, a prefixed string, unless policy is noDup
+    StringValueHolder cstr_;  // The string that's being stored
     union {
       ArrayIndex index_;
       StringStorage storage_;
@@ -578,7 +601,7 @@ private:
 
     void setComment(const char* text, size_t len);
 
-    char* comment_;
+    StringValueHolder comment_;
   };
 
   // struct MemberNamesTransform
@@ -595,9 +618,9 @@ private:
     LargestUInt uint_;
     double real_;
     bool bool_;
-    char* string_;  // actually ptr to unsigned, followed by str, unless !allocated_
     ObjectValues* map_;
   } value_;
+  StringValueHolder stringValue_;
   ValueType type_ : 8;
   unsigned int allocated_ : 1; // Notes: if declared as bool, bitfield is useless.
                                // If not allocated_, string_ must be null-terminated.
