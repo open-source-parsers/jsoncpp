@@ -23,8 +23,7 @@
 namespace Json {
 namespace detail {
 
-template<template<class T> class _Alloc = std::allocator<char>,
-  class _String = std::basic_string<char, std::char_traits<char>, std::allocator<char>>>
+template<class _Alloc, class _String>
 class Value;
 
 /**
@@ -53,7 +52,7 @@ public:
       \return zero on success (For now, we always return zero, so check the stream instead.)
       \throw std::exception possibly, depending on configuration
    */
-  virtual int write(Value const& root, std::ostream* sout) = 0;
+  virtual int write(_Value const& root, std::ostream* sout) = 0;
 
   /** \brief A simple abstract factory.
    */
@@ -71,7 +70,7 @@ public:
  * A StreamWriter will be created from the factory, used, and then deleted.
  */
 template<class _Value>
-std::string JSON_API writeString(StreamWriter::Factory const& factory, Value const& root);
+std::string JSON_API writeString(typename StreamWriter<_Value>::Factory const& factory, _Value const& root);
 
 
 /** \brief Build a StreamWriter implementation.
@@ -90,7 +89,7 @@ Usage:
 \endcode
 */
 template<class _Value>
-class JSON_API StreamWriterBuilder : public StreamWriter::Factory {
+class JSON_API StreamWriterBuilder : public StreamWriter<_Value>::Factory {
 public:
   // Note: We use a Json::Value so that we can add data-members to this class
   // without a major version bump.
@@ -115,7 +114,7 @@ public:
     JSON Value.
     \sa setDefaults()
     */
-  Json::Value settings_;
+  _Value settings_;
 
   StreamWriterBuilder();
   ~StreamWriterBuilder() override;
@@ -123,22 +122,22 @@ public:
   /**
    * \throw std::exception if something goes wrong (e.g. invalid settings)
    */
-  StreamWriter* newStreamWriter() const override;
+  StreamWriter<_Value>* newStreamWriter() const override;
 
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
    */
-  bool validate(Json::Value* invalid) const;
+  bool validate(_Value* invalid) const;
   /** A simple way to update a specific setting.
    */
-  Value& operator[](std::string key);
+  _Value& operator[](std::string key);
 
   /** Called by ctor, but you can use this to reset settings_.
    * \pre 'settings' != NULL (but Json::null is fine)
    * \remark Defaults:
    * \snippet src/lib_json/json_writer.cpp StreamWriterBuilderDefaults
    */
-  static void setDefaults(Json::Value* settings);
+  static void setDefaults(_Value* settings);
 };
 
 /** \brief Abstract class for writers.
@@ -149,7 +148,7 @@ class JSON_API Writer {
 public:
   virtual ~Writer();
 
-  virtual std::string write(const Value& root) = 0;
+  virtual std::string write(const _Value& root) = 0;
 };
 
 /** \brief Outputs a Value in <a HREF="http://www.json.org">JSON</a> format
@@ -162,7 +161,7 @@ public:
  * \deprecated Use StreamWriterBuilder.
  */
 template<class _Value>
-class JSON_API FastWriter : public Writer {
+class JSON_API FastWriter : public Writer<_Value> {
 
 public:
   FastWriter();
@@ -180,10 +179,10 @@ public:
   void omitEndingLineFeed();
 
 public: // overridden from Writer
-  std::string write(const Value& root) override;
+  std::string write(const _Value& root) override;
 
 private:
-  void writeValue(const Value& value);
+  void writeValue(const _Value& value);
 
   std::string document_;
   bool yamlCompatiblityEnabled_;
@@ -216,7 +215,7 @@ private:
  * \deprecated Use StreamWriterBuilder.
  */
 template<class _Value>
-class JSON_API StyledWriter : public Writer {
+class JSON_API StyledWriter : public Writer<_Value> {
 public:
   StyledWriter();
   ~StyledWriter() override {}
@@ -226,20 +225,20 @@ public: // overridden from Writer
    * \param root Value to serialize.
    * \return String containing the JSON document that represents the root value.
    */
-  std::string write(const Value& root) override;
+  std::string write(const _Value& root) override;
 
 private:
-  void writeValue(const Value& value);
-  void writeArrayValue(const Value& value);
-  bool isMultineArray(const Value& value);
+  void writeValue(const _Value& value);
+  void writeArrayValue(const _Value& value);
+  bool isMultineArray(const _Value& value);
   void pushValue(const std::string& value);
   void writeIndent();
   void writeWithIndent(const std::string& value);
   void indent();
   void unindent();
-  void writeCommentBeforeValue(const Value& root);
-  void writeCommentAfterValueOnSameLine(const Value& root);
-  bool hasCommentForValue(const Value& value);
+  void writeCommentBeforeValue(const _Value& root);
+  void writeCommentAfterValueOnSameLine(const _Value& root);
+  bool hasCommentForValue(const _Value& value);
   static std::string normalizeEOL(const std::string& text);
 
   typedef std::vector<std::string> ChildValues;
@@ -291,20 +290,20 @@ public:
    * \note There is no point in deriving from Writer, since write() should not
    * return a value.
    */
-  void write(std::ostream& out, const Value& root);
+  void write(std::ostream& out, const _Value& root);
 
 private:
-  void writeValue(const Value& value);
-  void writeArrayValue(const Value& value);
-  bool isMultineArray(const Value& value);
+  void writeValue(const _Value& value);
+  void writeArrayValue(const _Value& value);
+  bool isMultineArray(const _Value& value);
   void pushValue(const std::string& value);
   void writeIndent();
   void writeWithIndent(const std::string& value);
   void indent();
   void unindent();
-  void writeCommentBeforeValue(const Value& root);
-  void writeCommentAfterValueOnSameLine(const Value& root);
-  bool hasCommentForValue(const Value& value);
+  void writeCommentBeforeValue(const _Value& root);
+  void writeCommentAfterValueOnSameLine(const _Value& root);
+  bool hasCommentForValue(const _Value& value);
   static std::string normalizeEOL(const std::string& text);
 
   typedef std::vector<std::string> ChildValues;
@@ -334,11 +333,6 @@ template<class _Value>
 std::string JSON_API valueToString(bool value);
 template<class _Value>
 std::string JSON_API valueToQuotedString(const char* value);
-
-/// \brief Output using the StyledStreamWriter.
-/// \see Json::operator>>()
-template<class _Value>
-JSON_API std::ostream& operator<<(std::ostream&, const Value& root);
 
 } // namespace detail
 

@@ -79,7 +79,9 @@ typedef std::unique_ptr<StreamWriter> StreamWriterPtr;
 typedef std::auto_ptr<StreamWriter>   StreamWriterPtr;
 #endif
 
-static bool containsControlCharacter(const char* str) {
+namespace detail {
+
+bool containsControlCharacter(const char* str) {
   while (*str) {
     if (isControlCharacter(*(str++)))
       return true;
@@ -87,7 +89,7 @@ static bool containsControlCharacter(const char* str) {
   return false;
 }
 
-static bool containsControlCharacter0(const char* str, unsigned len) {
+bool containsControlCharacter0(const char* str, unsigned len) {
   char const* end = str + len;
   while (end != str) {
     if (isControlCharacter(*str) || 0==*str)
@@ -98,7 +100,7 @@ static bool containsControlCharacter0(const char* str, unsigned len) {
 }
 
 // https://github.com/upcaste/upcaste/blob/master/src/upcore/src/cstring/strnpbrk.cpp
-static char const* strnpbrk(char const* s, char const* accept, size_t n) {
+char const* strnpbrk(char const* s, char const* accept, size_t n) {
   assert((s || !n) && accept);
 
   char const* const end = s + n;
@@ -113,4 +115,5 @@ static char const* strnpbrk(char const* s, char const* accept, size_t n) {
   return NULL;
 }
 
+} // namespace detail
 } // namespace Json

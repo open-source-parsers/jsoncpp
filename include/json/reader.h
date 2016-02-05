@@ -74,7 +74,7 @@ public:
    * error occurred.
    */
   bool
-  parse(const std::string& document, Value& root, bool collectComments = true);
+  parse(const std::string& document, _Value& root, bool collectComments = true);
 
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
    document.
@@ -96,12 +96,12 @@ public:
    */
   bool parse(const char* beginDoc,
              const char* endDoc,
-             Value& root,
+			 _Value& root,
              bool collectComments = true);
 
   /// \brief Parse from input stream.
   /// \see Json::operator>>(std::istream&, Json::Value&).
-  bool parse(std::istream& is, Value& root, bool collectComments = true);
+  bool parse(std::istream& is, _Value& root, bool collectComments = true);
 
   /** \brief Returns a user friendly string that list errors in the parsed
    * document.
@@ -140,7 +140,7 @@ public:
    * \return \c true if the error was successfully added, \c false if the
    * Value offset exceeds the document size.
    */
-  bool pushError(const Value& value, const std::string& message);
+  bool pushError(const _Value& value, const std::string& message);
 
   /** \brief Add a semantic error message with extra context.
    * \param value JSON Value location associated with the error
@@ -149,7 +149,7 @@ public:
    * \return \c true if the error was successfully added, \c false if either
    * Value offset exceeds the document size.
    */
-  bool pushError(const Value& value, const std::string& message, const Value& extra);
+  bool pushError(const _Value& value, const std::string& message, const _Value& extra);
 
   /** \brief Return whether there are any errors.
    * \return \c true if there are no errors to report \c false if
@@ -203,11 +203,11 @@ private:
   bool readObject(Token& token);
   bool readArray(Token& token);
   bool decodeNumber(Token& token);
-  bool decodeNumber(Token& token, Value& decoded);
+  bool decodeNumber(Token& token, _Value& decoded);
   bool decodeString(Token& token);
   bool decodeString(Token& token, std::string& decoded);
   bool decodeDouble(Token& token);
-  bool decodeDouble(Token& token, Value& decoded);
+  bool decodeDouble(Token& token, _Value& decoded);
   bool decodeUnicodeCodePoint(Token& token,
                               Location& current,
                               Location end,
@@ -222,7 +222,7 @@ private:
                           Token& token,
                           TokenType skipUntilToken);
   void skipUntilSpace();
-  Value& currentValue();
+  _Value& currentValue();
   Char getNextChar();
   void
   getLocationLineAndColumn(Location location, int& line, int& column) const;
@@ -230,7 +230,7 @@ private:
   void addComment(Location begin, Location end, CommentPlacement placement);
   void skipCommentTokens(Token& token);
 
-  typedef std::stack<Value*> Nodes;
+  typedef std::stack<_Value*> Nodes;
   Nodes nodes_;
   Errors errors_;
   std::string document_;
@@ -238,7 +238,7 @@ private:
   Location end_;
   Location current_;
   Location lastValueEnd_;
-  Value* lastValue_;
+  _Value* lastValue_;
   std::string commentsBefore_;
   Features features_;
   bool collectComments_;
@@ -269,7 +269,7 @@ public:
    */
   virtual bool parse(
       char const* beginDoc, char const* endDoc,
-      Value* root, std::string* errs) = 0;
+	  _Value* root, std::string* errs) = 0;
 
   class JSON_API Factory {
   public:
@@ -294,7 +294,7 @@ Usage:
 \endcode
 */
 template<class _Value>
-class JSON_API CharReaderBuilder : public CharReader::Factory {
+class JSON_API CharReaderBuilder : public CharReader<_Value>::Factory {
 public:
   // Note: We use a Json::Value so that we can add data-members to this class
   // without a major version bump.
@@ -334,34 +334,34 @@ public:
     JSON Value.
     \sa setDefaults()
     */
-  Json::Value settings_;
+  _Value settings_;
 
   CharReaderBuilder();
   ~CharReaderBuilder() override;
 
-  CharReader* newCharReader() const override;
+  CharReader<_Value>* newCharReader() const override;
 
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
    */
-  bool validate(Json::Value* invalid) const;
+  bool validate(_Value* invalid) const;
 
   /** A simple way to update a specific setting.
    */
-  Value& operator[](std::string key);
+  _Value& operator[](std::string key);
 
   /** Called by ctor, but you can use this to reset settings_.
    * \pre 'settings' != NULL (but Json::null is fine)
    * \remark Defaults:
    * \snippet src/lib_json/json_reader.cpp CharReaderBuilderDefaults
    */
-  static void setDefaults(Json::Value* settings);
+  static void setDefaults(_Value* settings);
   /** Same as old Features::strictMode().
    * \pre 'settings' != NULL (but Json::null is fine)
    * \remark Defaults:
    * \snippet src/lib_json/json_reader.cpp CharReaderBuilderStrictMode
    */
-  static void strictMode(Json::Value* settings);
+  static void strictMode(_Value* settings);
 };
 
 /** Consume entire stream and use its begin/end.
@@ -370,9 +370,9 @@ public:
   */
 template<class _Value>
 bool JSON_API parseFromStream(
-    CharReader::Factory const&,
+    typename CharReader<_Value>::Factory const&,
     std::istream&,
-    Value* root, std::string* errs);
+    _Value* root, std::string* errs);
 
 /** \brief Read from 'sin' into 'root'.
 
@@ -399,7 +399,7 @@ bool JSON_API parseFromStream(
  \see Json::operator<<()
 */
 template<class _Value>
-JSON_API std::istream& operator>>(std::istream&, Value&);
+JSON_API std::istream& operator>>(std::istream&, _Value&);
 
 } // namespace detail
 

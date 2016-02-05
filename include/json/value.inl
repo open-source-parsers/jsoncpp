@@ -32,26 +32,37 @@ namespace detail {
 #else
 #define ALIGNAS(byte_alignment)
 #endif
-static const unsigned char ALIGNAS(8) kNull[sizeof(Value)] = { 0 };
+static const unsigned char ALIGNAS(8) kNull[2048] = { 0 }; //FIXME no sizeof(Value) exists
 const unsigned char& kNullRef = kNull[0];
-const Value& Value::null = reinterpret_cast<const Value&>(kNullRef);
-const Value& Value::nullRef = null;
+template <typename T, typename U>
+const Value<T, U>& Value<T, U>::null = reinterpret_cast<const Value<T, U>&>(kNullRef);
+template <typename T, typename U>
+const Value<T, U>& Value<T, U>::nullRef = null;
 
-const Int Value::minInt = Int(~(UInt(-1) / 2));
-const Int Value::maxInt = Int(UInt(-1) / 2);
-const UInt Value::maxUInt = UInt(-1);
+template <typename T, typename U>
+const Int Value<T, U>::minInt = Int(~(UInt(-1) / 2));
+template <typename T, typename U>
+const Int Value<T, U>::maxInt = Int(UInt(-1) / 2);
+template <typename T, typename U>
+const UInt Value<T, U>::maxUInt = UInt(-1);
 #if defined(JSON_HAS_INT64)
-const Int64 Value::minInt64 = Int64(~(UInt64(-1) / 2));
-const Int64 Value::maxInt64 = Int64(UInt64(-1) / 2);
-const UInt64 Value::maxUInt64 = UInt64(-1);
+template <typename T, typename U>
+const Int64 Value<T, U>::minInt64 = Int64(~(UInt64(-1) / 2));
+template <typename T, typename U>
+const Int64 Value<T, U>::maxInt64 = Int64(UInt64(-1) / 2);
+template <typename T, typename U>
+const UInt64 Value<T, U>::maxUInt64 = UInt64(-1);
 // The constant is hard-coded because some compiler have trouble
 // converting Value::maxUInt64 to a double correctly (AIX/xlC).
 // Assumes that UInt64 is a 64 bits integer.
 static const double maxUInt64AsDouble = 18446744073709551615.0;
 #endif // defined(JSON_HAS_INT64)
-const LargestInt Value::minLargestInt = LargestInt(~(LargestUInt(-1) / 2));
-const LargestInt Value::maxLargestInt = LargestInt(LargestUInt(-1) / 2);
-const LargestUInt Value::maxLargestUInt = LargestUInt(-1);
+template <typename T, typename U>
+const LargestInt Value<T, U>::minLargestInt = LargestInt(~(LargestUInt(-1) / 2));
+template <typename T, typename U>
+const LargestInt Value<T, U>::maxLargestInt = LargestInt(LargestUInt(-1) / 2);
+template <typename T, typename U>
+const LargestUInt Value<T, U>::maxLargestUInt = LargestUInt(-1);
 
 #if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 template <typename T, typename U>
@@ -85,8 +96,8 @@ static inline char* duplicateStringValue(const char* value,
                                          size_t length) {
   // Avoid an integer overflow in the call to malloc below by limiting length
   // to a sane value.
-  if (length >= (size_t)Value::maxInt)
-    length = Value::maxInt - 1;
+  if (length >= (size_t)_Value::maxInt)
+    length = _Value::maxInt - 1;
 
   char* newString = static_cast<char*>(malloc(length + 1));
   if (newString == NULL) {
@@ -108,7 +119,7 @@ static inline char* duplicateAndPrefixStringValue(
 {
   // Avoid an integer overflow in the call to malloc below by limiting length
   // to a sane value.
-  JSON_ASSERT_MESSAGE(length <= (unsigned)Value::maxInt - sizeof(unsigned) - 1U,
+  JSON_ASSERT_MESSAGE(length <= (unsigned)_Value::maxInt - sizeof(unsigned) - 1U,
                       "in Json::Value::duplicateAndPrefixStringValue(): "
                       "length too big for prefixing");
   unsigned actualLength = length + static_cast<unsigned>(sizeof(unsigned)) + 1U;
@@ -153,7 +164,7 @@ static inline void releaseStringValue(char* value) { free(value); }
 // //////////////////////////////////////////////////////////////////
 #if !defined(JSON_IS_AMALGAMATION)
 
-#include "json_valueiterator.inl"
+#include "valueiterator.inl"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
 namespace Json {
@@ -167,19 +178,19 @@ namespace detail {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-template<template<class T> class _Alloc, class _String>
-Value::CommentInfo::CommentInfo() : comment_(0) {}
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::CommentInfo::CommentInfo() : comment_(0) {}
 
-template<template<class T> class _Alloc, class _String>
-Value::CommentInfo::~CommentInfo() {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::CommentInfo::~CommentInfo() {
   if (comment_)
-    releaseStringValue(comment_);
+    releaseStringValue<Value<_Alloc, _String>>(comment_);
 }
 
-template<template<class T> class _Alloc, class _String>
-void Value::CommentInfo::setComment(const char* text, size_t len) {
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::CommentInfo::setComment(const char* text, size_t len) {
   if (comment_) {
-    releaseStringValue(comment_);
+    releaseStringValue<Value<_Alloc, _String>>(comment_);
     comment_ = 0;
   }
   JSON_ASSERT(text != 0);
@@ -187,7 +198,7 @@ void Value::CommentInfo::setComment(const char* text, size_t len) {
       text[0] == '\0' || text[0] == '/',
       "in Json::Value::setComment(): Comments must start with /");
   // It seems that /**/ style comments are acceptable as well.
-  comment_ = duplicateStringValue(text, len);
+  comment_ = duplicateStringValue<Value<_Alloc, _String>>(text, len);
 }
 
 // //////////////////////////////////////////////////////////////////
@@ -201,20 +212,21 @@ void Value::CommentInfo::setComment(const char* text, size_t len) {
 // Notes: policy_ indicates if the string was allocated when
 // a string is stored.
 
-template<template<class T> class _Alloc, class _String>
-Value::CZString::CZString(ArrayIndex aindex) : cstr_(0), index_(aindex) {}
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::CZString::CZString(ArrayIndex aindex) : cstr_(0), index_(aindex) {}
 
-template<template<class T> class _Alloc, class _String>
-Value::CZString::CZString(char const* str, unsigned ulength, DuplicationPolicy allocate)
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::CZString::CZString(char const* str, unsigned ulength, DuplicationPolicy allocate)
     : cstr_(str) {
   // allocate != duplicate
   storage_.policy_ = allocate & 0x3;
   storage_.length_ = ulength & 0x3FFFFFFF;
 }
 
-Value::CZString::CZString(const CZString& other)
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::CZString::CZString(const CZString& other)
     : cstr_(other.storage_.policy_ != noDuplication && other.cstr_ != 0
-                ? duplicateStringValue(other.cstr_, other.storage_.length_)
+                ? duplicateStringValue<Value<_Alloc, _String>>(other.cstr_, other.storage_.length_)
                 : other.cstr_) {
   storage_.policy_ = (other.cstr_
                  ? (static_cast<DuplicationPolicy>(other.storage_.policy_) == noDuplication
@@ -224,33 +236,33 @@ Value::CZString::CZString(const CZString& other)
 }
 
 #if JSON_HAS_RVALUE_REFERENCES
-template<template<class T> class _Alloc, class _String>
-Value::CZString::CZString(CZString&& other)
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::CZString::CZString(CZString&& other)
   : cstr_(other.cstr_), index_(other.index_) {
   other.cstr_ = nullptr;
 }
 #endif
 
-template<template<class T> class _Alloc, class _String>
-Value::CZString::~CZString() {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::CZString::~CZString() {
   if (cstr_ && storage_.policy_ == duplicate)
-    releaseStringValue(const_cast<char*>(cstr_));
+    releaseStringValue<Value<_Alloc, _String>>(const_cast<char*>(cstr_));
 }
 
-template<template<class T> class _Alloc, class _String>
-void Value::CZString::swap(CZString& other) {
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::CZString::swap(CZString& other) {
   std::swap(cstr_, other.cstr_);
   std::swap(index_, other.index_);
 }
 
-template<template<class T> class _Alloc, class _String>
-Value::CZString& Value::CZString::operator=(CZString other) {
+template<class _Alloc, class _String>
+typename Value<_Alloc, _String>::CZString& Value<_Alloc, _String>::CZString::operator=(CZString other) {
   swap(other);
   return *this;
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::CZString::operator<(const CZString& other) const {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::CZString::operator<(const CZString& other) const {
   if (!cstr_) return index_ < other.index_;
   //return strcmp(cstr_, other.cstr_) < 0;
   // Assume both are strings.
@@ -263,8 +275,8 @@ bool Value::CZString::operator<(const CZString& other) const {
   return (this_len < other_len);
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::CZString::operator==(const CZString& other) const {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::CZString::operator==(const CZString& other) const {
   if (!cstr_) return index_ == other.index_;
   //return strcmp(cstr_, other.cstr_) == 0;
   // Assume both are strings.
@@ -275,16 +287,16 @@ bool Value::CZString::operator==(const CZString& other) const {
   return comp == 0;
 }
 
-template<template<class T> class _Alloc, class _String>
-ArrayIndex Value::CZString::index() const { return index_; }
+template<class _Alloc, class _String>
+ArrayIndex Value<_Alloc, _String>::CZString::index() const { return index_; }
 
 //const char* Value::CZString::c_str() const { return cstr_; }
-template<template<class T> class _Alloc, class _String>
-const char* Value::CZString::data() const { return cstr_; }
-template<template<class T> class _Alloc, class _String>
-unsigned Value::CZString::length() const { return storage_.length_; }
-template<template<class T> class _Alloc, class _String>
-bool Value::CZString::isStaticString() const { return storage_.policy_ == noDuplication; }
+template<class _Alloc, class _String>
+const char* Value<_Alloc, _String>::CZString::data() const { return cstr_; }
+template<class _Alloc, class _String>
+unsigned Value<_Alloc, _String>::CZString::length() const { return storage_.length_; }
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::CZString::isStaticString() const { return storage_.policy_ == noDuplication; }
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
@@ -298,8 +310,8 @@ bool Value::CZString::isStaticString() const { return storage_.policy_ == noDupl
  * memset( this, 0, sizeof(Value) )
  * This optimization is used in ValueInternalMap fast allocator.
  */
-template<template<class T> class _Alloc, class _String>
-Value::Value(ValueType vtype) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::Value(ValueType vtype) {
   initBasic(vtype);
   switch (vtype) {
   case nullValue:
@@ -326,78 +338,78 @@ Value::Value(ValueType vtype) {
   }
 }
 
-template<template<class T> class _Alloc, class _String>
-Value::Value(Int value) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::Value(Int value) {
   initBasic(intValue);
   value_.int_ = value;
 }
 
-template<template<class T> class _Alloc, class _String>
-Value::Value(UInt value) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::Value(UInt value) {
   initBasic(uintValue);
   value_.uint_ = value;
 }
 #if defined(JSON_HAS_INT64)
-template<template<class T> class _Alloc, class _String>
-Value::Value(Int64 value) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::Value(Int64 value) {
   initBasic(intValue);
   value_.int_ = value;
 }
-template<template<class T> class _Alloc, class _String>
-Value::Value(UInt64 value) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::Value(UInt64 value) {
   initBasic(uintValue);
   value_.uint_ = value;
 }
 #endif // defined(JSON_HAS_INT64)
 
-template<template<class T> class _Alloc, class _String>
-Value::Value(double value) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::Value(double value) {
   initBasic(realValue);
   value_.real_ = value;
 }
 
-template<template<class T> class _Alloc, class _String>
-Value::Value(const char* value) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::Value(const char* value) {
   initBasic(stringValue, true);
-  value_.string_ = duplicateAndPrefixStringValue(value, static_cast<unsigned>(strlen(value)));
+  value_.string_ = duplicateAndPrefixStringValue<Value<_Alloc, _String>>(value, static_cast<unsigned>(strlen(value)));
 }
 
-template<template<class T> class _Alloc, class _String>
-Value::Value(const char* beginValue, const char* endValue) {
-  initBasic(stringValue, true);
-  value_.string_ =
-      duplicateAndPrefixStringValue(beginValue, static_cast<unsigned>(endValue - beginValue));
-}
-
-template<template<class T> class _Alloc, class _String>
-Value::Value(const std::string& value) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::Value(const char* beginValue, const char* endValue) {
   initBasic(stringValue, true);
   value_.string_ =
-      duplicateAndPrefixStringValue(value.data(), static_cast<unsigned>(value.length()));
+      duplicateAndPrefixStringValue<Value<_Alloc, _String>>(beginValue, static_cast<unsigned>(endValue - beginValue));
 }
 
-template<template<class T> class _Alloc, class _String>
-Value::Value(const StaticString& value) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::Value(const std::string& value) {
+  initBasic(stringValue, true);
+  value_.string_ =
+      duplicateAndPrefixStringValue<Value<_Alloc, _String>>(value.data(), static_cast<unsigned>(value.length()));
+}
+
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::Value(const StaticString& value) {
   initBasic(stringValue);
   value_.string_ = const_cast<char*>(value.c_str());
 }
 
 #ifdef JSON_USE_CPPTL
-template<template<class T> class _Alloc, class _String>
+template<class _Alloc, class _String>
 Value::Value(const CppTL::ConstString& value) {
   initBasic(stringValue, true);
   value_.string_ = duplicateAndPrefixStringValue(value, static_cast<unsigned>(value.length()));
 }
 #endif
 
-template<template<class T> class _Alloc, class _String>
-Value::Value(bool value) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::Value(bool value) {
   initBasic(booleanValue);
   value_.bool_ = value;
 }
 
-template<template<class T> class _Alloc, class _String>
-Value::Value(Value const& other)
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::Value(Value const& other)
     : type_(other.type_), allocated_(false)
       ,
       comments_(0), start_(other.start_), limit_(other.limit_)
@@ -414,9 +426,9 @@ Value::Value(Value const& other)
     if (other.value_.string_ && other.allocated_) {
       unsigned len;
       char const* str;
-      decodePrefixedString(other.allocated_, other.value_.string_,
+      decodePrefixedString<Value<_Alloc, _String>>(other.allocated_, other.value_.string_,
           &len, &str);
-      value_.string_ = duplicateAndPrefixStringValue(str, len);
+      value_.string_ = duplicateAndPrefixStringValue<Value<_Alloc, _String>>(str, len);
       allocated_ = true;
     } else {
       value_.string_ = other.value_.string_;
@@ -443,15 +455,15 @@ Value::Value(Value const& other)
 
 #if JSON_HAS_RVALUE_REFERENCES
 // Move constructor
-template<template<class T> class _Alloc, class _String>
-Value::Value(Value&& other) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::Value(Value&& other) {
   initBasic(nullValue);
   swap(other);
 }
 #endif
 
-template<template<class T> class _Alloc, class _String>
-Value::~Value() {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::~Value() {
   switch (type_) {
   case nullValue:
   case intValue:
@@ -461,7 +473,7 @@ Value::~Value() {
     break;
   case stringValue:
     if (allocated_)
-      releaseStringValue(value_.string_);
+      releaseStringValue<Value<_Alloc, _String>>(value_.string_);
     break;
   case arrayValue:
   case objectValue:
@@ -475,14 +487,14 @@ Value::~Value() {
     delete[] comments_;
 }
 
-template<template<class T> class _Alloc, class _String>
-Value& Value::operator=(Value other) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>& Value<_Alloc, _String>::operator=(Value other) {
   swap(other);
   return *this;
 }
 
-template<template<class T> class _Alloc, class _String>
-void Value::swapPayload(Value& other) {
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::swapPayload(Value<_Alloc, _String>& other) {
   ValueType temp = type_;
   type_ = other.type_;
   other.type_ = temp;
@@ -492,19 +504,19 @@ void Value::swapPayload(Value& other) {
   other.allocated_ = temp2 & 0x1;
 }
 
-template<template<class T> class _Alloc, class _String>
-void Value::swap(Value& other) {
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::swap(Value<_Alloc, _String>& other) {
   swapPayload(other);
   std::swap(comments_, other.comments_);
   std::swap(start_, other.start_);
   std::swap(limit_, other.limit_);
 }
 
-template<template<class T> class _Alloc, class _String>
-ValueType Value::type() const { return type_; }
+template<class _Alloc, class _String>
+ValueType Value<_Alloc, _String>::type() const { return type_; }
 
-template<template<class T> class _Alloc, class _String>
-int Value::compare(const Value& other) const {
+template<class _Alloc, class _String>
+int Value<_Alloc, _String>::compare(const Value<_Alloc, _String>& other) const {
   if (*this < other)
     return -1;
   if (*this > other)
@@ -512,8 +524,8 @@ int Value::compare(const Value& other) const {
   return 0;
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::operator<(const Value& other) const {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::operator<(const Value<_Alloc, _String>& other) const {
   int typeDelta = type_ - other.type_;
   if (typeDelta)
     return typeDelta < 0 ? true : false;
@@ -538,8 +550,8 @@ bool Value::operator<(const Value& other) const {
     unsigned other_len;
     char const* this_str;
     char const* other_str;
-    decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
-    decodePrefixedString(other.allocated_, other.value_.string_, &other_len, &other_str);
+    decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, this->value_.string_, &this_len, &this_str);
+    decodePrefixedString<Value<_Alloc, _String>>(other.allocated_, other.value_.string_, &other_len, &other_str);
     unsigned min_len = std::min(this_len, other_len);
     int comp = memcmp(this_str, other_str, min_len);
     if (comp < 0) return true;
@@ -559,17 +571,17 @@ bool Value::operator<(const Value& other) const {
   return false; // unreachable
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::operator<=(const Value& other) const { return !(other < *this); }
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::operator<=(const Value<_Alloc, _String>& other) const { return !(other < *this); }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::operator>=(const Value& other) const { return !(*this < other); }
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::operator>=(const Value<_Alloc, _String>& other) const { return !(*this < other); }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::operator>(const Value& other) const { return other < *this; }
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::operator>(const Value<_Alloc, _String>& other) const { return other < *this; }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::operator==(const Value& other) const {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::operator==(const Value<_Alloc, _String>& other) const {
   // if ( type_ != other.type_ )
   // GCC 2.95.3 says:
   // attempt to take address of bit-field structure member `Json::Value::type_'
@@ -597,8 +609,8 @@ bool Value::operator==(const Value& other) const {
     unsigned other_len;
     char const* this_str;
     char const* other_str;
-    decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
-    decodePrefixedString(other.allocated_, other.value_.string_, &other_len, &other_str);
+    decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, this->value_.string_, &this_len, &this_str);
+    decodePrefixedString<Value<_Alloc, _String>>(other.allocated_, other.value_.string_, &other_len, &other_str);
     if (this_len != other_len) return false;
     int comp = memcmp(this_str, other_str, this_len);
     return comp == 0;
@@ -613,32 +625,32 @@ bool Value::operator==(const Value& other) const {
   return false; // unreachable
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::operator!=(const Value& other) const { return !(*this == other); }
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::operator!=(const Value<_Alloc, _String>& other) const { return !(*this == other); }
 
-template<template<class T> class _Alloc, class _String>
-const char* Value::asCString() const {
+template<class _Alloc, class _String>
+const char* Value<_Alloc, _String>::asCString() const {
   JSON_ASSERT_MESSAGE(type_ == stringValue,
                       "in Json::Value::asCString(): requires stringValue");
   if (value_.string_ == 0) return 0;
   unsigned this_len;
   char const* this_str;
-  decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
+  decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, this->value_.string_, &this_len, &this_str);
   return this_str;
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::getString(char const** str, char const** cend) const {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::getString(char const** str, char const** cend) const {
   if (type_ != stringValue) return false;
   if (value_.string_ == 0) return false;
   unsigned length;
-  decodePrefixedString(this->allocated_, this->value_.string_, &length, str);
+  decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, this->value_.string_, &length, str);
   *cend = *str + length;
   return true;
 }
 
-template<template<class T> class _Alloc, class _String>
-std::string Value::asString() const {
+template<class _Alloc, class _String>
+std::string Value<_Alloc, _String>::asString() const {
   switch (type_) {
   case nullValue:
     return "";
@@ -647,25 +659,25 @@ std::string Value::asString() const {
     if (value_.string_ == 0) return "";
     unsigned this_len;
     char const* this_str;
-    decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
+    decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, this->value_.string_, &this_len, &this_str);
     return std::string(this_str, this_len);
   }
   case booleanValue:
     return value_.bool_ ? "true" : "false";
   case intValue:
-    return valueToString(value_.int_);
+    return valueToString<Value<_Alloc, _String>>(value_.int_);
   case uintValue:
-    return valueToString(value_.uint_);
+    return valueToString<Value<_Alloc, _String>>(value_.uint_);
   case realValue:
-    return valueToString(value_.real_);
+    return valueToString<Value<_Alloc, _String>>(value_.real_);
   default:
     JSON_FAIL_MESSAGE("Type is not convertible to string");
   }
 }
 
 #ifdef JSON_USE_CPPTL
-template<template<class T> class _Alloc, class _String>
-CppTL::ConstString Value::asConstString() const {
+template<class _Alloc, class _String>
+CppTL::ConstString Value<_Alloc, _String>::asConstString() const {
   unsigned len;
   char const* str;
   decodePrefixedString(allocated_, value_.string_,
@@ -674,8 +686,8 @@ CppTL::ConstString Value::asConstString() const {
 }
 #endif
 
-template<template<class T> class _Alloc, class _String>
-Value::Int Value::asInt() const {
+template<class _Alloc, class _String>
+typename Value<_Alloc, _String>::Int Value<_Alloc, _String>::asInt() const {
   switch (type_) {
   case intValue:
     JSON_ASSERT_MESSAGE(isInt(), "LargestInt out of Int range");
@@ -697,8 +709,8 @@ Value::Int Value::asInt() const {
   JSON_FAIL_MESSAGE("Value is not convertible to Int.");
 }
 
-template<template<class T> class _Alloc, class _String>
-Value::UInt Value::asUInt() const {
+template<class _Alloc, class _String>
+typename Value<_Alloc, _String>::UInt Value<_Alloc, _String>::asUInt() const {
   switch (type_) {
   case intValue:
     JSON_ASSERT_MESSAGE(isUInt(), "LargestInt out of UInt range");
@@ -722,8 +734,8 @@ Value::UInt Value::asUInt() const {
 
 #if defined(JSON_HAS_INT64)
 
-template<template<class T> class _Alloc, class _String>
-Value::Int64 Value::asInt64() const {
+template<class _Alloc, class _String>
+typename Value<_Alloc, _String>::Int64 Value<_Alloc, _String>::asInt64() const {
   switch (type_) {
   case intValue:
     return Int64(value_.int_);
@@ -744,8 +756,8 @@ Value::Int64 Value::asInt64() const {
   JSON_FAIL_MESSAGE("Value is not convertible to Int64.");
 }
 
-template<template<class T> class _Alloc, class _String>
-Value::UInt64 Value::asUInt64() const {
+template<class _Alloc, class _String>
+typename Value<_Alloc, _String>::UInt64 Value<_Alloc, _String>::asUInt64() const {
   switch (type_) {
   case intValue:
     JSON_ASSERT_MESSAGE(isUInt64(), "LargestInt out of UInt64 range");
@@ -767,8 +779,8 @@ Value::UInt64 Value::asUInt64() const {
 }
 #endif // if defined(JSON_HAS_INT64)
 
-template<template<class T> class _Alloc, class _String>
-LargestInt Value::asLargestInt() const {
+template<class _Alloc, class _String>
+LargestInt Value<_Alloc, _String>::asLargestInt() const {
 #if defined(JSON_NO_INT64)
   return asInt();
 #else
@@ -776,8 +788,8 @@ LargestInt Value::asLargestInt() const {
 #endif
 }
 
-template<template<class T> class _Alloc, class _String>
-LargestUInt Value::asLargestUInt() const {
+template<class _Alloc, class _String>
+LargestUInt Value<_Alloc, _String>::asLargestUInt() const {
 #if defined(JSON_NO_INT64)
   return asUInt();
 #else
@@ -785,8 +797,8 @@ LargestUInt Value::asLargestUInt() const {
 #endif
 }
 
-template<template<class T> class _Alloc, class _String>
-double Value::asDouble() const {
+template<class _Alloc, class _String>
+double Value<_Alloc, _String>::asDouble() const {
   switch (type_) {
   case intValue:
     return static_cast<double>(value_.int_);
@@ -808,8 +820,8 @@ double Value::asDouble() const {
   JSON_FAIL_MESSAGE("Value is not convertible to double.");
 }
 
-template<template<class T> class _Alloc, class _String>
-float Value::asFloat() const {
+template<class _Alloc, class _String>
+float Value<_Alloc, _String>::asFloat() const {
   switch (type_) {
   case intValue:
     return static_cast<float>(value_.int_);
@@ -831,8 +843,8 @@ float Value::asFloat() const {
   JSON_FAIL_MESSAGE("Value is not convertible to float.");
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::asBool() const {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::asBool() const {
   switch (type_) {
   case booleanValue:
     return value_.bool_;
@@ -851,8 +863,8 @@ bool Value::asBool() const {
   JSON_FAIL_MESSAGE("Value is not convertible to bool.");
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::isConvertibleTo(ValueType other) const {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isConvertibleTo(ValueType other) const {
   switch (other) {
   case nullValue:
     return (isNumeric() && asDouble() == 0.0) ||
@@ -886,8 +898,8 @@ bool Value::isConvertibleTo(ValueType other) const {
 }
 
 /// Number of values in array or object
-template<template<class T> class _Alloc, class _String>
-ArrayIndex Value::size() const {
+template<class _Alloc, class _String>
+ArrayIndex Value<_Alloc, _String>::size() const {
   switch (type_) {
   case nullValue:
   case intValue:
@@ -898,7 +910,7 @@ ArrayIndex Value::size() const {
     return 0;
   case arrayValue: // size of the array is highest index + 1
     if (!value_.map_->empty()) {
-      ObjectValues::const_iterator itLast = value_.map_->end();
+    	typename ObjectValues::const_iterator itLast = value_.map_->end();
       --itLast;
       return (*itLast).first.index() + 1;
     }
@@ -910,19 +922,19 @@ ArrayIndex Value::size() const {
   return 0; // unreachable;
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::empty() const {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::empty() const {
   if (isNull() || isArray() || isObject())
     return size() == 0u;
   else
     return false;
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::operator!() const { return isNull(); }
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::operator!() const { return isNull(); }
 
-template<template<class T> class _Alloc, class _String>
-void Value::clear() {
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::clear() {
   JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == arrayValue ||
                           type_ == objectValue,
                       "in Json::Value::clear(): requires complex value");
@@ -938,8 +950,8 @@ void Value::clear() {
   }
 }
 
-template<template<class T> class _Alloc, class _String>
-void Value::resize(ArrayIndex newSize) {
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::resize(ArrayIndex newSize) {
   JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == arrayValue,
                       "in Json::Value::resize(): requires arrayValue");
   if (type_ == nullValue)
@@ -957,55 +969,55 @@ void Value::resize(ArrayIndex newSize) {
   }
 }
 
-template<template<class T> class _Alloc, class _String>
-Value& Value::operator[](ArrayIndex index) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](ArrayIndex index) {
   JSON_ASSERT_MESSAGE(
       type_ == nullValue || type_ == arrayValue,
       "in Json::Value::operator[](ArrayIndex): requires arrayValue");
   if (type_ == nullValue)
     *this = Value(arrayValue);
   CZString key(index);
-  ObjectValues::iterator it = value_.map_->lower_bound(key);
+  typename ObjectValues::iterator it = value_.map_->lower_bound(key);
   if (it != value_.map_->end() && (*it).first == key)
     return (*it).second;
 
-  ObjectValues::value_type defaultValue(key, nullRef);
+  typename ObjectValues::value_type defaultValue(key, nullRef);
   it = value_.map_->insert(it, defaultValue);
   return (*it).second;
 }
 
-template<template<class T> class _Alloc, class _String>
-Value& Value::operator[](int index) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](int index) {
   JSON_ASSERT_MESSAGE(
       index >= 0,
       "in Json::Value::operator[](int index): index cannot be negative");
   return (*this)[ArrayIndex(index)];
 }
 
-template<template<class T> class _Alloc, class _String>
-const Value& Value::operator[](ArrayIndex index) const {
+template<class _Alloc, class _String>
+const Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](ArrayIndex index) const {
   JSON_ASSERT_MESSAGE(
       type_ == nullValue || type_ == arrayValue,
       "in Json::Value::operator[](ArrayIndex)const: requires arrayValue");
   if (type_ == nullValue)
     return nullRef;
   CZString key(index);
-  ObjectValues::const_iterator it = value_.map_->find(key);
+  typename ObjectValues::const_iterator it = value_.map_->find(key);
   if (it == value_.map_->end())
     return nullRef;
   return (*it).second;
 }
 
-template<template<class T> class _Alloc, class _String>
-const Value& Value::operator[](int index) const {
+template<class _Alloc, class _String>
+const Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](int index) const {
   JSON_ASSERT_MESSAGE(
       index >= 0,
       "in Json::Value::operator[](int index) const: index cannot be negative");
   return (*this)[ArrayIndex(index)];
 }
 
-template<template<class T> class _Alloc, class _String>
-void Value::initBasic(ValueType vtype, bool allocated) {
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::initBasic(ValueType vtype, bool allocated) {
   type_ = vtype;
   allocated_ = allocated;
   comments_ = 0;
@@ -1016,8 +1028,8 @@ void Value::initBasic(ValueType vtype, bool allocated) {
 // Access an object value by name, create a null member if it does not exist.
 // @pre Type of '*this' is object or null.
 // @param key is null-terminated.
-template<template<class T> class _Alloc, class _String>
-Value& Value::resolveReference(const char* key) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>& Value<_Alloc, _String>::resolveReference(const char* key) {
   JSON_ASSERT_MESSAGE(
       type_ == nullValue || type_ == objectValue,
       "in Json::Value::resolveReference(): requires objectValue");
@@ -1025,19 +1037,19 @@ Value& Value::resolveReference(const char* key) {
     *this = Value(objectValue);
   CZString actualKey(
       key, static_cast<unsigned>(strlen(key)), CZString::noDuplication); // NOTE!
-  ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
+  typename ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
   if (it != value_.map_->end() && (*it).first == actualKey)
     return (*it).second;
 
-  ObjectValues::value_type defaultValue(actualKey, nullRef);
+  typename ObjectValues::value_type defaultValue(actualKey, nullRef);
   it = value_.map_->insert(it, defaultValue);
   Value& value = (*it).second;
   return value;
 }
 
 // @param key is not null-terminated.
-template<template<class T> class _Alloc, class _String>
-Value& Value::resolveReference(char const* key, char const* cend)
+template<class _Alloc, class _String>
+Value<_Alloc, _String>& Value<_Alloc, _String>::resolveReference(char const* key, char const* cend)
 {
   JSON_ASSERT_MESSAGE(
       type_ == nullValue || type_ == objectValue,
@@ -1046,74 +1058,74 @@ Value& Value::resolveReference(char const* key, char const* cend)
     *this = Value(objectValue);
   CZString actualKey(
       key, static_cast<unsigned>(cend-key), CZString::duplicateOnCopy);
-  ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
+  typename ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
   if (it != value_.map_->end() && (*it).first == actualKey)
     return (*it).second;
 
-  ObjectValues::value_type defaultValue(actualKey, nullRef);
+  typename ObjectValues::value_type defaultValue(actualKey, nullRef);
   it = value_.map_->insert(it, defaultValue);
   Value& value = (*it).second;
   return value;
 }
 
-template<template<class T> class _Alloc, class _String>
-Value Value::get(ArrayIndex index, const Value& defaultValue) const {
+template<class _Alloc, class _String>
+Value<_Alloc, _String> Value<_Alloc, _String>::get(ArrayIndex index, const Value& defaultValue) const {
   const Value* value = &((*this)[index]);
   return value == &nullRef ? defaultValue : *value;
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::isValidIndex(ArrayIndex index) const { return index < size(); }
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isValidIndex(ArrayIndex index) const { return index < size(); }
 
-template<template<class T> class _Alloc, class _String>
-Value const* Value::find(char const* key, char const* cend) const
+template<class _Alloc, class _String>
+Value<_Alloc, _String> const* Value<_Alloc, _String>::find(char const* key, char const* cend) const
 {
   JSON_ASSERT_MESSAGE(
       type_ == nullValue || type_ == objectValue,
       "in Json::Value::find(key, end, found): requires objectValue or nullValue");
   if (type_ == nullValue) return NULL;
   CZString actualKey(key, static_cast<unsigned>(cend-key), CZString::noDuplication);
-  ObjectValues::const_iterator it = value_.map_->find(actualKey);
+  typename ObjectValues::const_iterator it = value_.map_->find(actualKey);
   if (it == value_.map_->end()) return NULL;
   return &(*it).second;
 }
-template<template<class T> class _Alloc, class _String>
-const Value& Value::operator[](const char* key) const
+template<class _Alloc, class _String>
+const Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](const char* key) const
 {
   Value const* found = find(key, key + strlen(key));
   if (!found) return nullRef;
   return *found;
 }
-template<template<class T> class _Alloc, class _String>
-Value const& Value::operator[](std::string const& key) const
+template<class _Alloc, class _String>
+Value<_Alloc, _String> const& Value<_Alloc, _String>::operator[](std::string const& key) const
 {
   Value const* found = find(key.data(), key.data() + key.length());
   if (!found) return nullRef;
   return *found;
 }
 
-template<template<class T> class _Alloc, class _String>
-Value& Value::operator[](const char* key) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](const char* key) {
   return resolveReference(key, key + strlen(key));
 }
 
-template<template<class T> class _Alloc, class _String>
-Value& Value::operator[](const std::string& key) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](const std::string& key) {
   return resolveReference(key.data(), key.data() + key.length());
 }
 
-template<template<class T> class _Alloc, class _String>
-Value& Value::operator[](const StaticString& key) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](const StaticString& key) {
   return resolveReference(key.c_str());
 }
 
 #ifdef JSON_USE_CPPTL
-template<template<class T> class _Alloc, class _String>
-Value& Value::operator[](const CppTL::ConstString& key) {
+template<class _Alloc, class _String>
+Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](const CppTL::ConstString& key) {
   return resolveReference(key.c_str(), key.end_c_str());
 }
-template<template<class T> class _Alloc, class _String>
-Value const& Value::operator[](CppTL::ConstString const& key) const
+template<class _Alloc, class _String>
+Value<_Alloc, _String> const& Value<_Alloc, _String>::operator[](CppTL::ConstString const& key) const
 {
   Value const* found = find(key.c_str(), key.end_c_str());
   if (!found) return nullRef;
@@ -1121,53 +1133,53 @@ Value const& Value::operator[](CppTL::ConstString const& key) const
 }
 #endif
 
-template<template<class T> class _Alloc, class _String>
-Value& Value::append(const Value& value) { return (*this)[size()] = value; }
+template<class _Alloc, class _String>
+Value<_Alloc, _String>& Value<_Alloc, _String>::append(const Value<_Alloc, _String>& value) { return (*this)[size()] = value; }
 
-template<template<class T> class _Alloc, class _String>
-Value Value::get(char const* key, char const* cend, Value const& defaultValue) const
+template<class _Alloc, class _String>
+Value<_Alloc, _String> Value<_Alloc, _String>::get(char const* key, char const* cend, Value<_Alloc, _String> const& defaultValue) const
 {
   Value const* found = find(key, cend);
   return !found ? defaultValue : *found;
 }
-template<template<class T> class _Alloc, class _String>
-Value Value::get(char const* key, Value const& defaultValue) const
+template<class _Alloc, class _String>
+Value<_Alloc, _String> Value<_Alloc, _String>::get(char const* key, Value<_Alloc, _String> const& defaultValue) const
 {
   return get(key, key + strlen(key), defaultValue);
 }
-template<template<class T> class _Alloc, class _String>
-Value Value::get(std::string const& key, Value const& defaultValue) const
+template<class _Alloc, class _String>
+Value<_Alloc, _String> Value<_Alloc, _String>::get(std::string const& key, Value<_Alloc, _String> const& defaultValue) const
 {
   return get(key.data(), key.data() + key.length(), defaultValue);
 }
 
 
-template<template<class T> class _Alloc, class _String>
-bool Value::removeMember(const char* key, const char* cend, Value* removed)
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::removeMember(const char* key, const char* cend, Value<_Alloc, _String>* removed)
 {
   if (type_ != objectValue) {
     return false;
   }
   CZString actualKey(key, static_cast<unsigned>(cend-key), CZString::noDuplication);
-  ObjectValues::iterator it = value_.map_->find(actualKey);
+  typename ObjectValues::iterator it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
     return false;
   *removed = it->second;
   value_.map_->erase(it);
   return true;
 }
-template<template<class T> class _Alloc, class _String>
-bool Value::removeMember(const char* key, Value* removed)
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::removeMember(const char* key, Value<_Alloc, _String>* removed)
 {
   return removeMember(key, key + strlen(key), removed);
 }
-template<template<class T> class _Alloc, class _String>
-bool Value::removeMember(std::string const& key, Value* removed)
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::removeMember(std::string const& key, Value<_Alloc, _String>* removed)
 {
   return removeMember(key.data(), key.data() + key.length(), removed);
 }
-template<template<class T> class _Alloc, class _String>
-Value Value::removeMember(const char* key)
+template<class _Alloc, class _String>
+Value<_Alloc, _String> Value<_Alloc, _String>::removeMember(const char* key)
 {
   JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == objectValue,
                       "in Json::Value::removeMember(): requires objectValue");
@@ -1178,19 +1190,19 @@ Value Value::removeMember(const char* key)
   removeMember(key, key + strlen(key), &removed);
   return removed; // still null if removeMember() did nothing
 }
-template<template<class T> class _Alloc, class _String>
-Value Value::removeMember(const std::string& key)
+template<class _Alloc, class _String>
+Value<_Alloc, _String> Value<_Alloc, _String>::removeMember(const std::string& key)
 {
   return removeMember(key.c_str());
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::removeIndex(ArrayIndex index, Value* removed) {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::removeIndex(ArrayIndex index, Value<_Alloc, _String>* removed) {
   if (type_ != arrayValue) {
     return false;
   }
   CZString key(index);
-  ObjectValues::iterator it = value_.map_->find(key);
+  typename ObjectValues::iterator it = value_.map_->find(key);
   if (it == value_.map_->end()) {
     return false;
   }
@@ -1203,45 +1215,45 @@ bool Value::removeIndex(ArrayIndex index, Value* removed) {
   }
   // erase the last one ("leftover")
   CZString keyLast(oldSize - 1);
-  ObjectValues::iterator itLast = value_.map_->find(keyLast);
+  typename ObjectValues::iterator itLast = value_.map_->find(keyLast);
   value_.map_->erase(itLast);
   return true;
 }
 
 #ifdef JSON_USE_CPPTL
-template<template<class T> class _Alloc, class _String>
-Value Value::get(const CppTL::ConstString& key,
-                 const Value& defaultValue) const {
+template<class _Alloc, class _String>
+Value<_Alloc, _String> Value<_Alloc, _String>::get(const CppTL::ConstString& key,
+                 const Value<_Alloc, _String>& defaultValue) const {
   return get(key.c_str(), key.end_c_str(), defaultValue);
 }
 #endif
 
-template<template<class T> class _Alloc, class _String>
-bool Value::isMember(char const* key, char const* cend) const
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isMember(char const* key, char const* cend) const
 {
   Value const* value = find(key, cend);
   return NULL != value;
 }
-template<template<class T> class _Alloc, class _String>
-bool Value::isMember(char const* key) const
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isMember(char const* key) const
 {
   return isMember(key, key + strlen(key));
 }
-template<template<class T> class _Alloc, class _String>
-bool Value::isMember(std::string const& key) const
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isMember(std::string const& key) const
 {
   return isMember(key.data(), key.data() + key.length());
 }
 
 #ifdef JSON_USE_CPPTL
-template<template<class T> class _Alloc, class _String>
-bool Value::isMember(const CppTL::ConstString& key) const {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isMember(const CppTL::ConstString& key) const {
   return isMember(key.c_str(), key.end_c_str());
 }
 #endif
 
-template<template<class T> class _Alloc, class _String>
-Value::Members Value::getMemberNames() const {
+template<class _Alloc, class _String>
+typename Value<_Alloc, _String>::Members Value<_Alloc, _String>::getMemberNames() const {
   JSON_ASSERT_MESSAGE(
       type_ == nullValue || type_ == objectValue,
       "in Json::Value::getMemberNames(), value must be objectValue");
@@ -1249,8 +1261,8 @@ Value::Members Value::getMemberNames() const {
     return Value::Members();
   Members members;
   members.reserve(value_.map_->size());
-  ObjectValues::const_iterator it = value_.map_->begin();
-  ObjectValues::const_iterator itEnd = value_.map_->end();
+  typename ObjectValues::const_iterator it = value_.map_->begin();
+  typename ObjectValues::const_iterator itEnd = value_.map_->end();
   for (; it != itEnd; ++it) {
     members.push_back(std::string((*it).first.data(),
                                   (*it).first.length()));
@@ -1288,14 +1300,14 @@ static bool IsIntegral(double d) {
   return modf(d, &integral_part) == 0.0;
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::isNull() const { return type_ == nullValue; }
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isNull() const { return type_ == nullValue; }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::isBool() const { return type_ == booleanValue; }
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isBool() const { return type_ == booleanValue; }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::isInt() const {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isInt() const {
   switch (type_) {
   case intValue:
     return value_.int_ >= minInt && value_.int_ <= maxInt;
@@ -1310,8 +1322,8 @@ bool Value::isInt() const {
   return false;
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::isUInt() const {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isUInt() const {
   switch (type_) {
   case intValue:
     return value_.int_ >= 0 && LargestUInt(value_.int_) <= LargestUInt(maxUInt);
@@ -1326,8 +1338,8 @@ bool Value::isUInt() const {
   return false;
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::isInt64() const {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isInt64() const {
 #if defined(JSON_HAS_INT64)
   switch (type_) {
   case intValue:
@@ -1347,8 +1359,8 @@ bool Value::isInt64() const {
   return false;
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::isUInt64() const {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isUInt64() const {
 #if defined(JSON_HAS_INT64)
   switch (type_) {
   case intValue:
@@ -1368,8 +1380,8 @@ bool Value::isUInt64() const {
   return false;
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::isIntegral() const {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isIntegral() const {
 #if defined(JSON_HAS_INT64)
   return isInt64() || isUInt64();
 #else
@@ -1377,23 +1389,23 @@ bool Value::isIntegral() const {
 #endif
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::isDouble() const { return type_ == realValue || isIntegral(); }
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isDouble() const { return type_ == realValue || isIntegral(); }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::isNumeric() const { return isIntegral() || isDouble(); }
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isNumeric() const { return isIntegral() || isDouble(); }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::isString() const { return type_ == stringValue; }
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isString() const { return type_ == stringValue; }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::isArray() const { return type_ == arrayValue; }
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isArray() const { return type_ == arrayValue; }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::isObject() const { return type_ == objectValue; }
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::isObject() const { return type_ == objectValue; }
 
-template<template<class T> class _Alloc, class _String>
-void Value::setComment(const char* comment, size_t len, CommentPlacement placement) {
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::setComment(const char* comment, size_t len, CommentPlacement placement) {
   if (!comments_)
     comments_ = new CommentInfo[numberOfCommentPlacement];
   if ((len > 0) && (comment[len-1] == '\n')) {
@@ -1403,48 +1415,48 @@ void Value::setComment(const char* comment, size_t len, CommentPlacement placeme
   comments_[placement].setComment(comment, len);
 }
 
-template<template<class T> class _Alloc, class _String>
-void Value::setComment(const char* comment, CommentPlacement placement) {
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::setComment(const char* comment, CommentPlacement placement) {
   setComment(comment, strlen(comment), placement);
 }
 
-template<template<class T> class _Alloc, class _String>
-void Value::setComment(const std::string& comment, CommentPlacement placement) {
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::setComment(const std::string& comment, CommentPlacement placement) {
   setComment(comment.c_str(), comment.length(), placement);
 }
 
-template<template<class T> class _Alloc, class _String>
-bool Value::hasComment(CommentPlacement placement) const {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::hasComment(CommentPlacement placement) const {
   return comments_ != 0 && comments_[placement].comment_ != 0;
 }
 
-template<template<class T> class _Alloc, class _String>
-std::string Value::getComment(CommentPlacement placement) const {
+template<class _Alloc, class _String>
+std::string Value<_Alloc, _String>::getComment(CommentPlacement placement) const {
   if (hasComment(placement))
     return comments_[placement].comment_;
   return "";
 }
 
-template<template<class T> class _Alloc, class _String>
-void Value::setOffsetStart(size_t start) { start_ = start; }
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::setOffsetStart(size_t start) { start_ = start; }
 
-template<template<class T> class _Alloc, class _String>
-void Value::setOffsetLimit(size_t limit) { limit_ = limit; }
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::setOffsetLimit(size_t limit) { limit_ = limit; }
 
-template<template<class T> class _Alloc, class _String>
-size_t Value::getOffsetStart() const { return start_; }
+template<class _Alloc, class _String>
+size_t Value<_Alloc, _String>::getOffsetStart() const { return start_; }
 
-template<template<class T> class _Alloc, class _String>
-size_t Value::getOffsetLimit() const { return limit_; }
+template<class _Alloc, class _String>
+size_t Value<_Alloc, _String>::getOffsetLimit() const { return limit_; }
 
-template<template<class T> class _Alloc, class _String>
-std::string Value::toStyledString() const {
-  StyledWriter writer;
+template<class _Alloc, class _String>
+std::string Value<_Alloc, _String>::toStyledString() const {
+  StyledWriter<Value<_Alloc, _String>> writer;
   return writer.write(*this);
 }
 
-template<template<class T> class _Alloc, class _String>
-Value::const_iterator Value::begin() const {
+template<class _Alloc, class _String>
+typename Value<_Alloc, _String>::const_iterator Value<_Alloc, _String>::begin() const {
   switch (type_) {
   case arrayValue:
   case objectValue:
@@ -1457,8 +1469,8 @@ Value::const_iterator Value::begin() const {
   return const_iterator();
 }
 
-template<template<class T> class _Alloc, class _String>
-Value::const_iterator Value::end() const {
+template<class _Alloc, class _String>
+typename Value<_Alloc, _String>::const_iterator Value<_Alloc, _String>::end() const {
   switch (type_) {
   case arrayValue:
   case objectValue:
@@ -1471,8 +1483,8 @@ Value::const_iterator Value::end() const {
   return const_iterator();
 }
 
-template<template<class T> class _Alloc, class _String>
-Value::iterator Value::begin() {
+template<class _Alloc, class _String>
+typename Value<_Alloc, _String>::iterator Value<_Alloc, _String>::begin() {
   switch (type_) {
   case arrayValue:
   case objectValue:
@@ -1485,8 +1497,8 @@ Value::iterator Value::begin() {
   return iterator();
 }
 
-template<template<class T> class _Alloc, class _String>
-Value::iterator Value::end() {
+template<class _Alloc, class _String>
+typename Value<_Alloc, _String>::iterator Value<_Alloc, _String>::end() {
   switch (type_) {
   case arrayValue:
   case objectValue:
@@ -1503,30 +1515,30 @@ Value::iterator Value::end() {
 // //////////////////////////////////////////////////////////////////
 
 template<class _Value>
-PathArgument::PathArgument() : key_(), index_(), kind_(kindNone) {}
+PathArgument<_Value>::PathArgument() : key_(), index_(), kind_(kindNone) {}
 
 template<class _Value>
-PathArgument::PathArgument(ArrayIndex index)
+PathArgument<_Value>::PathArgument(ArrayIndex index)
     : key_(), index_(index), kind_(kindIndex) {}
 
 template<class _Value>
-PathArgument::PathArgument(const char* key)
+PathArgument<_Value>::PathArgument(const char* key)
     : key_(key), index_(), kind_(kindKey) {}
 
 template<class _Value>
-PathArgument::PathArgument(const std::string& key)
+PathArgument<_Value>::PathArgument(const std::string& key)
     : key_(key.c_str()), index_(), kind_(kindKey) {}
 
 // class Path
 // //////////////////////////////////////////////////////////////////
 
 template<class _Value>
-Path::Path(const std::string& path,
-           const PathArgument& a1,
-           const PathArgument& a2,
-           const PathArgument& a3,
-           const PathArgument& a4,
-           const PathArgument& a5) {
+Path<_Value>::Path(const std::string& path,
+           const PathArgument<_Value>& a1,
+           const PathArgument<_Value>& a2,
+           const PathArgument<_Value>& a3,
+           const PathArgument<_Value>& a4,
+           const PathArgument<_Value>& a5) {
   InArgs in;
   in.push_back(&a1);
   in.push_back(&a2);
@@ -1537,15 +1549,15 @@ Path::Path(const std::string& path,
 }
 
 template<class _Value>
-void Path::makePath(const std::string& path, const InArgs& in) {
+void Path<_Value>::makePath(const std::string& path, const InArgs& in) {
   const char* current = path.c_str();
   const char* end = current + path.length();
-  InArgs::const_iterator itInArg = in.begin();
+  typename InArgs::const_iterator itInArg = in.begin();
   while (current != end) {
     if (*current == '[') {
       ++current;
       if (*current == '%')
-        addPathInArg(path, in, itInArg, PathArgument::kindIndex);
+        addPathInArg(path, in, itInArg, PathArgument<_Value>::kindIndex);
       else {
         ArrayIndex index = 0;
         for (; current != end && *current >= '0' && *current <= '9'; ++current)
@@ -1555,7 +1567,7 @@ void Path::makePath(const std::string& path, const InArgs& in) {
       if (current == end || *current++ != ']')
         invalidPath(path, int(current - path.c_str()));
     } else if (*current == '%') {
-      addPathInArg(path, in, itInArg, PathArgument::kindKey);
+      addPathInArg(path, in, itInArg, PathArgument<_Value>::kindKey);
       ++current;
     } else if (*current == '.') {
       ++current;
@@ -1569,10 +1581,10 @@ void Path::makePath(const std::string& path, const InArgs& in) {
 }
 
 template<class _Value>
-void Path::addPathInArg(const std::string& /*path*/,
+void Path<_Value>::addPathInArg(const std::string& /*path*/,
                         const InArgs& in,
-                        InArgs::const_iterator& itInArg,
-                        PathArgument::Kind kind) {
+                        typename InArgs::const_iterator& itInArg,
+                        typename PathArgument<_Value>::Kind kind) {
   if (itInArg == in.end()) {
     // Error: missing argument %d
   } else if ((*itInArg)->kind_ != kind) {
@@ -1583,26 +1595,26 @@ void Path::addPathInArg(const std::string& /*path*/,
 }
 
 template<class _Value>
-void Path::invalidPath(const std::string& /*path*/, int /*location*/) {
+void Path<_Value>::invalidPath(const std::string& /*path*/, int /*location*/) {
   // Error: invalid path.
 }
 
 template<class _Value>
-const Value& Path::resolve(const Value& root) const {
-  const Value* node = &root;
-  for (Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
-    const PathArgument& arg = *it;
-    if (arg.kind_ == PathArgument::kindIndex) {
+const _Value& Path<_Value>::resolve(const _Value& root) const {
+  const _Value* node = &root;
+  for (typename Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
+    const PathArgument<_Value>& arg = *it;
+    if (arg.kind_ == PathArgument<_Value>::kindIndex) {
       if (!node->isArray() || !node->isValidIndex(arg.index_)) {
         // Error: unable to resolve path (array value expected at position...
       }
       node = &((*node)[arg.index_]);
-    } else if (arg.kind_ == PathArgument::kindKey) {
+    } else if (arg.kind_ == PathArgument<_Value>::kindKey) {
       if (!node->isObject()) {
         // Error: unable to resolve path (object value expected at position...)
       }
       node = &((*node)[arg.key_]);
-      if (node == &Value::nullRef) {
+      if (node == &_Value::nullRef) {
         // Error: unable to resolve path (object has no member named '' at
         // position...)
       }
@@ -1612,19 +1624,19 @@ const Value& Path::resolve(const Value& root) const {
 }
 
 template<class _Value>
-Value Path::resolve(const Value& root, const Value& defaultValue) const {
-  const Value* node = &root;
-  for (Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
-    const PathArgument& arg = *it;
-    if (arg.kind_ == PathArgument::kindIndex) {
+_Value Path<_Value>::resolve(const _Value& root, const _Value& defaultValue) const {
+  const _Value* node = &root;
+  for (typename Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
+    const PathArgument<_Value>& arg = *it;
+    if (arg.kind_ == PathArgument<_Value>::kindIndex) {
       if (!node->isArray() || !node->isValidIndex(arg.index_))
         return defaultValue;
       node = &((*node)[arg.index_]);
-    } else if (arg.kind_ == PathArgument::kindKey) {
+    } else if (arg.kind_ == PathArgument<_Value>::kindKey) {
       if (!node->isObject())
         return defaultValue;
       node = &((*node)[arg.key_]);
-      if (node == &Value::nullRef)
+      if (node == &_Value::nullRef)
         return defaultValue;
     }
   }
@@ -1632,16 +1644,16 @@ Value Path::resolve(const Value& root, const Value& defaultValue) const {
 }
 
 template<class _Value>
-Value& Path::make(Value& root) const {
-  Value* node = &root;
-  for (Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
-    const PathArgument& arg = *it;
-    if (arg.kind_ == PathArgument::kindIndex) {
+_Value& Path<_Value>::make(_Value& root) const {
+  _Value* node = &root;
+  for (typename Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
+    const PathArgument<_Value>& arg = *it;
+    if (arg.kind_ == PathArgument<_Value>::kindIndex) {
       if (!node->isArray()) {
         // Error: node is not an array at position ...
       }
       node = &((*node)[arg.index_]);
-    } else if (arg.kind_ == PathArgument::kindKey) {
+    } else if (arg.kind_ == PathArgument<_Value>::kindKey) {
       if (!node->isObject()) {
         // Error: node is not an object at position...
       }

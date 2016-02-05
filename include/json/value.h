@@ -161,14 +161,15 @@ namespace detail {
  * but the Value API does *not* check bounds. That is the responsibility
  * of the caller.
  */
-template<template<class T> class _Alloc = std::allocator<char>,
+template<class _Alloc = std::allocator<char>,
   class _String = std::basic_string<char, std::char_traits<char>, std::allocator<char>>>
 class JSON_API Value {
+  template<typename T>
   friend class ValueIteratorBase;
 public:
   typedef std::vector<std::string> Members;
-  typedef ValueIterator iterator;
-  typedef ValueConstIterator const_iterator;
+  typedef ValueIterator<Value> iterator;
+  typedef ValueConstIterator<Value> const_iterator;
   typedef Json::UInt UInt;
   typedef Json::Int Int;
 #if defined(JSON_HAS_INT64)
@@ -293,7 +294,7 @@ Json::Value obj_value(Json::objectValue); // {}
    * Json::Value aValue(foo);
    * \endcode
    */
-  Value(const StaticString& value);
+  Value(const Json::StaticString& value);
   Value(const std::string& value); ///< Copy data() til size(). Embedded zeroes too.
 #ifdef JSON_USE_CPPTL
   Value(const CppTL::ConstString& value);
@@ -612,6 +613,7 @@ private:
 template<class _Value>
 class JSON_API PathArgument {
 public:
+  template<typename T>
   friend class Path;
 
   PathArgument();
@@ -645,27 +647,27 @@ template<class _Value>
 class JSON_API Path {
 public:
   Path(const std::string& path,
-       const PathArgument& a1 = PathArgument(),
-       const PathArgument& a2 = PathArgument(),
-       const PathArgument& a3 = PathArgument(),
-       const PathArgument& a4 = PathArgument(),
-       const PathArgument& a5 = PathArgument());
+       const PathArgument<_Value>& a1 = PathArgument<_Value>(),
+       const PathArgument<_Value>& a2 = PathArgument<_Value>(),
+       const PathArgument<_Value>& a3 = PathArgument<_Value>(),
+       const PathArgument<_Value>& a4 = PathArgument<_Value>(),
+       const PathArgument<_Value>& a5 = PathArgument<_Value>());
 
-  const Value& resolve(const Value& root) const;
-  Value resolve(const Value& root, const Value& defaultValue) const;
+  const _Value& resolve(const _Value& root) const;
+  _Value resolve(const _Value& root, const _Value& defaultValue) const;
   /// Creates the "path" to access the specified node and returns a reference on
   /// the node.
-  Value& make(Value& root) const;
+  _Value& make(_Value& root) const;
 
 private:
-  typedef std::vector<const PathArgument*> InArgs;
-  typedef std::vector<PathArgument> Args;
+  typedef std::vector<const PathArgument<_Value>*> InArgs;
+  typedef std::vector<PathArgument<_Value>> Args;
 
   void makePath(const std::string& path, const InArgs& in);
   void addPathInArg(const std::string& path,
                     const InArgs& in,
-                    InArgs::const_iterator& itInArg,
-                    PathArgument::Kind kind);
+                    typename InArgs::const_iterator& itInArg,
+					typename PathArgument<_Value>::Kind kind);
   void invalidPath(const std::string& path, int location);
 
   Args args_;
@@ -680,7 +682,7 @@ public:
   typedef std::bidirectional_iterator_tag iterator_category;
   typedef unsigned int size_t;
   typedef int difference_type;
-  typedef ValueIteratorBase SelfType;
+  typedef ValueIteratorBase<_Value> SelfType;
 
   bool operator==(const SelfType& other) const { return isEqual(other); }
 
@@ -692,7 +694,7 @@ public:
 
   /// Return either the index or the member name of the referenced value as a
   /// Value.
-  Value key() const;
+  _Value key() const;
 
   /// Return the index of the referenced Value, or -1 if it is not an arrayValue.
   UInt index() const;
@@ -713,7 +715,7 @@ public:
   char const* memberName(char const** end) const;
 
 protected:
-  Value& deref() const;
+  _Value& deref() const;
 
   void increment();
 
@@ -726,7 +728,7 @@ protected:
   void copy(const SelfType& other);
 
 private:
-  Value::ObjectValues::iterator current_;
+  typename _Value::ObjectValues::iterator current_;
   // Indicates that iterator is for a null value.
   bool isNull_;
 
@@ -734,33 +736,34 @@ public:
   // For some reason, BORLAND needs these at the end, rather
   // than earlier. No idea why.
   ValueIteratorBase();
-  explicit ValueIteratorBase(const Value::ObjectValues::iterator& current);
+  explicit ValueIteratorBase(const typename _Value::ObjectValues::iterator& current);
 };
 
 /** \brief const iterator for object and array value.
  *
  */
 template<class _Value>
-class JSON_API ValueConstIterator : public ValueIteratorBase {
+class JSON_API ValueConstIterator : public ValueIteratorBase<_Value> {
+  template<typename A, typename S>
   friend class Value;
 
 public:
-  typedef const Value value_type;
+  typedef const _Value value_type;
   //typedef unsigned int size_t;
   //typedef int difference_type;
-  typedef const Value& reference;
-  typedef const Value* pointer;
+  typedef const _Value& reference;
+  typedef const _Value* pointer;
   typedef ValueConstIterator SelfType;
 
   ValueConstIterator();
-  ValueConstIterator(ValueIterator const& other);
+  ValueConstIterator(ValueIterator<_Value> const& other);
 
 private:
 /*! \internal Use by Value to create an iterator.
  */
-  explicit ValueConstIterator(const Value::ObjectValues::iterator& current);
+  explicit ValueConstIterator(const typename _Value::ObjectValues::iterator& current);
 public:
-  SelfType& operator=(const ValueIteratorBase& other);
+  SelfType& operator=(const ValueIteratorBase<_Value>& other);
 
   SelfType operator++(int) {
     SelfType temp(*this);
@@ -775,42 +778,43 @@ public:
   }
 
   SelfType& operator--() {
-    decrement();
+    ValueIteratorBase<_Value>::decrement();
     return *this;
   }
 
   SelfType& operator++() {
-    increment();
+    ValueIteratorBase<_Value>::increment();
     return *this;
   }
 
-  reference operator*() const { return deref(); }
+  reference operator*() const { return ValueIteratorBase<_Value>::deref(); }
 
-  pointer operator->() const { return &deref(); }
+  pointer operator->() const { return &ValueIteratorBase<_Value>::deref(); }
 };
 
 /** \brief Iterator for object and array value.
  */
 template<class _Value>
-class JSON_API ValueIterator : public ValueIteratorBase {
+class JSON_API ValueIterator : public ValueIteratorBase<_Value> {
+  template<typename A, typename S>
   friend class Value;
 
 public:
-  typedef Value value_type;
+  typedef _Value value_type;
   typedef unsigned int size_t;
   typedef int difference_type;
-  typedef Value& reference;
-  typedef Value* pointer;
-  typedef ValueIterator SelfType;
+  typedef _Value& reference;
+  typedef _Value* pointer;
+  typedef ValueIterator<_Value> SelfType;
 
   ValueIterator();
-  explicit ValueIterator(const ValueConstIterator& other);
+  explicit ValueIterator(const ValueConstIterator<_Value>& other);
   ValueIterator(const ValueIterator& other);
 
 private:
 /*! \internal Use by Value to create an iterator.
  */
-  explicit ValueIterator(const Value::ObjectValues::iterator& current);
+  explicit ValueIterator(const typename _Value::ObjectValues::iterator& current);
 public:
   SelfType& operator=(const SelfType& other);
 
@@ -827,18 +831,18 @@ public:
   }
 
   SelfType& operator--() {
-    decrement();
+	ValueIteratorBase<_Value>::decrement();
     return *this;
   }
 
   SelfType& operator++() {
-    increment();
+	ValueIteratorBase<_Value>::increment();
     return *this;
   }
 
-  reference operator*() const { return deref(); }
+  reference operator*() const { return ValueIteratorBase<_Value>::deref(); }
 
-  pointer operator->() const { return &deref(); }
+  pointer operator->() const { return &ValueIteratorBase<_Value>::deref(); }
 };
 
 } // namespace detail
@@ -855,8 +859,9 @@ typedef detail::ValueIteratorBase<detail::Value<>> ValueIteratorBase; 	// class 
 
 namespace std {
 /// Specialize std::swap() for Json::Value.
-template<class _Value>
-inline void swap(Json::Value& a, Json::Value& b) { a.swap(b); }
+template<class _Alloc = std::allocator<char>,
+  class _String = std::basic_string<char, std::char_traits<char>, std::allocator<char>>>
+inline void swap(Json::detail::Value<_Alloc, _String>& a, Json::detail::Value<_Alloc, _String>& b) { a.swap(b); }
 }
 
 

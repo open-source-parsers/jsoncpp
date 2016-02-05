@@ -5,7 +5,7 @@
 
 #if !defined(JSON_IS_AMALGAMATION)
 #include <json/assertions.h>
-#include <json/reader.h>
+#include <json/reader.inl>
 #include <json/value.h>
 #include <json/tool.h>
 #endif // if !defined(JSON_IS_AMALGAMATION)
@@ -42,9 +42,6 @@
 #pragma warning(disable : 4996)
 #endif
 
-static int const stackLimit_g = 1000;
-static int       stackDepth_g = 0;  // see readValue()
-
 namespace Json {
 
 #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
@@ -71,9 +68,11 @@ Features Features::strictMode() {
   return features;
 }
 
+namespace detail {
 // exact copy of Implementation of class Features
 // ////////////////////////////////
 
 OurFeatures OurFeatures::all() { return OurFeatures(); }
 
+} // namespace detail
 } // namespace Json

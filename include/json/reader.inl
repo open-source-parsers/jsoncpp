@@ -7,7 +7,7 @@
 #include "assertions.h"
 #include "reader.h"
 #include "value.h"
-#include "json_tool.h"
+#include "tool.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <utility>
 #include <cstdio>
@@ -47,18 +47,12 @@ static int       stackDepth_g = 0;  // see readValue()
 
 namespace Json {
 namespace detail {
-	
-#if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
-typedef std::unique_ptr<CharReader> CharReaderPtr;
-#else
-typedef std::auto_ptr<CharReader>   CharReaderPtr;
-#endif
 
 // Implementation of class Reader
 // ////////////////////////////////
 
 template<class _Value>
-static bool containsNewLine(Reader::Location begin, Reader::Location end) {
+static bool containsNewLine(typename Reader<_Value>::Location begin, typename Reader<_Value>::Location end) {
   for (; begin < end; ++begin)
     if (*begin == '\n' || *begin == '\r')
       return true;
@@ -69,20 +63,20 @@ static bool containsNewLine(Reader::Location begin, Reader::Location end) {
 // //////////////////////////////////////////////////////////////////
 
 template<class _Value>
-Reader::Reader()
+Reader<_Value>::Reader()
     : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
       lastValue_(), commentsBefore_(), features_(Features::all()),
       collectComments_() {}
 
 template<class _Value>
-Reader::Reader(const Features& features)
+Reader<_Value>::Reader(const Features& features)
     : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
       lastValue_(), commentsBefore_(), features_(features), collectComments_() {
 }
 
 template<class _Value>
 bool
-Reader::parse(const std::string& document, Value& root, bool collectComments) {
+Reader<_Value>::parse(const std::string& document, _Value& root, bool collectComments) {
   document_ = document;
   const char* begin = document_.c_str();
   const char* end = begin + document_.length();
@@ -90,7 +84,7 @@ Reader::parse(const std::string& document, Value& root, bool collectComments) {
 }
 
 template<class _Value>
-bool Reader::parse(std::istream& sin, Value& root, bool collectComments) {
+bool Reader<_Value>::parse(std::istream& sin, _Value& root, bool collectComments) {
   // std::istream_iterator<char> begin(sin);
   // std::istream_iterator<char> end;
   // Those would allow streamed input from a file, if parse() were a
@@ -104,9 +98,9 @@ bool Reader::parse(std::istream& sin, Value& root, bool collectComments) {
 }
 
 template<class _Value>
-bool Reader::parse(const char* beginDoc,
+bool Reader<_Value>::parse(const char* beginDoc,
                    const char* endDoc,
-                   Value& root,
+                   _Value& root,
                    bool collectComments) {
   if (!features_.allowComments_) {
     collectComments = false;
@@ -147,7 +141,7 @@ bool Reader::parse(const char* beginDoc,
 }
 
 template<class _Value>
-bool Reader::readValue() {
+bool Reader<_Value>::readValue() {
   // This is a non-reentrant way to support a stackLimit. Terrible!
   // But this deprecated class has a security problem: Bad input can
   // cause a seg-fault. This seems like a fair, binary-compatible way
@@ -181,7 +175,7 @@ bool Reader::readValue() {
     break;
   case tokenTrue:
     {
-    Value v(true);
+    _Value v(true);
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -189,7 +183,7 @@ bool Reader::readValue() {
     break;
   case tokenFalse:
     {
-    Value v(false);
+    _Value v(false);
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -197,7 +191,7 @@ bool Reader::readValue() {
     break;
   case tokenNull:
     {
-    Value v;
+    _Value v;
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -210,7 +204,7 @@ bool Reader::readValue() {
       // "Un-read" the current token and mark the current value as a null
       // token.
       current_--;
-      Value v;
+      _Value v;
       currentValue().swapPayload(v);
       currentValue().setOffsetStart(current_ - begin_ - 1);
       currentValue().setOffsetLimit(current_ - begin_);
@@ -232,7 +226,7 @@ bool Reader::readValue() {
 }
 
 template<class _Value>
-void Reader::skipCommentTokens(Token& token) {
+void Reader<_Value>::skipCommentTokens(Token& token) {
   if (features_.allowComments_) {
     do {
       readToken(token);
@@ -243,7 +237,7 @@ void Reader::skipCommentTokens(Token& token) {
 }
 
 template<class _Value>
-bool Reader::readToken(Token& token) {
+bool Reader<_Value>::readToken(Token& token) {
   skipSpaces();
   token.start_ = current_;
   Char c = getNextChar();
@@ -314,7 +308,8 @@ bool Reader::readToken(Token& token) {
   return true;
 }
 
-void Reader::skipSpaces() {
+template<class _Value>
+void Reader<_Value>::skipSpaces() {
   while (current_ != end_) {
     Char c = *current_;
     if (c == ' ' || c == '\t' || c == '\r' || c == '\n')
@@ -325,7 +320,7 @@ void Reader::skipSpaces() {
 }
 
 template<class _Value>
-bool Reader::match(Location pattern, int patternLength) {
+bool Reader<_Value>::match(Location pattern, int patternLength) {
   if (end_ - current_ < patternLength)
     return false;
   int index = patternLength;
@@ -337,7 +332,7 @@ bool Reader::match(Location pattern, int patternLength) {
 }
 
 template<class _Value>
-bool Reader::readComment() {
+bool Reader<_Value>::readComment() {
   Location commentBegin = current_ - 1;
   Char c = getNextChar();
   bool successful = false;
@@ -350,8 +345,8 @@ bool Reader::readComment() {
 
   if (collectComments_) {
     CommentPlacement placement = commentBefore;
-    if (lastValueEnd_ && !containsNewLine(lastValueEnd_, commentBegin)) {
-      if (c != '*' || !containsNewLine(commentBegin, current_))
+    if (lastValueEnd_ && !containsNewLine<_Value>(lastValueEnd_, commentBegin)) {
+      if (c != '*' || !containsNewLine<_Value>(commentBegin, current_))
         placement = commentAfterOnSameLine;
     }
 
@@ -361,10 +356,10 @@ bool Reader::readComment() {
 }
 
 template<class _Value>
-static std::string normalizeEOL(Reader::Location begin, Reader::Location end) {
+static std::string normalizeEOL(typename Reader<_Value>::Location begin, typename Reader<_Value>::Location end) {
   std::string normalized;
   normalized.reserve(end - begin);
-  Reader::Location current = begin;
+  typename Reader<_Value>::Location current = begin;
   while (current != end) {
     char c = *current++;
     if (c == '\r') {
@@ -382,9 +377,9 @@ static std::string normalizeEOL(Reader::Location begin, Reader::Location end) {
 
 template<class _Value>
 void
-Reader::addComment(Location begin, Location end, CommentPlacement placement) {
+Reader<_Value>::addComment(Location begin, Location end, CommentPlacement placement) {
   assert(collectComments_);
-  const std::string& normalized = normalizeEOL(begin, end);
+  const std::string& normalized = normalizeEOL<_Value>(begin, end);
   if (placement == commentAfterOnSameLine) {
     assert(lastValue_ != 0);
     lastValue_->setComment(normalized, placement);
@@ -394,7 +389,7 @@ Reader::addComment(Location begin, Location end, CommentPlacement placement) {
 }
 
 template<class _Value>
-bool Reader::readCStyleComment() {
+bool Reader<_Value>::readCStyleComment() {
   while (current_ != end_) {
     Char c = getNextChar();
     if (c == '*' && *current_ == '/')
@@ -404,7 +399,7 @@ bool Reader::readCStyleComment() {
 }
 
 template<class _Value>
-bool Reader::readCppStyleComment() {
+bool Reader<_Value>::readCppStyleComment() {
   while (current_ != end_) {
     Char c = getNextChar();
     if (c == '\n')
@@ -421,7 +416,7 @@ bool Reader::readCppStyleComment() {
 }
 
 template<class _Value>
-void Reader::readNumber() {
+void Reader<_Value>::readNumber() {
   const char *p = current_;
   char c = '0'; // stopgap for already consumed character
   // integral part
@@ -444,7 +439,7 @@ void Reader::readNumber() {
 }
 
 template<class _Value>
-bool Reader::readString() {
+bool Reader<_Value>::readString() {
   Char c = 0;
   while (current_ != end_) {
     c = getNextChar();
@@ -457,10 +452,10 @@ bool Reader::readString() {
 }
 
 template<class _Value>
-bool Reader::readObject(Token& tokenStart) {
+bool Reader<_Value>::readObject(Token& tokenStart) {
   Token tokenName;
   std::string name;
-  Value init(objectValue);
+  _Value init(objectValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(tokenStart.start_ - begin_);
   while (readToken(tokenName)) {
@@ -476,7 +471,7 @@ bool Reader::readObject(Token& tokenStart) {
       if (!decodeString(tokenName, name))
         return recoverFromError(tokenObjectEnd);
     } else if (tokenName.type_ == tokenNumber && features_.allowNumericKeys_) {
-      Value numberName;
+      _Value numberName;
       if (!decodeNumber(tokenName, numberName))
         return recoverFromError(tokenObjectEnd);
       name = numberName.asString();
@@ -489,7 +484,7 @@ bool Reader::readObject(Token& tokenStart) {
       return addErrorAndRecover(
           "Missing ':' after object member name", colon, tokenObjectEnd);
     }
-    Value& value = currentValue()[name];
+    _Value& value = currentValue()[name];
     nodes_.push(&value);
     bool ok = readValue();
     nodes_.pop();
@@ -514,8 +509,8 @@ bool Reader::readObject(Token& tokenStart) {
 }
 
 template<class _Value>
-bool Reader::readArray(Token& tokenStart) {
-  Value init(arrayValue);
+bool Reader<_Value>::readArray(Token& tokenStart) {
+  _Value init(arrayValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(tokenStart.start_ - begin_);
   skipSpaces();
@@ -527,7 +522,7 @@ bool Reader::readArray(Token& tokenStart) {
   }
   int index = 0;
   for (;;) {
-    Value& value = currentValue()[index++];
+    _Value& value = currentValue()[index++];
     nodes_.push(&value);
     bool ok = readValue();
     nodes_.pop();
@@ -553,8 +548,8 @@ bool Reader::readArray(Token& tokenStart) {
 }
 
 template<class _Value>
-bool Reader::decodeNumber(Token& token) {
-  Value decoded;
+bool Reader<_Value>::decodeNumber(Token& token) {
+  _Value decoded;
   if (!decodeNumber(token, decoded))
     return false;
   currentValue().swapPayload(decoded);
@@ -564,7 +559,7 @@ bool Reader::decodeNumber(Token& token) {
 }
 
 template<class _Value>
-bool Reader::decodeNumber(Token& token, Value& decoded) {
+bool Reader<_Value>::decodeNumber(Token& token, _Value& decoded) {
   // Attempts to parse the number as an integer. If the number is
   // larger than the maximum supported value of an integer then
   // we decode the number as a double.
@@ -573,16 +568,16 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
   if (isNegative)
     ++current;
   // TODO: Help the compiler do the div and mod at compile time or get rid of them.
-  Value::LargestUInt maxIntegerValue =
-      isNegative ? Value::LargestUInt(Value::maxLargestInt) + 1
-                 : Value::maxLargestUInt;
-  Value::LargestUInt threshold = maxIntegerValue / 10;
-  Value::LargestUInt value = 0;
+  typename _Value::LargestUInt maxIntegerValue =
+      isNegative ? typename _Value::LargestUInt(_Value::maxLargestInt) + 1
+                 : _Value::maxLargestUInt;
+  typename _Value::LargestUInt threshold = maxIntegerValue / 10;
+  typename _Value::LargestUInt value = 0;
   while (current < token.end_) {
     Char c = *current++;
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
-    Value::UInt digit(c - '0');
+    typename _Value::UInt digit(c - '0');
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, b) this is the last digit, and
@@ -596,19 +591,19 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
     value = value * 10 + digit;
   }
   if (isNegative && value == maxIntegerValue)
-    decoded = Value::minLargestInt;
+    decoded = _Value::minLargestInt;
   else if (isNegative)
-    decoded = -Value::LargestInt(value);
-  else if (value <= Value::LargestUInt(Value::maxInt))
-    decoded = Value::LargestInt(value);
+    decoded = -typename _Value::LargestInt(value);
+  else if (value <= typename _Value::LargestUInt(_Value::maxInt))
+    decoded = typename _Value::LargestInt(value);
   else
     decoded = value;
   return true;
 }
 
 template<class _Value>
-bool Reader::decodeDouble(Token& token) {
-  Value decoded;
+bool Reader<_Value>::decodeDouble(Token& token) {
+  _Value decoded;
   if (!decodeDouble(token, decoded))
     return false;
   currentValue().swapPayload(decoded);
@@ -618,7 +613,7 @@ bool Reader::decodeDouble(Token& token) {
 }
 
 template<class _Value>
-bool Reader::decodeDouble(Token& token, Value& decoded) {
+bool Reader<_Value>::decodeDouble(Token& token, _Value& decoded) {
   double value = 0;
   std::string buffer(token.start_, token.end_);
   std::istringstream is(buffer);
@@ -631,11 +626,11 @@ bool Reader::decodeDouble(Token& token, Value& decoded) {
 }
 
 template<class _Value>
-bool Reader::decodeString(Token& token) {
+bool Reader<_Value>::decodeString(Token& token) {
   std::string decoded_string;
   if (!decodeString(token, decoded_string))
     return false;
-  Value decoded(decoded_string);
+  _Value decoded(decoded_string);
   currentValue().swapPayload(decoded);
   currentValue().setOffsetStart(token.start_ - begin_);
   currentValue().setOffsetLimit(token.end_ - begin_);
@@ -643,7 +638,7 @@ bool Reader::decodeString(Token& token) {
 }
 
 template<class _Value>
-bool Reader::decodeString(Token& token, std::string& decoded) {
+bool Reader<_Value>::decodeString(Token& token, std::string& decoded) {
   decoded.reserve(token.end_ - token.start_ - 2);
   Location current = token.start_ + 1; // skip '"'
   Location end = token.end_ - 1;       // do not include '"'
@@ -697,7 +692,7 @@ bool Reader::decodeString(Token& token, std::string& decoded) {
 }
 
 template<class _Value>
-bool Reader::decodeUnicodeCodePoint(Token& token,
+bool Reader<_Value>::decodeUnicodeCodePoint(Token& token,
                                     Location& current,
                                     Location end,
                                     unsigned int& unicode) {
@@ -727,7 +722,7 @@ bool Reader::decodeUnicodeCodePoint(Token& token,
 }
 
 template<class _Value>
-bool Reader::decodeUnicodeEscapeSequence(Token& token,
+bool Reader<_Value>::decodeUnicodeEscapeSequence(Token& token,
                                          Location& current,
                                          Location end,
                                          unsigned int& unicode) {
@@ -757,7 +752,7 @@ bool Reader::decodeUnicodeEscapeSequence(Token& token,
 
 template<class _Value>
 bool
-Reader::addError(const std::string& message, Token& token, Location extra) {
+Reader<_Value>::addError(const std::string& message, Token& token, Location extra) {
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
@@ -767,7 +762,7 @@ Reader::addError(const std::string& message, Token& token, Location extra) {
 }
 
 template<class _Value>
-bool Reader::recoverFromError(TokenType skipUntilToken) {
+bool Reader<_Value>::recoverFromError(TokenType skipUntilToken) {
   int errorCount = int(errors_.size());
   Token skip;
   for (;;) {
@@ -781,7 +776,7 @@ bool Reader::recoverFromError(TokenType skipUntilToken) {
 }
 
 template<class _Value>
-bool Reader::addErrorAndRecover(const std::string& message,
+bool Reader<_Value>::addErrorAndRecover(const std::string& message,
                                 Token& token,
                                 TokenType skipUntilToken) {
   addError(message, token);
@@ -789,17 +784,17 @@ bool Reader::addErrorAndRecover(const std::string& message,
 }
 
 template<class _Value>
-Value& Reader::currentValue() { return *(nodes_.top()); }
+_Value& Reader<_Value>::currentValue() { return *(nodes_.top()); }
 
 template<class _Value>
-Reader::Char Reader::getNextChar() {
+typename Reader<_Value>::Char Reader<_Value>::getNextChar() {
   if (current_ == end_)
     return 0;
   return *current_++;
 }
 
 template<class _Value>
-void Reader::getLocationLineAndColumn(Location location,
+void Reader<_Value>::getLocationLineAndColumn(Location location,
                                       int& line,
                                       int& column) const {
   Location current = begin_;
@@ -823,7 +818,7 @@ void Reader::getLocationLineAndColumn(Location location,
 }
 
 template<class _Value>
-std::string Reader::getLocationLineAndColumn(Location location) const {
+std::string Reader<_Value>::getLocationLineAndColumn(Location location) const {
   int line, column;
   getLocationLineAndColumn(location, line, column);
   char buffer[18 + 16 + 16 + 1];
@@ -833,14 +828,14 @@ std::string Reader::getLocationLineAndColumn(Location location) const {
 
 // Deprecated. Preserved for backward compatibility
 template<class _Value>
-std::string Reader::getFormatedErrorMessages() const {
+std::string Reader<_Value>::getFormatedErrorMessages() const {
   return getFormattedErrorMessages();
 }
 
 template<class _Value>
-std::string Reader::getFormattedErrorMessages() const {
+std::string Reader<_Value>::getFormattedErrorMessages() const {
   std::string formattedMessage;
-  for (Errors::const_iterator itError = errors_.begin();
+  for (typename Errors::const_iterator itError = errors_.begin();
        itError != errors_.end();
        ++itError) {
     const ErrorInfo& error = *itError;
@@ -855,9 +850,9 @@ std::string Reader::getFormattedErrorMessages() const {
 }
 
 template<class _Value>
-std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
+std::vector<typename Reader<_Value>::StructuredError> Reader<_Value>::getStructuredErrors() const {
   std::vector<Reader::StructuredError> allErrors;
-  for (Errors::const_iterator itError = errors_.begin();
+  for (typename Errors::const_iterator itError = errors_.begin();
        itError != errors_.end();
        ++itError) {
     const ErrorInfo& error = *itError;
@@ -871,7 +866,7 @@ std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
 }
 
 template<class _Value>
-bool Reader::pushError(const Value& value, const std::string& message) {
+bool Reader<_Value>::pushError(const _Value& value, const std::string& message) {
   size_t length = end_ - begin_;
   if(value.getOffsetStart() > length
     || value.getOffsetLimit() > length)
@@ -889,7 +884,7 @@ bool Reader::pushError(const Value& value, const std::string& message) {
 }
 
 template<class _Value>
-bool Reader::pushError(const Value& value, const std::string& message, const Value& extra) {
+bool Reader<_Value>::pushError(const _Value& value, const std::string& message, const _Value& extra) {
   size_t length = end_ - begin_;
   if(value.getOffsetStart() > length
     || value.getOffsetLimit() > length
@@ -908,7 +903,7 @@ bool Reader::pushError(const Value& value, const std::string& message, const Val
 }
 
 template<class _Value>
-bool Reader::good() const {
+bool Reader<_Value>::good() const {
   return !errors_.size();
 }
 
@@ -942,15 +937,15 @@ public:
     std::string message;
   };
 
-  OurReader(OurFeatures const& features);
+  OurReader(Json::detail::OurFeatures const& features);
   bool parse(const char* beginDoc,
              const char* endDoc,
-             Value& root,
+             _Value& root,
              bool collectComments = true);
   std::string getFormattedErrorMessages() const;
   std::vector<StructuredError> getStructuredErrors() const;
-  bool pushError(const Value& value, const std::string& message);
-  bool pushError(const Value& value, const std::string& message, const Value& extra);
+  bool pushError(const _Value& value, const std::string& message);
+  bool pushError(const _Value& value, const std::string& message, const _Value& extra);
   bool good() const;
 
 private:
@@ -1006,11 +1001,11 @@ private:
   bool readObject(Token& token);
   bool readArray(Token& token);
   bool decodeNumber(Token& token);
-  bool decodeNumber(Token& token, Value& decoded);
+  bool decodeNumber(Token& token, _Value& decoded);
   bool decodeString(Token& token);
   bool decodeString(Token& token, std::string& decoded);
   bool decodeDouble(Token& token);
-  bool decodeDouble(Token& token, Value& decoded);
+  bool decodeDouble(Token& token, _Value& decoded);
   bool decodeUnicodeCodePoint(Token& token,
                               Location& current,
                               Location end,
@@ -1025,7 +1020,7 @@ private:
                           Token& token,
                           TokenType skipUntilToken);
   void skipUntilSpace();
-  Value& currentValue();
+  _Value& currentValue();
   Char getNextChar();
   void
   getLocationLineAndColumn(Location location, int& line, int& column) const;
@@ -1033,7 +1028,7 @@ private:
   void addComment(Location begin, Location end, CommentPlacement placement);
   void skipCommentTokens(Token& token);
 
-  typedef std::stack<Value*> Nodes;
+  typedef std::stack<_Value*> Nodes;
   Nodes nodes_;
   Errors errors_;
   std::string document_;
@@ -1041,7 +1036,7 @@ private:
   Location end_;
   Location current_;
   Location lastValueEnd_;
-  Value* lastValue_;
+  _Value* lastValue_;
   std::string commentsBefore_;
   int stackDepth_;
 
@@ -1052,7 +1047,7 @@ private:
 // complete copy of Read impl, for OurReader
 
 template<class _Value>
-OurReader::OurReader(OurFeatures const& features)
+OurReader<_Value>::OurReader(OurFeatures const& features)
     : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
       lastValue_(), commentsBefore_(),
       stackDepth_(0),
@@ -1060,9 +1055,9 @@ OurReader::OurReader(OurFeatures const& features)
 }
 
 template<class _Value>
-bool OurReader::parse(const char* beginDoc,
+bool OurReader<_Value>::parse(const char* beginDoc,
                    const char* endDoc,
-                   Value& root,
+                   _Value& root,
                    bool collectComments) {
   if (!features_.allowComments_) {
     collectComments = false;
@@ -1109,7 +1104,7 @@ bool OurReader::parse(const char* beginDoc,
 }
 
 template<class _Value>
-bool OurReader::readValue() {
+bool OurReader<_Value>::readValue() {
   if (stackDepth_ >= features_.stackLimit_) throwRuntimeError("Exceeded stackLimit in readValue().");
   ++stackDepth_;
   Token token;
@@ -1138,7 +1133,7 @@ bool OurReader::readValue() {
     break;
   case tokenTrue:
     {
-    Value v(true);
+    _Value v(true);
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -1146,7 +1141,7 @@ bool OurReader::readValue() {
     break;
   case tokenFalse:
     {
-    Value v(false);
+    _Value v(false);
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -1154,7 +1149,7 @@ bool OurReader::readValue() {
     break;
   case tokenNull:
     {
-    Value v;
+    _Value v;
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -1162,7 +1157,7 @@ bool OurReader::readValue() {
     break;
   case tokenNaN:
     {
-    Value v(std::numeric_limits<double>::quiet_NaN());
+    _Value v(std::numeric_limits<double>::quiet_NaN());
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -1170,7 +1165,7 @@ bool OurReader::readValue() {
     break;
   case tokenPosInf:
     {
-    Value v(std::numeric_limits<double>::infinity());
+    _Value v(std::numeric_limits<double>::infinity());
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -1178,7 +1173,7 @@ bool OurReader::readValue() {
     break;
   case tokenNegInf:
     {
-    Value v(-std::numeric_limits<double>::infinity());
+    _Value v(-std::numeric_limits<double>::infinity());
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -1191,7 +1186,7 @@ bool OurReader::readValue() {
       // "Un-read" the current token and mark the current value as a null
       // token.
       current_--;
-      Value v;
+      _Value v;
       currentValue().swapPayload(v);
       currentValue().setOffsetStart(current_ - begin_ - 1);
       currentValue().setOffsetLimit(current_ - begin_);
@@ -1213,7 +1208,7 @@ bool OurReader::readValue() {
 }
 
 template<class _Value>
-void OurReader::skipCommentTokens(Token& token) {
+void OurReader<_Value>::skipCommentTokens(Token& token) {
   if (features_.allowComments_) {
     do {
       readToken(token);
@@ -1224,7 +1219,7 @@ void OurReader::skipCommentTokens(Token& token) {
 }
 
 template<class _Value>
-bool OurReader::readToken(Token& token) {
+bool OurReader<_Value>::readToken(Token& token) {
   skipSpaces();
   token.start_ = current_;
   Char c = getNextChar();
@@ -1325,7 +1320,7 @@ bool OurReader::readToken(Token& token) {
 }
 
 template<class _Value>
-void OurReader::skipSpaces() {
+void OurReader<_Value>::skipSpaces() {
   while (current_ != end_) {
     Char c = *current_;
     if (c == ' ' || c == '\t' || c == '\r' || c == '\n')
@@ -1336,7 +1331,7 @@ void OurReader::skipSpaces() {
 }
 
 template<class _Value>
-bool OurReader::match(Location pattern, int patternLength) {
+bool OurReader<_Value>::match(Location pattern, int patternLength) {
   if (end_ - current_ < patternLength)
     return false;
   int index = patternLength;
@@ -1348,7 +1343,7 @@ bool OurReader::match(Location pattern, int patternLength) {
 }
 
 template<class _Value>
-bool OurReader::readComment() {
+bool OurReader<_Value>::readComment() {
   Location commentBegin = current_ - 1;
   Char c = getNextChar();
   bool successful = false;
@@ -1361,8 +1356,8 @@ bool OurReader::readComment() {
 
   if (collectComments_) {
     CommentPlacement placement = commentBefore;
-    if (lastValueEnd_ && !containsNewLine(lastValueEnd_, commentBegin)) {
-      if (c != '*' || !containsNewLine(commentBegin, current_))
+    if (lastValueEnd_ && !containsNewLine<_Value>(lastValueEnd_, commentBegin)) {
+      if (c != '*' || !containsNewLine<_Value>(commentBegin, current_))
         placement = commentAfterOnSameLine;
     }
 
@@ -1373,9 +1368,9 @@ bool OurReader::readComment() {
 
 template<class _Value>
 void
-OurReader::addComment(Location begin, Location end, CommentPlacement placement) {
+OurReader<_Value>::addComment(Location begin, Location end, CommentPlacement placement) {
   assert(collectComments_);
-  const std::string& normalized = normalizeEOL(begin, end);
+  const std::string& normalized = normalizeEOL<_Value>(begin, end);
   if (placement == commentAfterOnSameLine) {
     assert(lastValue_ != 0);
     lastValue_->setComment(normalized, placement);
@@ -1385,7 +1380,7 @@ OurReader::addComment(Location begin, Location end, CommentPlacement placement) 
 }
 
 template<class _Value>
-bool OurReader::readCStyleComment() {
+bool OurReader<_Value>::readCStyleComment() {
   while (current_ != end_) {
     Char c = getNextChar();
     if (c == '*' && *current_ == '/')
@@ -1395,7 +1390,7 @@ bool OurReader::readCStyleComment() {
 }
 
 template<class _Value>
-bool OurReader::readCppStyleComment() {
+bool OurReader<_Value>::readCppStyleComment() {
   while (current_ != end_) {
     Char c = getNextChar();
     if (c == '\n')
@@ -1412,7 +1407,7 @@ bool OurReader::readCppStyleComment() {
 }
 
 template<class _Value>
-bool OurReader::readNumber(bool checkInf) {
+bool OurReader<_Value>::readNumber(bool checkInf) {
   const char *p = current_;
   if (checkInf && p != end_ && *p == 'I') {
     current_ = ++p;
@@ -1439,7 +1434,7 @@ bool OurReader::readNumber(bool checkInf) {
   return true;
 }
 template<class _Value>
-bool OurReader::readString() {
+bool OurReader<_Value>::readString() {
   Char c = 0;
   while (current_ != end_) {
     c = getNextChar();
@@ -1453,7 +1448,7 @@ bool OurReader::readString() {
 
 
 template<class _Value>
-bool OurReader::readStringSingleQuote() {
+bool OurReader<_Value>::readStringSingleQuote() {
   Char c = 0;
   while (current_ != end_) {
     c = getNextChar();
@@ -1466,10 +1461,10 @@ bool OurReader::readStringSingleQuote() {
 }
 
 template<class _Value>
-bool OurReader::readObject(Token& tokenStart) {
+bool OurReader<_Value>::readObject(Token& tokenStart) {
   Token tokenName;
   std::string name;
-  Value init(objectValue);
+  _Value init(objectValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(tokenStart.start_ - begin_);
   while (readToken(tokenName)) {
@@ -1485,7 +1480,7 @@ bool OurReader::readObject(Token& tokenStart) {
       if (!decodeString(tokenName, name))
         return recoverFromError(tokenObjectEnd);
     } else if (tokenName.type_ == tokenNumber && features_.allowNumericKeys_) {
-      Value numberName;
+      _Value numberName;
       if (!decodeNumber(tokenName, numberName))
         return recoverFromError(tokenObjectEnd);
       name = numberName.asString();
@@ -1504,7 +1499,7 @@ bool OurReader::readObject(Token& tokenStart) {
       return addErrorAndRecover(
           msg, tokenName, tokenObjectEnd);
     }
-    Value& value = currentValue()[name];
+    _Value& value = currentValue()[name];
     nodes_.push(&value);
     bool ok = readValue();
     nodes_.pop();
@@ -1529,8 +1524,8 @@ bool OurReader::readObject(Token& tokenStart) {
 }
 
 template<class _Value>
-bool OurReader::readArray(Token& tokenStart) {
-  Value init(arrayValue);
+bool OurReader<_Value>::readArray(Token& tokenStart) {
+  _Value init(arrayValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(tokenStart.start_ - begin_);
   skipSpaces();
@@ -1542,7 +1537,7 @@ bool OurReader::readArray(Token& tokenStart) {
   }
   int index = 0;
   for (;;) {
-    Value& value = currentValue()[index++];
+    _Value& value = currentValue()[index++];
     nodes_.push(&value);
     bool ok = readValue();
     nodes_.pop();
@@ -1568,8 +1563,8 @@ bool OurReader::readArray(Token& tokenStart) {
 }
 
 template<class _Value>
-bool OurReader::decodeNumber(Token& token) {
-  Value decoded;
+bool OurReader<_Value>::decodeNumber(Token& token) {
+  _Value decoded;
   if (!decodeNumber(token, decoded))
     return false;
   currentValue().swapPayload(decoded);
@@ -1579,7 +1574,7 @@ bool OurReader::decodeNumber(Token& token) {
 }
 
 template<class _Value>
-bool OurReader::decodeNumber(Token& token, Value& decoded) {
+bool OurReader<_Value>::decodeNumber(Token& token, _Value& decoded) {
   // Attempts to parse the number as an integer. If the number is
   // larger than the maximum supported value of an integer then
   // we decode the number as a double.
@@ -1588,16 +1583,16 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   if (isNegative)
     ++current;
   // TODO: Help the compiler do the div and mod at compile time or get rid of them.
-  Value::LargestUInt maxIntegerValue =
-      isNegative ? Value::LargestUInt(-Value::minLargestInt)
-                 : Value::maxLargestUInt;
-  Value::LargestUInt threshold = maxIntegerValue / 10;
-  Value::LargestUInt value = 0;
+  typename _Value::LargestUInt maxIntegerValue =
+      isNegative ? typename _Value::LargestUInt(-_Value::minLargestInt)
+                 : _Value::maxLargestUInt;
+  typename _Value::LargestUInt threshold = maxIntegerValue / 10;
+  typename _Value::LargestUInt value = 0;
   while (current < token.end_) {
     Char c = *current++;
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
-    Value::UInt digit(c - '0');
+    typename _Value::UInt digit(c - '0');
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, b) this is the last digit, and
@@ -1611,17 +1606,17 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
     value = value * 10 + digit;
   }
   if (isNegative)
-    decoded = -Value::LargestInt(value);
-  else if (value <= Value::LargestUInt(Value::maxInt))
-    decoded = Value::LargestInt(value);
+    decoded = -typename _Value::LargestInt(value);
+  else if (value <= typename _Value::LargestUInt(_Value::maxInt))
+    decoded = typename _Value::LargestInt(value);
   else
     decoded = value;
   return true;
 }
 
 template<class _Value>
-bool OurReader::decodeDouble(Token& token) {
-  Value decoded;
+bool OurReader<_Value>::decodeDouble(Token& token) {
+  _Value decoded;
   if (!decodeDouble(token, decoded))
     return false;
   currentValue().swapPayload(decoded);
@@ -1631,7 +1626,7 @@ bool OurReader::decodeDouble(Token& token) {
 }
 
 template<class _Value>
-bool OurReader::decodeDouble(Token& token, Value& decoded) {
+bool OurReader<_Value>::decodeDouble(Token& token, _Value& decoded) {
   double value = 0;
   const int bufferSize = 32;
   int count;
@@ -1668,11 +1663,11 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
 }
 
 template<class _Value>
-bool OurReader::decodeString(Token& token) {
+bool OurReader<_Value>::decodeString(Token& token) {
   std::string decoded_string;
   if (!decodeString(token, decoded_string))
     return false;
-  Value decoded(decoded_string);
+  _Value decoded(decoded_string);
   currentValue().swapPayload(decoded);
   currentValue().setOffsetStart(token.start_ - begin_);
   currentValue().setOffsetLimit(token.end_ - begin_);
@@ -1680,7 +1675,7 @@ bool OurReader::decodeString(Token& token) {
 }
 
 template<class _Value>
-bool OurReader::decodeString(Token& token, std::string& decoded) {
+bool OurReader<_Value>::decodeString(Token& token, std::string& decoded) {
   decoded.reserve(token.end_ - token.start_ - 2);
   Location current = token.start_ + 1; // skip '"'
   Location end = token.end_ - 1;       // do not include '"'
@@ -1734,7 +1729,7 @@ bool OurReader::decodeString(Token& token, std::string& decoded) {
 }
 
 template<class _Value>
-bool OurReader::decodeUnicodeCodePoint(Token& token,
+bool OurReader<_Value>::decodeUnicodeCodePoint(Token& token,
                                     Location& current,
                                     Location end,
                                     unsigned int& unicode) {
@@ -1764,7 +1759,7 @@ bool OurReader::decodeUnicodeCodePoint(Token& token,
 }
 
 template<class _Value>
-bool OurReader::decodeUnicodeEscapeSequence(Token& token,
+bool OurReader<_Value>::decodeUnicodeEscapeSequence(Token& token,
                                          Location& current,
                                          Location end,
                                          unsigned int& unicode) {
@@ -1794,7 +1789,7 @@ bool OurReader::decodeUnicodeEscapeSequence(Token& token,
 
 template<class _Value>
 bool
-OurReader::addError(const std::string& message, Token& token, Location extra) {
+OurReader<_Value>::addError(const std::string& message, Token& token, Location extra) {
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
@@ -1804,7 +1799,7 @@ OurReader::addError(const std::string& message, Token& token, Location extra) {
 }
 
 template<class _Value>
-bool OurReader::recoverFromError(TokenType skipUntilToken) {
+bool OurReader<_Value>::recoverFromError(TokenType skipUntilToken) {
   int errorCount = int(errors_.size());
   Token skip;
   for (;;) {
@@ -1817,7 +1812,8 @@ bool OurReader::recoverFromError(TokenType skipUntilToken) {
   return false;
 }
 
-bool OurReader::addErrorAndRecover(const std::string& message,
+template<class _Value>
+bool OurReader<_Value>::addErrorAndRecover(const std::string& message,
                                 Token& token,
                                 TokenType skipUntilToken) {
   addError(message, token);
@@ -1825,17 +1821,17 @@ bool OurReader::addErrorAndRecover(const std::string& message,
 }
 
 template<class _Value>
-Value& OurReader::currentValue() { return *(nodes_.top()); }
+_Value& OurReader<_Value>::currentValue() { return *(nodes_.top()); }
 
 template<class _Value>
-OurReader::Char OurReader::getNextChar() {
+typename OurReader<_Value>::Char OurReader<_Value>::getNextChar() {
   if (current_ == end_)
     return 0;
   return *current_++;
 }
 
 template<class _Value>
-void OurReader::getLocationLineAndColumn(Location location,
+void OurReader<_Value>::getLocationLineAndColumn(Location location,
                                       int& line,
                                       int& column) const {
   Location current = begin_;
@@ -1859,7 +1855,7 @@ void OurReader::getLocationLineAndColumn(Location location,
 }
 
 template<class _Value>
-std::string OurReader::getLocationLineAndColumn(Location location) const {
+std::string OurReader<_Value>::getLocationLineAndColumn(Location location) const {
   int line, column;
   getLocationLineAndColumn(location, line, column);
   char buffer[18 + 16 + 16 + 1];
@@ -1868,9 +1864,9 @@ std::string OurReader::getLocationLineAndColumn(Location location) const {
 }
 
 template<class _Value>
-std::string OurReader::getFormattedErrorMessages() const {
+std::string OurReader<_Value>::getFormattedErrorMessages() const {
   std::string formattedMessage;
-  for (Errors::const_iterator itError = errors_.begin();
+  for (typename Errors::const_iterator itError = errors_.begin();
        itError != errors_.end();
        ++itError) {
     const ErrorInfo& error = *itError;
@@ -1885,9 +1881,9 @@ std::string OurReader::getFormattedErrorMessages() const {
 }
 
 template<class _Value>
-std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
-  std::vector<OurReader::StructuredError> allErrors;
-  for (Errors::const_iterator itError = errors_.begin();
+std::vector<typename OurReader<_Value>::StructuredError> OurReader<_Value>::getStructuredErrors() const {
+  std::vector<typename OurReader<_Value>::StructuredError> allErrors;
+  for (typename Errors::const_iterator itError = errors_.begin();
        itError != errors_.end();
        ++itError) {
     const ErrorInfo& error = *itError;
@@ -1901,7 +1897,7 @@ std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
 }
 
 template<class _Value>
-bool OurReader::pushError(const Value& value, const std::string& message) {
+bool OurReader<_Value>::pushError(const _Value& value, const std::string& message) {
   size_t length = end_ - begin_;
   if(value.getOffsetStart() > length
     || value.getOffsetLimit() > length)
@@ -1919,7 +1915,7 @@ bool OurReader::pushError(const Value& value, const std::string& message) {
 }
 
 template<class _Value>
-bool OurReader::pushError(const Value& value, const std::string& message, const Value& extra) {
+bool OurReader<_Value>::pushError(const _Value& value, const std::string& message, const _Value& extra) {
   size_t length = end_ - begin_;
   if(value.getOffsetStart() > length
     || value.getOffsetLimit() > length
@@ -1938,15 +1934,15 @@ bool OurReader::pushError(const Value& value, const std::string& message, const 
 }
 
 template<class _Value>
-bool OurReader::good() const {
+bool OurReader<_Value>::good() const {
   return !errors_.size();
 }
 
 
 template<class _Value>
-class OurCharReader : public CharReader {
+class OurCharReader : public CharReader<_Value> {
   bool const collectComments_;
-  OurReader reader_;
+  OurReader<_Value> reader_;
 public:
   OurCharReader(
     bool collectComments,
@@ -1956,7 +1952,7 @@ public:
   {}
   bool parse(
       char const* beginDoc, char const* endDoc,
-      Value* root, std::string* errs) override {
+      _Value* root, std::string* errs) override {
     bool ok = reader_.parse(beginDoc, endDoc, *root, collectComments_);
     if (errs) {
       *errs = reader_.getFormattedErrorMessages();
@@ -1966,15 +1962,15 @@ public:
 };
 
 template<class _Value>
-CharReaderBuilder::CharReaderBuilder()
+CharReaderBuilder<_Value>::CharReaderBuilder()
 {
   setDefaults(&settings_);
 }
 template<class _Value>
-CharReaderBuilder::~CharReaderBuilder()
+CharReaderBuilder<_Value>::~CharReaderBuilder()
 {}
 template<class _Value>
-CharReader* CharReaderBuilder::newCharReader() const
+CharReader<_Value>* CharReaderBuilder<_Value>::newCharReader() const
 {
   bool collectComments = settings_["collectComments"].asBool();
   OurFeatures features = OurFeatures::all();
@@ -1987,7 +1983,7 @@ CharReader* CharReaderBuilder::newCharReader() const
   features.failIfExtra_ = settings_["failIfExtra"].asBool();
   features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
-  return new OurCharReader(collectComments, features);
+  return new OurCharReader<_Value>(collectComments, features);
 }
 template<class _Value>
 static void getValidReaderKeys(std::set<std::string>* valid_keys)
@@ -2005,14 +2001,14 @@ static void getValidReaderKeys(std::set<std::string>* valid_keys)
   valid_keys->insert("allowSpecialFloats");
 }
 template<class _Value>
-bool CharReaderBuilder::validate(Json::Value* invalid) const
+bool CharReaderBuilder<_Value>::validate(_Value* invalid) const
 {
-  Json::Value my_invalid;
+  _Value my_invalid;
   if (!invalid) invalid = &my_invalid;  // so we do not need to test for NULL
-  Json::Value& inv = *invalid;
+  _Value& inv = *invalid;
   std::set<std::string> valid_keys;
-  getValidReaderKeys(&valid_keys);
-  Value::Members keys = settings_.getMemberNames();
+  getValidReaderKeys<_Value>(&valid_keys);
+  typename _Value::Members keys = settings_.getMemberNames();
   size_t n = keys.size();
   for (size_t i = 0; i < n; ++i) {
     std::string const& key = keys[i];
@@ -2023,13 +2019,13 @@ bool CharReaderBuilder::validate(Json::Value* invalid) const
   return 0u == inv.size();
 }
 template<class _Value>
-Value& CharReaderBuilder::operator[](std::string key)
+_Value& CharReaderBuilder<_Value>::operator[](std::string key)
 {
   return settings_[key];
 }
 // static
 template<class _Value>
-void CharReaderBuilder::strictMode(Json::Value* settings)
+void CharReaderBuilder<_Value>::strictMode(_Value* settings)
 {
 //! [CharReaderBuilderStrictMode]
   (*settings)["allowComments"] = false;
@@ -2045,7 +2041,7 @@ void CharReaderBuilder::strictMode(Json::Value* settings)
 }
 // static
 template<class _Value>
-void CharReaderBuilder::setDefaults(Json::Value* settings)
+void CharReaderBuilder<_Value>::setDefaults(_Value* settings)
 {
 //! [CharReaderBuilderDefaults]
   (*settings)["collectComments"] = true;
@@ -2066,8 +2062,8 @@ void CharReaderBuilder::setDefaults(Json::Value* settings)
 
 template<class _Value>
 bool parseFromStream(
-    CharReader::Factory const& fact, std::istream& sin,
-    Value* root, std::string* errs)
+    typename CharReader<_Value>::Factory const& fact, std::istream& sin,
+    _Value* root, std::string* errs)
 {
   std::ostringstream ssin;
   ssin << sin.rdbuf();
@@ -2075,13 +2071,20 @@ bool parseFromStream(
   char const* begin = doc.data();
   char const* end = begin + doc.size();
   // Note that we do not actually need a null-terminator.
+	
+#if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
+typedef std::unique_ptr<CharReader<_Value>> CharReaderPtr;
+#else
+typedef std::auto_ptr<CharReader<_Value>>   CharReaderPtr;
+#endif
+
   CharReaderPtr const reader(fact.newCharReader());
   return reader->parse(begin, end, root, errs);
 }
 
 template<class _Value>
-std::istream& operator>>(std::istream& sin, Value& root) {
-  CharReaderBuilder b;
+std::istream& operator>>(std::istream& sin, _Value& root) {
+  CharReaderBuilder<_Value> b;
   std::string errs;
   bool ok = parseFromStream(b, sin, &root, &errs);
   if (!ok) {

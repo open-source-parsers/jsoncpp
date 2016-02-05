@@ -34,8 +34,7 @@ template<class _Value>
 class Path;
 template<class _Value>
 class PathArgument;
-template<template<class T> class _Alloc = std::allocator<char>,
-  class _String = std::basic_string<char, std::char_traits<char>, std::allocator<char>>>
+template<class _Alloc, class _String>
 class Value;
 template<class _Value>
 class ValueIteratorBase;
