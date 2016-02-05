@@ -131,7 +131,7 @@ public:
    *         errors.  This can occur if the parser recovers from a non-fatal
    *         parse error and then encounters additional errors.
    */
-  std::vector<Reader::StructuredError> getStructuredErrors() const;
+  std::vector<typename Reader::StructuredError> getStructuredErrors() const;
 
   /** \brief Add a semantic error message.
    * \param value JSON Value<_Traits, _Alloc> location associated with the error
@@ -156,8 +156,8 @@ public:
    */
   bool good() const;
 
-  static bool containsNewLine(Reader<_Traits, _Alloc>::Location begin, Reader<_Traits, _Alloc>::Location end);
-  static std::basic_string<char, _Traits, _Alloc> normalizeEOL(Reader<_Traits, _Alloc>::Location begin, Reader<_Traits, _Alloc>::Location end);
+  static bool containsNewLine(typename Reader<_Traits, _Alloc>::Location begin, typename Reader<_Traits, _Alloc>::Location end);
+  static std::basic_string<char, _Traits, _Alloc> normalizeEOL(typename Reader<_Traits, _Alloc>::Location begin, typename Reader<_Traits, _Alloc>::Location end);
 
 private:
   enum TokenType {
@@ -408,7 +408,7 @@ public:
              Value<_Traits, _Alloc>& root,
              bool collectComments = true);
   std::basic_string<char, _Traits, _Alloc> getFormattedErrorMessages() const;
-  std::vector<OurReader::StructuredError> getStructuredErrors() const;
+  std::vector<typename OurReader::StructuredError> getStructuredErrors() const;
   bool pushError(const Value<_Traits, _Alloc>& value, const std::basic_string<char, _Traits, _Alloc>& message);
   bool pushError(const Value<_Traits, _Alloc>& value, const std::basic_string<char, _Traits, _Alloc>& message, const Value<_Traits, _Alloc>& extra);
   bool good() const;

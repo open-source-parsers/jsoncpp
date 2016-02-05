@@ -21,7 +21,7 @@ template<typename _Traits, typename _Alloc>
 int Reader<_Traits, _Alloc>::stackDepth_g = 0;
 
 template<typename _Traits, typename _Alloc>
-bool Reader<_Traits, _Alloc>::containsNewLine(Reader<_Traits, _Alloc>::Location begin, Reader<_Traits, _Alloc>::Location end) {
+bool Reader<_Traits, _Alloc>::containsNewLine(typename Reader<_Traits, _Alloc>::Location begin, typename Reader<_Traits, _Alloc>::Location end) {
   for (; begin < end; ++begin)
     if (*begin == '\n' || *begin == '\r')
       return true;
@@ -326,7 +326,7 @@ bool Reader<_Traits, _Alloc>::readComment() {
 }
 
 template<typename _Traits, typename _Alloc>
-std::basic_string<char, _Traits, _Alloc> Reader<_Traits, _Alloc>::normalizeEOL(Reader<_Traits, _Alloc>::Location begin, Reader<_Traits, _Alloc>::Location end) {
+std::basic_string<char, _Traits, _Alloc> Reader<_Traits, _Alloc>::normalizeEOL(typename Reader<_Traits, _Alloc>::Location begin, typename Reader<_Traits, _Alloc>::Location end) {
   std::basic_string<char, _Traits, _Alloc> normalized;
   normalized.reserve(end - begin);
   Reader<_Traits, _Alloc>::Location current = begin;

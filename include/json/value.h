@@ -304,7 +304,7 @@ Value<_Traits, _Alloc>::Value(const char* beginValue, const char* endValue) {
 }
 
 template<typename _Traits, typename _Alloc>
-Value<_Traits, _Alloc>::Value(const std::basic_string<Value<_Traits, _Alloc>::value_type, Value<_Traits, _Alloc>::traits_type, Value<_Traits, _Alloc>::allocator_type>& value) {
+Value<_Traits, _Alloc>::Value(const std::basic_string<typename Value<_Traits, _Alloc>::value_type, typename Value<_Traits, _Alloc>::traits_type, typename Value<_Traits, _Alloc>::allocator_type>& value) {
   initBasic(stringValue, true);
   value_.stringDuplicate_ =
       duplicateAndPrefixStringValue(value.data(), static_cast<unsigned>(value.length()));
@@ -1072,7 +1072,7 @@ const Value<_Traits, _Alloc>& Value<_Traits, _Alloc>::operator[](const char* key
   return *found;
 }
 template<typename _Traits, typename _Alloc>
-Value<_Traits, _Alloc> const& Value<_Traits, _Alloc>::operator[](Value<_Traits, _Alloc>::string_type const& key) const
+Value<_Traits, _Alloc> const& Value<_Traits, _Alloc>::operator[](typename Value<_Traits, _Alloc>::string_type const& key) const
 {
   Value<_Traits, _Alloc> const* found = find(key.data(), key.data() + key.length());
   if (!found) return nullRef;
@@ -1085,7 +1085,7 @@ Value<_Traits, _Alloc>& Value<_Traits, _Alloc>::operator[](const char* key) {
 }
 
 template<typename _Traits, typename _Alloc>
-Value<_Traits, _Alloc>& Value<_Traits, _Alloc>::operator[](const Value<_Traits, _Alloc>::string_type& key) {
+Value<_Traits, _Alloc>& Value<_Traits, _Alloc>::operator[](const typename Value<_Traits, _Alloc>::string_type& key) {
   return resolveReference(key.data(), key.data() + key.length());
 }
 
@@ -1123,7 +1123,7 @@ Value<_Traits, _Alloc> Value<_Traits, _Alloc>::get(char const* key, Value<_Trait
   return get(key, key + strlen(key), defaultValue);
 }
 template<typename _Traits, typename _Alloc>
-Value<_Traits, _Alloc> Value<_Traits, _Alloc>::get(Value<_Traits, _Alloc>::string_type const& key, Value<_Traits, _Alloc> const& defaultValue) const
+Value<_Traits, _Alloc> Value<_Traits, _Alloc>::get(typename Value<_Traits, _Alloc>::string_type const& key, Value<_Traits, _Alloc> const& defaultValue) const
 {
   return get(key.data(), key.data() + key.length(), defaultValue);
 }
@@ -1149,7 +1149,7 @@ bool Value<_Traits, _Alloc>::removeMember(const char* key, Value<_Traits, _Alloc
   return removeMember(key, key + strlen(key), removed);
 }
 template<typename _Traits, typename _Alloc>
-bool Value<_Traits, _Alloc>::removeMember(Value<_Traits, _Alloc>::string_type const& key, Value<_Traits, _Alloc>* removed)
+bool Value<_Traits, _Alloc>::removeMember(typename Value<_Traits, _Alloc>::string_type const& key, Value<_Traits, _Alloc>* removed)
 {
   return removeMember(key.data(), key.data() + key.length(), removed);
 }
@@ -1166,7 +1166,7 @@ Value<_Traits, _Alloc> Value<_Traits, _Alloc>::removeMember(const char* key)
   return removed; // still null if removeMember() did nothing
 }
 template<typename _Traits, typename _Alloc>
-Value<_Traits, _Alloc> Value<_Traits, _Alloc>::removeMember(const Value<_Traits, _Alloc>::string_type& key)
+Value<_Traits, _Alloc> Value<_Traits, _Alloc>::removeMember(const typename Value<_Traits, _Alloc>::string_type& key)
 {
   return removeMember(key.c_str());
 }
@@ -1215,7 +1215,7 @@ bool Value<_Traits, _Alloc>::isMember(char const* key) const
   return isMember(key, key + strlen(key));
 }
 template<typename _Traits, typename _Alloc>
-bool Value<_Traits, _Alloc>::isMember(Value<_Traits, _Alloc>::string_type const& key) const
+bool Value<_Traits, _Alloc>::isMember(typename Value<_Traits, _Alloc>::string_type const& key) const
 {
   return isMember(key.data(), key.data() + key.length());
 }
