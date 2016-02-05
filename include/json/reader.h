@@ -34,6 +34,7 @@ namespace detail {
 template<class _Value>
 class JSON_API Reader {
 public:
+  typedef typename _Value::String String;
   typedef char Char;
   typedef const Char* Location;
 
@@ -74,7 +75,7 @@ public:
    * error occurred.
    */
   bool
-  parse(const std::string& document, _Value& root, bool collectComments = true);
+  parse(const String& document, _Value& root, bool collectComments = true);
 
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
    document.
@@ -205,7 +206,7 @@ private:
   bool decodeNumber(Token& token);
   bool decodeNumber(Token& token, _Value& decoded);
   bool decodeString(Token& token);
-  bool decodeString(Token& token, std::string& decoded);
+  bool decodeString(Token& token, String& decoded);
   bool decodeDouble(Token& token);
   bool decodeDouble(Token& token, _Value& decoded);
   bool decodeUnicodeCodePoint(Token& token,
@@ -226,20 +227,20 @@ private:
   Char getNextChar();
   void
   getLocationLineAndColumn(Location location, int& line, int& column) const;
-  std::string getLocationLineAndColumn(Location location) const;
+  String getLocationLineAndColumn(Location location) const;
   void addComment(Location begin, Location end, CommentPlacement placement);
   void skipCommentTokens(Token& token);
 
   typedef std::stack<_Value*> Nodes;
   Nodes nodes_;
   Errors errors_;
-  std::string document_;
+  String document_;
   Location begin_;
   Location end_;
   Location current_;
   Location lastValueEnd_;
   _Value* lastValue_;
-  std::string commentsBefore_;
+  String commentsBefore_;
   Features features_;
   bool collectComments_;
 };  // Reader
@@ -296,6 +297,7 @@ Usage:
 template<class _Value>
 class JSON_API CharReaderBuilder : public CharReader<_Value>::Factory {
 public:
+  typedef typename _Value::String String;
   // Note: We use a Json::Value so that we can add data-members to this class
   // without a major version bump.
   /** Configuration of this builder.
@@ -348,7 +350,7 @@ public:
 
   /** A simple way to update a specific setting.
    */
-  _Value& operator[](std::string key);
+  _Value& operator[](String key);
 
   /** Called by ctor, but you can use this to reset settings_.
    * \pre 'settings' != NULL (but Json::null is fine)

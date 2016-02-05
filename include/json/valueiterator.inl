@@ -104,12 +104,12 @@ UInt ValueIteratorBase<_Value>::index() const {
 }
 
 template<class _Value>
-std::string ValueIteratorBase<_Value>::name() const {
+typename ValueIteratorBase<_Value>::String ValueIteratorBase<_Value>::name() const {
   char const* keey;
   char const* end;
   keey = memberName(&end);
-  if (!keey) return std::string();
-  return std::string(keey, end);
+  if (!keey) return String();
+  return String(keey, end);
 }
 
 template<class _Value>

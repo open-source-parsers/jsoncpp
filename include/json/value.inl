@@ -382,7 +382,7 @@ Value<_Alloc, _String>::Value(const char* beginValue, const char* endValue) {
 }
 
 template<class _Alloc, class _String>
-Value<_Alloc, _String>::Value(const std::string& value) {
+Value<_Alloc, _String>::Value(const String& value) {
   initBasic(stringValue, true);
   value_.string_ =
       duplicateAndPrefixStringValue<Value<_Alloc, _String>>(value.data(), static_cast<unsigned>(value.length()));
@@ -650,7 +650,7 @@ bool Value<_Alloc, _String>::getString(char const** str, char const** cend) cons
 }
 
 template<class _Alloc, class _String>
-std::string Value<_Alloc, _String>::asString() const {
+_String Value<_Alloc, _String>::asString() const {
   switch (type_) {
   case nullValue:
     return "";
@@ -660,7 +660,7 @@ std::string Value<_Alloc, _String>::asString() const {
     unsigned this_len;
     char const* this_str;
     decodePrefixedString<Value<_Alloc, _String>>(this->allocated_, this->value_.string_, &this_len, &this_str);
-    return std::string(this_str, this_len);
+    return String(this_str, this_len);
   }
   case booleanValue:
     return value_.bool_ ? "true" : "false";
@@ -1097,7 +1097,7 @@ const Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](const char* key
   return *found;
 }
 template<class _Alloc, class _String>
-Value<_Alloc, _String> const& Value<_Alloc, _String>::operator[](std::string const& key) const
+Value<_Alloc, _String> const& Value<_Alloc, _String>::operator[](String const& key) const
 {
   Value const* found = find(key.data(), key.data() + key.length());
   if (!found) return nullRef;
@@ -1110,7 +1110,7 @@ Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](const char* key) {
 }
 
 template<class _Alloc, class _String>
-Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](const std::string& key) {
+Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](const String& key) {
   return resolveReference(key.data(), key.data() + key.length());
 }
 
@@ -1148,7 +1148,7 @@ Value<_Alloc, _String> Value<_Alloc, _String>::get(char const* key, Value<_Alloc
   return get(key, key + strlen(key), defaultValue);
 }
 template<class _Alloc, class _String>
-Value<_Alloc, _String> Value<_Alloc, _String>::get(std::string const& key, Value<_Alloc, _String> const& defaultValue) const
+Value<_Alloc, _String> Value<_Alloc, _String>::get(String const& key, Value<_Alloc, _String> const& defaultValue) const
 {
   return get(key.data(), key.data() + key.length(), defaultValue);
 }
@@ -1174,7 +1174,7 @@ bool Value<_Alloc, _String>::removeMember(const char* key, Value<_Alloc, _String
   return removeMember(key, key + strlen(key), removed);
 }
 template<class _Alloc, class _String>
-bool Value<_Alloc, _String>::removeMember(std::string const& key, Value<_Alloc, _String>* removed)
+bool Value<_Alloc, _String>::removeMember(String const& key, Value<_Alloc, _String>* removed)
 {
   return removeMember(key.data(), key.data() + key.length(), removed);
 }
@@ -1191,7 +1191,7 @@ Value<_Alloc, _String> Value<_Alloc, _String>::removeMember(const char* key)
   return removed; // still null if removeMember() did nothing
 }
 template<class _Alloc, class _String>
-Value<_Alloc, _String> Value<_Alloc, _String>::removeMember(const std::string& key)
+Value<_Alloc, _String> Value<_Alloc, _String>::removeMember(const String& key)
 {
   return removeMember(key.c_str());
 }
@@ -1240,7 +1240,7 @@ bool Value<_Alloc, _String>::isMember(char const* key) const
   return isMember(key, key + strlen(key));
 }
 template<class _Alloc, class _String>
-bool Value<_Alloc, _String>::isMember(std::string const& key) const
+bool Value<_Alloc, _String>::isMember(String const& key) const
 {
   return isMember(key.data(), key.data() + key.length());
 }
@@ -1264,7 +1264,7 @@ typename Value<_Alloc, _String>::Members Value<_Alloc, _String>::getMemberNames(
   typename ObjectValues::const_iterator it = value_.map_->begin();
   typename ObjectValues::const_iterator itEnd = value_.map_->end();
   for (; it != itEnd; ++it) {
-    members.push_back(std::string((*it).first.data(),
+    members.push_back(String((*it).first.data(),
                                   (*it).first.length()));
   }
   return members;
@@ -1421,7 +1421,7 @@ void Value<_Alloc, _String>::setComment(const char* comment, CommentPlacement pl
 }
 
 template<class _Alloc, class _String>
-void Value<_Alloc, _String>::setComment(const std::string& comment, CommentPlacement placement) {
+void Value<_Alloc, _String>::setComment(const String& comment, CommentPlacement placement) {
   setComment(comment.c_str(), comment.length(), placement);
 }
 
@@ -1431,7 +1431,7 @@ bool Value<_Alloc, _String>::hasComment(CommentPlacement placement) const {
 }
 
 template<class _Alloc, class _String>
-std::string Value<_Alloc, _String>::getComment(CommentPlacement placement) const {
+_String Value<_Alloc, _String>::getComment(CommentPlacement placement) const {
   if (hasComment(placement))
     return comments_[placement].comment_;
   return "";
@@ -1450,7 +1450,7 @@ template<class _Alloc, class _String>
 size_t Value<_Alloc, _String>::getOffsetLimit() const { return limit_; }
 
 template<class _Alloc, class _String>
-std::string Value<_Alloc, _String>::toStyledString() const {
+_String Value<_Alloc, _String>::toStyledString() const {
   StyledWriter<Value<_Alloc, _String>> writer;
   return writer.write(*this);
 }
@@ -1526,14 +1526,14 @@ PathArgument<_Value>::PathArgument(const char* key)
     : key_(key), index_(), kind_(kindKey) {}
 
 template<class _Value>
-PathArgument<_Value>::PathArgument(const std::string& key)
+PathArgument<_Value>::PathArgument(const String& key)
     : key_(key.c_str()), index_(), kind_(kindKey) {}
 
 // class Path
 // //////////////////////////////////////////////////////////////////
 
 template<class _Value>
-Path<_Value>::Path(const std::string& path,
+Path<_Value>::Path(const String& path,
            const PathArgument<_Value>& a1,
            const PathArgument<_Value>& a2,
            const PathArgument<_Value>& a3,
@@ -1549,7 +1549,7 @@ Path<_Value>::Path(const std::string& path,
 }
 
 template<class _Value>
-void Path<_Value>::makePath(const std::string& path, const InArgs& in) {
+void Path<_Value>::makePath(const String& path, const InArgs& in) {
   const char* current = path.c_str();
   const char* end = current + path.length();
   typename InArgs::const_iterator itInArg = in.begin();
@@ -1575,13 +1575,13 @@ void Path<_Value>::makePath(const std::string& path, const InArgs& in) {
       const char* beginName = current;
       while (current != end && !strchr("[.", *current))
         ++current;
-      args_.push_back(std::string(beginName, current));
+      args_.push_back(String(beginName, current));
     }
   }
 }
 
 template<class _Value>
-void Path<_Value>::addPathInArg(const std::string& /*path*/,
+void Path<_Value>::addPathInArg(const String& /*path*/,
                         const InArgs& in,
                         typename InArgs::const_iterator& itInArg,
                         typename PathArgument<_Value>::Kind kind) {
@@ -1595,7 +1595,7 @@ void Path<_Value>::addPathInArg(const std::string& /*path*/,
 }
 
 template<class _Value>
-void Path<_Value>::invalidPath(const std::string& /*path*/, int /*location*/) {
+void Path<_Value>::invalidPath(const String& /*path*/, int /*location*/) {
   // Error: invalid path.
 }
 

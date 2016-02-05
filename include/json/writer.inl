@@ -80,7 +80,7 @@ bool containsControlCharacter0(const char* str, unsigned len);
 char const* strnpbrk(char const* s, char const* accept, size_t n);
 
 template<class _Value>
-std::string valueToString(LargestInt value) {
+typename _Value::String valueToString(LargestInt value) {
   UIntToStringBuffer buffer;
   char* current = buffer + sizeof(buffer);
   if (value == _Value::minLargestInt) {
@@ -97,7 +97,7 @@ std::string valueToString(LargestInt value) {
 }
 
 template<class _Value>
-std::string valueToString(LargestUInt value) {
+typename _Value::String valueToString(LargestUInt value) {
   UIntToStringBuffer buffer;
   char* current = buffer + sizeof(buffer);
   uintToString(value, current);
@@ -108,19 +108,19 @@ std::string valueToString(LargestUInt value) {
 #if defined(JSON_HAS_INT64)
 
 template<class _Value>
-std::string valueToString(Int value) {
+typename _Value::String valueToString(Int value) {
   return valueToString<_Value>(LargestInt(value));
 }
 
 template<class _Value>
-std::string valueToString(UInt value) {
+typename _Value::String valueToString(UInt value) {
   return valueToString<_Value>(LargestUInt(value));
 }
 
 #endif // # if defined(JSON_HAS_INT64)
 
 template<class _Value>
-std::string valueToString(double value, bool useSpecialFloats, unsigned int precision) {
+typename _Value::String valueToString(double value, bool useSpecialFloats, unsigned int precision) {
   // Allocate a buffer that is more than large enough to store the 16 digits of
   // precision requested below.
   char buffer[32];
@@ -151,25 +151,26 @@ std::string valueToString(double value, bool useSpecialFloats, unsigned int prec
 }
 
 template<class _Value>
-std::string valueToString(double value) { return valueToString<_Value>(value, false, 17); }
+typename _Value::String valueToString(double value) { return valueToString<_Value>(value, false, 17); }
 
 template<class _Value>
-std::string valueToString(bool value) { return value ? "true" : "false"; }
+typename _Value::String valueToString(bool value) { return value ? "true" : "false"; }
 
 template<class _Value>
-std::string valueToQuotedString(const char* value) {
+typename _Value::String valueToQuotedString(const char* value) {
+  using String = typename _Value::String;
   if (value == NULL)
     return "";
   // Not sure how to handle unicode...
   if (strpbrk(value, "\"\\\b\f\n\r\t") == NULL &&
       !containsControlCharacter(value))
-    return std::string("\"") + value + "\"";
+    return String("\"") + value + "\"";
   // We have to walk value and escape any special characters.
   // Appending to std::string is not efficient, but this should be rare.
   // (Note: forward slashes are *not* rare, but I am not escaping them.)
-  std::string::size_type maxsize =
+  typename String::size_type maxsize =
       strlen(value) * 2 + 3; // allescaped+quotes+NULL
-  std::string result;
+  String result;
   result.reserve(maxsize); // to avoid lots of mallocs
   result += "\"";
   for (const char* c = value; *c != 0; ++c) {
@@ -220,19 +221,20 @@ std::string valueToQuotedString(const char* value) {
 }
 
 template<class _Value>
-static std::string valueToQuotedStringN(const char* value, unsigned length) {
+static typename _Value::String valueToQuotedStringN(const char* value, unsigned length) {
+  using String = typename _Value::String;
   if (value == NULL)
     return "";
   // Not sure how to handle unicode...
   if (strnpbrk(value, "\"\\\b\f\n\r\t", length) == NULL &&
       !containsControlCharacter0(value, length))
-    return std::string("\"") + value + "\"";
+    return String("\"") + value + "\"";
   // We have to walk value and escape any special characters.
   // Appending to std::string is not efficient, but this should be rare.
   // (Note: forward slashes are *not* rare, but I am not escaping them.)
-  std::string::size_type maxsize =
+  typename String::size_type maxsize =
       length * 2 + 3; // allescaped+quotes+NULL
-  std::string result;
+  String result;
   result.reserve(maxsize); // to avoid lots of mallocs
   result += "\"";
   char const* end = value + length;
@@ -306,7 +308,7 @@ template<class _Value>
 void FastWriter<_Value>::omitEndingLineFeed() { omitEndingLineFeed_ = true; }
 
 template<class _Value>
-std::string FastWriter<_Value>::write(const _Value& root) {
+typename FastWriter<_Value>::String FastWriter<_Value>::write(const _Value& root) {
   document_ = "";
   writeValue(root);
   if (!omitEndingLineFeed_)
@@ -357,7 +359,7 @@ void FastWriter<_Value>::writeValue(const _Value& value) {
     document_ += '{';
     for (typename _Value::Members::iterator it = members.begin(); it != members.end();
          ++it) {
-      const std::string& name = *it;
+      const String& name = *it;
       if (it != members.begin())
         document_ += ',';
       document_ += valueToQuotedStringN<_Value>(name.data(), static_cast<unsigned>(name.length()));
@@ -377,7 +379,7 @@ StyledWriter<_Value>::StyledWriter()
     : rightMargin_(74), indentSize_(3), addChildValues_() {}
 
 template<class _Value>
-std::string StyledWriter<_Value>::write(const _Value& root) {
+typename StyledWriter<_Value>::String StyledWriter<_Value>::write(const _Value& root) {
   document_ = "";
   addChildValues_ = false;
   indentString_ = "";
@@ -428,7 +430,7 @@ void StyledWriter<_Value>::writeValue(const _Value& value) {
       indent();
       typename _Value::Members::iterator it = members.begin();
       for (;;) {
-        const std::string& name = *it;
+        const String& name = *it;
         const _Value& childValue = value[name];
         writeCommentBeforeValue(childValue);
         writeWithIndent(valueToQuotedString<_Value>(name.c_str()));
@@ -521,7 +523,7 @@ bool StyledWriter<_Value>::isMultineArray(const _Value& value) {
 }
 
 template<class _Value>
-void StyledWriter<_Value>::pushValue(const std::string& value) {
+void StyledWriter<_Value>::pushValue(const String& value) {
   if (addChildValues_)
     childValues_.push_back(value);
   else
@@ -541,13 +543,13 @@ void StyledWriter<_Value>::writeIndent() {
 }
 
 template<class _Value>
-void StyledWriter<_Value>::writeWithIndent(const std::string& value) {
+void StyledWriter<_Value>::writeWithIndent(const String& value) {
   writeIndent();
   document_ += value;
 }
 
 template<class _Value>
-void StyledWriter<_Value>::indent() { indentString_ += std::string(indentSize_, ' '); }
+void StyledWriter<_Value>::indent() { indentString_ += String(indentSize_, ' '); }
 
 template<class _Value>
 void StyledWriter<_Value>::unindent() {
@@ -562,8 +564,8 @@ void StyledWriter<_Value>::writeCommentBeforeValue(const _Value& root) {
 
   document_ += "\n";
   writeIndent();
-  const std::string& comment = root.getComment(commentBefore);
-  std::string::const_iterator iter = comment.begin();
+  const String& comment = root.getComment(commentBefore);
+  typename String::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
     document_ += *iter;
     if (*iter == '\n' &&
@@ -599,7 +601,7 @@ bool StyledWriter<_Value>::hasCommentForValue(const _Value& value) {
 // //////////////////////////////////////////////////////////////////
 
 template<class _Value>
-StyledStreamWriter<_Value>::StyledStreamWriter(std::string indentation)
+StyledStreamWriter<_Value>::StyledStreamWriter(String indentation)
     : document_(NULL), rightMargin_(74), indentation_(indentation),
       addChildValues_() {}
 
@@ -658,7 +660,7 @@ void StyledStreamWriter<_Value>::writeValue(const _Value& value) {
       indent();
       typename _Value::Members::iterator it = members.begin();
       for (;;) {
-        const std::string& name = *it;
+        const String& name = *it;
         const _Value& childValue = value[name];
         writeCommentBeforeValue(childValue);
         writeWithIndent(valueToQuotedString<_Value>(name.c_str()));
@@ -753,7 +755,7 @@ bool StyledStreamWriter<_Value>::isMultineArray(const _Value& value) {
 }
 
 template<class _Value>
-void StyledStreamWriter<_Value>::pushValue(const std::string& value) {
+void StyledStreamWriter<_Value>::pushValue(const String& value) {
   if (addChildValues_)
     childValues_.push_back(value);
   else
@@ -770,7 +772,7 @@ void StyledStreamWriter<_Value>::writeIndent() {
 }
 
 template<class _Value>
-void StyledStreamWriter<_Value>::writeWithIndent(const std::string& value) {
+void StyledStreamWriter<_Value>::writeWithIndent(const String& value) {
   if (!indented_) writeIndent();
   *document_ << value;
   indented_ = false;
@@ -791,8 +793,8 @@ void StyledStreamWriter<_Value>::writeCommentBeforeValue(const _Value& root) {
     return;
 
   if (!indented_) writeIndent();
-  const std::string& comment = root.getComment(commentBefore);
-  std::string::const_iterator iter = comment.begin();
+  const String& comment = root.getComment(commentBefore);
+  typename String::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
     *document_ << *iter;
     if (*iter == '\n' &&
@@ -839,12 +841,13 @@ struct CommentStyle {
 template<class _Value>
 struct BuiltStyledStreamWriter : public StreamWriter<_Value>
 {
+  typedef typename _Value::String String;
   BuiltStyledStreamWriter(
-      std::string const& indentation,
+      String const& indentation,
       CommentStyle::Enum cs,
-      std::string const& colonSymbol,
-      std::string const& nullSymbol,
-      std::string const& endingLineFeedSymbol,
+      String const& colonSymbol,
+      String const& nullSymbol,
+      String const& endingLineFeedSymbol,
       bool useSpecialFloats,
       unsigned int precision);
   int write(_Value const& root, std::ostream* sout) override;
@@ -852,25 +855,25 @@ private:
   void writeValue(_Value const& value);
   void writeArrayValue(_Value const& value);
   bool isMultineArray(_Value const& value);
-  void pushValue(std::string const& value);
+  void pushValue(String const& value);
   void writeIndent();
-  void writeWithIndent(std::string const& value);
+  void writeWithIndent(String const& value);
   void indent();
   void unindent();
   void writeCommentBeforeValue(_Value const& root);
   void writeCommentAfterValueOnSameLine(_Value const& root);
   static bool hasCommentForValue(const _Value& value);
 
-  typedef std::vector<std::string> ChildValues;
+  typedef std::vector<String> ChildValues;
 
   ChildValues childValues_;
-  std::string indentString_;
+  String indentString_;
   int rightMargin_;
-  std::string indentation_;
+  String indentation_;
   CommentStyle::Enum cs_;
-  std::string colonSymbol_;
-  std::string nullSymbol_;
-  std::string endingLineFeedSymbol_;
+  String colonSymbol_;
+  String nullSymbol_;
+  String endingLineFeedSymbol_;
   bool addChildValues_ : 1;
   bool indented_ : 1;
   bool useSpecialFloats_ : 1;
@@ -878,11 +881,11 @@ private:
 };
 template<class _Value>
 BuiltStyledStreamWriter<_Value>::BuiltStyledStreamWriter(
-      std::string const& indentation,
+      String const& indentation,
       CommentStyle::Enum cs,
-      std::string const& colonSymbol,
-      std::string const& nullSymbol,
-      std::string const& endingLineFeedSymbol,
+      String const& colonSymbol,
+      String const& nullSymbol,
+      String const& endingLineFeedSymbol,
       bool useSpecialFloats,
       unsigned int precision)
   : rightMargin_(74)
@@ -953,7 +956,7 @@ void BuiltStyledStreamWriter<_Value>::writeValue(_Value const& value) {
       indent();
       typename _Value::Members::iterator it = members.begin();
       for (;;) {
-        std::string const& name = *it;
+        String const& name = *it;
         _Value const& childValue = value[name];
         writeCommentBeforeValue(childValue);
         writeWithIndent(valueToQuotedStringN<_Value>(name.data(), static_cast<unsigned>(name.length())));
@@ -1050,7 +1053,7 @@ bool BuiltStyledStreamWriter<_Value>::isMultineArray(_Value const& value) {
 }
 
 template<class _Value>
-void BuiltStyledStreamWriter<_Value>::pushValue(std::string const& value) {
+void BuiltStyledStreamWriter<_Value>::pushValue(String const& value) {
   if (addChildValues_)
     childValues_.push_back(value);
   else
@@ -1071,7 +1074,7 @@ void BuiltStyledStreamWriter<_Value>::writeIndent() {
 }
 
 template<class _Value>
-void BuiltStyledStreamWriter<_Value>::writeWithIndent(std::string const& value) {
+void BuiltStyledStreamWriter<_Value>::writeWithIndent(String const& value) {
   if (!indented_) writeIndent();
   *(StreamWriter<_Value>::sout_) << value;
   indented_ = false;
@@ -1093,8 +1096,8 @@ void BuiltStyledStreamWriter<_Value>::writeCommentBeforeValue(_Value const& root
     return;
 
   if (!indented_) writeIndent();
-  const std::string& comment = root.getComment(commentBefore);
-  std::string::const_iterator iter = comment.begin();
+  const String& comment = root.getComment(commentBefore);
+  typename String::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
 	*(StreamWriter<_Value>::sout_) << *iter;
     if (*iter == '\n' &&
@@ -1152,8 +1155,8 @@ StreamWriterBuilder<_Value>::~StreamWriterBuilder()
 template<class _Value>
 StreamWriter<_Value>* StreamWriterBuilder<_Value>::newStreamWriter() const
 {
-  std::string indentation = settings_["indentation"].asString();
-  std::string cs_str = settings_["commentStyle"].asString();
+  String indentation = settings_["indentation"].asString();
+  String cs_str = settings_["commentStyle"].asString();
   bool eyc = settings_["enableYAMLCompatibility"].asBool();
   bool dnp = settings_["dropNullPlaceholders"].asBool();
   bool usf = settings_["useSpecialFloats"].asBool(); 
@@ -1166,24 +1169,24 @@ StreamWriter<_Value>* StreamWriterBuilder<_Value>::newStreamWriter() const
   } else {
     throwRuntimeError("commentStyle must be 'All' or 'None'");
   }
-  std::string colonSymbol = " : ";
+  String colonSymbol = " : ";
   if (eyc) {
     colonSymbol = ": ";
   } else if (indentation.empty()) {
     colonSymbol = ":";
   }
-  std::string nullSymbol = "null";
+  String nullSymbol = "null";
   if (dnp) {
     nullSymbol = "";
   }
   if (pre > 17) pre = 17;
-  std::string endingLineFeedSymbol = "";
+  String endingLineFeedSymbol = "";
   return new BuiltStyledStreamWriter<_Value>(
       indentation, cs,
       colonSymbol, nullSymbol, endingLineFeedSymbol, usf, pre);
 }
 template<class _Value>
-static void getValidWriterKeys(std::set<std::string>* valid_keys)
+static void getValidWriterKeys(std::set<typename _Value::String>* valid_keys)
 {
   valid_keys->clear();
   valid_keys->insert("indentation");
@@ -1199,12 +1202,12 @@ bool StreamWriterBuilder<_Value>::validate(_Value* invalid) const
   _Value my_invalid;
   if (!invalid) invalid = &my_invalid;  // so we do not need to test for NULL
   _Value& inv = *invalid;
-  std::set<std::string> valid_keys;
+  std::set<String> valid_keys;
   getValidWriterKeys<_Value>(&valid_keys);
   typename _Value::Members keys = settings_.getMemberNames();
   size_t n = keys.size();
   for (size_t i = 0; i < n; ++i) {
-    std::string const& key = keys[i];
+    String const& key = keys[i];
     if (valid_keys.find(key) == valid_keys.end()) {
       inv[key] = settings_[key];
     }
@@ -1212,7 +1215,7 @@ bool StreamWriterBuilder<_Value>::validate(_Value* invalid) const
   return 0u == inv.size();
 }
 template<class _Value>
-_Value& StreamWriterBuilder<_Value>::operator[](std::string key)
+_Value& StreamWriterBuilder<_Value>::operator[](String key)
 {
   return settings_[key];
 }
@@ -1231,7 +1234,7 @@ void StreamWriterBuilder<_Value>::setDefaults(_Value* settings)
 }
 
 template<class _Value>
-std::string writeString(typename StreamWriter<_Value>::Factory const& builder, _Value const& root) {
+typename _Value::String writeString(typename StreamWriter<_Value>::Factory const& builder, _Value const& root) {
 #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
 typedef std::unique_ptr<StreamWriter<_Value>> StreamWriterPtr;
 #else

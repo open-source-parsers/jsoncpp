@@ -167,6 +167,8 @@ class JSON_API Value {
   template<typename T>
   friend class ValueIteratorBase;
 public:
+  typedef _String String;
+  typedef _Alloc Allocator;
   typedef std::vector<std::string> Members;
   typedef ValueIterator<Value> iterator;
   typedef ValueConstIterator<Value> const_iterator;
@@ -295,7 +297,7 @@ Json::Value obj_value(Json::objectValue); // {}
    * \endcode
    */
   Value(const Json::StaticString& value);
-  Value(const std::string& value); ///< Copy data() til size(). Embedded zeroes too.
+  Value(const String& value); ///< Copy data() til size(). Embedded zeroes too.
 #ifdef JSON_USE_CPPTL
   Value(const CppTL::ConstString& value);
 #endif
@@ -328,7 +330,7 @@ Json::Value obj_value(Json::objectValue); // {}
   int compare(const Value& other) const;
 
   const char* asCString() const; ///< Embedded zeroes could cause you trouble!
-  std::string asString() const; ///< Embedded zeroes are possible.
+  String asString() const; ///< Embedded zeroes are possible.
   /** Get raw char* of string-value.
    *  \return false if !string. (Seg-fault if str or end are NULL.)
    */
@@ -432,11 +434,11 @@ Json::Value obj_value(Json::objectValue); // {}
   const Value& operator[](const char* key) const;
   /// Access an object value by name, create a null member if it does not exist.
   /// \param key may contain embedded nulls.
-  Value& operator[](const std::string& key);
+  Value& operator[](const String& key);
   /// Access an object value by name, returns null if there is no member with
   /// that name.
   /// \param key may contain embedded nulls.
-  const Value& operator[](const std::string& key) const;
+  const Value& operator[](const String& key) const;
   /** \brief Access an object value by name, create a null member if it does not
    exist.
 
@@ -467,7 +469,7 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
   /// \param key may contain embedded nulls.
-  Value get(const std::string& key, const Value& defaultValue) const;
+  Value get(const String& key, const Value& defaultValue) const;
 #ifdef JSON_USE_CPPTL
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
@@ -492,7 +494,7 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Same as removeMember(const char*)
   /// \param key may contain embedded nulls.
   /// \deprecated
-  Value removeMember(const std::string& key);
+  Value removeMember(const String& key);
   /// Same as removeMember(const char* begin, const char* end, Value* removed),
   /// but 'key' is null-terminated.
   bool removeMember(const char* key, Value* removed);
@@ -502,8 +504,8 @@ Json::Value obj_value(Json::objectValue); // {}
       \param key may contain embedded nulls.
       \return true iff removed (no exceptions)
   */
-  bool removeMember(std::string const& key, Value* removed);
-  /// Same as removeMember(std::string const& key, Value* removed)
+  bool removeMember(String const& key, Value* removed);
+  /// Same as removeMember(String const& key, Value* removed)
   bool removeMember(const char* begin, const char* end, Value* removed);
   /** \brief Remove the indexed array element.
 
@@ -518,8 +520,8 @@ Json::Value obj_value(Json::objectValue); // {}
   bool isMember(const char* key) const;
   /// Return true if the object has a member named key.
   /// \param key may contain embedded nulls.
-  bool isMember(const std::string& key) const;
-  /// Same as isMember(std::string const& key)const
+  bool isMember(const String& key) const;
+  /// Same as isMember(String const& key)const
   bool isMember(const char* begin, const char* end) const;
 #ifdef JSON_USE_CPPTL
   /// Return true if the object has a member named key.
@@ -539,17 +541,17 @@ Json::Value obj_value(Json::objectValue); // {}
   //# endif
 
   /// \deprecated Always pass len.
-  JSONCPP_DEPRECATED("Use setComment(std::string const&) instead.")
+  JSONCPP_DEPRECATED("Use setComment(String const&) instead.")
   void setComment(const char* comment, CommentPlacement placement);
   /// Comments must be //... or /* ... */
   void setComment(const char* comment, size_t len, CommentPlacement placement);
   /// Comments must be //... or /* ... */
-  void setComment(const std::string& comment, CommentPlacement placement);
+  void setComment(const String& comment, CommentPlacement placement);
   bool hasComment(CommentPlacement placement) const;
   /// Include delimiters and embedded newlines.
-  std::string getComment(CommentPlacement placement) const;
+  String getComment(CommentPlacement placement) const;
 
-  std::string toStyledString() const;
+  String toStyledString() const;
 
   const_iterator begin() const;
   const_iterator end() const;
@@ -613,13 +615,14 @@ private:
 template<class _Value>
 class JSON_API PathArgument {
 public:
+  typedef typename _Value::String String;
   template<typename T>
   friend class Path;
 
   PathArgument();
   PathArgument(ArrayIndex index);
   PathArgument(const char* key);
-  PathArgument(const std::string& key);
+  PathArgument(const String& key);
 
 private:
   enum Kind {
@@ -627,7 +630,7 @@ private:
     kindIndex,
     kindKey
   };
-  std::string key_;
+  String key_;
   ArrayIndex index_;
   Kind kind_;
 };
@@ -646,7 +649,8 @@ private:
 template<class _Value>
 class JSON_API Path {
 public:
-  Path(const std::string& path,
+  typedef typename _Value::String String;
+  Path(const String& path,
        const PathArgument<_Value>& a1 = PathArgument<_Value>(),
        const PathArgument<_Value>& a2 = PathArgument<_Value>(),
        const PathArgument<_Value>& a3 = PathArgument<_Value>(),
@@ -663,12 +667,12 @@ private:
   typedef std::vector<const PathArgument<_Value>*> InArgs;
   typedef std::vector<PathArgument<_Value>> Args;
 
-  void makePath(const std::string& path, const InArgs& in);
-  void addPathInArg(const std::string& path,
+  void makePath(const String& path, const InArgs& in);
+  void addPathInArg(const String& path,
                     const InArgs& in,
                     typename InArgs::const_iterator& itInArg,
 					typename PathArgument<_Value>::Kind kind);
-  void invalidPath(const std::string& path, int location);
+  void invalidPath(const String& path, int location);
 
   Args args_;
 };
@@ -679,6 +683,7 @@ private:
 template<class _Value>
 class JSON_API ValueIteratorBase {
 public:
+  typedef typename _Value::String String;
   typedef std::bidirectional_iterator_tag iterator_category;
   typedef unsigned int size_t;
   typedef int difference_type;
@@ -702,7 +707,7 @@ public:
   /// Return the member name of the referenced Value, or "" if it is not an
   /// objectValue.
   /// \note Avoid `c_str()` on result, as embedded zeroes are possible.
-  std::string name() const;
+  String name() const;
 
   /// Return the member name of the referenced Value. "" if it is not an
   /// objectValue.

@@ -70,7 +70,7 @@ public:
  * A StreamWriter will be created from the factory, used, and then deleted.
  */
 template<class _Value>
-std::string JSON_API writeString(typename StreamWriter<_Value>::Factory const& factory, _Value const& root);
+typename _Value::String JSON_API writeString(typename StreamWriter<_Value>::Factory const& factory, _Value const& root);
 
 
 /** \brief Build a StreamWriter implementation.
@@ -91,6 +91,7 @@ Usage:
 template<class _Value>
 class JSON_API StreamWriterBuilder : public StreamWriter<_Value>::Factory {
 public:
+  typedef typename _Value::String String;
   // Note: We use a Json::Value so that we can add data-members to this class
   // without a major version bump.
   /** Configuration of this builder.
@@ -130,7 +131,7 @@ public:
   bool validate(_Value* invalid) const;
   /** A simple way to update a specific setting.
    */
-  _Value& operator[](std::string key);
+  _Value& operator[](String key);
 
   /** Called by ctor, but you can use this to reset settings_.
    * \pre 'settings' != NULL (but Json::null is fine)
@@ -146,9 +147,10 @@ public:
 template<class _Value>
 class JSON_API Writer {
 public:
+  typedef typename _Value::String String;
   virtual ~Writer();
 
-  virtual std::string write(const _Value& root) = 0;
+  virtual String write(const _Value& root) = 0;
 };
 
 /** \brief Outputs a Value in <a HREF="http://www.json.org">JSON</a> format
@@ -164,6 +166,7 @@ template<class _Value>
 class JSON_API FastWriter : public Writer<_Value> {
 
 public:
+  typedef typename _Value::String String;
   FastWriter();
   ~FastWriter() override {}
 
@@ -179,12 +182,12 @@ public:
   void omitEndingLineFeed();
 
 public: // overridden from Writer
-  std::string write(const _Value& root) override;
+  String write(const _Value& root) override;
 
 private:
   void writeValue(const _Value& value);
 
-  std::string document_;
+  String document_;
   bool yamlCompatiblityEnabled_;
   bool dropNullPlaceholders_;
   bool omitEndingLineFeed_;
@@ -217,6 +220,7 @@ private:
 template<class _Value>
 class JSON_API StyledWriter : public Writer<_Value> {
 public:
+  typedef typename _Value::String String;
   StyledWriter();
   ~StyledWriter() override {}
 
@@ -225,27 +229,27 @@ public: // overridden from Writer
    * \param root Value to serialize.
    * \return String containing the JSON document that represents the root value.
    */
-  std::string write(const _Value& root) override;
+  String write(const _Value& root) override;
 
 private:
   void writeValue(const _Value& value);
   void writeArrayValue(const _Value& value);
   bool isMultineArray(const _Value& value);
-  void pushValue(const std::string& value);
+  void pushValue(const String& value);
   void writeIndent();
-  void writeWithIndent(const std::string& value);
+  void writeWithIndent(const String& value);
   void indent();
   void unindent();
   void writeCommentBeforeValue(const _Value& root);
   void writeCommentAfterValueOnSameLine(const _Value& root);
   bool hasCommentForValue(const _Value& value);
-  static std::string normalizeEOL(const std::string& text);
+  static String normalizeEOL(const String& text);
 
-  typedef std::vector<std::string> ChildValues;
+  typedef std::vector<String> ChildValues;
 
   ChildValues childValues_;
-  std::string document_;
-  std::string indentString_;
+  String document_;
+  String indentString_;
   int rightMargin_;
   int indentSize_;
   bool addChildValues_;
@@ -280,7 +284,8 @@ private:
 template<class _Value>
 class JSON_API StyledStreamWriter {
 public:
-  StyledStreamWriter(std::string indentation = "\t");
+  typedef typename _Value::String String;
+  StyledStreamWriter(String indentation = "\t");
   ~StyledStreamWriter() {}
 
 public:
@@ -296,43 +301,43 @@ private:
   void writeValue(const _Value& value);
   void writeArrayValue(const _Value& value);
   bool isMultineArray(const _Value& value);
-  void pushValue(const std::string& value);
+  void pushValue(const String& value);
   void writeIndent();
-  void writeWithIndent(const std::string& value);
+  void writeWithIndent(const String& value);
   void indent();
   void unindent();
   void writeCommentBeforeValue(const _Value& root);
   void writeCommentAfterValueOnSameLine(const _Value& root);
   bool hasCommentForValue(const _Value& value);
-  static std::string normalizeEOL(const std::string& text);
+  static String normalizeEOL(const String& text);
 
-  typedef std::vector<std::string> ChildValues;
+  typedef std::vector<String> ChildValues;
 
   ChildValues childValues_;
   std::ostream* document_;
-  std::string indentString_;
+  String indentString_;
   int rightMargin_;
-  std::string indentation_;
+  String indentation_;
   bool addChildValues_ : 1;
   bool indented_ : 1;
 };
 
 #if defined(JSON_HAS_INT64)
 template<class _Value>
-std::string JSON_API valueToString(Int value);
+typename _Value::String JSON_API valueToString(Int value);
 template<class _Value>
-std::string JSON_API valueToString(UInt value);
+typename _Value::String JSON_API valueToString(UInt value);
 #endif // if defined(JSON_HAS_INT64)
 template<class _Value>
-std::string JSON_API valueToString(LargestInt value);
+typename _Value::String JSON_API valueToString(LargestInt value);
 template<class _Value>
-std::string JSON_API valueToString(LargestUInt value);
+typename _Value::String JSON_API valueToString(LargestUInt value);
 template<class _Value>
-std::string JSON_API valueToString(double value);
+typename _Value::String JSON_API valueToString(double value);
 template<class _Value>
-std::string JSON_API valueToString(bool value);
+typename _Value::String JSON_API valueToString(bool value);
 template<class _Value>
-std::string JSON_API valueToQuotedString(const char* value);
+typename _Value::String JSON_API valueToQuotedString(const char* value);
 
 } // namespace detail
 

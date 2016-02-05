@@ -76,7 +76,7 @@ Reader<_Value>::Reader(const Features& features)
 
 template<class _Value>
 bool
-Reader<_Value>::parse(const std::string& document, _Value& root, bool collectComments) {
+Reader<_Value>::parse(const String& document, _Value& root, bool collectComments) {
   document_ = document;
   const char* begin = document_.c_str();
   const char* end = begin + document_.length();
@@ -92,7 +92,7 @@ bool Reader<_Value>::parse(std::istream& sin, _Value& root, bool collectComments
 
   // Since std::string is reference-counted, this at least does not
   // create an extra copy.
-  std::string doc;
+  String doc;
   std::getline(sin, doc, (char)EOF);
   return parse(doc, root, collectComments);
 }
@@ -356,8 +356,8 @@ bool Reader<_Value>::readComment() {
 }
 
 template<class _Value>
-static std::string normalizeEOL(typename Reader<_Value>::Location begin, typename Reader<_Value>::Location end) {
-  std::string normalized;
+static typename _Value::String normalizeEOL(typename Reader<_Value>::Location begin, typename Reader<_Value>::Location end) {
+  typename _Value::String normalized;
   normalized.reserve(end - begin);
   typename Reader<_Value>::Location current = begin;
   while (current != end) {
@@ -379,7 +379,7 @@ template<class _Value>
 void
 Reader<_Value>::addComment(Location begin, Location end, CommentPlacement placement) {
   assert(collectComments_);
-  const std::string& normalized = normalizeEOL<_Value>(begin, end);
+  const String& normalized = normalizeEOL<_Value>(begin, end);
   if (placement == commentAfterOnSameLine) {
     assert(lastValue_ != 0);
     lastValue_->setComment(normalized, placement);
@@ -454,7 +454,7 @@ bool Reader<_Value>::readString() {
 template<class _Value>
 bool Reader<_Value>::readObject(Token& tokenStart) {
   Token tokenName;
-  std::string name;
+  String name;
   _Value init(objectValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(tokenStart.start_ - begin_);
@@ -615,10 +615,10 @@ bool Reader<_Value>::decodeDouble(Token& token) {
 template<class _Value>
 bool Reader<_Value>::decodeDouble(Token& token, _Value& decoded) {
   double value = 0;
-  std::string buffer(token.start_, token.end_);
+  String buffer(token.start_, token.end_);
   std::istringstream is(buffer);
   if (!(is >> value))
-    return addError("'" + std::string(token.start_, token.end_) +
+    return addError("'" + String(token.start_, token.end_) +
                         "' is not a number.",
                     token);
   decoded = value;
@@ -627,7 +627,7 @@ bool Reader<_Value>::decodeDouble(Token& token, _Value& decoded) {
 
 template<class _Value>
 bool Reader<_Value>::decodeString(Token& token) {
-  std::string decoded_string;
+  String decoded_string;
   if (!decodeString(token, decoded_string))
     return false;
   _Value decoded(decoded_string);
@@ -638,7 +638,7 @@ bool Reader<_Value>::decodeString(Token& token) {
 }
 
 template<class _Value>
-bool Reader<_Value>::decodeString(Token& token, std::string& decoded) {
+bool Reader<_Value>::decodeString(Token& token, String& decoded) {
   decoded.reserve(token.end_ - token.start_ - 2);
   Location current = token.start_ + 1; // skip '"'
   Location end = token.end_ - 1;       // do not include '"'
@@ -679,7 +679,7 @@ bool Reader<_Value>::decodeString(Token& token, std::string& decoded) {
         unsigned int unicode;
         if (!decodeUnicodeCodePoint(token, current, end, unicode))
           return false;
-        decoded += codePointToUTF8(unicode);
+        decoded += codePointToUTF8<String>(unicode);
       } break;
       default:
         return addError("Bad escape sequence in string", token, current);
@@ -818,7 +818,7 @@ void Reader<_Value>::getLocationLineAndColumn(Location location,
 }
 
 template<class _Value>
-std::string Reader<_Value>::getLocationLineAndColumn(Location location) const {
+typename _Value::String Reader<_Value>::getLocationLineAndColumn(Location location) const {
   int line, column;
   getLocationLineAndColumn(location, line, column);
   char buffer[18 + 16 + 16 + 1];
@@ -929,6 +929,7 @@ public:
 template<class _Value>
 class OurReader {
 public:
+  typedef typename _Value::String String;
   typedef char Char;
   typedef const Char* Location;
   struct StructuredError {
@@ -1716,7 +1717,7 @@ bool OurReader<_Value>::decodeString(Token& token, std::string& decoded) {
         unsigned int unicode;
         if (!decodeUnicodeCodePoint(token, current, end, unicode))
           return false;
-        decoded += codePointToUTF8(unicode);
+        decoded += codePointToUTF8<String>(unicode);
       } break;
       default:
         return addError("Bad escape sequence in string", token, current);
@@ -2019,7 +2020,7 @@ bool CharReaderBuilder<_Value>::validate(_Value* invalid) const
   return 0u == inv.size();
 }
 template<class _Value>
-_Value& CharReaderBuilder<_Value>::operator[](std::string key)
+_Value& CharReaderBuilder<_Value>::operator[](String key)
 {
   return settings_[key];
 }
