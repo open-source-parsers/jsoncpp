@@ -12,6 +12,13 @@
 
 namespace Json {
 
+// features.h
+class Features;
+class StaticString;
+typedef unsigned int ArrayIndex;
+
+namespace detail {
+
 // writer.h
 template<class _Value>
 class FastWriter;
@@ -22,12 +29,7 @@ class StyledWriter;
 template<class _Value>
 class Reader;
 
-// features.h
-class Features;
-
 // value.h
-typedef unsigned int ArrayIndex;
-class StaticString;
 template<class _Value>
 class Path;
 template<class _Value>
@@ -42,6 +44,7 @@ class ValueIterator;
 template<class _Value>
 class ValueConstIterator;
 
+} // namespace detail
 } // namespace Json
 
 #endif // JSON_FORWARDS_H_INCLUDED

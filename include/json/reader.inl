@@ -46,7 +46,8 @@ static int const stackLimit_g = 1000;
 static int       stackDepth_g = 0;  // see readValue()
 
 namespace Json {
-
+namespace detail {
+	
 #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
 typedef std::unique_ptr<CharReader> CharReaderPtr;
 #else
@@ -2093,4 +2094,5 @@ std::istream& operator>>(std::istream& sin, Value& root) {
   return sin;
 }
 
+} // namespace detail
 } // namespace Json

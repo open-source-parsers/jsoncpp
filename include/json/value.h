@@ -33,7 +33,7 @@
  */
 namespace Json {
 
-/** Base class for all exceptions we throw.
+	/** Base class for all exceptions we throw.
  *
  * We use nothing but these internally. Of course, STL can throw others.
  */
@@ -124,6 +124,8 @@ public:
 private:
   const char* c_str_;
 };
+
+namespace detail {
 
 /** \brief Represents a <a HREF="http://www.json.org">JSON</a> value.
  *
@@ -838,6 +840,15 @@ public:
 
   pointer operator->() const { return &deref(); }
 };
+
+} // namespace detail
+
+typedef detail::Path<detail::Value<>> Path; 							// class Json::Path
+typedef detail::PathArgument<detail::Value<>> PathArgument; 			// class Json::PathArgument
+typedef detail::Value<> Value; 											// class Json::Value
+typedef detail::ValueConstIterator<detail::Value<>> ValueConstIterator; // class Json::ValueConstIterator
+typedef detail::ValueIterator<detail::Value<>> ValueIterator; 			// class Json::ValueIterator
+typedef detail::ValueIteratorBase<detail::Value<>> ValueIteratorBase; 	// class Json::ValueIteratorBase
 
 } // namespace Json
 

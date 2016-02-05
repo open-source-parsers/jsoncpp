@@ -22,6 +22,7 @@
 #define JSON_ASSERT_UNREACHABLE assert(false)
 
 namespace Json {
+namespace detail {
 
 // This is a walkaround to avoid the static initialization of Value::null.
 // kNull must be word-aligned to avoid crashing on ARM.  We use an alignment of
@@ -140,6 +141,7 @@ inline static void decodePrefixedString(
 template<class _Value>
 static inline void releaseStringValue(char* value) { free(value); }
 
+} // namespace detail
 } // namespace Json
 
 // //////////////////////////////////////////////////////////////////
@@ -155,6 +157,7 @@ static inline void releaseStringValue(char* value) { free(value); }
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
 namespace Json {
+namespace detail {
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
@@ -1648,4 +1651,5 @@ Value& Path::make(Value& root) const {
   return *node;
 }
 
+} // namespace detail
 } // namespace Json

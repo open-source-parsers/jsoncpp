@@ -6,6 +6,7 @@
 // included by json_value.cpp
 
 namespace Json {
+namespace detail {
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
@@ -186,4 +187,5 @@ ValueIterator& ValueIterator::operator=(const SelfType& other) {
   return *this;
 }
 
+} // namespace detail
 } // namespace Json

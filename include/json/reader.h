@@ -24,6 +24,7 @@
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
 namespace Json {
+namespace detail {
 
 /** \brief Unserialize a <a HREF="http://www.json.org">JSON</a> document into a
  *Value.
@@ -399,6 +400,12 @@ bool JSON_API parseFromStream(
 */
 template<class _Value>
 JSON_API std::istream& operator>>(std::istream&, Value&);
+
+} // namespace detail
+
+typedef detail::CharReader<detail::Value<>> CharReader; 				// class Json::CharReader
+typedef detail::CharReaderBuilder<detail::Value<>> CharReaderBuilder; 	// class Json::CharReaderBuilder
+typedef detail::Reader<detail::Value<>> Reader; 						// class Json::Reader
 
 } // namespace Json
 

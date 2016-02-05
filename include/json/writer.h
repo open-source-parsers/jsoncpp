@@ -21,7 +21,10 @@
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
 namespace Json {
+namespace detail {
 
+template<template<class T> class _Alloc = std::allocator<char>,
+  class _String = std::basic_string<char, std::char_traits<char>, std::allocator<char>>>
 class Value;
 
 /**
@@ -336,6 +339,15 @@ std::string JSON_API valueToQuotedString(const char* value);
 /// \see Json::operator>>()
 template<class _Value>
 JSON_API std::ostream& operator<<(std::ostream&, const Value& root);
+
+} // namespace detail
+
+typedef detail::FastWriter<detail::Value<>> FastWriter; 					// class Json::FastWriter
+typedef detail::StreamWriter<detail::Value<>> StreamWriter; 				// class Json::StreamWriter
+typedef detail::StreamWriterBuilder<detail::Value<>> StreamWriterBuilder; 	// class Json::StreamWriterBuilder
+typedef detail::StyledStreamWriter<detail::Value<>> StyledStreamWriter; 	// class Json::StyledStreamWriter
+typedef detail::StyledWriter<detail::Value<>> StyledWriter; 				// class Json::StyledWriter
+typedef detail::Writer<detail::Value<>> Writer; 							// class Json::Writer
 
 } // namespace Json
 
