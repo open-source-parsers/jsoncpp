@@ -37,6 +37,7 @@ Usage:
   }
 \endcode
 */
+template<class _Value>
 class JSON_API StreamWriter {
 protected:
   std::ostream* sout_;  // not owned; will not delete
@@ -66,6 +67,7 @@ public:
 /** \brief Write into stringstream, then return string, for convenience.
  * A StreamWriter will be created from the factory, used, and then deleted.
  */
+template<class _Value>
 std::string JSON_API writeString(StreamWriter::Factory const& factory, Value const& root);
 
 
@@ -84,6 +86,7 @@ Usage:
   std::cout << std::endl;  // add lf and flush
 \endcode
 */
+template<class _Value>
 class JSON_API StreamWriterBuilder : public StreamWriter::Factory {
 public:
   // Note: We use a Json::Value so that we can add data-members to this class
@@ -138,6 +141,7 @@ public:
 /** \brief Abstract class for writers.
  * \deprecated Use StreamWriter. (And really, this is an implementation detail.)
  */
+template<class _Value>
 class JSON_API Writer {
 public:
   virtual ~Writer();
@@ -154,6 +158,7 @@ public:
  * \sa Reader, Value
  * \deprecated Use StreamWriterBuilder.
  */
+template<class _Value>
 class JSON_API FastWriter : public Writer {
 
 public:
@@ -207,6 +212,7 @@ private:
  * \sa Reader, Value, Value::setComment()
  * \deprecated Use StreamWriterBuilder.
  */
+template<class _Value>
 class JSON_API StyledWriter : public Writer {
 public:
   StyledWriter();
@@ -269,6 +275,7 @@ private:
  * \sa Reader, Value, Value::setComment()
  * \deprecated Use StreamWriterBuilder.
  */
+template<class _Value>
 class JSON_API StyledStreamWriter {
 public:
   StyledStreamWriter(std::string indentation = "\t");
@@ -309,17 +316,25 @@ private:
 };
 
 #if defined(JSON_HAS_INT64)
+template<class _Value>
 std::string JSON_API valueToString(Int value);
+template<class _Value>
 std::string JSON_API valueToString(UInt value);
 #endif // if defined(JSON_HAS_INT64)
+template<class _Value>
 std::string JSON_API valueToString(LargestInt value);
+template<class _Value>
 std::string JSON_API valueToString(LargestUInt value);
+template<class _Value>
 std::string JSON_API valueToString(double value);
+template<class _Value>
 std::string JSON_API valueToString(bool value);
+template<class _Value>
 std::string JSON_API valueToQuotedString(const char* value);
 
 /// \brief Output using the StyledStreamWriter.
 /// \see Json::operator>>()
+template<class _Value>
 JSON_API std::ostream& operator<<(std::ostream&, const Value& root);
 
 } // namespace Json

@@ -30,6 +30,7 @@ namespace Json {
  *
  * \deprecated Use CharReader and CharReaderBuilder.
  */
+template<class _Value>
 class JSON_API Reader {
 public:
   typedef char Char;
@@ -244,6 +245,7 @@ private:
 
 /** Interface for reading JSON from a char array.
  */
+template<class _Value>
 class JSON_API CharReader {
 public:
   virtual ~CharReader() {}
@@ -290,6 +292,7 @@ Usage:
   bool ok = parseFromStream(builder, std::cin, &value, &errs);
 \endcode
 */
+template<class _Value>
 class JSON_API CharReaderBuilder : public CharReader::Factory {
 public:
   // Note: We use a Json::Value so that we can add data-members to this class
@@ -364,6 +367,7 @@ public:
   * Someday we might have a real StreamReader, but for now this
   * is convenient.
   */
+template<class _Value>
 bool JSON_API parseFromStream(
     CharReader::Factory const&,
     std::istream&,
@@ -393,6 +397,7 @@ bool JSON_API parseFromStream(
  \throw std::exception on parse error.
  \see Json::operator<<()
 */
+template<class _Value>
 JSON_API std::istream& operator>>(std::istream&, Value&);
 
 } // namespace Json

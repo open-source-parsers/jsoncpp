@@ -159,6 +159,8 @@ private:
  * but the Value API does *not* check bounds. That is the responsibility
  * of the caller.
  */
+template<template<class T> class _Alloc = std::allocator<char>,
+  class _String = std::basic_string<char, std::char_traits<char>, std::allocator<char>>>
 class JSON_API Value {
   friend class ValueIteratorBase;
 public:
@@ -605,6 +607,7 @@ private:
 /** \brief Experimental and untested: represents an element of the "path" to
  * access a node.
  */
+template<class _Value>
 class JSON_API PathArgument {
 public:
   friend class Path;
@@ -636,6 +639,7 @@ private:
  * - ".%" => member name is provided as parameter
  * - ".[%]" => index is provied as parameter
  */
+template<class _Value>
 class JSON_API Path {
 public:
   Path(const std::string& path,
@@ -668,6 +672,7 @@ private:
 /** \brief base class for Value iterators.
  *
  */
+template<class _Value>
 class JSON_API ValueIteratorBase {
 public:
   typedef std::bidirectional_iterator_tag iterator_category;
@@ -733,6 +738,7 @@ public:
 /** \brief const iterator for object and array value.
  *
  */
+template<class _Value>
 class JSON_API ValueConstIterator : public ValueIteratorBase {
   friend class Value;
 
@@ -783,6 +789,7 @@ public:
 
 /** \brief Iterator for object and array value.
  */
+template<class _Value>
 class JSON_API ValueIterator : public ValueIteratorBase {
   friend class Value;
 
@@ -837,7 +844,7 @@ public:
 
 namespace std {
 /// Specialize std::swap() for Json::Value.
-template<>
+template<class _Value>
 inline void swap(Json::Value& a, Json::Value& b) { a.swap(b); }
 }
 
