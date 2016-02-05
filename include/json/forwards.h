@@ -13,10 +13,13 @@
 namespace Json {
 
 // writer.h
+template<typename _Traits, typename _Alloc>
 class FastWriter;
+template<typename _Traits, typename _Alloc>
 class StyledWriter;
 
-// reader.h
+// reader_declaration.h
+template<typename _Traits, typename _Alloc>
 class Reader;
 
 // features.h
@@ -25,11 +28,17 @@ class Features;
 // value.h
 typedef unsigned int ArrayIndex;
 class StaticString;
+template<typename _Traits, typename _Alloc>
 class Path;
+template<typename _Traits, typename _Alloc>
 class PathArgument;
+template<typename _Traits, typename _Alloc>
 class Value;
+template<typename _Traits, typename _Alloc>
 class ValueIteratorBase;
+template<typename _Traits, typename _Alloc>
 class ValueIterator;
+template<typename _Traits, typename _Alloc>
 class ValueConstIterator;
 
 } // namespace Json

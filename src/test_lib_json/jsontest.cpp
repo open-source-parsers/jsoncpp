@@ -203,11 +203,11 @@ TestResult& TestResult::addToLastFailure(const std::string& message) {
 }
 
 TestResult& TestResult::operator<<(Json::Int64 value) {
-  return addToLastFailure(Json::valueToString(value));
+  return addToLastFailure(Json::valueToString<std::char_traits<char>, std::allocator<char>>(value));
 }
 
 TestResult& TestResult::operator<<(Json::UInt64 value) {
-  return addToLastFailure(Json::valueToString(value));
+  return addToLastFailure(Json::valueToString<std::char_traits<char>, std::allocator<char>>(value));
 }
 
 TestResult& TestResult::operator<<(bool value) {

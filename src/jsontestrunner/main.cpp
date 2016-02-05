@@ -15,12 +15,15 @@
 #pragma warning(disable : 4996) // disable fopen deprecation warning
 #endif
 
+#define USING_TRAITS_ALLOC std::char_traits<char>, std::allocator<char>
+using TestValue = Json::Value<USING_TRAITS_ALLOC>;
+
 struct Options
 {
   std::string path;
   Json::Features features;
   bool parseOnly;
-  typedef std::string (*writeFuncType)(Json::Value const&);
+  typedef std::string (*writeFuncType)(TestValue const&);
   writeFuncType write;
 };
 
@@ -70,7 +73,7 @@ static std::string readInputTestFile(const char* path) {
 }
 
 static void
-printValueTree(FILE* fout, Json::Value& value, const std::string& path = ".") {
+printValueTree(FILE* fout, TestValue& value, const std::string& path = ".") {
   if (value.hasComment(Json::commentBefore)) {
     fprintf(fout, "%s\n", value.getComment(Json::commentBefore).c_str());
   }
@@ -82,13 +85,13 @@ printValueTree(FILE* fout, Json::Value& value, const std::string& path = ".") {
     fprintf(fout,
             "%s=%s\n",
             path.c_str(),
-            Json::valueToString(value.asLargestInt()).c_str());
+            Json::valueToString<USING_TRAITS_ALLOC>(value.asLargestInt()).c_str());
     break;
   case Json::uintValue:
     fprintf(fout,
             "%s=%s\n",
             path.c_str(),
-            Json::valueToString(value.asLargestUInt()).c_str());
+            Json::valueToString<USING_TRAITS_ALLOC>(value.asLargestUInt()).c_str());
     break;
   case Json::realValue:
     fprintf(fout,
@@ -117,10 +120,10 @@ printValueTree(FILE* fout, Json::Value& value, const std::string& path = ".") {
   } break;
   case Json::objectValue: {
     fprintf(fout, "%s={}\n", path.c_str());
-    Json::Value::Members members(value.getMemberNames());
+    TestValue::Members members(value.getMemberNames());
     std::sort(members.begin(), members.end());
     std::string suffix = *(path.end() - 1) == '.' ? "" : ".";
-    for (Json::Value::Members::iterator it = members.begin();
+    for (TestValue::Members::iterator it = members.begin();
          it != members.end();
          ++it) {
       const std::string& name = *it;
@@ -141,9 +144,9 @@ static int parseAndSaveValueTree(const std::string& input,
                                  const std::string& kind,
                                  const Json::Features& features,
                                  bool parseOnly,
-                                 Json::Value* root)
+                                 TestValue* root)
 {
-  Json::Reader reader(features);
+  Json::Reader<USING_TRAITS_ALLOC> reader(features);
   bool parsingSuccessful = reader.parse(input, *root);
   if (!parsingSuccessful) {
     printf("Failed to parse %s file: \n%s\n",
@@ -162,34 +165,34 @@ static int parseAndSaveValueTree(const std::string& input,
   }
   return 0;
 }
-// static std::string useFastWriter(Json::Value const& root) {
+// static std::string useFastWriter(TestValue const& root) {
 //   Json::FastWriter writer;
 //   writer.enableYAMLCompatibility();
 //   return writer.write(root);
 // }
 static std::string useStyledWriter(
-    Json::Value const& root)
+    TestValue const& root)
 {
-  Json::StyledWriter writer;
+  Json::StyledWriter<USING_TRAITS_ALLOC> writer;
   return writer.write(root);
 }
 static std::string useStyledStreamWriter(
-    Json::Value const& root)
+    TestValue const& root)
 {
-  Json::StyledStreamWriter writer;
+  Json::StyledStreamWriter<USING_TRAITS_ALLOC> writer;
   std::ostringstream sout;
   writer.write(sout, root);
   return sout.str();
 }
 static std::string useBuiltStyledStreamWriter(
-    Json::Value const& root)
+    TestValue const& root)
 {
-  Json::StreamWriterBuilder builder;
+  Json::StreamWriterBuilder<USING_TRAITS_ALLOC> builder;
   return Json::writeString(builder, root);
 }
 static int rewriteValueTree(
     const std::string& rewritePath,
-    const Json::Value& root,
+    const TestValue& root,
     Options::writeFuncType write,
     std::string* rewrite)
 {
@@ -287,7 +290,7 @@ static int runTest(Options const& opts)
   std::string const rewritePath = basePath + ".rewrite";
   std::string const rewriteActualPath = basePath + ".actual-rewrite";
 
-  Json::Value root;
+  TestValue root;
   exitCode = parseAndSaveValueTree(
       input, actualPath, "input",
       opts.features, opts.parseOnly, &root);
@@ -299,7 +302,7 @@ static int runTest(Options const& opts)
   if (exitCode) {
     return exitCode;
   }
-  Json::Value rewriteRoot;
+  TestValue rewriteRoot;
   exitCode = parseAndSaveValueTree(
       rewrite, rewriteActualPath, "rewrite",
       opts.features, opts.parseOnly, &rewriteRoot);
