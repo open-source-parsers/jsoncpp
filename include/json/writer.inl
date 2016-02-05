@@ -79,24 +79,6 @@ typedef std::unique_ptr<StreamWriter> StreamWriterPtr;
 typedef std::auto_ptr<StreamWriter>   StreamWriterPtr;
 #endif
 
-static bool containsControlCharacter(const char* str) {
-  while (*str) {
-    if (isControlCharacter(*(str++)))
-      return true;
-  }
-  return false;
-}
-
-static bool containsControlCharacter0(const char* str, unsigned len) {
-  char const* end = str + len;
-  while (end != str) {
-    if (isControlCharacter(*str) || 0==*str)
-      return true;
-    ++str;
-  }
-  return false;
-}
-
 std::string valueToString(LargestInt value) {
   UIntToStringBuffer buffer;
   char* current = buffer + sizeof(buffer);
@@ -229,21 +211,6 @@ std::string valueToQuotedString(const char* value) {
   return result;
 }
 
-// https://github.com/upcaste/upcaste/blob/master/src/upcore/src/cstring/strnpbrk.cpp
-static char const* strnpbrk(char const* s, char const* accept, size_t n) {
-  assert((s || !n) && accept);
-
-  char const* const end = s + n;
-  for (char const* cur = s; cur < end; ++cur) {
-    int const c = *cur;
-    for (char const* a = accept; *a; ++a) {
-      if (*a == c) {
-        return cur;
-      }
-    }
-  }
-  return NULL;
-}
 static std::string valueToQuotedStringN(const char* value, unsigned length) {
   if (value == NULL)
     return "";

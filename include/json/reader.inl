@@ -53,24 +53,6 @@ typedef std::unique_ptr<CharReader> CharReaderPtr;
 typedef std::auto_ptr<CharReader>   CharReaderPtr;
 #endif
 
-// Implementation of class Features
-// ////////////////////////////////
-
-Features::Features()
-    : allowComments_(true), strictRoot_(false),
-      allowDroppedNullPlaceholders_(false), allowNumericKeys_(false) {}
-
-Features Features::all() { return Features(); }
-
-Features Features::strictMode() {
-  Features features;
-  features.allowComments_ = false;
-  features.strictRoot_ = true;
-  features.allowDroppedNullPlaceholders_ = false;
-  features.allowNumericKeys_ = false;
-  return features;
-}
-
 // Implementation of class Reader
 // ////////////////////////////////
 
@@ -903,11 +885,6 @@ public:
   bool allowSpecialFloats_;
   int stackLimit_;
 };  // OurFeatures
-
-// exact copy of Implementation of class Features
-// ////////////////////////////////
-
-OurFeatures OurFeatures::all() { return OurFeatures(); }
 
 // Implementation of class Reader
 // ////////////////////////////////

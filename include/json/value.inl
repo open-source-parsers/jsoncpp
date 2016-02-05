@@ -152,30 +152,6 @@ static inline void releaseStringValue(char* value) { free(value); }
 
 namespace Json {
 
-Exception::Exception(std::string const& msg)
-  : msg_(msg)
-{}
-Exception::~Exception() throw()
-{}
-char const* Exception::what() const throw()
-{
-  return msg_.c_str();
-}
-RuntimeError::RuntimeError(std::string const& msg)
-  : Exception(msg)
-{}
-LogicError::LogicError(std::string const& msg)
-  : Exception(msg)
-{}
-void throwRuntimeError(std::string const& msg)
-{
-  throw RuntimeError(msg);
-}
-void throwLogicError(std::string const& msg)
-{
-  throw LogicError(msg);
-}
-
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
