@@ -70,6 +70,9 @@ const LargestUInt Value<T, U>::maxLargestUInt = LargestUInt(-1);
 #if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 template <typename T, typename U>
 static inline bool InRange(double d, T min, U max) {
+  // The casts can lose precision, but we are looking only for
+  // an approximate range. Might fail on edge cases though. ~cdunn
+  //return d >= static_cast<double>(min) && d <= static_cast<double>(max);
   return d >= min && d <= max;
 }
 #else  // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
@@ -1448,16 +1451,16 @@ _String Value<_Alloc, _String>::getComment(CommentPlacement placement) const {
 }
 
 template<class _Alloc, class _String>
-void Value<_Alloc, _String>::setOffsetStart(size_t start) { start_ = start; }
+void Value<_Alloc, _String>::setOffsetStart(ptrdiff_t start) { start_ = start; }
 
 template<class _Alloc, class _String>
-void Value<_Alloc, _String>::setOffsetLimit(size_t limit) { limit_ = limit; }
+void Value<_Alloc, _String>::setOffsetLimit(ptrdiff_t limit) { limit_ = limit; }
 
 template<class _Alloc, class _String>
-size_t Value<_Alloc, _String>::getOffsetStart() const { return start_; }
+ptrdiff_t Value<_Alloc, _String>::getOffsetStart() const { return start_; }
 
 template<class _Alloc, class _String>
-size_t Value<_Alloc, _String>::getOffsetLimit() const { return limit_; }
+ptrdiff_t Value<_Alloc, _String>::getOffsetLimit() const { return limit_; }
 
 template<class _Alloc, class _String>
 _String Value<_Alloc, _String>::toStyledString() const {
