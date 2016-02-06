@@ -341,6 +341,8 @@ typename _Value::String JSON_API valueToQuotedString(const char* value);
 
 } // namespace detail
 
+bool jsonIsFinite(double value);
+
 typedef detail::FastWriter<detail::Value<>> FastWriter; 					// class Json::FastWriter
 typedef detail::StreamWriter<detail::Value<>> StreamWriter; 				// class Json::StreamWriter
 typedef detail::StreamWriterBuilder<detail::Value<>> StreamWriterBuilder; 	// class Json::StreamWriterBuilder

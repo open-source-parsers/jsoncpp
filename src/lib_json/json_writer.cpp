@@ -46,26 +46,9 @@
 #endif
 #endif
 
-#if defined(_MSC_VER)
-#if !defined(WINCE) && defined(__STDC_SECURE_LIB__) && _MSC_VER >= 1500 // VC++ 9.0 and above
-#define snprintf sprintf_s
-#elif _MSC_VER >= 1900 // VC++ 14.0 and above
-#define snprintf std::snprintf
-#else
-#define snprintf _snprintf
-#endif
-#elif defined(__ANDROID__) || defined(__QNXNTO__)
-#define snprintf snprintf
-#elif __cplusplus >= 201103L
-#if !defined(__MINGW32__)
-#define snprintf std::snprintf
-#endif
-#endif
-
-#if defined(__BORLANDC__)  
+#if defined(__BORLANDC__)
 #include <float.h>
 #define isfinite _finite
-#define snprintf _snprintf
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400 // VC++ 8.0
@@ -80,6 +63,10 @@ typedef std::unique_ptr<StreamWriter> StreamWriterPtr;
 #else
 typedef std::auto_ptr<StreamWriter>   StreamWriterPtr;
 #endif
+
+bool jsonIsFinite(double value) {
+  return isfinite(value);
+}
 
 namespace detail {
 
