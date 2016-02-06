@@ -361,8 +361,8 @@ void FastWriter::writeValue(const Value& value) {
     break;
   case arrayValue: {
     document_ += '[';
-    int size = value.size();
-    for (int index = 0; index < size; ++index) {
+    ArrayIndex size = value.size();
+    for (ArrayIndex index = 0; index < size; ++index) {
       if (index > 0)
         document_ += ',';
       writeValue(value[index]);
@@ -506,10 +506,10 @@ void StyledWriter::writeArrayValue(const Value& value) {
 }
 
 bool StyledWriter::isMultineArray(const Value& value) {
-  int size = value.size();
+  ArrayIndex const size = value.size();
   bool isMultiLine = size * 3 >= rightMargin_;
   childValues_.clear();
-  for (int index = 0; index < size && !isMultiLine; ++index) {
+  for (ArrayIndex index = 0; index < size && !isMultiLine; ++index) {
     const Value& childValue = value[index];
     isMultiLine = ((childValue.isArray() || childValue.isObject()) &&
                         childValue.size() > 0);
@@ -518,13 +518,13 @@ bool StyledWriter::isMultineArray(const Value& value) {
   {
     childValues_.reserve(size);
     addChildValues_ = true;
-    int lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
-    for (int index = 0; index < size; ++index) {
+    ArrayIndex lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
+    for (ArrayIndex index = 0; index < size; ++index) {
       if (hasCommentForValue(value[index])) {
         isMultiLine = true;
       }
       writeValue(value[index]);
-      lineLength += int(childValues_[index].length());
+      lineLength += childValues_[index].length();
     }
     addChildValues_ = false;
     isMultiLine = isMultiLine || lineLength >= rightMargin_;
@@ -725,10 +725,10 @@ void StyledStreamWriter::writeArrayValue(const Value& value) {
 }
 
 bool StyledStreamWriter::isMultineArray(const Value& value) {
-  int size = value.size();
+  ArrayIndex const size = value.size();
   bool isMultiLine = size * 3 >= rightMargin_;
   childValues_.clear();
-  for (int index = 0; index < size && !isMultiLine; ++index) {
+  for (ArrayIndex index = 0; index < size && !isMultiLine; ++index) {
     const Value& childValue = value[index];
     isMultiLine = ((childValue.isArray() || childValue.isObject()) &&
                         childValue.size() > 0);
@@ -737,13 +737,13 @@ bool StyledStreamWriter::isMultineArray(const Value& value) {
   {
     childValues_.reserve(size);
     addChildValues_ = true;
-    int lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
-    for (int index = 0; index < size; ++index) {
+    ArrayIndex lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
+    for (ArrayIndex index = 0; index < size; ++index) {
       if (hasCommentForValue(value[index])) {
         isMultiLine = true;
       }
       writeValue(value[index]);
-      lineLength += int(childValues_[index].length());
+      lineLength += childValues_[index].length();
     }
     addChildValues_ = false;
     isMultiLine = isMultiLine || lineLength >= rightMargin_;
@@ -1008,10 +1008,10 @@ void BuiltStyledStreamWriter::writeArrayValue(Value const& value) {
 }
 
 bool BuiltStyledStreamWriter::isMultineArray(Value const& value) {
-  int size = value.size();
+  ArrayIndex const size = value.size();
   bool isMultiLine = size * 3 >= rightMargin_;
   childValues_.clear();
-  for (int index = 0; index < size && !isMultiLine; ++index) {
+  for (ArrayIndex index = 0; index < size && !isMultiLine; ++index) {
     Value const& childValue = value[index];
     isMultiLine = ((childValue.isArray() || childValue.isObject()) &&
                         childValue.size() > 0);
@@ -1020,13 +1020,13 @@ bool BuiltStyledStreamWriter::isMultineArray(Value const& value) {
   {
     childValues_.reserve(size);
     addChildValues_ = true;
-    int lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
-    for (int index = 0; index < size; ++index) {
+    ArrayIndex lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
+    for (ArrayIndex index = 0; index < size; ++index) {
       if (hasCommentForValue(value[index])) {
         isMultiLine = true;
       }
       writeValue(value[index]);
-      lineLength += int(childValues_[index].length());
+      lineLength += childValues_[index].length();
     }
     addChildValues_ = false;
     isMultiLine = isMultiLine || lineLength >= rightMargin_;

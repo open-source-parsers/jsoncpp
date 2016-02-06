@@ -238,8 +238,8 @@ private:
   ChildValues childValues_;
   std::string document_;
   std::string indentString_;
-  int rightMargin_;
-  int indentSize_;
+  unsigned int rightMargin_;
+  unsigned int indentSize_;
   bool addChildValues_;
 };
 

@@ -57,12 +57,13 @@ static std::string readInputTestFile(const char* path) {
   if (!file)
     return std::string("");
   fseek(file, 0, SEEK_END);
-  long size = ftell(file);
+  long const size = ftell(file);
+  unsigned long const usize = static_cast<unsigned long const>(size);
   fseek(file, 0, SEEK_SET);
   std::string text;
   char* buffer = new char[size + 1];
   buffer[size] = 0;
-  if (fread(buffer, 1, size, file) == (unsigned long)size)
+  if (fread(buffer, 1, usize, file) == usize)
     text = buffer;
   fclose(file);
   delete[] buffer;
@@ -104,8 +105,8 @@ printValueTree(FILE* fout, Json::Value& value, const std::string& path = ".") {
     break;
   case Json::arrayValue: {
     fprintf(fout, "%s=[]\n", path.c_str());
-    int size = value.size();
-    for (int index = 0; index < size; ++index) {
+    Json::ArrayIndex size = value.size();
+    for (Json::ArrayIndex index = 0; index < size; ++index) {
       static char buffer[16];
 #if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__)
       sprintf_s(buffer, sizeof(buffer), "[%d]", index);

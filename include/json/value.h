@@ -554,10 +554,10 @@ Json::Value obj_value(Json::objectValue); // {}
 
   // Accessors for the [start, limit) range of bytes within the JSON text from
   // which this value was parsed, if any.
-  void setOffsetStart(size_t start);
-  void setOffsetLimit(size_t limit);
-  size_t getOffsetStart() const;
-  size_t getOffsetLimit() const;
+  void setOffsetStart(ptrdiff_t start);
+  void setOffsetLimit(ptrdiff_t limit);
+  ptrdiff_t getOffsetStart() const;
+  ptrdiff_t getOffsetLimit() const;
 
 private:
   void initBasic(ValueType type, bool allocated = false);
@@ -598,8 +598,8 @@ private:
 
   // [start, limit) byte offsets in the source JSON text from which this Value
   // was extracted.
-  size_t start_;
-  size_t limit_;
+  ptrdiff_t start_;
+  ptrdiff_t limit_;
 };
 
 /** \brief Experimental and untested: represents an element of the "path" to
