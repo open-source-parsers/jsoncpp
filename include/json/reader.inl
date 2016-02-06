@@ -752,7 +752,7 @@ bool Reader<_Value>::decodeUnicodeEscapeSequence(Token& token,
           token,
           current);
   }
-  ret_unicode = unicode;
+  ret_unicode = static_cast<unsigned int>(unicode);
   return true;
 }
 
@@ -1599,7 +1599,7 @@ bool OurReader<_Value>::decodeNumber(Token& token, _Value& decoded) {
     Char c = *current++;
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
-    typename _Value::UInt digit(c - '0');
+    typename _Value::UInt digit(static_cast<typename _Value::UInt>(c - '0'));
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, b) this is the last digit, and
