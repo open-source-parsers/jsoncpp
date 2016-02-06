@@ -57,7 +57,9 @@
 #elif defined(__ANDROID__) || defined(__QNXNTO__)
 #define snprintf snprintf
 #elif __cplusplus >= 201103L
+#if !defined(__MINGW32__)
 #define snprintf std::snprintf
+#endif
 #endif
 
 #if defined(__BORLANDC__)  
