@@ -12,6 +12,8 @@ OPTION(JSONCPP_WITH_CMAKE_PACKAGE "Generate and install cmake package files" OFF
 OPTION(BUILD_SHARED_LIBS "Build jsoncpp_lib as a shared library." OFF)
 OPTION(BUILD_STATIC_LIBS "Build jsoncpp_lib static library." ON)
 
+include(GNUInstallDirs)
+
 # Ensures that CMAKE_BUILD_TYPE is visible in cmake-gui on Unix
 IF(NOT WIN32)
     IF(NOT CMAKE_BUILD_TYPE)
@@ -30,7 +32,7 @@ SET(ARCHIVE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}
     CACHE PATH "Install dir for static libraries")
 SET(LIBRARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}
     CACHE PATH "Install dir for shared libraries")
-SET(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include
+SET(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/jsoncpp
     CACHE PATH "Install dir for headers")
 SET(PACKAGE_INSTALL_DIR lib${LIB_SUFFIX}/cmake
     CACHE PATH "Install dir for cmake package config files")
@@ -114,7 +116,7 @@ IF(JSONCPP_WITH_PKGCONFIG_SUPPORT)
 		"pkg-config/jsoncpp.pc"
 		@ONLY)
 	INSTALL(FILES "${CMAKE_BINARY_DIR}/pkg-config/jsoncpp.pc"
-		DESTINATION "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/pkgconfig")
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 ENDIF()
 
 IF(JSONCPP_WITH_CMAKE_PACKAGE)

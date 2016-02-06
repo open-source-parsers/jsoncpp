@@ -54,7 +54,11 @@
 
 namespace Json {
 
-typedef std::auto_ptr<StreamWriter>   StreamWriterPtr;
+#if __GNUC__ >= 6
+typedef std::scoped_ptr<StreamWriter> const  StreamWriterPtr;
+#else
+typedef std::auto_ptr<StreamWriter>          StreamWriterPtr;
+#endif
 
 static bool containsControlCharacter(const char* str) {
   while (*str) {
