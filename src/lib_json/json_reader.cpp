@@ -43,7 +43,11 @@ static int       stackDepth_g = 0;  // see readValue()
 
 namespace Json {
 
-typedef std::auto_ptr<CharReader>   CharReaderPtr;
+#if __GNUC__ >= 6
+typedef std::scoped_ptr<CharReader> const  CharReaderPtr;
+#else
+typedef std::auto_ptr<CharReader>          CharReaderPtr;
+#endif
 
 // Implementation of class Features
 // ////////////////////////////////
