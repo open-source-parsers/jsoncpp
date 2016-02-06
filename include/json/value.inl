@@ -36,7 +36,7 @@ namespace detail {
 #define ALIGNAS(byte_alignment)
 #endif
 static const unsigned char ALIGNAS(8) kNull[2048] = { 0 }; //FIXME no sizeof(Value) exists
-const unsigned char& kNullRef = kNull[0];
+static const unsigned char& kNullRef = kNull[0];
 template <typename T, typename U>
 const Value<T, U>& Value<T, U>::null = reinterpret_cast<const Value<T, U>&>(kNullRef);
 template <typename T, typename U>
@@ -128,7 +128,7 @@ static inline typename _Value::StringDataPtr duplicateAndPrefixStringValue(
                       "length too big for prefixing");
 
   try {
-	typename  _Value::StringDataPtr newString(new typename _Value::StringData(value, value + length));
+	typename  _Value::StringDataPtr newString(new typename _Value::StringData());
     for (unsigned int i=0; i<sizeof(unsigned); i++)
       newString->push_back(reinterpret_cast<char*>(&length)[i]);
     newString->insert(newString->end(), value, value+length);
@@ -157,7 +157,7 @@ inline static void decodePrefixedString(
 /** Free the string duplicated by duplicateStringValue()/duplicateAndPrefixStringValue().
  */
 template<class _Value>
-static inline void releaseStringValue(char* value) { /* Unused */ } //FIXME Remove!
+static inline void releaseStringValue(char* value) { (void)(value);/* Unused */ } //FIXME Remove!
 
 } // namespace detail
 } // namespace Json
