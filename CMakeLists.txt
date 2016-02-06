@@ -64,7 +64,7 @@ ENDMACRO()
 #SET( JSONCPP_VERSION_MAJOR X )
 #SET( JSONCPP_VERSION_MINOR Y )
 #SET( JSONCPP_VERSION_PATCH Z )
-SET( JSONCPP_VERSION 1.6.5 )
+SET( JSONCPP_VERSION 1.7.0 )
 jsoncpp_parse_version( ${JSONCPP_VERSION} JSONCPP_VERSION )
 #IF(NOT JSONCPP_VERSION_FOUND)
 #    MESSAGE(FATAL_ERROR "Failed to parse version string properly. Expect X.Y.Z")
@@ -103,10 +103,10 @@ endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   # using regular Clang or AppleClang
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wconversion -Wshadow -Wno-sign-conversion")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wconversion -Wshadow -Wno-sign-conversion -Werror=conversion")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # using GCC
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wconversion -Wshadow -Wextra")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wconversion -Wshadow -Wextra -Werror=conversion")
   # not yet ready for -Wsign-conversion
 
   if (JSONCPP_WITH_STRICT_ISO AND NOT JSONCPP_WITH_WARNING_AS_ERROR)

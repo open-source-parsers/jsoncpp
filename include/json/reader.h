@@ -42,8 +42,8 @@ public:
    *
    */
   struct StructuredError {
-    size_t offset_start;
-    size_t offset_limit;
+    ptrdiff_t offset_start;
+    ptrdiff_t offset_limit;
     std::string message;
   };
 

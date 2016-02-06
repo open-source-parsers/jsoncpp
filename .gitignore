@@ -34,3 +34,14 @@ CTestTestFile.cmake
 cmake_install.cmake
 pkg-config/jsoncpp.pc
 jsoncpp_lib_static.dir/
+
+# In case someone runs cmake in the root-dir:
+/CMakeCache.txt
+/Makefile
+/include/Makefile
+/src/Makefile
+/src/jsontestrunner/Makefile
+/src/jsontestrunner/jsontestrunner_exe
+/src/lib_json/Makefile
+/src/test_lib_json/Makefile
+/src/test_lib_json/jsoncpp_test

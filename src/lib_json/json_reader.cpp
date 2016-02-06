@@ -30,7 +30,9 @@
 #elif defined(__ANDROID__) || defined(__QNXNTO__)
 #define snprintf snprintf
 #elif __cplusplus >= 201103L
+#if !defined(__MINGW32__)
 #define snprintf std::snprintf
+#endif
 #endif
 
 #if defined(__QNXNTO__)
@@ -368,7 +370,7 @@ bool Reader::readComment() {
 
 static std::string normalizeEOL(Reader::Location begin, Reader::Location end) {
   std::string normalized;
-  normalized.reserve(end - begin);
+  normalized.reserve(static_cast<size_t>(end - begin));
   Reader::Location current = begin;
   while (current != end) {
     char c = *current++;
@@ -578,7 +580,7 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
     Char c = *current++;
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
-    Value::UInt digit(c - '0');
+    Value::UInt digit(static_cast<Value::UInt>(c - '0'));
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, b) this is the last digit, and
@@ -636,7 +638,7 @@ bool Reader::decodeString(Token& token) {
 }
 
 bool Reader::decodeString(Token& token, std::string& decoded) {
-  decoded.reserve(token.end_ - token.start_ - 2);
+  decoded.reserve(static_cast<size_t>(token.end_ - token.start_ - 2));
   Location current = token.start_ + 1; // skip '"'
   Location end = token.end_ - 1;       // do not include '"'
   while (current != end) {
@@ -720,13 +722,13 @@ bool Reader::decodeUnicodeCodePoint(Token& token,
 bool Reader::decodeUnicodeEscapeSequence(Token& token,
                                          Location& current,
                                          Location end,
-                                         unsigned int& unicode) {
+                                         unsigned int& ret_unicode) {
   if (end - current < 4)
     return addError(
         "Bad unicode escape sequence in string: four digits expected.",
         token,
         current);
-  unicode = 0;
+  int unicode = 0;
   for (int index = 0; index < 4; ++index) {
     Char c = *current++;
     unicode *= 16;
@@ -742,6 +744,7 @@ bool Reader::decodeUnicodeEscapeSequence(Token& token,
           token,
           current);
   }
+  ret_unicode = static_cast<unsigned int>(unicode);
   return true;
 }
 
@@ -756,7 +759,7 @@ Reader::addError(const std::string& message, Token& token, Location extra) {
 }
 
 bool Reader::recoverFromError(TokenType skipUntilToken) {
-  int errorCount = int(errors_.size());
+  size_t const errorCount = errors_.size();
   Token skip;
   for (;;) {
     if (!readToken(skip))
@@ -851,7 +854,7 @@ std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
 }
 
 bool Reader::pushError(const Value& value, const std::string& message) {
-  size_t length = end_ - begin_;
+  ptrdiff_t const length = end_ - begin_;
   if(value.getOffsetStart() > length
     || value.getOffsetLimit() > length)
     return false;
@@ -868,7 +871,7 @@ bool Reader::pushError(const Value& value, const std::string& message) {
 }
 
 bool Reader::pushError(const Value& value, const std::string& message, const Value& extra) {
-  size_t length = end_ - begin_;
+  ptrdiff_t const length = end_ - begin_;
   if(value.getOffsetStart() > length
     || value.getOffsetLimit() > length
     || extra.getOffsetLimit() > length)
@@ -918,8 +921,8 @@ public:
   typedef char Char;
   typedef const Char* Location;
   struct StructuredError {
-    size_t offset_start;
-    size_t offset_limit;
+    ptrdiff_t offset_start;
+    ptrdiff_t offset_limit;
     std::string message;
   };
 
@@ -1560,7 +1563,7 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
     Char c = *current++;
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
-    Value::UInt digit(c - '0');
+    Value::UInt digit(static_cast<Value::UInt>(c - '0'));
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, b) this is the last digit, and
@@ -1596,12 +1599,13 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
   const int bufferSize = 32;
   int count;
-  int length = int(token.end_ - token.start_);
+  ptrdiff_t const length = token.end_ - token.start_;
 
   // Sanity check to avoid buffer overflow exploits.
   if (length < 0) {
     return addError("Unable to parse token length", token);
   }
+  size_t const ulength = static_cast<size_t>(length);
 
   // Avoid using a string constant for the format control string given to
   // sscanf, as this can cause hard to debug crashes on OS X. See here for more
@@ -1612,7 +1616,7 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
 
   if (length <= bufferSize) {
     Char buffer[bufferSize + 1];
-    memcpy(buffer, token.start_, length);
+    memcpy(buffer, token.start_, ulength);
     buffer[length] = 0;
     count = sscanf(buffer, format, &value);
   } else {
@@ -1640,7 +1644,7 @@ bool OurReader::decodeString(Token& token) {
 }
 
 bool OurReader::decodeString(Token& token, std::string& decoded) {
-  decoded.reserve(token.end_ - token.start_ - 2);
+  decoded.reserve(static_cast<size_t>(token.end_ - token.start_ - 2));
   Location current = token.start_ + 1; // skip '"'
   Location end = token.end_ - 1;       // do not include '"'
   while (current != end) {
@@ -1724,13 +1728,13 @@ bool OurReader::decodeUnicodeCodePoint(Token& token,
 bool OurReader::decodeUnicodeEscapeSequence(Token& token,
                                          Location& current,
                                          Location end,
-                                         unsigned int& unicode) {
+                                         unsigned int& ret_unicode) {
   if (end - current < 4)
     return addError(
         "Bad unicode escape sequence in string: four digits expected.",
         token,
         current);
-  unicode = 0;
+  int unicode = 0;
   for (int index = 0; index < 4; ++index) {
     Char c = *current++;
     unicode *= 16;
@@ -1746,6 +1750,7 @@ bool OurReader::decodeUnicodeEscapeSequence(Token& token,
           token,
           current);
   }
+  ret_unicode = static_cast<unsigned int>(unicode);
   return true;
 }
 
@@ -1760,7 +1765,7 @@ OurReader::addError(const std::string& message, Token& token, Location extra) {
 }
 
 bool OurReader::recoverFromError(TokenType skipUntilToken) {
-  int errorCount = int(errors_.size());
+  size_t errorCount = errors_.size();
   Token skip;
   for (;;) {
     if (!readToken(skip))
@@ -1850,7 +1855,7 @@ std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
 }
 
 bool OurReader::pushError(const Value& value, const std::string& message) {
-  size_t length = end_ - begin_;
+  ptrdiff_t length = end_ - begin_;
   if(value.getOffsetStart() > length
     || value.getOffsetLimit() > length)
     return false;
@@ -1867,7 +1872,7 @@ bool OurReader::pushError(const Value& value, const std::string& message) {
 }
 
 bool OurReader::pushError(const Value& value, const std::string& message, const Value& extra) {
-  size_t length = end_ - begin_;
+  ptrdiff_t length = end_ - begin_;
   if(value.getOffsetStart() > length
     || value.getOffsetLimit() > length
     || extra.getOffsetLimit() > length)
