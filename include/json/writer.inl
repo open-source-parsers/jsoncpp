@@ -3,6 +3,9 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
+#ifndef JSON_WRITER_INL_INCLUDED
+#define JSON_WRITER_INL_INCLUDED
+
 #if !defined(JSON_IS_AMALGAMATION)
 #include <json/writer.h>
 #include "tool.h"
@@ -1249,15 +1252,15 @@ typedef std::auto_ptr<StreamWriter<_Value>>   StreamWriterPtr;
 
 /// \brief Output using the StyledStreamWriter.
 /// \see Json::operator>>()
-template<class _Value>
-std::ostream& operator<<(std::ostream& sout, _Value const& root) {
+template<class _Alloc, class _String>
+std::ostream& operator<<(std::ostream& sout, Value<_Alloc, _String> const& root) {
 #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
-typedef std::unique_ptr<StreamWriter<_Value>> StreamWriterPtr;
+typedef std::unique_ptr<StreamWriter<Value<_Alloc, _String>>> StreamWriterPtr;
 #else
-typedef std::auto_ptr<StreamWriter<_Value>>   StreamWriterPtr;
+typedef std::auto_ptr<StreamWriter<Value<_Alloc, _String>>>   StreamWriterPtr;
 #endif
 
-  StreamWriterBuilder<_Value> builder;
+  StreamWriterBuilder<Value<_Alloc, _String>> builder;
   StreamWriterPtr const writer(builder.newStreamWriter());
   writer->write(root, &sout);
   return sout;
@@ -1265,3 +1268,5 @@ typedef std::auto_ptr<StreamWriter<_Value>>   StreamWriterPtr;
 
 } // namespace detail
 } // namespace Json
+
+#endif // JSON_WRITER_INL_INCLUDED

@@ -3,6 +3,9 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
+#ifndef CPPTL_JSON_READER_INL_INCLUDED
+#define CPPTL_JSON_READER_INL_INCLUDED
+
 #if !defined(JSON_IS_AMALGAMATION)
 #include "assertions.h"
 #include "reader.h"
@@ -2100,3 +2103,5 @@ std::istream& operator>>(std::istream& sin, _Value& root) {
 
 } // namespace detail
 } // namespace Json
+
+#endif // CPPTL_JSON_READER_INL_INCLUDED

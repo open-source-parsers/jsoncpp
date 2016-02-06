@@ -9,6 +9,7 @@
 #if !defined(JSON_IS_AMALGAMATION)
 #include "forwards.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
+#include <memory>
 #include <string>
 #include <vector>
 #include <exception>
@@ -887,8 +888,7 @@ typedef detail::ValueIteratorBase<detail::Value<>> ValueIteratorBase; 	// class 
 
 namespace std {
 /// Specialize std::swap() for Json::Value.
-template<class _Alloc = std::allocator<char>,
-  class _String = std::basic_string<char, std::char_traits<char>, std::allocator<char>>>
+template<class _Alloc, class _String>
 inline void swap(Json::detail::Value<_Alloc, _String>& a, Json::detail::Value<_Alloc, _String>& b) { a.swap(b); }
 }
 

@@ -7,8 +7,8 @@
 #define JSONTEST_H_INCLUDED
 
 #include <json/config.h>
-#include <json/value.h>
-#include <json/writer.h>
+#include <json/value.inl>
+#include <json/writer.inl>
 #include <stdio.h>
 #include <deque>
 #include <sstream>
