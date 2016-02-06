@@ -30,7 +30,7 @@ SET(ARCHIVE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}
     CACHE PATH "Install dir for static libraries")
 SET(LIBRARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}
     CACHE PATH "Install dir for shared libraries")
-SET(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include
+SET(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/jsoncpp
     CACHE PATH "Install dir for headers")
 SET(PACKAGE_INSTALL_DIR lib${LIB_SUFFIX}/cmake
     CACHE PATH "Install dir for cmake package config files")
