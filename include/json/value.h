@@ -219,6 +219,8 @@ private:
   class StringValueHolder {
     public:
       StringValueHolder();
+      StringValueHolder(const StringValueHolder& other);
+      StringValueHolder(StringValueHolder&& other);
       StringValueHolder(StringDataPtr&& value);
       StringValueHolder(char* value);
       ~StringValueHolder();
@@ -227,6 +229,11 @@ private:
       void SetString(StringDataPtr&& value);
       void SetString(char* value);
       bool IsRaw() const;
+
+      StringValueHolder& operator=(const StringValueHolder& other);
+      StringValueHolder& operator=(StringValueHolder&& other);
+      void copy(const StringValueHolder& other);
+      void swap(StringValueHolder&& other);
 
     private:
   	  char* valueStringRaw_ = nullptr;          // the value that was passed in, this does not belong to value

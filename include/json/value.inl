@@ -511,6 +511,7 @@ void Value<_Alloc, _String>::swapPayload(Value<_Alloc, _String>& other) {
   int temp2 = allocated_;
   allocated_ = other.allocated_;
   other.allocated_ = temp2 & 0x1;
+  std::swap(stringValue_, other.stringValue_);
 }
 
 template<class _Alloc, class _String>
@@ -1526,6 +1527,16 @@ Value<_Alloc, _String>::StringValueHolder::StringValueHolder() {
 }
 
 template<class _Alloc, class _String>
+Value<_Alloc, _String>::StringValueHolder::StringValueHolder(const StringValueHolder& other) {
+  copy(other);
+}
+
+template<class _Alloc, class _String>
+Value<_Alloc, _String>::StringValueHolder::StringValueHolder(StringValueHolder&& other) {
+  swap(std::move(other));
+}
+
+template<class _Alloc, class _String>
 Value<_Alloc, _String>::StringValueHolder::StringValueHolder(StringDataPtr&& value) {
   SetString(std::move(value));
 }
@@ -1577,6 +1588,33 @@ void Value<_Alloc, _String>::StringValueHolder::SetString(StringDataPtr&& value)
 template<class _Alloc, class _String>
 bool Value<_Alloc, _String>::StringValueHolder::IsRaw() const {
   return raw_;
+}
+
+template<class _Alloc, class _String>
+typename Value<_Alloc, _String>::StringValueHolder& Value<_Alloc, _String>::StringValueHolder::operator=(const StringValueHolder& other) {
+  copy(other);
+  return *this;
+}
+
+template<class _Alloc, class _String>
+typename Value<_Alloc, _String>::StringValueHolder& Value<_Alloc, _String>::StringValueHolder::operator=(StringValueHolder&& other) {
+  swap(std::move(other));
+  return *this;
+}
+
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::StringValueHolder::copy(const StringValueHolder& other) {
+  valueStringRaw_ = other.valueStringRaw_;
+  if (other.valueStringCopy_)
+    valueStringCopy_ = StringDataPtr(new StringData(*other.valueStringCopy_));
+  raw_ = other.raw_;
+}
+
+template<class _Alloc, class _String>
+void Value<_Alloc, _String>::StringValueHolder::swap(StringValueHolder&& other) {
+  std::swap(valueStringRaw_, other.valueStringRaw_);
+  std::swap(valueStringCopy_, other.valueStringCopy_);
+  std::swap(raw_, other.raw_);
 }
 
 // class PathArgument
