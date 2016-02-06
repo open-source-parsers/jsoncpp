@@ -302,7 +302,7 @@ private:
   ChildValues childValues_;
   std::ostream* document_;
   std::string indentString_;
-  int rightMargin_;
+  unsigned int rightMargin_;
   std::string indentation_;
   bool addChildValues_ : 1;
   bool indented_ : 1;

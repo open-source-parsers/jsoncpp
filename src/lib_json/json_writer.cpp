@@ -524,7 +524,7 @@ bool StyledWriter::isMultineArray(const Value& value) {
         isMultiLine = true;
       }
       writeValue(value[index]);
-      lineLength += childValues_[index].length();
+      lineLength += static_cast<ArrayIndex>(childValues_[index].length());
     }
     addChildValues_ = false;
     isMultiLine = isMultiLine || lineLength >= rightMargin_;
@@ -743,7 +743,7 @@ bool StyledStreamWriter::isMultineArray(const Value& value) {
         isMultiLine = true;
       }
       writeValue(value[index]);
-      lineLength += childValues_[index].length();
+      lineLength += static_cast<ArrayIndex>(childValues_[index].length());
     }
     addChildValues_ = false;
     isMultiLine = isMultiLine || lineLength >= rightMargin_;
@@ -1026,7 +1026,7 @@ bool BuiltStyledStreamWriter::isMultineArray(Value const& value) {
         isMultiLine = true;
       }
       writeValue(value[index]);
-      lineLength += childValues_[index].length();
+      lineLength += static_cast<ArrayIndex>(childValues_[index].length());
     }
     addChildValues_ = false;
     isMultiLine = isMultiLine || lineLength >= rightMargin_;
