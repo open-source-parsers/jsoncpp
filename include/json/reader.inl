@@ -83,7 +83,8 @@ template<class _Value>
 template<class CharT, class Traits, class BSAllocator, template<class, class, class> class BasicString>
 bool
 Reader<_Value>::parse(const BasicString<CharT, Traits, BSAllocator>& document, _Value& root, bool collectComments) {
-  document_ = document;
+  String stronglyTypedDocument(document.begin(), document.end());
+  std::swap(stronglyTypedDocument, document_);
   const char* begin = document_.c_str();
   const char* end = begin + document_.length();
   return parse(begin, end, root, collectComments);
