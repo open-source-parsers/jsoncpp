@@ -2580,9 +2580,12 @@ JSONTEST_FIXTURE(AllocatorTest, otherAllocator) {
 
 	FastWriter fwriter;
 	auto fastoutput = fwriter.write(testValue);
+	std::string fastoutputString(fastoutput.begin(), fastoutput.end());
 
 	StyledWriter swriter;
 	auto styledoutput = swriter.write(testValue);
+
+	JSONTEST_ASSERT_EQUAL(fastoutputString, testValue.toStyledTemplateString<std::string>());
 
 	Reader reader;
 	Value node;

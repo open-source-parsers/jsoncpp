@@ -586,6 +586,8 @@ Json::Value obj_value(Json::objectValue); // {}
   String getComment(CommentPlacement placement) const;
 
   String toStyledString() const;
+  template<class RString>
+  RString toStyledTemplateString() const;
 
   const_iterator begin() const;
   const_iterator end() const;

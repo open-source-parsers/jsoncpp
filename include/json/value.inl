@@ -1497,6 +1497,14 @@ _String Value<_Alloc, _String>::toStyledString() const {
 }
 
 template<class _Alloc, class _String>
+template<class RString>
+RString Value<_Alloc, _String>::toStyledTemplateString() const {
+  StyledWriter<Value<_Alloc, _String>> writer;
+  auto written = writer.write(*this);
+  return RString(written.begin(), written.end());
+}
+
+template<class _Alloc, class _String>
 typename Value<_Alloc, _String>::const_iterator Value<_Alloc, _String>::begin() const {
   switch (type_) {
   case arrayValue:
