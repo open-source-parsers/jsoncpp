@@ -80,8 +80,9 @@ Reader<_Value>::Reader(const Features& features)
 }
 
 template<class _Value>
+template<class CharT, class Traits, class BSAllocator, template<class, class, class> class BasicString>
 bool
-Reader<_Value>::parse(const String& document, _Value& root, bool collectComments) {
+Reader<_Value>::parse(const BasicString<CharT, Traits, BSAllocator>& document, _Value& root, bool collectComments) {
   document_ = document;
   const char* begin = document_.c_str();
   const char* end = begin + document_.length();
@@ -100,6 +101,13 @@ bool Reader<_Value>::parse(std::istream& sin, _Value& root, bool collectComments
   String doc;
   std::getline(sin, doc, (char)EOF);
   return parse(doc, root, collectComments);
+}
+
+template<class _Value>
+bool Reader<_Value>::parse(const char* doc,
+                   _Value& root,
+                   bool collectComments) {
+  return parse(doc, doc + strlen(doc), root, collectComments);
 }
 
 template<class _Value>

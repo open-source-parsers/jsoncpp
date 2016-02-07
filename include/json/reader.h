@@ -74,8 +74,28 @@ public:
    * \return \c true if the document was successfully parsed, \c false if an
    * error occurred.
    */
+  template<class CharT, class Traits, class BSAllocator, template<class, class, class> class BasicString>
   bool
-  parse(const String& document, _Value& root, bool collectComments = true);
+  parse(const BasicString<CharT, Traits, BSAllocator>& document, _Value& root, bool collectComments = true);
+
+  /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
+   document.
+   * \param doc Pointer on the beginning of the UTF-8 encoded string of the
+   document to read.
+   * \param root [out] Contains the root value of the document if it was
+   *             successfully parsed.
+   * \param collectComments \c true to collect comment and allow writing them
+   back during
+   *                        serialization, \c false to discard comments.
+   *                        This parameter is ignored if
+   Features::allowComments_
+   *                        is \c false.
+   * \return \c true if the document was successfully parsed, \c false if an
+   error occurred.
+   */
+  bool parse(const char* doc,
+			 _Value& root,
+             bool collectComments = true);
 
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
    document.
