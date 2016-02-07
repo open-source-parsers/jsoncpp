@@ -758,7 +758,7 @@ bool Reader<_Value>::decodeUnicodeEscapeSequence(Token& token,
 
 template<class _Value>
 bool
-Reader<_Value>::addError(const std::string& message, Token& token, Location extra) {
+Reader<_Value>::addError(String message, Token& token, Location extra) {
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
@@ -782,7 +782,7 @@ bool Reader<_Value>::recoverFromError(TokenType skipUntilToken) {
 }
 
 template<class _Value>
-bool Reader<_Value>::addErrorAndRecover(const std::string& message,
+bool Reader<_Value>::addErrorAndRecover(const String& message,
                                 Token& token,
                                 TokenType skipUntilToken) {
   addError(message, token);
@@ -1021,7 +1021,7 @@ private:
                                    Location& current,
                                    Location end,
                                    unsigned int& unicode);
-  bool addError(const std::string& message, Token& token, Location extra = 0);
+  bool addError(String message, Token& token, Location extra = 0);
   bool recoverFromError(TokenType skipUntilToken);
   bool addErrorAndRecover(const std::string& message,
                           Token& token,
@@ -1798,7 +1798,7 @@ bool OurReader<_Value>::decodeUnicodeEscapeSequence(Token& token,
 
 template<class _Value>
 bool
-OurReader<_Value>::addError(const std::string& message, Token& token, Location extra) {
+OurReader<_Value>::addError(String message, Token& token, Location extra) {
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
@@ -1822,7 +1822,7 @@ bool OurReader<_Value>::recoverFromError(TokenType skipUntilToken) {
 }
 
 template<class _Value>
-bool OurReader<_Value>::addErrorAndRecover(const std::string& message,
+bool OurReader<_Value>::addErrorAndRecover(const String& message,
                                 Token& token,
                                 TokenType skipUntilToken) {
   addError(message, token);
