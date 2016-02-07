@@ -170,7 +170,7 @@ class JSON_API Value {
 public:
   typedef _String String;
   typedef _Alloc Allocator;
-  typedef std::vector<std::string> Members;
+  typedef std::vector<_String> Members;
   typedef ValueIterator<Value> iterator;
   typedef ValueConstIterator<Value> const_iterator;
   typedef Json::UInt UInt;

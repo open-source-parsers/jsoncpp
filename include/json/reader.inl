@@ -479,7 +479,8 @@ bool Reader<_Value>::readObject(Token& tokenStart) {
       _Value numberName;
       if (!decodeNumber(tokenName, numberName))
         return recoverFromError(tokenObjectEnd);
-      name = numberName.asString();
+      String tmp = numberName.asString();
+      name = tmp;
     } else {
       break;
     }
@@ -621,7 +622,7 @@ template<class _Value>
 bool Reader<_Value>::decodeDouble(Token& token, _Value& decoded) {
   double value = 0;
   String buffer(token.start_, token.end_);
-  std::istringstream is(buffer);
+  std::basic_istringstream<typename _Value::String::value_type, typename _Value::String::traits_type, typename _Value::Allocator> is(buffer);
   if (!(is >> value))
     return addError("'" + String(token.start_, token.end_) +
                         "' is not a number.",

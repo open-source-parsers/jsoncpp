@@ -180,7 +180,7 @@ typename _Value::String valueToQuotedString(const char* value) {
     // sequence from occurring.
     default:
       if (isControlCharacter(*c)) {
-        std::ostringstream oss;
+        std::basic_ostringstream<typename _Value::String::value_type, typename _Value::String::traits_type, typename _Value::Allocator> oss;
         oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
             << std::setw(4) << static_cast<int>(*c);
         result += oss.str();
@@ -245,7 +245,7 @@ static typename _Value::String valueToQuotedStringN(const char* value, unsigned 
     // sequence from occurring.
     default:
       if ((isControlCharacter(*c)) || (*c == 0)) {
-        std::ostringstream oss;
+        std::basic_ostringstream<typename _Value::String::value_type, typename _Value::String::traits_type, typename _Value::Allocator> oss;
         oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
             << std::setw(4) << static_cast<int>(*c);
         result += oss.str();

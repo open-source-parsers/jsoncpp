@@ -2510,6 +2510,88 @@ JSONTEST_FIXTURE(RValueTest, moveConstruction) {
 #endif
 }
 
+struct AllocatorTest : JsonTest::TestCase {};
+
+template<typename T>
+class SecureAllocator {
+	public:
+		// Type definitions
+		using value_type      = T;
+		using pointer         = T*;
+		using const_pointer   = const T*;
+		using reference       = T&;
+		using const_reference = const T&;
+		using size_type       = std::size_t;
+		using difference_type = std::ptrdiff_t;
+
+		/**
+		 * Allocate memory for N items using the standard allocator.
+		 */
+		pointer allocate(size_type n) {
+			// allocate using "global operator new"
+			return static_cast<pointer>(::operator new(n * sizeof(T)));
+		}
+
+		/**
+		 * Release memory which was allocated for N items at pointer P.
+		 *
+		 * The memory block is filled with zeroes before being released.
+		 * The pointer argument is tagged as "volatile" to prevent the
+		 * compiler optimizing out this critical step.
+		 */
+		void deallocate(volatile pointer p, size_type n) {
+			std::memset(p, 0, n * sizeof(T));
+			// free using "global operator delete"
+			::operator delete(p);
+		}
+
+		/**
+		 * Construct an item in-place at pointer P.
+		 */
+		template<typename... Args>
+		void construct(pointer p, Args&&... args) {
+			// construct using "placement new" and "perfect forwarding"
+			::new (static_cast<void*>(p)) T(std::forward<Args>(args)...);
+		}
+
+		/**
+		 * Destroy an item in-place at pointer P.
+		 */
+		void destroy(pointer p) {
+			// destroy using "explicit destructor"
+			p->~T();
+		}
+
+		// Boilerplate
+		SecureAllocator() {}
+		template<typename U> SecureAllocator(const SecureAllocator<U>&) {}
+		template<typename U> struct rebind { using other = SecureAllocator<U>; };
+};
+#include <iostream>
+JSONTEST_FIXTURE(AllocatorTest, otherAllocator) {
+	using MyString = std::basic_string<char, std::char_traits<char>, SecureAllocator<char>>;
+	using Value = Json::detail::Value<SecureAllocator<char>, MyString>;
+	using FastWriter = Json::detail::FastWriter<Value> ;
+	using StyledWriter = Json::detail::StyledWriter<Value> ;
+	using Reader = Json::detail::Reader<Value>;
+
+	Value testValue = MyString("1234");
+	JSONTEST_ASSERT_EQUAL(MyString("1234"), testValue.asString());
+
+	FastWriter fwriter;
+	auto fastoutput = fwriter.write(testValue);
+	std::cout << fastoutput << std::endl;
+
+	StyledWriter swriter;
+	auto styledoutput = swriter.write(testValue);
+std::cout << styledoutput << std::endl;
+
+	Reader reader;
+	Value node;
+	reader.parse(styledoutput, node);
+	JSONTEST_ASSERT_EQUAL(MyString("1234"), node.asString());
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -2584,6 +2666,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, const);
 
   JSONTEST_REGISTER_FIXTURE(runner, RValueTest, moveConstruction);
+
+  JSONTEST_REGISTER_FIXTURE(runner, AllocatorTest, otherAllocator);
 
   return runner.runCommandLine(argc, argv);
 }
