@@ -2567,7 +2567,7 @@ class SecureAllocator {
 		template<typename U> SecureAllocator(const SecureAllocator<U>&) {}
 		template<typename U> struct rebind { using other = SecureAllocator<U>; };
 };
-#include <iostream>
+
 JSONTEST_FIXTURE(AllocatorTest, otherAllocator) {
 	using MyString = std::basic_string<char, std::char_traits<char>, SecureAllocator<char>>;
 	using Value = Json::detail::Value<SecureAllocator<char>, MyString>;
@@ -2580,16 +2580,16 @@ JSONTEST_FIXTURE(AllocatorTest, otherAllocator) {
 
 	FastWriter fwriter;
 	auto fastoutput = fwriter.write(testValue);
-	std::cout << fastoutput << std::endl;
 
 	StyledWriter swriter;
 	auto styledoutput = swriter.write(testValue);
-std::cout << styledoutput << std::endl;
 
 	Reader reader;
 	Value node;
 	reader.parse(styledoutput, node);
 	JSONTEST_ASSERT_EQUAL(MyString("1234"), node.asString());
+
+	JSONTEST_ASSERT_EQUAL(std::string("1234"), node.asTemplateString<std::string>());
 }
 
 int main(int argc, const char* argv[]) {

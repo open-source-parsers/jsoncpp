@@ -394,7 +394,8 @@ Value<_Alloc, _String>::Value(const char* beginValue, const char* endValue) {
 }
 
 template<class _Alloc, class _String>
-Value<_Alloc, _String>::Value(const String& value) {
+template<class CharT, class Traits, class BSAllocator, template<class, class, class> class BasicString>
+Value<_Alloc, _String>::Value(const BasicString<CharT, Traits, BSAllocator>& value) {
   initBasic(stringValue, true);
   stringValue_.SetString(
       duplicateAndPrefixStringValue<Value<_Alloc, _String>>(value.data(), static_cast<unsigned>(value.length())));
@@ -685,6 +686,33 @@ _String Value<_Alloc, _String>::asString() const {
     return valueToString<Value<_Alloc, _String>>(value_.real_);
   default:
     JSON_FAIL_MESSAGE("Type is not convertible to string");
+  }
+}
+
+template<class _Alloc, class _String>
+template<class RString>
+RString Value<_Alloc, _String>::asTemplateString() const {
+  switch (type_) {
+    case nullValue:
+      return "";
+    case stringValue:
+    {
+	  if (stringValue_.GetString() == 0) return "";
+  	  unsigned this_len;
+	  char const* this_str;
+	  decodePrefixedString<Value<_Alloc, RString>>(this->allocated_, this->stringValue_.GetString(), &this_len, &this_str);
+	  return RString(this_str, this_len);
+    }
+    case booleanValue:
+	  return value_.bool_ ? "true" : "false";
+    case intValue:
+	  return valueToString<Value<_Alloc, RString>>(value_.int_);
+    case uintValue:
+	  return valueToString<Value<_Alloc, RString>>(value_.uint_);
+    case realValue:
+	  return valueToString<Value<_Alloc, RString>>(value_.real_);
+    default:
+	  JSON_FAIL_MESSAGE("Type is not convertible to string");
   }
 }
 

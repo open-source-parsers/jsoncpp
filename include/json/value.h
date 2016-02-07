@@ -328,7 +328,8 @@ Json::Value obj_value(Json::objectValue); // {}
    * \endcode
    */
   Value(const Json::StaticString& value);
-  Value(const String& value); ///< Copy data() til size(). Embedded zeroes too.
+  template<class CharT, class Traits, class BSAllocator, template<class, class, class> class BasicString>
+  Value(const BasicString<CharT, Traits, BSAllocator>& value); ///< Copy data() til size(). Embedded zeroes too.
 #ifdef JSON_USE_CPPTL
   Value(const CppTL::ConstString& value);
 #endif
@@ -362,6 +363,8 @@ Json::Value obj_value(Json::objectValue); // {}
 
   const char* asCString() const; ///< Embedded zeroes could cause you trouble!
   String asString() const; ///< Embedded zeroes are possible.
+  template<class RString = _String>
+  RString asTemplateString() const; ///< Embedded zeroes are possible.
   /** Get raw char* of string-value.
    *  \return false if !string. (Seg-fault if str or end are NULL.)
    */
