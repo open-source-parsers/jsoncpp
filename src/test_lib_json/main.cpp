@@ -2568,6 +2568,16 @@ class SecureAllocator {
 		template<typename U> struct rebind { using other = SecureAllocator<U>; };
 };
 
+template<typename T, typename U>
+bool operator==(const SecureAllocator<T>&, const SecureAllocator<U>&) {
+	return true;
+}
+
+template<typename T, typename U>
+bool operator!=(const SecureAllocator<T>&, const SecureAllocator<U>&) {
+	return false;
+}
+
 JSONTEST_FIXTURE(AllocatorTest, otherAllocator) {
 	using MyString = std::basic_string<char, std::char_traits<char>, SecureAllocator<char>>;
 	using Value = Json::detail::Value<SecureAllocator<char>, MyString>;
