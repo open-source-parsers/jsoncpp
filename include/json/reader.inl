@@ -1023,7 +1023,7 @@ private:
                                    unsigned int& unicode);
   bool addError(String message, Token& token, Location extra = 0);
   bool recoverFromError(TokenType skipUntilToken);
-  bool addErrorAndRecover(const std::string& message,
+  bool addErrorAndRecover(const String& message,
                           Token& token,
                           TokenType skipUntilToken);
   void skipUntilSpace();
