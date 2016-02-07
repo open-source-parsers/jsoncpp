@@ -989,7 +989,7 @@ private:
   class ErrorInfo {
   public:
     Token token_;
-    std::string message_;
+    String message_;
     Location extra_;
   };
 
