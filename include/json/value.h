@@ -885,6 +885,8 @@ public:
 
 typedef detail::Path<detail::Value<>> Path; 							// class Json::Path
 typedef detail::PathArgument<detail::Value<>> PathArgument; 			// class Json::PathArgument
+template<class _Alloc, class _String>                                   // class Json::Value_ type with accessible allocator
+	using Value_ = Json::detail::Value<_Alloc, _String>;
 typedef detail::Value<> Value; 											// class Json::Value
 typedef detail::ValueConstIterator<detail::Value<>> ValueConstIterator; // class Json::ValueConstIterator
 typedef detail::ValueIterator<detail::Value<>> ValueIterator; 			// class Json::ValueIterator
