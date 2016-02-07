@@ -407,10 +407,7 @@ JSON_API std::istream& operator>>(std::istream&, _Value&);
 
 typedef detail::CharReader<detail::Value<>> CharReader; 				// class Json::CharReader
 typedef detail::CharReaderBuilder<detail::Value<>> CharReaderBuilder; 	// class Json::CharReaderBuilder
-
 typedef detail::Reader<detail::Value<>> Reader; 						// class Json::Reader
-template<class _Alloc, class _String>                                   // class Json::Reader_ type with accessible allocator
-        using Reader_ = detail::Reader<detail::Value<_Alloc, _String>>;
 
 } // namespace Json
 

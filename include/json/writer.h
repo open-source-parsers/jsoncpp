@@ -343,18 +343,12 @@ typename _Value::String JSON_API valueToQuotedString(const char* value);
 
 bool jsonIsFinite(double value);
 
+typedef detail::FastWriter<detail::Value<>> FastWriter; 					// class Json::FastWriter
 typedef detail::StreamWriter<detail::Value<>> StreamWriter; 				// class Json::StreamWriter
 typedef detail::StreamWriterBuilder<detail::Value<>> StreamWriterBuilder; 	// class Json::StreamWriterBuilder
 typedef detail::StyledStreamWriter<detail::Value<>> StyledStreamWriter; 	// class Json::StyledStreamWriter
 typedef detail::StyledWriter<detail::Value<>> StyledWriter; 				// class Json::StyledWriter
-
-typedef detail::FastWriter<detail::Value<>> FastWriter; 					// class Json::FastWriter
-template<class _Alloc, class _String>                                   	// class Json::FastWriter type with accessible allocator
-        using FastWriter_ = detail::FastWriter<detail::Value<_Alloc, _String>>;
-
 typedef detail::Writer<detail::Value<>> Writer; 							// class Json::Writer
-template<class _Alloc, class _String>                                   	// class Json::Writer_ type with accessible allocator
-        using Writer_ = detail::Writer<detail::Value<_Alloc, _String>>;
 
 } // namespace Json
 
