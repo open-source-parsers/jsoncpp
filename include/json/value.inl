@@ -394,8 +394,8 @@ Value<_Alloc, _String>::Value(const char* beginValue, const char* endValue) {
 }
 
 template<class _Alloc, class _String>
-template<class CharT, class Traits, class BSAllocator, template<class, class, class> class BasicString>
-Value<_Alloc, _String>::Value(const BasicString<CharT, Traits, BSAllocator>& value) {
+template<class CharT, class Traits, class BSAllocator>
+Value<_Alloc, _String>::Value(const std::basic_string<CharT, Traits, BSAllocator>& value) {
   initBasic(stringValue, true);
   stringValue_.SetString(
       duplicateAndPrefixStringValue<Value<_Alloc, _String>>(value.data(), static_cast<unsigned>(value.length())));

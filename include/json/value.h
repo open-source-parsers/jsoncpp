@@ -328,8 +328,8 @@ Json::Value obj_value(Json::objectValue); // {}
    * \endcode
    */
   Value(const Json::StaticString& value);
-  template<class CharT, class Traits, class BSAllocator, template<class, class, class> class BasicString>
-  Value(const BasicString<CharT, Traits, BSAllocator>& value); ///< Copy data() til size(). Embedded zeroes too.
+  template<class CharT, class Traits, class BSAllocator>
+  Value(const std::basic_string<CharT, Traits, BSAllocator>& value); ///< Copy data() til size(). Embedded zeroes too.
 #ifdef JSON_USE_CPPTL
   Value(const CppTL::ConstString& value);
 #endif
