@@ -1130,6 +1130,7 @@ Value<_Alloc, _String> const* Value<_Alloc, _String>::find(char const* key, char
   if (it == value_.map_->end()) return NULL;
   return &(*it).second;
 }
+
 template<class _Alloc, class _String>
 const Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](const char* key) const
 {
@@ -1137,8 +1138,10 @@ const Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](const char* key
   if (!found) return nullRef;
   return *found;
 }
+
 template<class _Alloc, class _String>
-Value<_Alloc, _String> const& Value<_Alloc, _String>::operator[](String const& key) const
+template<class CharT, class Traits, class BSAllocator>
+Value<_Alloc, _String> const& Value<_Alloc, _String>::operator[](std::basic_string<CharT, Traits, BSAllocator> const& key) const
 {
   Value const* found = find(key.data(), key.data() + key.length());
   if (!found) return nullRef;
@@ -1151,7 +1154,8 @@ Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](const char* key) {
 }
 
 template<class _Alloc, class _String>
-Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](const String& key) {
+template<class CharT, class Traits, class BSAllocator>
+Value<_Alloc, _String>& Value<_Alloc, _String>::operator[](const std::basic_string<CharT, Traits, BSAllocator>& key) {
   return resolveReference(key.data(), key.data() + key.length());
 }
 
@@ -1183,13 +1187,16 @@ Value<_Alloc, _String> Value<_Alloc, _String>::get(char const* key, char const* 
   Value const* found = find(key, cend);
   return !found ? defaultValue : *found;
 }
+
 template<class _Alloc, class _String>
 Value<_Alloc, _String> Value<_Alloc, _String>::get(char const* key, Value<_Alloc, _String> const& defaultValue) const
 {
   return get(key, key + strlen(key), defaultValue);
 }
+
 template<class _Alloc, class _String>
-Value<_Alloc, _String> Value<_Alloc, _String>::get(String const& key, Value<_Alloc, _String> const& defaultValue) const
+template<class CharT, class Traits, class BSAllocator>
+Value<_Alloc, _String> Value<_Alloc, _String>::get(std::basic_string<CharT, Traits, BSAllocator> const& key, Value<_Alloc, _String> const& defaultValue) const
 {
   return get(key.data(), key.data() + key.length(), defaultValue);
 }

@@ -468,11 +468,13 @@ Json::Value obj_value(Json::objectValue); // {}
   const Value& operator[](const char* key) const;
   /// Access an object value by name, create a null member if it does not exist.
   /// \param key may contain embedded nulls.
-  Value& operator[](const String& key);
+  template<class CharT, class Traits, class BSAllocator>
+  Value& operator[](const std::basic_string<CharT, Traits, BSAllocator>& key);
   /// Access an object value by name, returns null if there is no member with
   /// that name.
   /// \param key may contain embedded nulls.
-  const Value& operator[](const String& key) const;
+  template<class CharT, class Traits, class BSAllocator>
+  const Value& operator[](const std::basic_string<CharT, Traits, BSAllocator>& key) const;
   /** \brief Access an object value by name, create a null member if it does not
    exist.
 
@@ -503,7 +505,8 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
   /// \param key may contain embedded nulls.
-  Value get(const String& key, const Value& defaultValue) const;
+  template<class CharT, class Traits, class BSAllocator>
+  Value get(const std::basic_string<CharT, Traits, BSAllocator>& key, const Value& defaultValue) const;
 #ifdef JSON_USE_CPPTL
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
