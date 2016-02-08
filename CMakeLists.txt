@@ -27,11 +27,11 @@ SET(LIB_SUFFIX "" CACHE STRING "Optional arch-dependent suffix for the library i
 
 SET(RUNTIME_INSTALL_DIR bin
     CACHE PATH "Install dir for executables and dlls")
-SET(ARCHIVE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}
+SET(ARCHIVE_INSTALL_DIR lib${LIB_SUFFIX}
     CACHE PATH "Install dir for static libraries")
-SET(LIBRARY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}
+SET(LIBRARY_INSTALL_DIR lib${LIB_SUFFIX}
     CACHE PATH "Install dir for shared libraries")
-SET(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include
+SET(INCLUDE_INSTALL_DIR include
     CACHE PATH "Install dir for headers")
 SET(PACKAGE_INSTALL_DIR lib${LIB_SUFFIX}/cmake
     CACHE PATH "Install dir for cmake package config files")
