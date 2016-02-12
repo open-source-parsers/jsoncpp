@@ -141,7 +141,7 @@ std::string valueToString(double value, bool useSpecialFloats, unsigned int prec
   char buffer[32];
   int len = -1;
 
-  int length = (value==0.0)?1:(int)(std::floor(std::log10(std::abs(value)))+1);
+  unsigned int length = (value==0.0)?(unsigned int)1:(unsigned int)(std::floor(std::log10(std::abs(value)))+1);
   if (length<1) length=1;
 
   char formatString[6];
