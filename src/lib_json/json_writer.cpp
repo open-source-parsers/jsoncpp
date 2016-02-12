@@ -57,7 +57,7 @@
 #elif defined(__ANDROID__) || defined(__QNXNTO__)
 #define snprintf snprintf
 #elif __cplusplus >= 201103L
-#if !defined(__MINGW32__)
+#if !defined(__MINGW32__) && !defined(__CYGWIN__)
 #define snprintf std::snprintf
 #endif
 #endif
@@ -560,7 +560,7 @@ void StyledWriter::writeWithIndent(const std::string& value) {
 void StyledWriter::indent() { indentString_ += std::string(indentSize_, ' '); }
 
 void StyledWriter::unindent() {
-  assert(int(indentString_.size()) >= indentSize_);
+  assert(indentString_.size() >= indentSize_);
   indentString_.resize(indentString_.size() - indentSize_);
 }
 
@@ -857,7 +857,7 @@ private:
 
   ChildValues childValues_;
   std::string indentString_;
-  int rightMargin_;
+  unsigned int rightMargin_;
   std::string indentation_;
   CommentStyle::Enum cs_;
   std::string colonSymbol_;
