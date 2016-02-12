@@ -103,7 +103,7 @@ static inline typename _Value::StringDataPtr duplicateStringValue(const char* va
   // Avoid an integer overflow in the call to malloc below by limiting length
   // to a sane value.
   if (length >= (size_t)_Value::maxInt)
-    length = _Value::maxInt - 1;
+    length = static_cast<size_t>(_Value::maxInt - 1);
 
   try {
 	  typename _Value::StringDataPtr newString(new typename _Value::StringData(value, value + length));
