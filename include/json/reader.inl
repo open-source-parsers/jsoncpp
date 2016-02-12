@@ -1969,7 +1969,8 @@ public:
   : collectComments_(collectComments)
   , reader_(features)
   {}
-  bool parse(
+  virtual ~OurCharReader() {}
+  virtual bool parse(
       char const* beginDoc, char const* endDoc,
       _Value* root, std::string* errs) override {
     bool ok = reader_.parse(beginDoc, endDoc, *root, collectComments_);
