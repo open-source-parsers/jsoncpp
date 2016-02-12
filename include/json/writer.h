@@ -118,12 +118,12 @@ public:
   _Value settings_;
 
   StreamWriterBuilder();
-  ~StreamWriterBuilder() override;
+  virtual ~StreamWriterBuilder() override;
 
   /**
    * \throw std::exception if something goes wrong (e.g. invalid settings)
    */
-  StreamWriter<_Value>* newStreamWriter() const override;
+  virtual StreamWriter<_Value>* newStreamWriter() const override;
 
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
@@ -168,7 +168,7 @@ class JSON_API FastWriter : public Writer<_Value> {
 public:
   typedef typename _Value::String String;
   FastWriter();
-  ~FastWriter() override {}
+  virtual ~FastWriter() override {}
 
   void enableYAMLCompatibility();
 
@@ -182,7 +182,7 @@ public:
   void omitEndingLineFeed();
 
 public: // overridden from Writer
-  String write(const _Value& root) override;
+  virtual String write(const _Value& root) override;
 
 private:
   void writeValue(const _Value& value);
@@ -222,14 +222,14 @@ class JSON_API StyledWriter : public Writer<_Value> {
 public:
   typedef typename _Value::String String;
   StyledWriter();
-  ~StyledWriter() override {}
+  virtual ~StyledWriter() override {}
 
 public: // overridden from Writer
   /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
    * \param root Value to serialize.
    * \return String containing the JSON document that represents the root value.
    */
-  String write(const _Value& root) override;
+  virtual String write(const _Value& root) override;
 
 private:
   void writeValue(const _Value& value);

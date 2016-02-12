@@ -824,7 +824,8 @@ struct BuiltStyledStreamWriter : public StreamWriter<_Value>
       String const& endingLineFeedSymbol,
       bool useSpecialFloats,
       unsigned int precision);
-  int write(_Value const& root, std::ostream* sout) override;
+  virtual ~BuiltStyledStreamWriter() {}
+  virtual int write(_Value const& root, std::ostream* sout) override;
 private:
   void writeValue(_Value const& value);
   void writeArrayValue(_Value const& value);
