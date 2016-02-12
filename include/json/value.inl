@@ -240,7 +240,7 @@ Value<_Alloc, _String>::CZString::CZString(const CZString& other) {
   } else {
 	  cstr_.SetString(const_cast<char*>(other.cstr_.GetString()));
   }
-  storage_.policy_ = (other.cstr_.GetString()
+  storage_.policy_ = static_cast<unsigned>(other.cstr_.GetString()
                  ? (static_cast<DuplicationPolicy>(other.storage_.policy_) == noDuplication
                      ? noDuplication : duplicate)
                  : static_cast<DuplicationPolicy>(other.storage_.policy_));
@@ -870,7 +870,8 @@ float Value<_Alloc, _String>::asFloat() const {
 #if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
     return static_cast<float>(value_.uint_);
 #else  // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
-    return integerToDouble(value_.uint_);
+    // This can fail (silently?) if the value is bigger than MAX_FLOAT.
+    return static_cast<float>(integerToDouble(value_.uint_));
 #endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
   case realValue:
     return static_cast<float>(value_.real_);
