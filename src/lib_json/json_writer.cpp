@@ -143,7 +143,7 @@ std::string valueToString(double value, bool useSpecialFloats, unsigned int prec
   int len = -1;
 
   std::stringstream value_ss;
-  value_ss << std::setprecision( 17 ) << value;
+  value_ss << std::setprecision( precision ) << value;
   std::string value_str = value_ss.str();
 
   // Print into the buffer. We need not request the alternative representation
