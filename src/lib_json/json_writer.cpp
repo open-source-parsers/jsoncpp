@@ -8,6 +8,7 @@
 #include "json_tool.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <iomanip>
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include <utility>
@@ -141,18 +142,15 @@ std::string valueToString(double value, bool useSpecialFloats, unsigned int prec
   char buffer[32];
   int len = -1;
 
-  unsigned int length = (value==0.0)?(unsigned int)1:(unsigned int)(std::floor(std::log10(std::abs(value)))+1);
-  if (length<1) length=1;
-  if (length>precision-1) length = precision-1;
-
-  char formatString[6];
-  sprintf(formatString, "%%.%dg", precision-length);
+  std::stringstream value_ss;
+  value_ss << std::setprecision( 15 ) << value;
+  std::string value_str = value_ss.str();
 
   // Print into the buffer. We need not request the alternative representation
   // that always has a decimal point because JSON doesn't distingish the
   // concepts of reals and integers.
   if (isfinite(value)) {
-    len = snprintf(buffer, sizeof(buffer), formatString, value);
+    len = snprintf(buffer, sizeof(buffer), value_str.c_str());
   } else {
     // IEEE standard states that NaN values will not compare to themselves
     if (value != value) {
