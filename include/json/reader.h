@@ -359,9 +359,9 @@ public:
   _Value settings_;
 
   CharReaderBuilder();
-  ~CharReaderBuilder() override;
+  virtual ~CharReaderBuilder() override;
 
-  CharReader<_Value>* newCharReader() const override;
+  virtual CharReader<_Value>* newCharReader() const override;
 
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
