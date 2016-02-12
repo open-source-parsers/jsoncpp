@@ -145,7 +145,14 @@ std::string valueToString(double value, bool useSpecialFloats, unsigned int prec
   if (length<1) length=1;
 
   char formatString[6];
-  sprintf(formatString, "%%.%dg", precision-length);
+  if (length<precision)
+  {
+	  sprintf(formatString, "%%.%dg", precision-length);
+  }
+  else
+  {
+	  sprintf(formatString, "%%g");
+  }
 
   // Print into the buffer. We need not request the alternative representation
   // that always has a decimal point because JSON doesn't distingish the
