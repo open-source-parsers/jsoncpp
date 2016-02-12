@@ -143,14 +143,14 @@ std::string valueToString(double value, bool useSpecialFloats, unsigned int prec
   int len = -1;
 
   std::stringstream value_ss;
-  value_ss << std::setprecision( (int)precision ) << value;
+  value_ss << std::setprecision( precision ) << value;
   std::string value_str = value_ss.str();
 
   // Print into the buffer. We need not request the alternative representation
   // that always has a decimal point because JSON doesn't distingish the
   // concepts of reals and integers.
   if (isfinite(value)) {
-    len = snprintf(buffer, sizeof(buffer), (const char*)value_str.c_str());
+    len = snprintf(buffer, sizeof(buffer), value_str.c_str());
   } else {
     // IEEE standard states that NaN values will not compare to themselves
     if (value != value) {
