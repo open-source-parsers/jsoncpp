@@ -2558,6 +2558,14 @@ class SecureAllocator {
 			return size_t(-1) / sizeof(T);
 		}
 
+		pointer address( reference x ) const {
+			return std::__addressof(x);
+		}
+
+		const_pointer address( const_reference x ) const {
+			return std::__addressof(x);
+		}
+
 		/**
 		 * Destroy an item in-place at pointer P.
 		 */
