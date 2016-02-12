@@ -2554,6 +2554,10 @@ class SecureAllocator {
 			::new (static_cast<void*>(p)) T(std::forward<Args>(args)...);
 		}
 
+		size_type max_size() const {
+			return size_t(-1) / sizeof(T);
+		}
+
 		/**
 		 * Destroy an item in-place at pointer P.
 		 */

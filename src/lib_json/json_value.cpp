@@ -16,7 +16,6 @@
 #ifdef JSON_USE_CPPTL
 #include <cpptl/conststring.h>
 #endif
-#include <cstddef> // size_t
 #include <algorithm> // min()
 
 #define JSON_ASSERT_UNREACHABLE assert(false)
