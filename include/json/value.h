@@ -606,6 +606,7 @@ Json::Value obj_value(Json::objectValue); // {}
   ptrdiff_t getOffsetLimit() const;
 
 private:
+  static bool IsIntegral(double d);
   void initBasic(ValueType type, bool allocated = false);
 
   Value& resolveReference(const char* key);

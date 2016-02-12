@@ -1344,7 +1344,8 @@ typename Value<_Alloc, _String>::Members Value<_Alloc, _String>::getMemberNames(
 //
 //# endif
 
-static bool IsIntegral(double d) {
+template<class _Alloc, class _String>
+bool Value<_Alloc, _String>::IsIntegral(double d) {
   double integral_part;
   return modf(d, &integral_part) == 0.0;
 }
