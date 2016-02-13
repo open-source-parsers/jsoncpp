@@ -24,14 +24,17 @@
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
 namespace Json {
+namespace detail {
 
 /** \brief Unserialize a <a HREF="http://www.json.org">JSON</a> document into a
  *Value.
  *
  * \deprecated Use CharReader and CharReaderBuilder.
  */
+template<class _Value>
 class JSON_API Reader {
 public:
+  typedef typename _Value::String String;
   typedef char Char;
   typedef const Char* Location;
 
@@ -71,8 +74,28 @@ public:
    * \return \c true if the document was successfully parsed, \c false if an
    * error occurred.
    */
+  template<class CharT, class Traits, class BSAllocator, template<class, class, class> class BasicString>
   bool
-  parse(const std::string& document, Value& root, bool collectComments = true);
+  parse(const BasicString<CharT, Traits, BSAllocator>& document, _Value& root, bool collectComments = true);
+
+  /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
+   document.
+   * \param doc Pointer on the beginning of the UTF-8 encoded string of the
+   document to read.
+   * \param root [out] Contains the root value of the document if it was
+   *             successfully parsed.
+   * \param collectComments \c true to collect comment and allow writing them
+   back during
+   *                        serialization, \c false to discard comments.
+   *                        This parameter is ignored if
+   Features::allowComments_
+   *                        is \c false.
+   * \return \c true if the document was successfully parsed, \c false if an
+   error occurred.
+   */
+  bool parse(const char* doc,
+			 _Value& root,
+             bool collectComments = true);
 
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
    document.
@@ -94,12 +117,12 @@ public:
    */
   bool parse(const char* beginDoc,
              const char* endDoc,
-             Value& root,
+			 _Value& root,
              bool collectComments = true);
 
   /// \brief Parse from input stream.
   /// \see Json::operator>>(std::istream&, Json::Value&).
-  bool parse(std::istream& is, Value& root, bool collectComments = true);
+  bool parse(std::istream& is, _Value& root, bool collectComments = true);
 
   /** \brief Returns a user friendly string that list errors in the parsed
    * document.
@@ -138,7 +161,7 @@ public:
    * \return \c true if the error was successfully added, \c false if the
    * Value offset exceeds the document size.
    */
-  bool pushError(const Value& value, const std::string& message);
+  bool pushError(const _Value& value, const std::string& message);
 
   /** \brief Add a semantic error message with extra context.
    * \param value JSON Value location associated with the error
@@ -147,7 +170,7 @@ public:
    * \return \c true if the error was successfully added, \c false if either
    * Value offset exceeds the document size.
    */
-  bool pushError(const Value& value, const std::string& message, const Value& extra);
+  bool pushError(const _Value& value, const std::string& message, const _Value& extra);
 
   /** \brief Return whether there are any errors.
    * \return \c true if there are no errors to report \c false if
@@ -183,7 +206,7 @@ private:
   class ErrorInfo {
   public:
     Token token_;
-    std::string message_;
+    String message_;
     Location extra_;
   };
 
@@ -201,11 +224,11 @@ private:
   bool readObject(Token& token);
   bool readArray(Token& token);
   bool decodeNumber(Token& token);
-  bool decodeNumber(Token& token, Value& decoded);
+  bool decodeNumber(Token& token, _Value& decoded);
   bool decodeString(Token& token);
-  bool decodeString(Token& token, std::string& decoded);
+  bool decodeString(Token& token, String& decoded);
   bool decodeDouble(Token& token);
-  bool decodeDouble(Token& token, Value& decoded);
+  bool decodeDouble(Token& token, _Value& decoded);
   bool decodeUnicodeCodePoint(Token& token,
                               Location& current,
                               Location end,
@@ -214,36 +237,37 @@ private:
                                    Location& current,
                                    Location end,
                                    unsigned int& unicode);
-  bool addError(const std::string& message, Token& token, Location extra = 0);
+  bool addError(String message, Token& token, Location extra = 0);
   bool recoverFromError(TokenType skipUntilToken);
-  bool addErrorAndRecover(const std::string& message,
+  bool addErrorAndRecover(const String& message,
                           Token& token,
                           TokenType skipUntilToken);
   void skipUntilSpace();
-  Value& currentValue();
+  _Value& currentValue();
   Char getNextChar();
   void
   getLocationLineAndColumn(Location location, int& line, int& column) const;
-  std::string getLocationLineAndColumn(Location location) const;
+  String getLocationLineAndColumn(Location location) const;
   void addComment(Location begin, Location end, CommentPlacement placement);
   void skipCommentTokens(Token& token);
 
-  typedef std::stack<Value*> Nodes;
+  typedef std::stack<_Value*> Nodes;
   Nodes nodes_;
   Errors errors_;
-  std::string document_;
+  String document_;
   Location begin_;
   Location end_;
   Location current_;
   Location lastValueEnd_;
-  Value* lastValue_;
-  std::string commentsBefore_;
+  _Value* lastValue_;
+  String commentsBefore_;
   Features features_;
   bool collectComments_;
 };  // Reader
 
 /** Interface for reading JSON from a char array.
  */
+template<class _Value>
 class JSON_API CharReader {
 public:
   virtual ~CharReader() {}
@@ -266,7 +290,7 @@ public:
    */
   virtual bool parse(
       char const* beginDoc, char const* endDoc,
-      Value* root, std::string* errs) = 0;
+	  _Value* root, std::string* errs) = 0;
 
   class JSON_API Factory {
   public:
@@ -290,8 +314,10 @@ Usage:
   bool ok = parseFromStream(builder, std::cin, &value, &errs);
 \endcode
 */
-class JSON_API CharReaderBuilder : public CharReader::Factory {
+template<class _Value>
+class JSON_API CharReaderBuilder : public CharReader<_Value>::Factory {
 public:
+  typedef typename _Value::String String;
   // Note: We use a Json::Value so that we can add data-members to this class
   // without a major version bump.
   /** Configuration of this builder.
@@ -330,44 +356,45 @@ public:
     JSON Value.
     \sa setDefaults()
     */
-  Json::Value settings_;
+  _Value settings_;
 
   CharReaderBuilder();
-  ~CharReaderBuilder() override;
+  virtual ~CharReaderBuilder() override;
 
-  CharReader* newCharReader() const override;
+  virtual CharReader<_Value>* newCharReader() const override;
 
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
    */
-  bool validate(Json::Value* invalid) const;
+  bool validate(_Value* invalid) const;
 
   /** A simple way to update a specific setting.
    */
-  Value& operator[](std::string key);
+  _Value& operator[](String key);
 
   /** Called by ctor, but you can use this to reset settings_.
    * \pre 'settings' != NULL (but Json::null is fine)
    * \remark Defaults:
    * \snippet src/lib_json/json_reader.cpp CharReaderBuilderDefaults
    */
-  static void setDefaults(Json::Value* settings);
+  static void setDefaults(_Value* settings);
   /** Same as old Features::strictMode().
    * \pre 'settings' != NULL (but Json::null is fine)
    * \remark Defaults:
    * \snippet src/lib_json/json_reader.cpp CharReaderBuilderStrictMode
    */
-  static void strictMode(Json::Value* settings);
+  static void strictMode(_Value* settings);
 };
 
 /** Consume entire stream and use its begin/end.
   * Someday we might have a real StreamReader, but for now this
   * is convenient.
   */
+template<class _Value>
 bool JSON_API parseFromStream(
-    CharReader::Factory const&,
+    typename CharReader<_Value>::Factory const&,
     std::istream&,
-    Value* root, std::string* errs);
+    _Value* root, std::string* errs);
 
 /** \brief Read from 'sin' into 'root'.
 
@@ -393,7 +420,14 @@ bool JSON_API parseFromStream(
  \throw std::exception on parse error.
  \see Json::operator<<()
 */
-JSON_API std::istream& operator>>(std::istream&, Value&);
+template<class _Value>
+JSON_API std::istream& operator>>(std::istream&, _Value&);
+
+} // namespace detail
+
+typedef detail::CharReader<detail::Value<>> CharReader; 				// class Json::CharReader
+typedef detail::CharReaderBuilder<detail::Value<>> CharReaderBuilder; 	// class Json::CharReaderBuilder
+typedef detail::Reader<detail::Value<>> Reader; 						// class Json::Reader
 
 } // namespace Json
 

@@ -1565,7 +1565,7 @@ JSONTEST_FIXTURE(ValueTest, CommentBefore) {
   wbuilder.settings_["commentStyle"] = "All";
   {
     char const expected[] = "// this comment should appear before\nnull";
-    std::string result = Json::writeString(wbuilder, val);
+    std::string result = Json::detail::writeString<Json::Value>(wbuilder, val);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
     std::string res2 = val.toStyledString();
     std::string exp2 = "\n";
@@ -1577,7 +1577,7 @@ JSONTEST_FIXTURE(ValueTest, CommentBefore) {
   val.swapPayload(other);
   {
     char const expected[] = "// this comment should appear before\n\"hello\"";
-    std::string result = Json::writeString(wbuilder, val);
+    std::string result = Json::detail::writeString<Json::Value>(wbuilder, val);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
     std::string res2 = val.toStyledString();
     std::string exp2 = "\n";
@@ -1591,7 +1591,7 @@ JSONTEST_FIXTURE(ValueTest, CommentBefore) {
   // Assignment over-writes comments.
   {
     char const expected[] = "\"hello\"";
-    std::string result = Json::writeString(wbuilder, val);
+    std::string result = Json::detail::writeString<Json::Value>(wbuilder, val);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
     std::string res2 = val.toStyledString();
     std::string exp2 = "";
@@ -1661,17 +1661,17 @@ JSONTEST_FIXTURE(ValueTest, specialFloats) {
 
   Json::Value v = std::numeric_limits<double>::quiet_NaN();
   std::string expected = "NaN";
-  std::string result = Json::writeString(b, v);
+  std::string result = Json::detail::writeString<Json::Value>(b, v);
   JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 
   v = std::numeric_limits<double>::infinity();
   expected = "Infinity";
-  result = Json::writeString(b, v);
+  result = Json::detail::writeString<Json::Value>(b, v);
   JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 
   v = -std::numeric_limits<double>::infinity();
   expected = "-Infinity";
-  result = Json::writeString(b, v);
+  result = Json::detail::writeString<Json::Value>(b, v);
   JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 }
 
@@ -1681,34 +1681,34 @@ JSONTEST_FIXTURE(ValueTest, precision) {
 
     Json::Value v = 100.0/3;
     std::string expected = "33.333";
-    std::string result = Json::writeString(b, v);
+    std::string result = Json::detail::writeString<Json::Value>(b, v);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
     
     v = 0.25000000;
     expected = "0.25";
-    result = Json::writeString(b, v);
+    result = Json::detail::writeString<Json::Value>(b, v);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 
     v = 0.2563456;
     expected = "0.25635";
-    result = Json::writeString(b, v);
+    result = Json::detail::writeString<Json::Value>(b, v);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 
     b.settings_["precision"] = 1;
     expected = "0.3";
-    result = Json::writeString(b, v);
+    result = Json::detail::writeString<Json::Value>(b, v);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 
     b.settings_["precision"] = 17;
     v = 1234857476305.256345694873740545068;
     expected = "1234857476305.2563";
-    result = Json::writeString(b, v);
+    result = Json::detail::writeString<Json::Value>(b, v);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 
     b.settings_["precision"] = 24;
     v = 0.256345694873740545068;
     expected = "0.25634569487374054";
-    result = Json::writeString(b, v);
+    result = Json::detail::writeString<Json::Value>(b, v);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 }
 
@@ -1729,9 +1729,9 @@ JSONTEST_FIXTURE(StreamWriterTest, dropNullPlaceholders) {
   Json::StreamWriterBuilder b;
   Json::Value nullValue;
   b.settings_["dropNullPlaceholders"] = false;
-  JSONTEST_ASSERT(Json::writeString(b, nullValue) == "null");
+  JSONTEST_ASSERT(Json::detail::writeString<Json::Value>(b, nullValue) == "null");
   b.settings_["dropNullPlaceholders"] = true;
-  JSONTEST_ASSERT(Json::writeString(b, nullValue) == "");
+  JSONTEST_ASSERT(Json::detail::writeString<Json::Value>(b, nullValue) == "");
 }
 
 JSONTEST_FIXTURE(StreamWriterTest, writeZeroes) {
@@ -1743,7 +1743,7 @@ JSONTEST_FIXTURE(StreamWriterTest, writeZeroes) {
     Json::Value root;
     root = binary;
     JSONTEST_ASSERT_STRING_EQUAL(binary, root.asString());
-    std::string out = Json::writeString(b, root);
+    std::string out = Json::detail::writeString<Json::Value>(b, root);
     JSONTEST_ASSERT_EQUAL(expected.size(), out.size());
     JSONTEST_ASSERT_STRING_EQUAL(expected, out);
   }
@@ -1751,7 +1751,7 @@ JSONTEST_FIXTURE(StreamWriterTest, writeZeroes) {
     Json::Value root;
     root["top"] = binary;
     JSONTEST_ASSERT_STRING_EQUAL(binary, root["top"].asString());
-    std::string out = Json::writeString(b, root["top"]);
+    std::string out = Json::detail::writeString<Json::Value>(b, root["top"]);
     JSONTEST_ASSERT_STRING_EQUAL(expected, out);
   }
 }
@@ -2510,6 +2510,113 @@ JSONTEST_FIXTURE(RValueTest, moveConstruction) {
 #endif
 }
 
+struct AllocatorTest : JsonTest::TestCase {};
+
+template<typename T>
+class SecureAllocator {
+	public:
+		// Type definitions
+		using value_type      = T;
+		using pointer         = T*;
+		using const_pointer   = const T*;
+		using reference       = T&;
+		using const_reference = const T&;
+		using size_type       = std::size_t;
+		using difference_type = std::ptrdiff_t;
+
+		/**
+		 * Allocate memory for N items using the standard allocator.
+		 */
+		pointer allocate(size_type n) {
+			// allocate using "global operator new"
+			return static_cast<pointer>(::operator new(n * sizeof(T)));
+		}
+
+		/**
+		 * Release memory which was allocated for N items at pointer P.
+		 *
+		 * The memory block is filled with zeroes before being released.
+		 * The pointer argument is tagged as "volatile" to prevent the
+		 * compiler optimizing out this critical step.
+		 */
+		void deallocate(volatile pointer p, size_type n) {
+			std::memset(p, 0, n * sizeof(T));
+			// free using "global operator delete"
+			::operator delete(p);
+		}
+
+		/**
+		 * Construct an item in-place at pointer P.
+		 */
+		template<typename... Args>
+		void construct(pointer p, Args&&... args) {
+			// construct using "placement new" and "perfect forwarding"
+			::new (static_cast<void*>(p)) T(std::forward<Args>(args)...);
+		}
+
+		size_type max_size() const {
+			return size_t(-1) / sizeof(T);
+		}
+
+		pointer address( reference x ) const {
+			return std::__addressof(x);
+		}
+
+		const_pointer address( const_reference x ) const {
+			return std::__addressof(x);
+		}
+
+		/**
+		 * Destroy an item in-place at pointer P.
+		 */
+		void destroy(pointer p) {
+			// destroy using "explicit destructor"
+			p->~T();
+		}
+
+		// Boilerplate
+		SecureAllocator() {}
+		template<typename U> SecureAllocator(const SecureAllocator<U>&) {}
+		template<typename U> struct rebind { using other = SecureAllocator<U>; };
+};
+
+template<typename T, typename U>
+bool operator==(const SecureAllocator<T>&, const SecureAllocator<U>&) {
+	return true;
+}
+
+template<typename T, typename U>
+bool operator!=(const SecureAllocator<T>&, const SecureAllocator<U>&) {
+	return false;
+}
+
+JSONTEST_FIXTURE(AllocatorTest, otherAllocator) {
+	using MyString = std::basic_string<char, std::char_traits<char>, SecureAllocator<char>>;
+	using Value = Json::detail::Value<SecureAllocator<char>, MyString>;
+	using FastWriter = Json::detail::FastWriter<Value> ;
+	using StyledWriter = Json::detail::StyledWriter<Value> ;
+	using Reader = Json::detail::Reader<Value>;
+
+	Value testValue = MyString("1234");
+	JSONTEST_ASSERT_EQUAL(MyString("1234"), testValue.asString());
+
+	FastWriter fwriter;
+	auto fastoutput = fwriter.write(testValue);
+	std::string fastoutputString(fastoutput.begin(), fastoutput.end());
+
+	StyledWriter swriter;
+	auto styledoutput = swriter.write(testValue);
+
+	JSONTEST_ASSERT_EQUAL(fastoutputString, testValue.toStyledTemplateString<std::string>());
+
+	Reader reader;
+	Value node;
+	reader.parse(styledoutput, node);
+	JSONTEST_ASSERT_EQUAL(MyString("1234"), node.asString());
+
+	JSONTEST_ASSERT_EQUAL(std::string("1234"), node.asTemplateString<std::string>());
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -2584,6 +2691,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, const);
 
   JSONTEST_REGISTER_FIXTURE(runner, RValueTest, moveConstruction);
+
+  JSONTEST_REGISTER_FIXTURE(runner, AllocatorTest, otherAllocator);
 
   return runner.runCommandLine(argc, argv);
 }

@@ -7,8 +7,8 @@
 #define JSONTEST_H_INCLUDED
 
 #include <json/config.h>
-#include <json/value.h>
-#include <json/writer.h>
+#include <json/value.inl>
+#include <json/writer.inl>
 #include <stdio.h>
 #include <deque>
 #include <sstream>
@@ -265,8 +265,10 @@ TestResult& checkStringEqual(TestResult& result,
     }                                                                          \
                                                                                \
   public: /* overidden from TestCase */                                        \
-    const char* testName() const override { return #FixtureType "/" #name; }    \
-    void runTestCase() override;                                                \
+	virtual ~Test##FixtureType##name() {}									   \
+    virtual const char* testName() const override 							   \
+		{ return #FixtureType "/" #name; }                                     \
+	virtual void runTestCase() override;                                       \
   };                                                                           \
                                                                                \
   void Test##FixtureType##name::runTestCase()

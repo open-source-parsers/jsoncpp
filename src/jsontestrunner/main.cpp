@@ -83,13 +83,13 @@ printValueTree(FILE* fout, Json::Value& value, const std::string& path = ".") {
     fprintf(fout,
             "%s=%s\n",
             path.c_str(),
-            Json::valueToString(value.asLargestInt()).c_str());
+            Json::detail::valueToString<Json::Value>(value.asLargestInt()).c_str());
     break;
   case Json::uintValue:
     fprintf(fout,
             "%s=%s\n",
             path.c_str(),
-            Json::valueToString(value.asLargestUInt()).c_str());
+			Json::detail::valueToString<Json::Value>(value.asLargestUInt()).c_str());
     break;
   case Json::realValue:
     fprintf(fout,
@@ -186,7 +186,7 @@ static std::string useBuiltStyledStreamWriter(
     Json::Value const& root)
 {
   Json::StreamWriterBuilder builder;
-  return Json::writeString(builder, root);
+  return Json::detail::writeString<Json::Value>(builder, root);
 }
 static int rewriteValueTree(
     const std::string& rewritePath,

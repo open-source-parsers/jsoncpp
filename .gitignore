@@ -28,6 +28,11 @@
 *.tlog/
 *.pdb
 
+# eclipse project files
+.project
+.cproject
+/.settings/
+
 # CMake-generated files:
 CMakeFiles/
 CTestTestFile.cmake

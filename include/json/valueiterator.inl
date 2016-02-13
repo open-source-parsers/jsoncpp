@@ -6,6 +6,7 @@
 // included by json_value.cpp
 
 namespace Json {
+namespace detail {
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
@@ -15,28 +16,34 @@ namespace Json {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-ValueIteratorBase::ValueIteratorBase()
+template<class _Value>
+ValueIteratorBase<_Value>::ValueIteratorBase()
     : current_(), isNull_(true) {
 }
 
-ValueIteratorBase::ValueIteratorBase(
-    const Value::ObjectValues::iterator& current)
+template<class _Value>
+ValueIteratorBase<_Value>::ValueIteratorBase(
+    const typename _Value::ObjectValues::iterator& current)
     : current_(current), isNull_(false) {}
 
-Value& ValueIteratorBase::deref() const {
+template<class _Value>
+_Value& ValueIteratorBase<_Value>::deref() const {
   return current_->second;
 }
 
-void ValueIteratorBase::increment() {
+template<class _Value>
+void ValueIteratorBase<_Value>::increment() {
   ++current_;
 }
 
-void ValueIteratorBase::decrement() {
+template<class _Value>
+void ValueIteratorBase<_Value>::decrement() {
   --current_;
 }
 
-ValueIteratorBase::difference_type
-ValueIteratorBase::computeDistance(const SelfType& other) const {
+template<class _Value>
+typename ValueIteratorBase<_Value>::difference_type
+ValueIteratorBase<_Value>::computeDistance(const SelfType& other) const {
 #ifdef JSON_USE_CPPTL_SMALLMAP
   return other.current_ - current_;
 #else
@@ -55,7 +62,7 @@ ValueIteratorBase::computeDistance(const SelfType& other) const {
   // Using a portable hand-made version for non random iterator instead:
   //   return difference_type( std::distance( current_, other.current_ ) );
   difference_type myDistance = 0;
-  for (Value::ObjectValues::iterator it = current_; it != other.current_;
+  for (typename _Value::ObjectValues::iterator it = current_; it != other.current_;
        ++it) {
     ++myDistance;
   }
@@ -63,49 +70,56 @@ ValueIteratorBase::computeDistance(const SelfType& other) const {
 #endif
 }
 
-bool ValueIteratorBase::isEqual(const SelfType& other) const {
+template<class _Value>
+bool ValueIteratorBase<_Value>::isEqual(const SelfType& other) const {
   if (isNull_) {
     return other.isNull_;
   }
   return current_ == other.current_;
 }
 
-void ValueIteratorBase::copy(const SelfType& other) {
+template<class _Value>
+void ValueIteratorBase<_Value>::copy(const SelfType& other) {
   current_ = other.current_;
   isNull_ = other.isNull_;
 }
 
-Value ValueIteratorBase::key() const {
-  const Value::CZString czstring = (*current_).first;
+template<class _Value>
+_Value ValueIteratorBase<_Value>::key() const {
+  const typename _Value::CZString czstring = (*current_).first;
   if (czstring.data()) {
     if (czstring.isStaticString())
-      return Value(StaticString(czstring.data()));
-    return Value(czstring.data(), czstring.data() + czstring.length());
+      return _Value(StaticString(czstring.data()));
+    return _Value(czstring.data(), czstring.data() + czstring.length());
   }
-  return Value(czstring.index());
+  return _Value(czstring.index());
 }
 
-UInt ValueIteratorBase::index() const {
-  const Value::CZString czstring = (*current_).first;
+template<class _Value>
+UInt ValueIteratorBase<_Value>::index() const {
+  const typename _Value::CZString czstring = (*current_).first;
   if (!czstring.data())
     return czstring.index();
-  return Value::UInt(-1);
+  return typename _Value::UInt(-1);
 }
 
-std::string ValueIteratorBase::name() const {
+template<class _Value>
+typename ValueIteratorBase<_Value>::String ValueIteratorBase<_Value>::name() const {
   char const* keey;
   char const* end;
   keey = memberName(&end);
-  if (!keey) return std::string();
-  return std::string(keey, end);
+  if (!keey) return String();
+  return String(keey, end);
 }
 
-char const* ValueIteratorBase::memberName() const {
+template<class _Value>
+char const* ValueIteratorBase<_Value>::memberName() const {
   const char* cname = (*current_).first.data();
   return cname ? cname : "";
 }
 
-char const* ValueIteratorBase::memberName(char const** end) const {
+template<class _Value>
+char const* ValueIteratorBase<_Value>::memberName(char const** end) const {
   const char* cname = (*current_).first.data();
   if (!cname) {
     *end = NULL;
@@ -123,17 +137,21 @@ char const* ValueIteratorBase::memberName(char const** end) const {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-ValueConstIterator::ValueConstIterator() {}
+template<class _Value>
+ValueConstIterator<_Value>::ValueConstIterator() {}
 
-ValueConstIterator::ValueConstIterator(
-    const Value::ObjectValues::iterator& current)
-    : ValueIteratorBase(current) {}
+template<class _Value>
+ValueConstIterator<_Value>::ValueConstIterator(
+    const typename _Value::ObjectValues::iterator& current)
+    : ValueIteratorBase<_Value>(current) {}
 
-ValueConstIterator::ValueConstIterator(ValueIterator const& other)
-    : ValueIteratorBase(other) {}
+template<class _Value>
+ValueConstIterator<_Value>::ValueConstIterator(ValueIterator<_Value> const& other)
+    : ValueIteratorBase<_Value>(other) {}
 
-ValueConstIterator& ValueConstIterator::
-operator=(const ValueIteratorBase& other) {
+template<class _Value>
+ValueConstIterator<_Value>& ValueConstIterator<_Value>::
+operator=(const ValueIteratorBase<_Value>& other) {
   copy(other);
   return *this;
 }
@@ -146,22 +164,28 @@ operator=(const ValueIteratorBase& other) {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-ValueIterator::ValueIterator() {}
+template<class _Value>
+ValueIterator<_Value>::ValueIterator() {}
 
-ValueIterator::ValueIterator(const Value::ObjectValues::iterator& current)
-    : ValueIteratorBase(current) {}
+template<class _Value>
+ValueIterator<_Value>::ValueIterator(const typename _Value::ObjectValues::iterator& current)
+    : ValueIteratorBase<_Value>(current) {}
 
-ValueIterator::ValueIterator(const ValueConstIterator& other)
-    : ValueIteratorBase(other) {
+template<class _Value>
+ValueIterator<_Value>::ValueIterator(const ValueConstIterator<_Value>& other)
+    : ValueIteratorBase<_Value>(other) {
   throwRuntimeError("ConstIterator to Iterator should never be allowed.");
 }
 
-ValueIterator::ValueIterator(const ValueIterator& other)
-    : ValueIteratorBase(other) {}
+template<class _Value>
+ValueIterator<_Value>::ValueIterator(const ValueIterator<_Value>& other)
+    : ValueIteratorBase<_Value>(other) {}
 
-ValueIterator& ValueIterator::operator=(const SelfType& other) {
+template<class _Value>
+ValueIterator<_Value>& ValueIterator<_Value>::operator=(const SelfType& other) {
   copy(other);
   return *this;
 }
 
+} // namespace detail
 } // namespace Json
