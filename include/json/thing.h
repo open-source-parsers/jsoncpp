@@ -5,7 +5,6 @@
  * Then we will move the Exceptions, Iterators, and Paths here too.
  * For now, we are working on the API we *want*.
  */
-#include <string>
 #include <vector>
 
 // Disable warning C4251: <data member>: <type> needs to have dll-interface to
@@ -53,9 +52,10 @@ namespace Json {
  * but the Value API does *not* check bounds. That is the responsibility
  * of the caller.
  */
+template <String>
 class JSON_API Thing {
 public:
-  typedef std::vector<std::string> Members;
+  typedef std::vector<String> Members;
   //typedef ThingIterator iterator;
   //typedef ThingConstIterator const_iterator;
 
@@ -129,7 +129,7 @@ Json::Thing obj_value(Json::objectThing); // {}
    * \endcode
    */
   Thing(const StaticString& value);
-  Thing(const std::string& value); ///< Copy data() til size(). Embedded zeroes too.
+  Thing(const String& value); ///< Copy data() til size(). Embedded zeroes too.
   Thing(bool value);
   /// Deep copy.
   Thing(const Thing& other);
@@ -159,7 +159,7 @@ Json::Thing obj_value(Json::objectThing); // {}
   int compare(const Thing& other) const;
 
   const char* asCString() const; ///< Embedded zeroes could cause you trouble!
-  std::string asString() const; ///< Embedded zeroes are possible.
+  String asString() const; ///< Embedded zeroes are possible.
   /** Get raw char* of string-value.
    *  \return false if !string. (Seg-fault if str or end are NULL.)
    */
@@ -260,11 +260,11 @@ Json::Thing obj_value(Json::objectThing); // {}
   const Thing& operator[](const char* key) const;
   /// Access an object value by name, create a null member if it does not exist.
   /// \param key may contain embedded nulls.
-  Thing& operator[](const std::string& key);
+  Thing& operator[](const String& key);
   /// Access an object value by name, returns null if there is no member with
   /// that name.
   /// \param key may contain embedded nulls.
-  const Thing& operator[](const std::string& key) const;
+  const Thing& operator[](const String& key) const;
   /** \brief Access an object value by name, create a null member if it does not
    exist.
 
@@ -288,7 +288,7 @@ Json::Thing obj_value(Json::objectThing); // {}
   /// Return the member named key if it exist, defaultThing otherwise.
   /// \note deep copy
   /// \param key may contain embedded nulls.
-  Thing get(const std::string& key, const Thing& defaultThing) const;
+  Thing get(const String& key, const Thing& defaultThing) const;
   /// Most general and efficient version of isMember()const, get()const,
   /// and operator[]const
   /// \note As stated elsewhere, behavior is undefined if (end-begin) >= 2^30
@@ -308,7 +308,7 @@ Json::Thing obj_value(Json::objectThing); // {}
   /// Same as removeMember(const char*)
   /// \param key may contain embedded nulls.
   /// \deprecated
-  Thing removeMember(const std::string& key);
+  Thing removeMember(const String& key);
   /// Same as removeMember(const char* begin, const char* end, Thing* removed),
   /// but 'key' is null-terminated.
   bool removeMember(const char* key, Thing* removed);
@@ -318,8 +318,8 @@ Json::Thing obj_value(Json::objectThing); // {}
       \param key may contain embedded nulls.
       \return true iff removed (no exceptions)
   */
-  bool removeMember(std::string const& key, Thing* removed);
-  /// Same as removeMember(std::string const& key, Thing* removed)
+  bool removeMember(String const& key, Thing* removed);
+  /// Same as removeMember(String const& key, Thing* removed)
   bool removeMember(const char* begin, const char* end, Thing* removed);
   /** \brief Remove the indexed array element.
 
@@ -334,8 +334,8 @@ Json::Thing obj_value(Json::objectThing); // {}
   bool isMember(const char* key) const;
   /// Return true if the object has a member named key.
   /// \param key may contain embedded nulls.
-  bool isMember(const std::string& key) const;
-  /// Same as isMember(std::string const& key)const
+  bool isMember(const String& key) const;
+  /// Same as isMember(String const& key)const
   bool isMember(const char* begin, const char* end) const;
 
   /// \brief Return a list of the member names.
@@ -346,17 +346,17 @@ Json::Thing obj_value(Json::objectThing); // {}
   Members getMemberNames() const;
 
   /// \deprecated Always pass len.
-  JSONCPP_DEPRECATED("Use setComment(std::string const&) instead.")
+  JSONCPP_DEPRECATED("Use setComment(String const&) instead.")
   void setComment(const char* comment, CommentPlacement placement);
   /// Comments must be //... or /* ... */
   void setComment(const char* comment, size_t len, CommentPlacement placement);
   /// Comments must be //... or /* ... */
-  void setComment(const std::string& comment, CommentPlacement placement);
+  void setComment(const String& comment, CommentPlacement placement);
   bool hasComment(CommentPlacement placement) const;
   /// Include delimiters and embedded newlines.
-  std::string getComment(CommentPlacement placement) const;
+  String getComment(CommentPlacement placement) const;
 
-  std::string toStyledString() const;
+  String toStyledString() const;
 
   const_iterator begin() const;
   const_iterator end() const;
