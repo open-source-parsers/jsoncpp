@@ -56,6 +56,7 @@ namespace Json {
 template<Integer, Float>
 class JSON_API Thing {
 public:
+  typedef int ArrayIndex; // Is this best?
   typedef std::vector<std::string> Members;
   //typedef ThingIterator iterator;
   //typedef ThingConstIterator const_iterator;
