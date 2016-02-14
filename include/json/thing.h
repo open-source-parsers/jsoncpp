@@ -53,6 +53,7 @@ namespace Json {
  * but the Value API does *not* check bounds. That is the responsibility
  * of the caller.
  */
+template<Integer, Float>
 class JSON_API Thing {
 public:
   typedef std::vector<std::string> Members;
