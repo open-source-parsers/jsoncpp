@@ -113,22 +113,6 @@ Json::Thing obj_value(Json::objectThing); // {}
   Thing(double value);
   Thing(const char* value); ///< Copy til first 0. (NULL causes to seg-fault.)
   Thing(const char* begin, const char* end); ///< Copy all, incl zeroes.
-  /** \brief Constructs a value from a static string.
-
-   * Like other value string constructor but do not duplicate the string for
-   * internal storage. The given string must remain alive after the call to this
-   * constructor.
-   * \note This works only for null-terminated strings. (We cannot change the
-   *   size of this class, so we have nowhere to store the length,
-   *   which might be computed later for various operations.)
-   *
-   * Example of usage:
-   * \code
-   * static StaticString foo("some text");
-   * Json::Thing aThing(foo);
-   * \endcode
-   */
-  Thing(const StaticString& value);
   Thing(const String& value); ///< Copy data() til size(). Embedded zeroes too.
   Thing(bool value);
   /// Deep copy.
@@ -265,19 +249,6 @@ Json::Thing obj_value(Json::objectThing); // {}
   /// that name.
   /// \param key may contain embedded nulls.
   const Thing& operator[](const String& key) const;
-  /** \brief Access an object value by name, create a null member if it does not
-   exist.
-
-   * If the object has no entry for that name, then the member name used to store
-   * the new entry is not duplicated.
-   * Example of use:
-   * \code
-   * Json::Thing object;
-   * static const StaticString code("code");
-   * object[code] = 1234;
-   * \endcode
-   */
-  Thing& operator[](const StaticString& key);
   /// Return the member named key if it exist, defaultThing otherwise.
   /// \note deep copy
   Thing get(const char* key, const Thing& defaultThing) const;
