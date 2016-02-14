@@ -1,6 +1,12 @@
+/* This will be the new Json::Value in JsonCpp-2.0.0
+ *
+ * When we are ready, we will rename this to Value,
+ * Value to ValImpl, and this will wrap the ValImpl.
+ * Then we will move the Exceptions, Iterators, and Paths here too.
+ * For now, we are working on the API we *want*.
+ */
 #include <string>
 #include <vector>
-#include <exception>
 
 // Disable warning C4251: <data member>: <type> needs to have dll-interface to
 // be used by...
