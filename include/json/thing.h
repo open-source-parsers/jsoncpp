@@ -125,11 +125,7 @@ private:
   };
 
 public:
-#ifndef JSON_USE_CPPTL_SMALLMAP
   typedef std::map<CZString, Thing> ObjectThings;
-#else
-  typedef CppTL::SmallMap<CZString, Thing> ObjectThings;
-#endif // ifndef JSON_USE_CPPTL_SMALLMAP
 #endif // ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
 
 public:
@@ -175,9 +171,6 @@ Json::Thing obj_value(Json::objectThing); // {}
    */
   Thing(const StaticString& value);
   Thing(const std::string& value); ///< Copy data() til size(). Embedded zeroes too.
-#ifdef JSON_USE_CPPTL
-  Thing(const CppTL::ConstString& value);
-#endif
   Thing(bool value);
   /// Deep copy.
   Thing(const Thing& other);
@@ -213,9 +206,6 @@ Json::Thing obj_value(Json::objectThing); // {}
    */
   bool getString(
       char const** begin, char const** end) const;
-#ifdef JSON_USE_CPPTL
-  CppTL::ConstString asConstString() const;
-#endif
   Int asInt() const;
   UInt asUInt() const;
 #if defined(JSON_HAS_INT64)
@@ -329,13 +319,6 @@ Json::Thing obj_value(Json::objectThing); // {}
    * \endcode
    */
   Thing& operator[](const StaticString& key);
-#ifdef JSON_USE_CPPTL
-  /// Access an object value by name, create a null member if it does not exist.
-  Thing& operator[](const CppTL::ConstString& key);
-  /// Access an object value by name, returns null if there is no member with
-  /// that name.
-  const Thing& operator[](const CppTL::ConstString& key) const;
-#endif
   /// Return the member named key if it exist, defaultThing otherwise.
   /// \note deep copy
   Thing get(const char* key, const Thing& defaultThing) const;
@@ -347,11 +330,6 @@ Json::Thing obj_value(Json::objectThing); // {}
   /// \note deep copy
   /// \param key may contain embedded nulls.
   Thing get(const std::string& key, const Thing& defaultThing) const;
-#ifdef JSON_USE_CPPTL
-  /// Return the member named key if it exist, defaultThing otherwise.
-  /// \note deep copy
-  Thing get(const CppTL::ConstString& key, const Thing& defaultThing) const;
-#endif
   /// Most general and efficient version of isMember()const, get()const,
   /// and operator[]const
   /// \note As stated elsewhere, behavior is undefined if (end-begin) >= 2^30
@@ -400,10 +378,6 @@ Json::Thing obj_value(Json::objectThing); // {}
   bool isMember(const std::string& key) const;
   /// Same as isMember(std::string const& key)const
   bool isMember(const char* begin, const char* end) const;
-#ifdef JSON_USE_CPPTL
-  /// Return true if the object has a member named key.
-  bool isMember(const CppTL::ConstString& key) const;
-#endif
 
   /// \brief Return a list of the member names.
   ///
@@ -411,11 +385,6 @@ Json::Thing obj_value(Json::objectThing); // {}
   /// \pre type() is objectThing or nullThing
   /// \post if type() was nullThing, it remains nullThing
   Members getMemberNames() const;
-
-  //# ifdef JSON_USE_CPPTL
-  //      EnumMemberNames enumMemberNames() const;
-  //      EnumThings enumThings() const;
-  //# endif
 
   /// \deprecated Always pass len.
   JSONCPP_DEPRECATED("Use setComment(std::string const&) instead.")
