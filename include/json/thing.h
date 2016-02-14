@@ -84,49 +84,8 @@ public:
   static const UInt64 maxUInt64;
 #endif // defined(JSON_HAS_INT64)
 
-private:
-#ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
-  class CZString {
-  public:
-    enum DuplicationPolicy {
-      noDuplication = 0,
-      duplicate,
-      duplicateOnCopy
-    };
-    CZString(ArrayIndex index);
-    CZString(char const* str, unsigned length, DuplicationPolicy allocate);
-    CZString(CZString const& other);
-#if JSON_HAS_RVALUE_REFERENCES
-    CZString(CZString&& other);
-#endif
-    ~CZString();
-    CZString& operator=(CZString other);
-    bool operator<(CZString const& other) const;
-    bool operator==(CZString const& other) const;
-    ArrayIndex index() const;
-    //const char* c_str() const; ///< \deprecated
-    char const* data() const;
-    unsigned length() const;
-    bool isStaticString() const;
-
-  private:
-    void swap(CZString& other);
-
-    struct StringStorage {
-      unsigned policy_: 2;
-      unsigned length_: 30; // 1GB max
-    };
-
-    char const* cstr_;  // actually, a prefixed string, unless policy is noDup
-    union {
-      ArrayIndex index_;
-      StringStorage storage_;
-    };
-  };
-
 public:
-  typedef std::map<CZString, Thing> ObjectThings;
-#endif // ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
+  //typedef std::map<CZString, Thing> ObjectValues;
 
 public:
   /** \brief Create a default Thing of the given type.
@@ -411,48 +370,6 @@ Json::Thing obj_value(Json::objectThing); // {}
   void setOffsetLimit(ptrdiff_t limit);
   ptrdiff_t getOffsetStart() const;
   ptrdiff_t getOffsetLimit() const;
-
-private:
-  void initBasic(ThingType type, bool allocated = false);
-
-  Thing& resolveReference(const char* key);
-  Thing& resolveReference(const char* key, const char* end);
-
-  struct CommentInfo {
-    CommentInfo();
-    ~CommentInfo();
-
-    void setComment(const char* text, size_t len);
-
-    char* comment_;
-  };
-
-  // struct MemberNamesTransform
-  //{
-  //   typedef const char *result_type;
-  //   const char *operator()( const CZString &name ) const
-  //   {
-  //      return name.c_str();
-  //   }
-  //};
-
-  union ThingHolder {
-    LargestInt int_;
-    LargestUInt uint_;
-    double real_;
-    bool bool_;
-    char* string_;  // actually ptr to unsigned, followed by str, unless !allocated_
-    ObjectThings* map_;
-  } value_;
-  ThingType type_ : 8;
-  unsigned int allocated_ : 1; // Notes: if declared as bool, bitfield is useless.
-                               // If not allocated_, string_ must be null-terminated.
-  CommentInfo* comments_;
-
-  // [start, limit) byte offsets in the source JSON text from which this Thing
-  // was extracted.
-  ptrdiff_t start_;
-  ptrdiff_t limit_;
 };
 
 } // namespace Json
