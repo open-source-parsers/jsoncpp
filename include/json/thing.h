@@ -62,28 +62,6 @@ public:
 
   static const Thing& null;  ///< We regret this reference to a global instance; prefer the simpler Thing().
   static const Thing& nullRef;  ///< just a kludge for binary-compatibility; same as null
-  /// Minimum signed integer value that can be stored in a Json::Thing.
-  static const LargestInt minLargestInt;
-  /// Maximum signed integer value that can be stored in a Json::Thing.
-  static const LargestInt maxLargestInt;
-  /// Maximum unsigned integer value that can be stored in a Json::Thing.
-  static const LargestUInt maxLargestUInt;
-
-  /// Minimum signed int value that can be stored in a Json::Thing.
-  static const Int minInt;
-  /// Maximum signed int value that can be stored in a Json::Thing.
-  static const Int maxInt;
-  /// Maximum unsigned int value that can be stored in a Json::Thing.
-  static const UInt maxUInt;
-
-#if defined(JSON_HAS_INT64)
-  /// Minimum signed 64 bits int value that can be stored in a Json::Thing.
-  static const Int64 minInt64;
-  /// Maximum signed 64 bits int value that can be stored in a Json::Thing.
-  static const Int64 maxInt64;
-  /// Maximum unsigned 64 bits int value that can be stored in a Json::Thing.
-  static const UInt64 maxUInt64;
-#endif // defined(JSON_HAS_INT64)
 
 public:
   //typedef std::map<CZString, Thing> ObjectValues;
@@ -105,13 +83,8 @@ Json::Thing obj_value(Json::objectThing); // {}
 \endcode
   */
   Thing(ThingType type = nullThing);
-  Thing(Int value);
-  Thing(UInt value);
-#if defined(JSON_HAS_INT64)
-  Thing(Int64 value);
-  Thing(UInt64 value);
-#endif // if defined(JSON_HAS_INT64)
-  Thing(double value);
+  Thing(Integer value);
+  Thing(Float value);
   Thing(const char* value); ///< Copy til first 0. (NULL causes to seg-fault.)
   Thing(const char* begin, const char* end); ///< Copy all, incl zeroes.
   /** \brief Constructs a value from a static string.
@@ -166,24 +139,13 @@ Json::Thing obj_value(Json::objectThing); // {}
    */
   bool getString(
       char const** begin, char const** end) const;
-  Int asInt() const;
-  UInt asUInt() const;
-#if defined(JSON_HAS_INT64)
-  Int64 asInt64() const;
-  UInt64 asUInt64() const;
-#endif // if defined(JSON_HAS_INT64)
-  LargestInt asLargestInt() const;
-  LargestUInt asLargestUInt() const;
-  float asFloat() const;
-  double asDouble() const;
+  Integer asInteger() const;
+  Float asFloat() const;
+  Float asDouble() const;
   bool asBool() const;
 
   bool isNull() const;
   bool isBool() const;
-  bool isInt() const;
-  bool isInt64() const;
-  bool isUInt() const;
-  bool isUInt64() const;
   bool isIntegral() const;
   bool isDouble() const;
   bool isNumeric() const;
