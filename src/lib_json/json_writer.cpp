@@ -99,7 +99,7 @@ static bool containsControlCharacter0(const char* str, unsigned len) {
   return false;
 }
 
-std::string valueToString(LargestInt value) {
+Json::String valueToString(LargestInt value) {
   UIntToStringBuffer buffer;
   char* current = buffer + sizeof(buffer);
   if (value == Value::minLargestInt) {
@@ -115,7 +115,7 @@ std::string valueToString(LargestInt value) {
   return current;
 }
 
-std::string valueToString(LargestUInt value) {
+Json::String valueToString(LargestUInt value) {
   UIntToStringBuffer buffer;
   char* current = buffer + sizeof(buffer);
   uintToString(value, current);
@@ -125,17 +125,17 @@ std::string valueToString(LargestUInt value) {
 
 #if defined(JSON_HAS_INT64)
 
-std::string valueToString(Int value) {
+Json::String valueToString(Int value) {
   return valueToString(LargestInt(value));
 }
 
-std::string valueToString(UInt value) {
+Json::String valueToString(UInt value) {
   return valueToString(LargestUInt(value));
 }
 
 #endif // # if defined(JSON_HAS_INT64)
 
-std::string valueToString(double value, bool useSpecialFloats, unsigned int precision) {
+Json::String valueToString(double value, bool useSpecialFloats, unsigned int precision) {
   // Allocate a buffer that is more than large enough to store the 16 digits of
   // precision requested below.
   char buffer[32];
@@ -165,23 +165,23 @@ std::string valueToString(double value, bool useSpecialFloats, unsigned int prec
   return buffer;
 }
 
-std::string valueToString(double value) { return valueToString(value, false, 17); }
+Json::String valueToString(double value) { return valueToString(value, false, 17); }
 
-std::string valueToString(bool value) { return value ? "true" : "false"; }
+Json::String valueToString(bool value) { return value ? "true" : "false"; }
 
-std::string valueToQuotedString(const char* value) {
+Json::String valueToQuotedString(const char* value) {
   if (value == NULL)
     return "";
   // Not sure how to handle unicode...
   if (strpbrk(value, "\"\\\b\f\n\r\t") == NULL &&
       !containsControlCharacter(value))
-    return std::string("\"") + value + "\"";
+    return Json::String("\"") + value + "\"";
   // We have to walk value and escape any special characters.
-  // Appending to std::string is not efficient, but this should be rare.
+  // Appending to Json::String is not efficient, but this should be rare.
   // (Note: forward slashes are *not* rare, but I am not escaping them.)
-  std::string::size_type maxsize =
+  Json::String::size_type maxsize =
       strlen(value) * 2 + 3; // allescaped+quotes+NULL
-  std::string result;
+  Json::String result;
   result.reserve(maxsize); // to avoid lots of mallocs
   result += "\"";
   for (const char* c = value; *c != 0; ++c) {
@@ -217,7 +217,7 @@ std::string valueToQuotedString(const char* value) {
     // sequence from occurring.
     default:
       if (isControlCharacter(*c)) {
-        std::ostringstream oss;
+        Json::OStringStream oss;
         oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
             << std::setw(4) << static_cast<int>(*c);
         result += oss.str();
@@ -246,19 +246,19 @@ static char const* strnpbrk(char const* s, char const* accept, size_t n) {
   }
   return NULL;
 }
-static std::string valueToQuotedStringN(const char* value, unsigned length) {
+static Json::String valueToQuotedStringN(const char* value, unsigned length) {
   if (value == NULL)
     return "";
   // Not sure how to handle unicode...
   if (strnpbrk(value, "\"\\\b\f\n\r\t", length) == NULL &&
       !containsControlCharacter0(value, length))
-    return std::string("\"") + value + "\"";
+    return Json::String("\"") + value + "\"";
   // We have to walk value and escape any special characters.
-  // Appending to std::string is not efficient, but this should be rare.
+  // Appending to Json::String is not efficient, but this should be rare.
   // (Note: forward slashes are *not* rare, but I am not escaping them.)
-  std::string::size_type maxsize =
+  Json::String::size_type maxsize =
       length * 2 + 3; // allescaped+quotes+NULL
-  std::string result;
+  Json::String result;
   result.reserve(maxsize); // to avoid lots of mallocs
   result += "\"";
   char const* end = value + length;
@@ -295,7 +295,7 @@ static std::string valueToQuotedStringN(const char* value, unsigned length) {
     // sequence from occurring.
     default:
       if ((isControlCharacter(*c)) || (*c == 0)) {
-        std::ostringstream oss;
+        Json::OStringStream oss;
         oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
             << std::setw(4) << static_cast<int>(*c);
         result += oss.str();
@@ -326,7 +326,7 @@ void FastWriter::dropNullPlaceholders() { dropNullPlaceholders_ = true; }
 
 void FastWriter::omitEndingLineFeed() { omitEndingLineFeed_ = true; }
 
-std::string FastWriter::write(const Value& root) {
+Json::String FastWriter::write(const Value& root) {
   document_ = "";
   writeValue(root);
   if (!omitEndingLineFeed_)
@@ -376,7 +376,7 @@ void FastWriter::writeValue(const Value& value) {
     document_ += '{';
     for (Value::Members::iterator it = members.begin(); it != members.end();
          ++it) {
-      const std::string& name = *it;
+      const Json::String& name = *it;
       if (it != members.begin())
         document_ += ',';
       document_ += valueToQuotedStringN(name.data(), static_cast<unsigned>(name.length()));
@@ -394,7 +394,7 @@ void FastWriter::writeValue(const Value& value) {
 StyledWriter::StyledWriter()
     : rightMargin_(74), indentSize_(3), addChildValues_() {}
 
-std::string StyledWriter::write(const Value& root) {
+Json::String StyledWriter::write(const Value& root) {
   document_ = "";
   addChildValues_ = false;
   indentString_ = "";
@@ -444,7 +444,7 @@ void StyledWriter::writeValue(const Value& value) {
       indent();
       Value::Members::iterator it = members.begin();
       for (;;) {
-        const std::string& name = *it;
+        const Json::String& name = *it;
         const Value& childValue = value[name];
         writeCommentBeforeValue(childValue);
         writeWithIndent(valueToQuotedString(name.c_str()));
@@ -534,7 +534,7 @@ bool StyledWriter::isMultineArray(const Value& value) {
   return isMultiLine;
 }
 
-void StyledWriter::pushValue(const std::string& value) {
+void StyledWriter::pushValue(const Json::String& value) {
   if (addChildValues_)
     childValues_.push_back(value);
   else
@@ -552,12 +552,12 @@ void StyledWriter::writeIndent() {
   document_ += indentString_;
 }
 
-void StyledWriter::writeWithIndent(const std::string& value) {
+void StyledWriter::writeWithIndent(const Json::String& value) {
   writeIndent();
   document_ += value;
 }
 
-void StyledWriter::indent() { indentString_ += std::string(indentSize_, ' '); }
+void StyledWriter::indent() { indentString_ += Json::String(indentSize_, ' '); }
 
 void StyledWriter::unindent() {
   assert(indentString_.size() >= indentSize_);
@@ -570,8 +570,8 @@ void StyledWriter::writeCommentBeforeValue(const Value& root) {
 
   document_ += "\n";
   writeIndent();
-  const std::string& comment = root.getComment(commentBefore);
-  std::string::const_iterator iter = comment.begin();
+  const Json::String& comment = root.getComment(commentBefore);
+  Json::String::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
     document_ += *iter;
     if (*iter == '\n' &&
@@ -604,11 +604,11 @@ bool StyledWriter::hasCommentForValue(const Value& value) {
 // Class StyledStreamWriter
 // //////////////////////////////////////////////////////////////////
 
-StyledStreamWriter::StyledStreamWriter(std::string indentation)
+StyledStreamWriter::StyledStreamWriter(Json::String indentation)
     : document_(NULL), rightMargin_(74), indentation_(indentation),
       addChildValues_() {}
 
-void StyledStreamWriter::write(std::ostream& out, const Value& root) {
+void StyledStreamWriter::write(Json::OStream& out, const Value& root) {
   document_ = &out;
   addChildValues_ = false;
   indentString_ = "";
@@ -661,7 +661,7 @@ void StyledStreamWriter::writeValue(const Value& value) {
       indent();
       Value::Members::iterator it = members.begin();
       for (;;) {
-        const std::string& name = *it;
+        const Json::String& name = *it;
         const Value& childValue = value[name];
         writeCommentBeforeValue(childValue);
         writeWithIndent(valueToQuotedString(name.c_str()));
@@ -753,7 +753,7 @@ bool StyledStreamWriter::isMultineArray(const Value& value) {
   return isMultiLine;
 }
 
-void StyledStreamWriter::pushValue(const std::string& value) {
+void StyledStreamWriter::pushValue(const Json::String& value) {
   if (addChildValues_)
     childValues_.push_back(value);
   else
@@ -768,7 +768,7 @@ void StyledStreamWriter::writeIndent() {
   *document_ << '\n' << indentString_;
 }
 
-void StyledStreamWriter::writeWithIndent(const std::string& value) {
+void StyledStreamWriter::writeWithIndent(const Json::String& value) {
   if (!indented_) writeIndent();
   *document_ << value;
   indented_ = false;
@@ -786,8 +786,8 @@ void StyledStreamWriter::writeCommentBeforeValue(const Value& root) {
     return;
 
   if (!indented_) writeIndent();
-  const std::string& comment = root.getComment(commentBefore);
-  std::string::const_iterator iter = comment.begin();
+  const Json::String& comment = root.getComment(commentBefore);
+  Json::String::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
     *document_ << *iter;
     if (*iter == '\n' &&
@@ -832,48 +832,48 @@ struct CommentStyle {
 struct BuiltStyledStreamWriter : public StreamWriter
 {
   BuiltStyledStreamWriter(
-      std::string const& indentation,
+      Json::String const& indentation,
       CommentStyle::Enum cs,
-      std::string const& colonSymbol,
-      std::string const& nullSymbol,
-      std::string const& endingLineFeedSymbol,
+      Json::String const& colonSymbol,
+      Json::String const& nullSymbol,
+      Json::String const& endingLineFeedSymbol,
       bool useSpecialFloats,
       unsigned int precision);
-  int write(Value const& root, std::ostream* sout) override;
+  int write(Value const& root, Json::OStream* sout) override;
 private:
   void writeValue(Value const& value);
   void writeArrayValue(Value const& value);
   bool isMultineArray(Value const& value);
-  void pushValue(std::string const& value);
+  void pushValue(Json::String const& value);
   void writeIndent();
-  void writeWithIndent(std::string const& value);
+  void writeWithIndent(Json::String const& value);
   void indent();
   void unindent();
   void writeCommentBeforeValue(Value const& root);
   void writeCommentAfterValueOnSameLine(Value const& root);
   static bool hasCommentForValue(const Value& value);
 
-  typedef std::vector<std::string> ChildValues;
+  typedef std::vector<Json::String> ChildValues;
 
   ChildValues childValues_;
-  std::string indentString_;
+  Json::String indentString_;
   unsigned int rightMargin_;
-  std::string indentation_;
+  Json::String indentation_;
   CommentStyle::Enum cs_;
-  std::string colonSymbol_;
-  std::string nullSymbol_;
-  std::string endingLineFeedSymbol_;
+  Json::String colonSymbol_;
+  Json::String nullSymbol_;
+  Json::String endingLineFeedSymbol_;
   bool addChildValues_ : 1;
   bool indented_ : 1;
   bool useSpecialFloats_ : 1;
   unsigned int precision_;
 };
 BuiltStyledStreamWriter::BuiltStyledStreamWriter(
-      std::string const& indentation,
+      Json::String const& indentation,
       CommentStyle::Enum cs,
-      std::string const& colonSymbol,
-      std::string const& nullSymbol,
-      std::string const& endingLineFeedSymbol,
+      Json::String const& colonSymbol,
+      Json::String const& nullSymbol,
+      Json::String const& endingLineFeedSymbol,
       bool useSpecialFloats,
       unsigned int precision)
   : rightMargin_(74)
@@ -888,7 +888,7 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
   , precision_(precision)
 {
 }
-int BuiltStyledStreamWriter::write(Value const& root, std::ostream* sout)
+int BuiltStyledStreamWriter::write(Value const& root, Json::OStream* sout)
 {
   sout_ = sout;
   addChildValues_ = false;
@@ -942,7 +942,7 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
       indent();
       Value::Members::iterator it = members.begin();
       for (;;) {
-        std::string const& name = *it;
+        Json::String const& name = *it;
         Value const& childValue = value[name];
         writeCommentBeforeValue(childValue);
         writeWithIndent(valueToQuotedStringN(name.data(), static_cast<unsigned>(name.length())));
@@ -1036,7 +1036,7 @@ bool BuiltStyledStreamWriter::isMultineArray(Value const& value) {
   return isMultiLine;
 }
 
-void BuiltStyledStreamWriter::pushValue(std::string const& value) {
+void BuiltStyledStreamWriter::pushValue(Json::String const& value) {
   if (addChildValues_)
     childValues_.push_back(value);
   else
@@ -1055,7 +1055,7 @@ void BuiltStyledStreamWriter::writeIndent() {
   }
 }
 
-void BuiltStyledStreamWriter::writeWithIndent(std::string const& value) {
+void BuiltStyledStreamWriter::writeWithIndent(Json::String const& value) {
   if (!indented_) writeIndent();
   *sout_ << value;
   indented_ = false;
@@ -1074,8 +1074,8 @@ void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
     return;
 
   if (!indented_) writeIndent();
-  const std::string& comment = root.getComment(commentBefore);
-  std::string::const_iterator iter = comment.begin();
+  const Json::String& comment = root.getComment(commentBefore);
+  Json::String::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
     *sout_ << *iter;
     if (*iter == '\n' &&
@@ -1125,8 +1125,8 @@ StreamWriterBuilder::~StreamWriterBuilder()
 {}
 StreamWriter* StreamWriterBuilder::newStreamWriter() const
 {
-  std::string indentation = settings_["indentation"].asString();
-  std::string cs_str = settings_["commentStyle"].asString();
+  Json::String indentation = settings_["indentation"].asString();
+  Json::String cs_str = settings_["commentStyle"].asString();
   bool eyc = settings_["enableYAMLCompatibility"].asBool();
   bool dnp = settings_["dropNullPlaceholders"].asBool();
   bool usf = settings_["useSpecialFloats"].asBool(); 
@@ -1139,23 +1139,23 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
   } else {
     throwRuntimeError("commentStyle must be 'All' or 'None'");
   }
-  std::string colonSymbol = " : ";
+  Json::String colonSymbol = " : ";
   if (eyc) {
     colonSymbol = ": ";
   } else if (indentation.empty()) {
     colonSymbol = ":";
   }
-  std::string nullSymbol = "null";
+  Json::String nullSymbol = "null";
   if (dnp) {
     nullSymbol = "";
   }
   if (pre > 17) pre = 17;
-  std::string endingLineFeedSymbol = "";
+  Json::String endingLineFeedSymbol = "";
   return new BuiltStyledStreamWriter(
       indentation, cs,
       colonSymbol, nullSymbol, endingLineFeedSymbol, usf, pre);
 }
-static void getValidWriterKeys(std::set<std::string>* valid_keys)
+static void getValidWriterKeys(std::set<Json::String>* valid_keys)
 {
   valid_keys->clear();
   valid_keys->insert("indentation");
@@ -1170,19 +1170,19 @@ bool StreamWriterBuilder::validate(Json::Value* invalid) const
   Json::Value my_invalid;
   if (!invalid) invalid = &my_invalid;  // so we do not need to test for NULL
   Json::Value& inv = *invalid;
-  std::set<std::string> valid_keys;
+  std::set<Json::String> valid_keys;
   getValidWriterKeys(&valid_keys);
   Value::Members keys = settings_.getMemberNames();
   size_t n = keys.size();
   for (size_t i = 0; i < n; ++i) {
-    std::string const& key = keys[i];
+    Json::String const& key = keys[i];
     if (valid_keys.find(key) == valid_keys.end()) {
       inv[key] = settings_[key];
     }
   }
   return 0u == inv.size();
 }
-Value& StreamWriterBuilder::operator[](std::string key)
+Value& StreamWriterBuilder::operator[](Json::String key)
 {
   return settings_[key];
 }
@@ -1199,14 +1199,14 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings)
   //! [StreamWriterBuilderDefaults]
 }
 
-std::string writeString(StreamWriter::Factory const& builder, Value const& root) {
-  std::ostringstream sout;
+Json::String writeString(StreamWriter::Factory const& builder, Value const& root) {
+  Json::OStringStream sout;
   StreamWriterPtr const writer(builder.newStreamWriter());
   writer->write(root, &sout);
   return sout.str();
 }
 
-std::ostream& operator<<(std::ostream& sout, Value const& root) {
+Json::OStream& operator<<(Json::OStream& sout, Value const& root) {
   StreamWriterBuilder builder;
   StreamWriterPtr const writer(builder.newStreamWriter());
   writer->write(root, &sout);
