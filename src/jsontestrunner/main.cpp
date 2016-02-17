@@ -17,14 +17,14 @@
 
 struct Options
 {
-  std::string path;
+  Json::String path;
   Json::Features features;
   bool parseOnly;
-  typedef std::string (*writeFuncType)(Json::Value const&);
+  typedef Json::String (*writeFuncType)(Json::Value const&);
   writeFuncType write;
 };
 
-static std::string normalizeFloatingPointStr(double value) {
+static Json::String normalizeFloatingPointStr(double value) {
   char buffer[32];
 #if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__)
   sprintf_s(buffer, sizeof(buffer), "%.16g", value);
@@ -32,18 +32,21 @@ static std::string normalizeFloatingPointStr(double value) {
   snprintf(buffer, sizeof(buffer), "%.16g", value);
 #endif
   buffer[sizeof(buffer) - 1] = 0;
-  std::string s(buffer);
-  std::string::size_type index = s.find_last_of("eE");
-  if (index != std::string::npos) {
-    std::string::size_type hasSign =
+  Json::String s(buffer);
+#if JSON_USE_SECURE_MEMORY
+  memset(&buffer, 0, sizeof(buffer));
+#endif
+  Json::String::size_type index = s.find_last_of("eE");
+  if (index != Json::String::npos) {
+    Json::String::size_type hasSign =
         (s[index + 1] == '+' || s[index + 1] == '-') ? 1 : 0;
-    std::string::size_type exponentStartIndex = index + 1 + hasSign;
-    std::string normalized = s.substr(0, exponentStartIndex);
-    std::string::size_type indexDigit =
+    Json::String::size_type exponentStartIndex = index + 1 + hasSign;
+    Json::String normalized = s.substr(0, exponentStartIndex);
+    Json::String::size_type indexDigit =
         s.find_first_not_of('0', exponentStartIndex);
-    std::string exponent = "0";
+    Json::String exponent = "0";
     if (indexDigit !=
-        std::string::npos) // There is an exponent different from 0
+        Json::String::npos) // There is an exponent different from 0
     {
       exponent = s.substr(indexDigit);
     }
@@ -52,26 +55,29 @@ static std::string normalizeFloatingPointStr(double value) {
   return s;
 }
 
-static std::string readInputTestFile(const char* path) {
+static Json::String readInputTestFile(const char* path) {
   FILE* file = fopen(path, "rb");
   if (!file)
-    return std::string("");
+    return Json::String("");
   fseek(file, 0, SEEK_END);
   long const size = ftell(file);
   unsigned long const usize = static_cast<unsigned long const>(size);
   fseek(file, 0, SEEK_SET);
-  std::string text;
+  Json::String text;
   char* buffer = new char[size + 1];
   buffer[size] = 0;
   if (fread(buffer, 1, usize, file) == usize)
     text = buffer;
   fclose(file);
+#if JSON_USE_SECURE_MEMORY
+  memset(buffer, 0, static_cast<size_t>(size + 1));
+#endif
   delete[] buffer;
   return text;
 }
 
 static void
-printValueTree(FILE* fout, Json::Value& value, const std::string& path = ".") {
+printValueTree(FILE* fout, Json::Value& value, const Json::String& path = ".") {
   if (value.hasComment(Json::commentBefore)) {
     fprintf(fout, "%s\n", value.getComment(Json::commentBefore).c_str());
   }
@@ -120,11 +126,11 @@ printValueTree(FILE* fout, Json::Value& value, const std::string& path = ".") {
     fprintf(fout, "%s={}\n", path.c_str());
     Json::Value::Members members(value.getMemberNames());
     std::sort(members.begin(), members.end());
-    std::string suffix = *(path.end() - 1) == '.' ? "" : ".";
+    Json::String suffix = *(path.end() - 1) == '.' ? "" : ".";
     for (Json::Value::Members::iterator it = members.begin();
          it != members.end();
          ++it) {
-      const std::string& name = *it;
+      const Json::String name = *it;
       printValueTree(fout, value[name], path + suffix + name);
     }
   } break;
@@ -137,15 +143,15 @@ printValueTree(FILE* fout, Json::Value& value, const std::string& path = ".") {
   }
 }
 
-static int parseAndSaveValueTree(const std::string& input,
-                                 const std::string& actual,
-                                 const std::string& kind,
+static int parseAndSaveValueTree(const Json::String& input,
+                                 const Json::String& actual,
+                                 const Json::String& kind,
                                  const Json::Features& features,
                                  bool parseOnly,
                                  Json::Value* root)
 {
   Json::Reader reader(features);
-  bool parsingSuccessful = reader.parse(input, *root);
+  bool parsingSuccessful = reader.parse(input.data(), input.data() + input.size(), *root);
   if (!parsingSuccessful) {
     printf("Failed to parse %s file: \n%s\n",
            kind.c_str(),
@@ -163,36 +169,36 @@ static int parseAndSaveValueTree(const std::string& input,
   }
   return 0;
 }
-// static std::string useFastWriter(Json::Value const& root) {
+// static Json::String useFastWriter(Json::Value const& root) {
 //   Json::FastWriter writer;
 //   writer.enableYAMLCompatibility();
 //   return writer.write(root);
 // }
-static std::string useStyledWriter(
+static Json::String useStyledWriter(
     Json::Value const& root)
 {
   Json::StyledWriter writer;
   return writer.write(root);
 }
-static std::string useStyledStreamWriter(
+static Json::String useStyledStreamWriter(
     Json::Value const& root)
 {
   Json::StyledStreamWriter writer;
-  std::ostringstream sout;
+  Json::OStringStream sout;
   writer.write(sout, root);
   return sout.str();
 }
-static std::string useBuiltStyledStreamWriter(
+static Json::String useBuiltStyledStreamWriter(
     Json::Value const& root)
 {
   Json::StreamWriterBuilder builder;
   return Json::writeString(builder, root);
 }
 static int rewriteValueTree(
-    const std::string& rewritePath,
+    const Json::String& rewritePath,
     const Json::Value& root,
     Options::writeFuncType write,
-    std::string* rewrite)
+    Json::String* rewrite)
 {
   *rewrite = write(root);
   FILE* fout = fopen(rewritePath.c_str(), "wt");
@@ -205,13 +211,13 @@ static int rewriteValueTree(
   return 0;
 }
 
-static std::string removeSuffix(const std::string& path,
-                                const std::string& extension) {
+static Json::String removeSuffix(const Json::String& path,
+                                const Json::String& extension) {
   if (extension.length() >= path.length())
-    return std::string("");
-  std::string suffix = path.substr(path.length() - extension.length());
+    return Json::String("");
+  Json::String suffix = path.substr(path.length() - extension.length());
   if (suffix != extension)
-    return std::string("");
+    return Json::String("");
   return path.substr(0, path.length() - extension.length());
 }
 
@@ -238,18 +244,18 @@ static int parseCommandLine(
     return printUsage(argv);
   }
   int index = 1;
-  if (std::string(argv[index]) == "--json-checker") {
+  if (Json::String(argv[index]) == "--json-checker") {
     opts->features = Json::Features::strictMode();
     opts->parseOnly = true;
     ++index;
   }
-  if (std::string(argv[index]) == "--json-config") {
+  if (Json::String(argv[index]) == "--json-config") {
     printConfig();
     return 3;
   }
-  if (std::string(argv[index]) == "--json-writer") {
+  if (Json::String(argv[index]) == "--json-writer") {
     ++index;
-    std::string const writerName(argv[index++]);
+    Json::String const writerName(argv[index++]);
     if (writerName == "StyledWriter") {
       opts->write = &useStyledWriter;
     } else if (writerName == "StyledStreamWriter") {
@@ -271,22 +277,22 @@ static int runTest(Options const& opts)
 {
   int exitCode = 0;
 
-  std::string input = readInputTestFile(opts.path.c_str());
+  Json::String input = readInputTestFile(opts.path.c_str());
   if (input.empty()) {
     printf("Failed to read input or empty input: %s\n", opts.path.c_str());
     return 3;
   }
 
-  std::string basePath = removeSuffix(opts.path, ".json");
+  Json::String basePath = removeSuffix(opts.path, ".json");
   if (!opts.parseOnly && basePath.empty()) {
     printf("Bad input path. Path does not end with '.expected':\n%s\n",
             opts.path.c_str());
     return 3;
   }
 
-  std::string const actualPath = basePath + ".actual";
-  std::string const rewritePath = basePath + ".rewrite";
-  std::string const rewriteActualPath = basePath + ".actual-rewrite";
+  Json::String const actualPath = basePath + ".actual";
+  Json::String const rewritePath = basePath + ".rewrite";
+  Json::String const rewriteActualPath = basePath + ".actual-rewrite";
 
   Json::Value root;
   exitCode = parseAndSaveValueTree(
@@ -295,7 +301,7 @@ static int runTest(Options const& opts)
   if (exitCode || opts.parseOnly) {
     return exitCode;
   }
-  std::string rewrite;
+  Json::String rewrite;
   exitCode = rewriteValueTree(rewritePath, root, opts.write, &rewrite);
   if (exitCode) {
     return exitCode;

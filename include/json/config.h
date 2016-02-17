@@ -6,6 +6,8 @@
 #ifndef JSON_CONFIG_H_INCLUDED
 #define JSON_CONFIG_H_INCLUDED
 #include <stddef.h>
+#include "allocator.h" //typedef Allocator
+#include <string> //typdef String
 
 /// If defined, indicates that json library is embedded in CppTL library.
 //# define JSON_IN_CPPTL 1
@@ -118,6 +120,12 @@
 #  define JSON_USE_INT64_DOUBLE_CONVERSION 1
 #endif
 
+// If non-zero, the library zeroes any memory that it has allocated before
+// it frees its
+#ifndef JSON_USE_SECURE_MEMORY
+#define JSON_USE_SECURE_MEMORY 1
+#endif
+
 namespace Json {
 typedef int Int;
 typedef unsigned int UInt;
@@ -138,6 +146,17 @@ typedef Int64 LargestInt;
 typedef UInt64 LargestUInt;
 #define JSON_HAS_INT64
 #endif // if defined(JSON_NO_INT64)
+#if JSON_USE_SECURE_MEMORY
+typedef std::basic_string<char, std::char_traits<char>, SecureAllocator<char>> String;
+typedef std::basic_ostringstream<char, std::char_traits<char>, SecureAllocator<char>> OStringStream;
+typedef std::basic_ostream<char, std::char_traits<char>> OStream;
+typedef std::basic_istringstream<char, std::char_traits<char>, SecureAllocator<char>> IStringStream;
+#else
+typedef std::string String;
+typedef std::ostringstream OStringStream;
+typedef std::ostream OStream;
+typedef std::istringstream IStringStream;
+#endif // if JSON_USE_SECURE_MEMORY
 } // end namespace Json
 
 #endif // JSON_CONFIG_H_INCLUDED
