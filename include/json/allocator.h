@@ -6,6 +6,7 @@
 #ifndef CPPTL_JSON_ALLOCATOR_H_INCLUDED
 #define CPPTL_JSON_ALLOCATOR_H_INCLUDED
 
+#include <cstring>
 #include <memory>
 
 namespace Json {
