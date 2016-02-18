@@ -230,7 +230,7 @@ private:
 
     struct StringStorage {
       unsigned policy_: 2;
-      size_t length_: 30; // 1GB max
+      unsigned length_: 30; // 1GB max
     };
 
     char const* cstr_;  // actually, a prefixed string, unless policy is noDup
@@ -323,8 +323,10 @@ Json::Value obj_value(Json::objectValue); // {}
   int compare(const Value& other) const;
 
   const char* asCString() const; ///< Embedded zeroes could cause you trouble!
+#if JSON_USE_SECURE_MEMORY
   unsigned getCStringLength() const; //Allows you to understand the length of the CString
-  std::string asString() const; ///< Embedded zeroes are possible.
+#endif
+  Json::String asString() const; ///< Embedded zeroes are possible.
   /** Get raw char* of string-value.
    *  \return false if !string. (Seg-fault if str or end are NULL.)
    */
@@ -573,7 +575,9 @@ private:
     void setComment(const char* text, size_t len);
 
     char* comment_;
+#if JSON_USE_SECURE_MEMORY
     size_t len_;
+#endif
   };
 
   // struct MemberNamesTransform
@@ -596,7 +600,9 @@ private:
   ValueType type_ : 8;
   unsigned int allocated_ : 1; // Notes: if declared as bool, bitfield is useless.
                                // If not allocated_, string_ must be null-terminated.
+#if JSON_USE_SECURE_MEMORY
   size_t allocatedLength_ = 0;
+#endif
   CommentInfo* comments_;
 
   // [start, limit) byte offsets in the source JSON text from which this Value

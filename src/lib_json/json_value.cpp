@@ -83,15 +83,20 @@ static inline bool InRange(double d, T min, U max) {
  * @return Pointer on the duplicate instance of string.
  */
 static inline char* duplicateStringValue(const char* value,
-                                         size_t length,
-										 size_t& allocatedLength) {
+                                         size_t length
+#if JSON_USE_SECURE_MEMORY
+	                                     , size_t& allocatedLength
+#endif
+										  ) {
   // Avoid an integer overflow in the call to malloc below by limiting length
   // to a sane value.
   if (length >= (size_t)Value::maxInt)
     length = Value::maxInt - 1;
 
+#if JSON_USE_SECURE_MEMORY
   allocatedLength = length + 1;
-  char* newString = static_cast<char*>(malloc(allocatedLength));
+#endif
+  char* newString = static_cast<char*>(malloc(length + 1));
   if (newString == NULL) {
     throwRuntimeError(
         "in Json::Value::duplicateStringValue(): "
@@ -106,8 +111,11 @@ static inline char* duplicateStringValue(const char* value,
  */
 static inline char* duplicateAndPrefixStringValue(
     const char* value,
-    unsigned int length,
-	size_t& allocatedLength)
+    unsigned int length
+#if JSON_USE_SECURE_MEMORY
+	, size_t& allocatedLength
+#endif
+	)
 {
   // Avoid an integer overflow in the call to malloc below by limiting length
   // to a sane value.
@@ -115,7 +123,9 @@ static inline char* duplicateAndPrefixStringValue(
                       "in Json::Value::duplicateAndPrefixStringValue(): "
                       "length too big for prefixing");
   unsigned actualLength = length + static_cast<unsigned>(sizeof(unsigned)) + 1U;
+#if JSON_USE_SECURE_MEMORY
   allocatedLength = actualLength;
+#endif
   char* newString = static_cast<char*>(malloc(actualLength));
   if (newString == 0) {
     throwRuntimeError(
@@ -141,7 +151,11 @@ inline static void decodePrefixedString(
 }
 /** Free the string duplicated by duplicateStringValue()/duplicateAndPrefixStringValue().
  */
-static inline void releaseStringValue(char* value, size_t& length) {
+static inline void releaseStringValue(char* value
+#if JSON_USE_SECURE_MEMORY
+		, size_t& length
+#endif
+		) {
 #if JSON_USE_SECURE_MEMORY
 	memset(value, 0, length);
 #endif
@@ -196,16 +210,26 @@ void throwLogicError(Json::String const& msg)
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-Value::CommentInfo::CommentInfo() : comment_(0), len_(0) {}
+Value::CommentInfo::CommentInfo() : comment_(0)
+#if JSON_USE_SECURE_MEMORY
+	, len_(0)
+#endif
+{}
+
+#if JSON_USE_SECURE_MEMORY
+#define PASS_COMMENT_INFO_LEN , len_
+#else
+#define PASS_COMMENT_INFO_LEN
+#endif
 
 Value::CommentInfo::~CommentInfo() {
   if (comment_)
-    releaseStringValue(comment_, len_);
+    releaseStringValue(comment_ PASS_COMMENT_INFO_LEN);
 }
 
 void Value::CommentInfo::setComment(const char* text, size_t len) {
   if (comment_) {
-    releaseStringValue(comment_, len_);
+    releaseStringValue(comment_ PASS_COMMENT_INFO_LEN);
     comment_ = 0;
   }
   JSON_ASSERT(text != 0);
@@ -213,7 +237,7 @@ void Value::CommentInfo::setComment(const char* text, size_t len) {
       text[0] == '\0' || text[0] == '/',
       "in Json::Value::setComment(): Comments must start with /");
   // It seems that /**/ style comments are acceptable as well.
-  comment_ = duplicateStringValue(text, len, len_);
+  comment_ = duplicateStringValue(text, len PASS_COMMENT_INFO_LEN);
 }
 
 // //////////////////////////////////////////////////////////////////
@@ -236,10 +260,18 @@ Value::CZString::CZString(char const* str, unsigned ulength, DuplicationPolicy a
   storage_.length_ = ulength & 0x3FFFFFFF;
 }
 
+#if JSON_USE_SECURE_MEMORY
+#define CZSTRING_PASS_LENGTH , length
+#else
+#define CZSTRING_PASS_LENGTH
+#endif
+
 Value::CZString::CZString(const CZString& other) {
+#if JSON_USE_SECURE_MEMORY
   size_t length = other.storage_.length_;
+#endif
   cstr_ = (other.storage_.policy_ != noDuplication && other.cstr_ != 0
-				 ? duplicateStringValue(other.cstr_, other.storage_.length_, length)
+				 ? duplicateStringValue(other.cstr_, other.storage_.length_ CZSTRING_PASS_LENGTH)
 				 : other.cstr_);
   storage_.policy_ = static_cast<unsigned>(other.cstr_
                  ? (static_cast<DuplicationPolicy>(other.storage_.policy_) == noDuplication
@@ -257,8 +289,10 @@ Value::CZString::CZString(CZString&& other)
 
 Value::CZString::~CZString() {
   if (cstr_ && storage_.policy_ == duplicate) {
+#if JSON_USE_SECURE_MEMORY
     size_t length = storage_.length_;
-    releaseStringValue(const_cast<char*>(cstr_), length);
+#endif
+    releaseStringValue(const_cast<char*>(cstr_) CZSTRING_PASS_LENGTH);
   }
 }
 
@@ -367,21 +401,28 @@ Value::Value(double value) {
   value_.real_ = value;
 }
 
+#if JSON_USE_SECURE_MEMORY
+#define VALUE_PASS_ALLOCATED_LENGTH , allocatedLength_
+#else
+#define VALUE_PASS_ALLOCATED_LENGTH
+#endif
+
+
 Value::Value(const char* value) {
   initBasic(stringValue, true);
-  value_.string_ = duplicateAndPrefixStringValue(value, static_cast<unsigned>(strlen(value)), allocatedLength_);
+  value_.string_ = duplicateAndPrefixStringValue(value, static_cast<unsigned>(strlen(value)) VALUE_PASS_ALLOCATED_LENGTH);
 }
 
 Value::Value(const char* beginValue, const char* endValue) {
   initBasic(stringValue, true);
   value_.string_ =
-      duplicateAndPrefixStringValue(beginValue, static_cast<unsigned>(endValue - beginValue), allocatedLength_);
+      duplicateAndPrefixStringValue(beginValue, static_cast<unsigned>(endValue - beginValue) VALUE_PASS_ALLOCATED_LENGTH);
 }
 
 Value::Value(const Json::String& value) {
   initBasic(stringValue, true);
   value_.string_ =
-      duplicateAndPrefixStringValue(value.data(), static_cast<unsigned>(value.length()), allocatedLength_);
+      duplicateAndPrefixStringValue(value.data(), static_cast<unsigned>(value.length()) VALUE_PASS_ALLOCATED_LENGTH);
 }
 
 Value::Value(const StaticString& value) {
@@ -420,7 +461,7 @@ Value::Value(Value const& other)
       char const* str;
       decodePrefixedString(other.allocated_, other.value_.string_,
           &len, &str);
-      value_.string_ = duplicateAndPrefixStringValue(str, len, allocatedLength_);
+      value_.string_ = duplicateAndPrefixStringValue(str, len VALUE_PASS_ALLOCATED_LENGTH);
       allocated_ = true;
     } else {
       value_.string_ = other.value_.string_;
@@ -463,7 +504,7 @@ Value::~Value() {
     break;
   case stringValue:
     if (allocated_)
-      releaseStringValue(value_.string_, allocatedLength_);
+      releaseStringValue(value_.string_ VALUE_PASS_ALLOCATED_LENGTH);
     break;
   case arrayValue:
   case objectValue:
@@ -619,6 +660,7 @@ const char* Value::asCString() const {
   return this_str;
 }
 
+#if JSON_USE_SECURE_MEMORY
 unsigned Value::getCStringLength() const {
   JSON_ASSERT_MESSAGE(type_ == stringValue,
 	                  "in Json::Value::asCString(): requires stringValue");
@@ -628,6 +670,7 @@ unsigned Value::getCStringLength() const {
   decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
   return this_len;
 }
+#endif
 
 bool Value::getString(char const** str, char const** cend) const {
   if (type_ != stringValue) return false;
@@ -638,17 +681,7 @@ bool Value::getString(char const** str, char const** cend) const {
   return true;
 }
 
-#if JSON_USE_SECURE_MEMORY
-inline std::string toStdString(Json::String in) {
-  return std::string(in.data(), in.data() + in.length());
-}
-#else
-inline std::string toStdString(std::string in) {
-  return in;
-}
-#endif
-
-std::string Value::asString() const {
+Json::String Value::asString() const {
   switch (type_) {
   case nullValue:
     return "";
@@ -658,16 +691,16 @@ std::string Value::asString() const {
     unsigned this_len;
     char const* this_str;
     decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
-    return std::string(this_str, this_len);
+    return Json::String(this_str, this_len);
   }
   case booleanValue:
     return value_.bool_ ? "true" : "false";
   case intValue:
-    return toStdString(valueToString(value_.int_));
+    return valueToString(value_.int_);
   case uintValue:
-    return toStdString(valueToString(value_.uint_));
+    return valueToString(value_.uint_);
   case realValue:
-    return toStdString(valueToString(value_.real_));
+    return valueToString(value_.real_);
   default:
     JSON_FAIL_MESSAGE("Type is not convertible to string");
   }

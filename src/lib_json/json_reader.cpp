@@ -1458,9 +1458,7 @@ bool OurReader::readObject(Token& tokenStart) {
       Value numberName;
       if (!decodeNumber(tokenName, numberName))
         return recoverFromError(tokenObjectEnd);
-      const char* string = numberName.asCString();
-      unsigned stringLength = numberName.getCStringLength();
-      name = Json::String(string, string + stringLength);
+      name = numberName.asString();
     } else {
       break;
     }

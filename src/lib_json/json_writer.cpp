@@ -81,16 +81,6 @@ typedef std::unique_ptr<StreamWriter> StreamWriterPtr;
 typedef std::auto_ptr<StreamWriter>   StreamWriterPtr;
 #endif
 
-#if JSON_USE_SECURE_MEMORY
-inline Json::String toSecureString(std::string in) {
-  return Json::String(in.data(), in.data() + in.length());
-}
-#else
-inline std::string toSecureString(std::string in) {
-  return in;
-}
-#endif
-
 static bool containsControlCharacter(const char* str) {
   while (*str) {
     if (isControlCharacter(*(str++)))
@@ -1135,8 +1125,8 @@ StreamWriterBuilder::~StreamWriterBuilder()
 {}
 StreamWriter* StreamWriterBuilder::newStreamWriter() const
 {
-  Json::String indentation = toSecureString(settings_["indentation"].asString());
-  Json::String cs_str = toSecureString(settings_["commentStyle"].asString());
+  Json::String indentation = settings_["indentation"].asString();
+  Json::String cs_str = settings_["commentStyle"].asString();
   bool eyc = settings_["enableYAMLCompatibility"].asBool();
   bool dnp = settings_["dropNullPlaceholders"].asBool();
   bool usf = settings_["useSpecialFloats"].asBool(); 
