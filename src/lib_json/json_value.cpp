@@ -143,6 +143,7 @@ static inline void releasePrefixedStringValue(char* value) {
   unsigned length = 0;
   const char* valueDecoded;
   decodePrefixedString(true, value, &length, &valueDecoded);
+  length += sizeof(unsigned) + 1;
   memset(value, 0, length);
 #endif
   free(value);
@@ -267,9 +268,9 @@ Value::CZString::CZString(CZString&& other)
 Value::CZString::~CZString() {
   if (cstr_ && storage_.policy_ == duplicate) {
 #if JSON_USE_SECURE_MEMORY
-	  releaseStringValue(const_cast<char*>(cstr_), storage_.length_);
+	  releaseStringValue(const_cast<char*>(cstr_), storage_.length_ + 1); //+1 for null terminating character for sake of completeness but not actually necessary
 #else
-	  releaseStringValue(const_cast<char*>(cstr_), storage_.length_);
+	  releaseStringValue(const_cast<char*>(cstr_), storage_.length_ + 1);
 #endif
 
   }
