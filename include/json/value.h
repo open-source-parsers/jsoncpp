@@ -575,9 +575,6 @@ private:
     void setComment(const char* text, size_t len);
 
     char* comment_;
-#if JSON_USE_SECURE_MEMORY
-    size_t len_;
-#endif
   };
 
   // struct MemberNamesTransform
@@ -600,9 +597,6 @@ private:
   ValueType type_ : 8;
   unsigned int allocated_ : 1; // Notes: if declared as bool, bitfield is useless.
                                // If not allocated_, string_ must be null-terminated.
-#if JSON_USE_SECURE_MEMORY
-  size_t allocatedLength_ = 0;
-#endif
   CommentInfo* comments_;
 
   // [start, limit) byte offsets in the source JSON text from which this Value

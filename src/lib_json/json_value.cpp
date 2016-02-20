@@ -83,19 +83,13 @@ static inline bool InRange(double d, T min, U max) {
  * @return Pointer on the duplicate instance of string.
  */
 static inline char* duplicateStringValue(const char* value,
-                                         size_t length
-#if JSON_USE_SECURE_MEMORY
-	                                     , size_t& allocatedLength
-#endif
-										  ) {
+                                         size_t length)
+{
   // Avoid an integer overflow in the call to malloc below by limiting length
   // to a sane value.
   if (length >= (size_t)Value::maxInt)
     length = Value::maxInt - 1;
 
-#if JSON_USE_SECURE_MEMORY
-  allocatedLength = length + 1;
-#endif
   char* newString = static_cast<char*>(malloc(length + 1));
   if (newString == NULL) {
     throwRuntimeError(
@@ -111,11 +105,7 @@ static inline char* duplicateStringValue(const char* value,
  */
 static inline char* duplicateAndPrefixStringValue(
     const char* value,
-    unsigned int length
-#if JSON_USE_SECURE_MEMORY
-	, size_t& allocatedLength
-#endif
-	)
+    unsigned int length)
 {
   // Avoid an integer overflow in the call to malloc below by limiting length
   // to a sane value.
@@ -123,9 +113,6 @@ static inline char* duplicateAndPrefixStringValue(
                       "in Json::Value::duplicateAndPrefixStringValue(): "
                       "length too big for prefixing");
   unsigned actualLength = length + static_cast<unsigned>(sizeof(unsigned)) + 1U;
-#if JSON_USE_SECURE_MEMORY
-  allocatedLength = actualLength;
-#endif
   char* newString = static_cast<char*>(malloc(actualLength));
   if (newString == 0) {
     throwRuntimeError(
@@ -151,15 +138,23 @@ inline static void decodePrefixedString(
 }
 /** Free the string duplicated by duplicateStringValue()/duplicateAndPrefixStringValue().
  */
-static inline void releaseStringValue(char* value
+static inline void releasePrefixedStringValue(char* value) {
 #if JSON_USE_SECURE_MEMORY
-		, size_t& length
+  unsigned length = 0;
+  const char* valueDecoded;
+  decodePrefixedString(true, value, &length, &valueDecoded);
+  memset(value, 0, length);
 #endif
-		) {
+  free(value);
+}
+
+static inline void releaseStringValue(char* value, unsigned length) {
 #if JSON_USE_SECURE_MEMORY
-	memset(value, 0, length);
+  if (length == 0)
+    length = static_cast<unsigned>(strlen(value)); //As we allocated the strings memory
+  memset(value, 0, length);
 #endif
-	free(value);
+  free(value);
 }
 
 } // namespace Json
@@ -211,25 +206,16 @@ void throwLogicError(Json::String const& msg)
 // //////////////////////////////////////////////////////////////////
 
 Value::CommentInfo::CommentInfo() : comment_(0)
-#if JSON_USE_SECURE_MEMORY
-	, len_(0)
-#endif
 {}
-
-#if JSON_USE_SECURE_MEMORY
-#define PASS_COMMENT_INFO_LEN , len_
-#else
-#define PASS_COMMENT_INFO_LEN
-#endif
 
 Value::CommentInfo::~CommentInfo() {
   if (comment_)
-    releaseStringValue(comment_ PASS_COMMENT_INFO_LEN);
+    releaseStringValue(comment_, 0);
 }
 
 void Value::CommentInfo::setComment(const char* text, size_t len) {
   if (comment_) {
-    releaseStringValue(comment_ PASS_COMMENT_INFO_LEN);
+    releaseStringValue(comment_, 0);
     comment_ = 0;
   }
   JSON_ASSERT(text != 0);
@@ -237,7 +223,7 @@ void Value::CommentInfo::setComment(const char* text, size_t len) {
       text[0] == '\0' || text[0] == '/',
       "in Json::Value::setComment(): Comments must start with /");
   // It seems that /**/ style comments are acceptable as well.
-  comment_ = duplicateStringValue(text, len PASS_COMMENT_INFO_LEN);
+  comment_ = duplicateStringValue(text, len);
 }
 
 // //////////////////////////////////////////////////////////////////
@@ -260,18 +246,9 @@ Value::CZString::CZString(char const* str, unsigned ulength, DuplicationPolicy a
   storage_.length_ = ulength & 0x3FFFFFFF;
 }
 
-#if JSON_USE_SECURE_MEMORY
-#define CZSTRING_PASS_LENGTH , length
-#else
-#define CZSTRING_PASS_LENGTH
-#endif
-
 Value::CZString::CZString(const CZString& other) {
-#if JSON_USE_SECURE_MEMORY
-  size_t length = other.storage_.length_;
-#endif
   cstr_ = (other.storage_.policy_ != noDuplication && other.cstr_ != 0
-				 ? duplicateStringValue(other.cstr_, other.storage_.length_ CZSTRING_PASS_LENGTH)
+				 ? duplicateStringValue(other.cstr_, other.storage_.length_)
 				 : other.cstr_);
   storage_.policy_ = static_cast<unsigned>(other.cstr_
                  ? (static_cast<DuplicationPolicy>(other.storage_.policy_) == noDuplication
@@ -290,9 +267,11 @@ Value::CZString::CZString(CZString&& other)
 Value::CZString::~CZString() {
   if (cstr_ && storage_.policy_ == duplicate) {
 #if JSON_USE_SECURE_MEMORY
-    size_t length = storage_.length_;
+	  releaseStringValue(const_cast<char*>(cstr_), storage_.length_);
+#else
+	  releaseStringValue(const_cast<char*>(cstr_), storage_.length_);
 #endif
-    releaseStringValue(const_cast<char*>(cstr_) CZSTRING_PASS_LENGTH);
+
   }
 }
 
@@ -401,28 +380,21 @@ Value::Value(double value) {
   value_.real_ = value;
 }
 
-#if JSON_USE_SECURE_MEMORY
-#define VALUE_PASS_ALLOCATED_LENGTH , allocatedLength_
-#else
-#define VALUE_PASS_ALLOCATED_LENGTH
-#endif
-
-
 Value::Value(const char* value) {
   initBasic(stringValue, true);
-  value_.string_ = duplicateAndPrefixStringValue(value, static_cast<unsigned>(strlen(value)) VALUE_PASS_ALLOCATED_LENGTH);
+  value_.string_ = duplicateAndPrefixStringValue(value, static_cast<unsigned>(strlen(value)));
 }
 
 Value::Value(const char* beginValue, const char* endValue) {
   initBasic(stringValue, true);
   value_.string_ =
-      duplicateAndPrefixStringValue(beginValue, static_cast<unsigned>(endValue - beginValue) VALUE_PASS_ALLOCATED_LENGTH);
+      duplicateAndPrefixStringValue(beginValue, static_cast<unsigned>(endValue - beginValue));
 }
 
 Value::Value(const Json::String& value) {
   initBasic(stringValue, true);
   value_.string_ =
-      duplicateAndPrefixStringValue(value.data(), static_cast<unsigned>(value.length()) VALUE_PASS_ALLOCATED_LENGTH);
+      duplicateAndPrefixStringValue(value.data(), static_cast<unsigned>(value.length()));
 }
 
 Value::Value(const StaticString& value) {
@@ -461,7 +433,7 @@ Value::Value(Value const& other)
       char const* str;
       decodePrefixedString(other.allocated_, other.value_.string_,
           &len, &str);
-      value_.string_ = duplicateAndPrefixStringValue(str, len VALUE_PASS_ALLOCATED_LENGTH);
+      value_.string_ = duplicateAndPrefixStringValue(str, len);
       allocated_ = true;
     } else {
       value_.string_ = other.value_.string_;
@@ -504,7 +476,7 @@ Value::~Value() {
     break;
   case stringValue:
     if (allocated_)
-      releaseStringValue(value_.string_ VALUE_PASS_ALLOCATED_LENGTH);
+      releasePrefixedStringValue(value_.string_);
     break;
   case arrayValue:
   case objectValue:
