@@ -211,12 +211,12 @@ Value::CommentInfo::CommentInfo() : comment_(0)
 
 Value::CommentInfo::~CommentInfo() {
   if (comment_)
-    releaseStringValue(comment_, 0);
+    releaseStringValue(comment_, 0u);
 }
 
 void Value::CommentInfo::setComment(const char* text, size_t len) {
   if (comment_) {
-    releaseStringValue(comment_, 0);
+    releaseStringValue(comment_, 0u);
     comment_ = 0;
   }
   JSON_ASSERT(text != 0);
@@ -268,9 +268,9 @@ Value::CZString::CZString(CZString&& other)
 Value::CZString::~CZString() {
   if (cstr_ && storage_.policy_ == duplicate) {
 #if JSON_USE_SECURE_MEMORY
-	  releaseStringValue(const_cast<char*>(cstr_), storage_.length_ + 1); //+1 for null terminating character for sake of completeness but not actually necessary
+	  releaseStringValue(const_cast<char*>(cstr_), storage_.length_ + 1u); //+1 for null terminating character for sake of completeness but not actually necessary
 #else
-	  releaseStringValue(const_cast<char*>(cstr_), storage_.length_ + 1);
+	  releaseStringValue(const_cast<char*>(cstr_), storage_.length_ + 1u);
 #endif
 
   }
