@@ -123,7 +123,7 @@
 // If non-zero, the library zeroes any memory that it has allocated before
 // it frees its
 #ifndef JSON_USE_SECURE_MEMORY
-#define JSON_USE_SECURE_MEMORY 1
+#define JSON_USE_SECURE_MEMORY 0
 #endif
 
 namespace Json {
