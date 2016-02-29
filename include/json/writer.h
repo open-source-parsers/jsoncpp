@@ -112,7 +112,7 @@ public:
   Json::Value settings_;
 
   StreamWriterBuilder();
-  ~StreamWriterBuilder() override;
+  virtual ~StreamWriterBuilder();
 
   /**
    * \throw std::exception if something goes wrong (e.g. invalid settings)
@@ -158,7 +158,7 @@ class JSON_API FastWriter : public Writer {
 
 public:
   FastWriter();
-  ~FastWriter() override {}
+  virtual ~FastWriter() {}
 
   void enableYAMLCompatibility();
 
@@ -210,7 +210,7 @@ private:
 class JSON_API StyledWriter : public Writer {
 public:
   StyledWriter();
-  ~StyledWriter() override {}
+  virtaul ~StyledWriter() {}
 
 public: // overridden from Writer
   /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
