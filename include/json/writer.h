@@ -210,7 +210,7 @@ private:
 class JSON_API StyledWriter : public Writer {
 public:
   StyledWriter();
-  virtaul ~StyledWriter() {}
+  virtual ~StyledWriter() {}
 
 public: // overridden from Writer
   /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
