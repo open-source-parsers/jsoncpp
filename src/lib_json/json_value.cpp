@@ -267,6 +267,7 @@ bool Value::CZString::operator<(const CZString& other) const {
   unsigned this_len = this->storage_.length_;
   unsigned other_len = other.storage_.length_;
   unsigned min_len = std::min(this_len, other_len);
+  JSON_ASSERT(this->cstr_ && other.cstr_);
   int comp = memcmp(this->cstr_, other.cstr_, min_len);
   if (comp < 0) return true;
   if (comp > 0) return false;
@@ -280,6 +281,7 @@ bool Value::CZString::operator==(const CZString& other) const {
   unsigned this_len = this->storage_.length_;
   unsigned other_len = other.storage_.length_;
   if (this_len != other_len) return false;
+  JSON_ASSERT(this->cstr_ && other.cstr_);
   int comp = memcmp(this->cstr_, other.cstr_, this_len);
   return comp == 0;
 }
@@ -525,6 +527,7 @@ bool Value::operator<(const Value& other) const {
     decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
     decodePrefixedString(other.allocated_, other.value_.string_, &other_len, &other_str);
     unsigned min_len = std::min(this_len, other_len);
+    JSON_ASSERT(this_str && other_str);
     int comp = memcmp(this_str, other_str, min_len);
     if (comp < 0) return true;
     if (comp > 0) return false;
@@ -580,6 +583,7 @@ bool Value::operator==(const Value& other) const {
     decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
     decodePrefixedString(other.allocated_, other.value_.string_, &other_len, &other_str);
     if (this_len != other_len) return false;
+    JSON_ASSERT(this_str && other_str);
     int comp = memcmp(this_str, other_str, this_len);
     return comp == 0;
   }
@@ -914,7 +918,7 @@ void Value::resize(ArrayIndex newSize) {
     for (ArrayIndex index = newSize; index < oldSize; ++index) {
       value_.map_->erase(index);
     }
-    assert(size() == newSize);
+    JSON_ASSERT(size() == newSize);
   }
 }
 
