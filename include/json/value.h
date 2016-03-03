@@ -40,7 +40,7 @@ namespace Json {
 class JSON_API Exception : public std::exception {
 public:
   Exception(std::string const& msg);
-  ~Exception() throw() override;
+  virtual ~Exception() throw();
   char const* what() const throw() override;
 protected:
   std::string msg_;

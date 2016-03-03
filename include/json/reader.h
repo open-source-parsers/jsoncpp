@@ -333,7 +333,7 @@ public:
   Json::Value settings_;
 
   CharReaderBuilder();
-  ~CharReaderBuilder() override;
+  virtual ~CharReaderBuilder();
 
   CharReader* newCharReader() const override;
 
