@@ -617,7 +617,7 @@ bool Reader::decodeDouble(Token& token) {
 bool Reader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
   std::string buffer(token.start_, token.end_);
-  std::istringstream is(buffer);
+  JSONCPP_ISTRINGSTREAM is(buffer);
   if (!(is >> value))
     return addError("'" + std::string(token.start_, token.end_) +
                         "' is not a number.",
