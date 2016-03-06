@@ -2007,7 +2007,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings)
 // global functions
 
 bool parseFromStream(
-    CharReader::Factory const& fact, std::istream& sin,
+    CharReader::Factory const& fact, JSONCPP_ISTREAM& sin,
     Value* root, std::string* errs)
 {
   JSONCPP_OSTRINGSTREAM ssin;
@@ -2020,7 +2020,7 @@ bool parseFromStream(
   return reader->parse(begin, end, root, errs);
 }
 
-std::istream& operator>>(std::istream& sin, Value& root) {
+JSONCPP_ISTREAM& operator>>(JSONCPP_ISTREAM& sin, Value& root) {
   CharReaderBuilder b;
   std::string errs;
   bool ok = parseFromStream(b, sin, &root, &errs);
