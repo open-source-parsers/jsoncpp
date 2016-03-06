@@ -82,7 +82,7 @@ public:
 
   // Generic operator that will work with anything ostream can deal with.
   template <typename T> TestResult& operator<<(const T& value) {
-    std::ostringstream oss;
+    JSONCPP_OSTRINGSTREAM oss;
     oss.precision(16);
     oss.setf(std::ios_base::floatfield);
     oss << value;

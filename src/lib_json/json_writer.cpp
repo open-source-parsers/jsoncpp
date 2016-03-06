@@ -217,7 +217,7 @@ std::string valueToQuotedString(const char* value) {
     // sequence from occurring.
     default:
       if (isControlCharacter(*c)) {
-        std::ostringstream oss;
+        JSONCPP_OSTRINGSTREAM oss;
         oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
             << std::setw(4) << static_cast<int>(*c);
         result += oss.str();
@@ -295,7 +295,7 @@ static std::string valueToQuotedStringN(const char* value, unsigned length) {
     // sequence from occurring.
     default:
       if ((isControlCharacter(*c)) || (*c == 0)) {
-        std::ostringstream oss;
+        JSONCPP_OSTRINGSTREAM oss;
         oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
             << std::setw(4) << static_cast<int>(*c);
         result += oss.str();
@@ -1200,7 +1200,7 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings)
 }
 
 std::string writeString(StreamWriter::Factory const& builder, Value const& root) {
-  std::ostringstream sout;
+  JSONCPP_OSTRINGSTREAM sout;
   StreamWriterPtr const writer(builder.newStreamWriter());
   writer->write(root, &sout);
   return sout.str();

@@ -178,7 +178,7 @@ static std::string useStyledStreamWriter(
     Json::Value const& root)
 {
   Json::StyledStreamWriter writer;
-  std::ostringstream sout;
+  JSONCPP_OSTRINGSTREAM sout;
   writer.write(sout, root);
   return sout.str();
 }

@@ -2010,7 +2010,7 @@ bool parseFromStream(
     CharReader::Factory const& fact, std::istream& sin,
     Value* root, std::string* errs)
 {
-  std::ostringstream ssin;
+  JSONCPP_OSTRINGSTREAM ssin;
   ssin << sin.rdbuf();
   std::string doc = ssin.str();
   char const* begin = doc.data();
