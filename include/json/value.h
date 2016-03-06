@@ -39,11 +39,11 @@ namespace Json {
  */
 class JSON_API Exception : public std::exception {
 public:
-  Exception(std::string const& msg);
+  Exception(JSONCPP_STRING const& msg);
   ~Exception() throw() override;
   char const* what() const throw() override;
 protected:
-  std::string msg_;
+  JSONCPP_STRING msg_;
 };
 
 /** Exceptions which the user cannot easily avoid.
@@ -54,7 +54,7 @@ protected:
  */
 class JSON_API RuntimeError : public Exception {
 public:
-  RuntimeError(std::string const& msg);
+  RuntimeError(JSONCPP_STRING const& msg);
 };
 
 /** Exceptions thrown by JSON_ASSERT/JSON_FAIL macros.
@@ -65,13 +65,13 @@ public:
  */
 class JSON_API LogicError : public Exception {
 public:
-  LogicError(std::string const& msg);
+  LogicError(JSONCPP_STRING const& msg);
 };
 
 /// used internally
-void throwRuntimeError(std::string const& msg);
+void throwRuntimeError(JSONCPP_STRING const& msg);
 /// used internally
-void throwLogicError(std::string const& msg);
+void throwLogicError(JSONCPP_STRING const& msg);
 
 /** \brief Type of the value held by a Value object.
  */
@@ -162,7 +162,7 @@ private:
 class JSON_API Value {
   friend class ValueIteratorBase;
 public:
-  typedef std::vector<std::string> Members;
+  typedef std::vector<JSONCPP_STRING> Members;
   typedef ValueIterator iterator;
   typedef ValueConstIterator const_iterator;
   typedef Json::UInt UInt;
@@ -290,7 +290,7 @@ Json::Value obj_value(Json::objectValue); // {}
    * \endcode
    */
   Value(const StaticString& value);
-  Value(const std::string& value); ///< Copy data() til size(). Embedded zeroes too.
+  Value(const JSONCPP_STRING& value); ///< Copy data() til size(). Embedded zeroes too.
 #ifdef JSON_USE_CPPTL
   Value(const CppTL::ConstString& value);
 #endif
@@ -323,7 +323,7 @@ Json::Value obj_value(Json::objectValue); // {}
   int compare(const Value& other) const;
 
   const char* asCString() const; ///< Embedded zeroes could cause you trouble!
-  std::string asString() const; ///< Embedded zeroes are possible.
+  JSONCPP_STRING asString() const; ///< Embedded zeroes are possible.
   /** Get raw char* of string-value.
    *  \return false if !string. (Seg-fault if str or end are NULL.)
    */
@@ -427,11 +427,11 @@ Json::Value obj_value(Json::objectValue); // {}
   const Value& operator[](const char* key) const;
   /// Access an object value by name, create a null member if it does not exist.
   /// \param key may contain embedded nulls.
-  Value& operator[](const std::string& key);
+  Value& operator[](const JSONCPP_STRING& key);
   /// Access an object value by name, returns null if there is no member with
   /// that name.
   /// \param key may contain embedded nulls.
-  const Value& operator[](const std::string& key) const;
+  const Value& operator[](const JSONCPP_STRING& key) const;
   /** \brief Access an object value by name, create a null member if it does not
    exist.
 
@@ -462,7 +462,7 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
   /// \param key may contain embedded nulls.
-  Value get(const std::string& key, const Value& defaultValue) const;
+  Value get(const JSONCPP_STRING& key, const Value& defaultValue) const;
 #ifdef JSON_USE_CPPTL
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
@@ -487,7 +487,7 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Same as removeMember(const char*)
   /// \param key may contain embedded nulls.
   /// \deprecated
-  Value removeMember(const std::string& key);
+  Value removeMember(const JSONCPP_STRING& key);
   /// Same as removeMember(const char* begin, const char* end, Value* removed),
   /// but 'key' is null-terminated.
   bool removeMember(const char* key, Value* removed);
@@ -497,8 +497,8 @@ Json::Value obj_value(Json::objectValue); // {}
       \param key may contain embedded nulls.
       \return true iff removed (no exceptions)
   */
-  bool removeMember(std::string const& key, Value* removed);
-  /// Same as removeMember(std::string const& key, Value* removed)
+  bool removeMember(JSONCPP_STRING const& key, Value* removed);
+  /// Same as removeMember(JSONCPP_STRING const& key, Value* removed)
   bool removeMember(const char* begin, const char* end, Value* removed);
   /** \brief Remove the indexed array element.
 
@@ -513,8 +513,8 @@ Json::Value obj_value(Json::objectValue); // {}
   bool isMember(const char* key) const;
   /// Return true if the object has a member named key.
   /// \param key may contain embedded nulls.
-  bool isMember(const std::string& key) const;
-  /// Same as isMember(std::string const& key)const
+  bool isMember(const JSONCPP_STRING& key) const;
+  /// Same as isMember(JSONCPP_STRING const& key)const
   bool isMember(const char* begin, const char* end) const;
 #ifdef JSON_USE_CPPTL
   /// Return true if the object has a member named key.
@@ -534,17 +534,17 @@ Json::Value obj_value(Json::objectValue); // {}
   //# endif
 
   /// \deprecated Always pass len.
-  JSONCPP_DEPRECATED("Use setComment(std::string const&) instead.")
+  JSONCPP_DEPRECATED("Use setComment(JSONCPP_STRING const&) instead.")
   void setComment(const char* comment, CommentPlacement placement);
   /// Comments must be //... or /* ... */
   void setComment(const char* comment, size_t len, CommentPlacement placement);
   /// Comments must be //... or /* ... */
-  void setComment(const std::string& comment, CommentPlacement placement);
+  void setComment(const JSONCPP_STRING& comment, CommentPlacement placement);
   bool hasComment(CommentPlacement placement) const;
   /// Include delimiters and embedded newlines.
-  std::string getComment(CommentPlacement placement) const;
+  JSONCPP_STRING getComment(CommentPlacement placement) const;
 
-  std::string toStyledString() const;
+  JSONCPP_STRING toStyledString() const;
 
   const_iterator begin() const;
   const_iterator end() const;
@@ -612,7 +612,7 @@ public:
   PathArgument();
   PathArgument(ArrayIndex index);
   PathArgument(const char* key);
-  PathArgument(const std::string& key);
+  PathArgument(const JSONCPP_STRING& key);
 
 private:
   enum Kind {
@@ -620,7 +620,7 @@ private:
     kindIndex,
     kindKey
   };
-  std::string key_;
+  JSONCPP_STRING key_;
   ArrayIndex index_;
   Kind kind_;
 };
@@ -638,7 +638,7 @@ private:
  */
 class JSON_API Path {
 public:
-  Path(const std::string& path,
+  Path(const JSONCPP_STRING& path,
        const PathArgument& a1 = PathArgument(),
        const PathArgument& a2 = PathArgument(),
        const PathArgument& a3 = PathArgument(),
@@ -655,12 +655,12 @@ private:
   typedef std::vector<const PathArgument*> InArgs;
   typedef std::vector<PathArgument> Args;
 
-  void makePath(const std::string& path, const InArgs& in);
-  void addPathInArg(const std::string& path,
+  void makePath(const JSONCPP_STRING& path, const InArgs& in);
+  void addPathInArg(const JSONCPP_STRING& path,
                     const InArgs& in,
                     InArgs::const_iterator& itInArg,
                     PathArgument::Kind kind);
-  void invalidPath(const std::string& path, int location);
+  void invalidPath(const JSONCPP_STRING& path, int location);
 
   Args args_;
 };
@@ -693,7 +693,7 @@ public:
   /// Return the member name of the referenced Value, or "" if it is not an
   /// objectValue.
   /// \note Avoid `c_str()` on result, as embedded zeroes are possible.
-  std::string name() const;
+  JSONCPP_STRING name() const;
 
   /// Return the member name of the referenced Value. "" if it is not an
   /// objectValue.
