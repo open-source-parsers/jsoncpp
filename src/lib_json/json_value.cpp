@@ -155,7 +155,7 @@ static inline void releaseStringValue(char* value) { free(value); }
 
 namespace Json {
 
-Exception::Exception(std::string const& msg)
+Exception::Exception(JSONCPP_STRING const& msg)
   : msg_(msg)
 {}
 Exception::~Exception() throw()
@@ -164,17 +164,17 @@ char const* Exception::what() const throw()
 {
   return msg_.c_str();
 }
-RuntimeError::RuntimeError(std::string const& msg)
+RuntimeError::RuntimeError(JSONCPP_STRING const& msg)
   : Exception(msg)
 {}
-LogicError::LogicError(std::string const& msg)
+LogicError::LogicError(JSONCPP_STRING const& msg)
   : Exception(msg)
 {}
-void throwRuntimeError(std::string const& msg)
+void throwRuntimeError(JSONCPP_STRING const& msg)
 {
   throw RuntimeError(msg);
 }
-void throwLogicError(std::string const& msg)
+void throwLogicError(JSONCPP_STRING const& msg)
 {
   throw LogicError(msg);
 }
@@ -368,7 +368,7 @@ Value::Value(const char* beginValue, const char* endValue) {
       duplicateAndPrefixStringValue(beginValue, static_cast<unsigned>(endValue - beginValue));
 }
 
-Value::Value(const std::string& value) {
+Value::Value(const JSONCPP_STRING& value) {
   initBasic(stringValue, true);
   value_.string_ =
       duplicateAndPrefixStringValue(value.data(), static_cast<unsigned>(value.length()));
@@ -618,7 +618,7 @@ bool Value::getString(char const** str, char const** cend) const {
   return true;
 }
 
-std::string Value::asString() const {
+JSONCPP_STRING Value::asString() const {
   switch (type_) {
   case nullValue:
     return "";
@@ -628,7 +628,7 @@ std::string Value::asString() const {
     unsigned this_len;
     char const* this_str;
     decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
-    return std::string(this_str, this_len);
+    return JSONCPP_STRING(this_str, this_len);
   }
   case booleanValue:
     return value_.bool_ ? "true" : "false";
@@ -1038,7 +1038,7 @@ const Value& Value::operator[](const char* key) const
   if (!found) return nullRef;
   return *found;
 }
-Value const& Value::operator[](std::string const& key) const
+Value const& Value::operator[](JSONCPP_STRING const& key) const
 {
   Value const* found = find(key.data(), key.data() + key.length());
   if (!found) return nullRef;
@@ -1049,7 +1049,7 @@ Value& Value::operator[](const char* key) {
   return resolveReference(key, key + strlen(key));
 }
 
-Value& Value::operator[](const std::string& key) {
+Value& Value::operator[](const JSONCPP_STRING& key) {
   return resolveReference(key.data(), key.data() + key.length());
 }
 
@@ -1080,7 +1080,7 @@ Value Value::get(char const* key, Value const& defaultValue) const
 {
   return get(key, key + strlen(key), defaultValue);
 }
-Value Value::get(std::string const& key, Value const& defaultValue) const
+Value Value::get(JSONCPP_STRING const& key, Value const& defaultValue) const
 {
   return get(key.data(), key.data() + key.length(), defaultValue);
 }
@@ -1103,7 +1103,7 @@ bool Value::removeMember(const char* key, Value* removed)
 {
   return removeMember(key, key + strlen(key), removed);
 }
-bool Value::removeMember(std::string const& key, Value* removed)
+bool Value::removeMember(JSONCPP_STRING const& key, Value* removed)
 {
   return removeMember(key.data(), key.data() + key.length(), removed);
 }
@@ -1118,7 +1118,7 @@ Value Value::removeMember(const char* key)
   removeMember(key, key + strlen(key), &removed);
   return removed; // still null if removeMember() did nothing
 }
-Value Value::removeMember(const std::string& key)
+Value Value::removeMember(const JSONCPP_STRING& key)
 {
   return removeMember(key.c_str());
 }
@@ -1162,7 +1162,7 @@ bool Value::isMember(char const* key) const
 {
   return isMember(key, key + strlen(key));
 }
-bool Value::isMember(std::string const& key) const
+bool Value::isMember(JSONCPP_STRING const& key) const
 {
   return isMember(key.data(), key.data() + key.length());
 }
@@ -1184,7 +1184,7 @@ Value::Members Value::getMemberNames() const {
   ObjectValues::const_iterator it = value_.map_->begin();
   ObjectValues::const_iterator itEnd = value_.map_->end();
   for (; it != itEnd; ++it) {
-    members.push_back(std::string((*it).first.data(),
+    members.push_back(JSONCPP_STRING((*it).first.data(),
                                   (*it).first.length()));
   }
   return members;
@@ -1326,7 +1326,7 @@ void Value::setComment(const char* comment, CommentPlacement placement) {
   setComment(comment, strlen(comment), placement);
 }
 
-void Value::setComment(const std::string& comment, CommentPlacement placement) {
+void Value::setComment(const JSONCPP_STRING& comment, CommentPlacement placement) {
   setComment(comment.c_str(), comment.length(), placement);
 }
 
@@ -1334,7 +1334,7 @@ bool Value::hasComment(CommentPlacement placement) const {
   return comments_ != 0 && comments_[placement].comment_ != 0;
 }
 
-std::string Value::getComment(CommentPlacement placement) const {
+JSONCPP_STRING Value::getComment(CommentPlacement placement) const {
   if (hasComment(placement))
     return comments_[placement].comment_;
   return "";
@@ -1348,7 +1348,7 @@ ptrdiff_t Value::getOffsetStart() const { return start_; }
 
 ptrdiff_t Value::getOffsetLimit() const { return limit_; }
 
-std::string Value::toStyledString() const {
+JSONCPP_STRING Value::toStyledString() const {
   StyledWriter writer;
   return writer.write(*this);
 }
@@ -1416,13 +1416,13 @@ PathArgument::PathArgument(ArrayIndex index)
 PathArgument::PathArgument(const char* key)
     : key_(key), index_(), kind_(kindKey) {}
 
-PathArgument::PathArgument(const std::string& key)
+PathArgument::PathArgument(const JSONCPP_STRING& key)
     : key_(key.c_str()), index_(), kind_(kindKey) {}
 
 // class Path
 // //////////////////////////////////////////////////////////////////
 
-Path::Path(const std::string& path,
+Path::Path(const JSONCPP_STRING& path,
            const PathArgument& a1,
            const PathArgument& a2,
            const PathArgument& a3,
@@ -1437,7 +1437,7 @@ Path::Path(const std::string& path,
   makePath(path, in);
 }
 
-void Path::makePath(const std::string& path, const InArgs& in) {
+void Path::makePath(const JSONCPP_STRING& path, const InArgs& in) {
   const char* current = path.c_str();
   const char* end = current + path.length();
   InArgs::const_iterator itInArg = in.begin();
@@ -1463,12 +1463,12 @@ void Path::makePath(const std::string& path, const InArgs& in) {
       const char* beginName = current;
       while (current != end && !strchr("[.", *current))
         ++current;
-      args_.push_back(std::string(beginName, current));
+      args_.push_back(JSONCPP_STRING(beginName, current));
     }
   }
 }
 
-void Path::addPathInArg(const std::string& /*path*/,
+void Path::addPathInArg(const JSONCPP_STRING& /*path*/,
                         const InArgs& in,
                         InArgs::const_iterator& itInArg,
                         PathArgument::Kind kind) {
@@ -1481,7 +1481,7 @@ void Path::addPathInArg(const std::string& /*path*/,
   }
 }
 
-void Path::invalidPath(const std::string& /*path*/, int /*location*/) {
+void Path::invalidPath(const JSONCPP_STRING& /*path*/, int /*location*/) {
   // Error: invalid path.
 }
 

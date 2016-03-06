@@ -217,7 +217,7 @@ std::string valueToQuotedString(const char* value) {
     // sequence from occurring.
     default:
       if (isControlCharacter(*c)) {
-        std::ostringstream oss;
+        JSONCPP_OSTRINGSTREAM oss;
         oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
             << std::setw(4) << static_cast<int>(*c);
         result += oss.str();
@@ -295,7 +295,7 @@ static std::string valueToQuotedStringN(const char* value, unsigned length) {
     // sequence from occurring.
     default:
       if ((isControlCharacter(*c)) || (*c == 0)) {
-        std::ostringstream oss;
+        JSONCPP_OSTRINGSTREAM oss;
         oss << "\\u" << std::hex << std::uppercase << std::setfill('0')
             << std::setw(4) << static_cast<int>(*c);
         result += oss.str();
@@ -608,7 +608,7 @@ StyledStreamWriter::StyledStreamWriter(std::string indentation)
     : document_(NULL), rightMargin_(74), indentation_(indentation),
       addChildValues_() {}
 
-void StyledStreamWriter::write(std::ostream& out, const Value& root) {
+void StyledStreamWriter::write(JSONCPP_OSTREAM& out, const Value& root) {
   document_ = &out;
   addChildValues_ = false;
   indentString_ = "";
@@ -839,7 +839,7 @@ struct BuiltStyledStreamWriter : public StreamWriter
       std::string const& endingLineFeedSymbol,
       bool useSpecialFloats,
       unsigned int precision);
-  int write(Value const& root, std::ostream* sout) override;
+  int write(Value const& root, JSONCPP_OSTREAM* sout) override;
 private:
   void writeValue(Value const& value);
   void writeArrayValue(Value const& value);
@@ -888,7 +888,7 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
   , precision_(precision)
 {
 }
-int BuiltStyledStreamWriter::write(Value const& root, std::ostream* sout)
+int BuiltStyledStreamWriter::write(Value const& root, JSONCPP_OSTREAM* sout)
 {
   sout_ = sout;
   addChildValues_ = false;
@@ -1200,13 +1200,13 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings)
 }
 
 std::string writeString(StreamWriter::Factory const& builder, Value const& root) {
-  std::ostringstream sout;
+  JSONCPP_OSTRINGSTREAM sout;
   StreamWriterPtr const writer(builder.newStreamWriter());
   writer->write(root, &sout);
   return sout.str();
 }
 
-std::ostream& operator<<(std::ostream& sout, Value const& root) {
+JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM& sout, Value const& root) {
   StreamWriterBuilder builder;
   StreamWriterPtr const writer(builder.newStreamWriter());
   writer->write(root, &sout);

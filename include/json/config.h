@@ -6,6 +6,7 @@
 #ifndef JSON_CONFIG_H_INCLUDED
 #define JSON_CONFIG_H_INCLUDED
 #include <stddef.h>
+#include <string> //typdef String
 
 /// If defined, indicates that json library is embedded in CppTL library.
 //# define JSON_IN_CPPTL 1
@@ -138,6 +139,11 @@ typedef Int64 LargestInt;
 typedef UInt64 LargestUInt;
 #define JSON_HAS_INT64
 #endif // if defined(JSON_NO_INT64)
+#define JSONCPP_STRING        std::string
+#define JSONCPP_OSTRINGSTREAM std::ostringstream
+#define JSONCPP_OSTREAM       std::ostream
+#define JSONCPP_ISTRINGSTREAM std::istringstream
+#define JSONCPP_ISTREAM       std::istream
 } // end namespace Json
 
 #endif // JSON_CONFIG_H_INCLUDED

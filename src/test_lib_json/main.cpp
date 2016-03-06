@@ -2480,13 +2480,13 @@ JSONTEST_FIXTURE(IteratorTest, const) {
 
   for(int i = 9; i < 12; ++i)
   {
-    std::ostringstream out;
+    JSONCPP_OSTRINGSTREAM out;
     out << std::setw(2) << i;
     std::string str = out.str();
     value[str] = str;
   }
 
-  std::ostringstream out;
+  JSONCPP_OSTRINGSTREAM out;
   //in old code, this will get a compile error
   Json::Value::const_iterator iter = value.begin();
   for(; iter != value.end(); ++iter)
