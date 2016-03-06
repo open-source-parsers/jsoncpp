@@ -119,6 +119,16 @@
 #  define JSON_USE_INT64_DOUBLE_CONVERSION 1
 #endif
 
+// If non-zero, the library zeroes any memory that it has allocated before
+// it frees its
+#ifndef JSON_USE_SECURE_MEMORY
+#define JSON_USE_SECURE_MEMORY 0
+#endif
+
+#if JSON_USE_SECURE_MEMORY
+#include "allocator.h" //typedef Allocator
+#endif
+
 namespace Json {
 typedef int Int;
 typedef unsigned int UInt;
@@ -139,11 +149,19 @@ typedef Int64 LargestInt;
 typedef UInt64 LargestUInt;
 #define JSON_HAS_INT64
 #endif // if defined(JSON_NO_INT64)
+#if JSON_USE_SECURE_MEMORY
+#define JSONCPP_STRING        std::basic_string<char, std::char_traits<char>, SecureAllocator<char> >
+#define JSONCPP_OSTRINGSTREAM std::basic_ostringstream<char, std::char_traits<char>, SecureAllocator<char> >
+#define JSONCPP_OSTREAM       std::basic_ostream<char, std::char_traits<char>>
+#define JSONCPP_ISTRINGSTREAM std::basic_istringstream<char, std::char_traits<char>, SecureAllocator<char> >
+#define JSONCPP_ISTREAM       std::istream
+#else
 #define JSONCPP_STRING        std::string
 #define JSONCPP_OSTRINGSTREAM std::ostringstream
 #define JSONCPP_OSTREAM       std::ostream
 #define JSONCPP_ISTRINGSTREAM std::istringstream
 #define JSONCPP_ISTREAM       std::istream
+#endif // if JSON_USE_SECURE_MEMORY
 } // end namespace Json
 
 #endif // JSON_CONFIG_H_INCLUDED
