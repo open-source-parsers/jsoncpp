@@ -15,8 +15,8 @@
 namespace Json {
 
 /// Converts a unicode code-point to UTF-8.
-static inline Json::String codePointToUTF8(unsigned int cp) {
-  Json::String result;
+static inline JSONCPP_STRING codePointToUTF8(unsigned int cp) {
+  JSONCPP_STRING result;
 
   // based on description from http://en.wikipedia.org/wiki/UTF-8
 

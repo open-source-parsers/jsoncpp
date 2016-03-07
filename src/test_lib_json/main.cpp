@@ -102,21 +102,21 @@ struct ValueTest : JsonTest::TestCase {
 
   /// Normalize the representation of floating-point number by stripped leading
   /// 0 in exponent.
-  static Json::String normalizeFloatingPointStr(const Json::String& s);
+  static JSONCPP_STRING normalizeFloatingPointStr(const JSONCPP_STRING& s);
 };
 
-Json::String ValueTest::normalizeFloatingPointStr(const Json::String& s) {
-  Json::String::size_type index = s.find_last_of("eE");
-  if (index != Json::String::npos) {
-    Json::String::size_type hasSign =
+JSONCPP_STRING ValueTest::normalizeFloatingPointStr(const JSONCPP_STRING& s) {
+  JSONCPP_STRING::size_type index = s.find_last_of("eE");
+  if (index != JSONCPP_STRING::npos) {
+    JSONCPP_STRING::size_type hasSign =
         (s[index + 1] == '+' || s[index + 1] == '-') ? 1 : 0;
-    Json::String::size_type exponentStartIndex = index + 1 + hasSign;
-    Json::String normalized = s.substr(0, exponentStartIndex);
-    Json::String::size_type indexDigit =
+    JSONCPP_STRING::size_type exponentStartIndex = index + 1 + hasSign;
+    JSONCPP_STRING normalized = s.substr(0, exponentStartIndex);
+    JSONCPP_STRING::size_type indexDigit =
         s.find_first_not_of('0', exponentStartIndex);
-    Json::String exponent = "0";
+    JSONCPP_STRING exponent = "0";
     if (indexDigit !=
-        Json::String::npos) // There is an exponent different from 0
+        JSONCPP_STRING::npos) // There is an exponent different from 0
     {
       exponent = s.substr(indexDigit);
     }
@@ -1538,7 +1538,7 @@ JSONTEST_FIXTURE(ValueTest, offsetAccessors) {
 JSONTEST_FIXTURE(ValueTest, StaticString) {
   char mutant[] = "hello";
   Json::StaticString ss(mutant);
-  Json::String regular(mutant);
+  JSONCPP_STRING regular(mutant);
   mutant[1] = 'a';
   JSONTEST_ASSERT_STRING_EQUAL("hallo", ss.c_str());
   JSONTEST_ASSERT_STRING_EQUAL("hello", regular.c_str());
@@ -1560,15 +1560,15 @@ JSONTEST_FIXTURE(ValueTest, StaticString) {
 
 JSONTEST_FIXTURE(ValueTest, CommentBefore) {
   Json::Value val; // fill val
-  val.setComment(Json::String("// this comment should appear before"), Json::commentBefore);
+  val.setComment(JSONCPP_STRING("// this comment should appear before"), Json::commentBefore);
   Json::StreamWriterBuilder wbuilder;
   wbuilder.settings_["commentStyle"] = "All";
   {
     char const expected[] = "// this comment should appear before\nnull";
-    Json::String result = Json::writeString(wbuilder, val);
+    JSONCPP_STRING result = Json::writeString(wbuilder, val);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
-    Json::String res2 = val.toStyledString();
-    Json::String exp2 = "\n";
+    JSONCPP_STRING res2 = val.toStyledString();
+    JSONCPP_STRING exp2 = "\n";
     exp2 += expected;
     exp2 += "\n";
     JSONTEST_ASSERT_STRING_EQUAL(exp2, res2);
@@ -1577,10 +1577,10 @@ JSONTEST_FIXTURE(ValueTest, CommentBefore) {
   val.swapPayload(other);
   {
     char const expected[] = "// this comment should appear before\n\"hello\"";
-    Json::String result = Json::writeString(wbuilder, val);
+    JSONCPP_STRING result = Json::writeString(wbuilder, val);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
-    Json::String res2 = val.toStyledString();
-    Json::String exp2 = "\n";
+    JSONCPP_STRING res2 = val.toStyledString();
+    JSONCPP_STRING exp2 = "\n";
     exp2 += expected;
     exp2 += "\n";
     JSONTEST_ASSERT_STRING_EQUAL(exp2, res2);
@@ -1591,10 +1591,10 @@ JSONTEST_FIXTURE(ValueTest, CommentBefore) {
   // Assignment over-writes comments.
   {
     char const expected[] = "\"hello\"";
-    Json::String result = Json::writeString(wbuilder, val);
+    JSONCPP_STRING result = Json::writeString(wbuilder, val);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
-    Json::String res2 = val.toStyledString();
-    Json::String exp2 = "";
+    JSONCPP_STRING res2 = val.toStyledString();
+    JSONCPP_STRING exp2 = "";
     exp2 += expected;
     exp2 += "\n";
     JSONTEST_ASSERT_STRING_EQUAL(exp2, res2);
@@ -1603,7 +1603,7 @@ JSONTEST_FIXTURE(ValueTest, CommentBefore) {
 
 JSONTEST_FIXTURE(ValueTest, zeroes) {
   char const cstr[] = "h\0i";
-  Json::String binary(cstr, sizeof(cstr));  // include trailing 0
+  JSONCPP_STRING binary(cstr, sizeof(cstr));  // include trailing 0
   JSONTEST_ASSERT_EQUAL(4U, binary.length());
   Json::StreamWriterBuilder b;
   {
@@ -1631,7 +1631,7 @@ JSONTEST_FIXTURE(ValueTest, zeroes) {
 
 JSONTEST_FIXTURE(ValueTest, zeroesInKeys) {
   char const cstr[] = "h\0i";
-  Json::String binary(cstr, sizeof(cstr));  // include trailing 0
+  JSONCPP_STRING binary(cstr, sizeof(cstr));  // include trailing 0
   JSONTEST_ASSERT_EQUAL(4U, binary.length());
   {
     Json::Value root;
@@ -1660,8 +1660,8 @@ JSONTEST_FIXTURE(ValueTest, specialFloats) {
   b.settings_["useSpecialFloats"] = true;
 
   Json::Value v = std::numeric_limits<double>::quiet_NaN();
-  Json::String expected = "NaN";
-  Json::String result = Json::writeString(b, v);
+  JSONCPP_STRING expected = "NaN";
+  JSONCPP_STRING result = Json::writeString(b, v);
   JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 
   v = std::numeric_limits<double>::infinity();
@@ -1680,8 +1680,8 @@ JSONTEST_FIXTURE(ValueTest, precision) {
     b.settings_["precision"] = 5;
 
     Json::Value v = 100.0/3;
-    Json::String expected = "33.333";
-    Json::String result = Json::writeString(b, v);
+    JSONCPP_STRING expected = "33.333";
+    JSONCPP_STRING result = Json::writeString(b, v);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
     
     v = 0.25000000;
@@ -1735,15 +1735,15 @@ JSONTEST_FIXTURE(StreamWriterTest, dropNullPlaceholders) {
 }
 
 JSONTEST_FIXTURE(StreamWriterTest, writeZeroes) {
-  Json::String binary("hi", 3);  // include trailing 0
+  JSONCPP_STRING binary("hi", 3);  // include trailing 0
   JSONTEST_ASSERT_EQUAL(3, binary.length());
-  Json::String expected("\"hi\\u0000\"");  // unicoded zero
+  JSONCPP_STRING expected("\"hi\\u0000\"");  // unicoded zero
   Json::StreamWriterBuilder b;
   {
     Json::Value root;
     root = binary;
     JSONTEST_ASSERT_STRING_EQUAL(binary, root.asString());
-    Json::String out = Json::writeString(b, root);
+    JSONCPP_STRING out = Json::writeString(b, root);
     JSONTEST_ASSERT_EQUAL(expected.size(), out.size());
     JSONTEST_ASSERT_STRING_EQUAL(expected, out);
   }
@@ -1751,7 +1751,7 @@ JSONTEST_FIXTURE(StreamWriterTest, writeZeroes) {
     Json::Value root;
     root["top"] = binary;
     JSONTEST_ASSERT_STRING_EQUAL(binary, root["top"].asString());
-    Json::String out = Json::writeString(b, root["top"]);
+    JSONCPP_STRING out = Json::writeString(b, root["top"]);
     JSONTEST_ASSERT_STRING_EQUAL(expected, out);
   }
 }
@@ -1852,7 +1852,7 @@ struct CharReaderTest : JsonTest::TestCase {};
 JSONTEST_FIXTURE(CharReaderTest, parseWithNoErrors) {
   Json::CharReaderBuilder b;
   Json::CharReader* reader(b.newCharReader());
-  Json::String errs;
+  JSONCPP_STRING errs;
   Json::Value root;
   char const doc[] = "{ \"property\" : \"value\" }";
   bool ok = reader->parse(
@@ -1866,7 +1866,7 @@ JSONTEST_FIXTURE(CharReaderTest, parseWithNoErrors) {
 JSONTEST_FIXTURE(CharReaderTest, parseWithNoErrorsTestingOffsets) {
   Json::CharReaderBuilder b;
   Json::CharReader* reader(b.newCharReader());
-  Json::String errs;
+  JSONCPP_STRING errs;
   Json::Value root;
   char const doc[] =
                          "{ \"property\" : [\"value\", \"value2\"], \"obj\" : "
@@ -1883,7 +1883,7 @@ JSONTEST_FIXTURE(CharReaderTest, parseWithNoErrorsTestingOffsets) {
 JSONTEST_FIXTURE(CharReaderTest, parseWithOneError) {
   Json::CharReaderBuilder b;
   Json::CharReader* reader(b.newCharReader());
-  Json::String errs;
+  JSONCPP_STRING errs;
   Json::Value root;
   char const doc[] =
       "{ \"property\" :: \"value\" }";
@@ -1900,7 +1900,7 @@ JSONTEST_FIXTURE(CharReaderTest, parseWithOneError) {
 JSONTEST_FIXTURE(CharReaderTest, parseChineseWithOneError) {
   Json::CharReaderBuilder b;
   Json::CharReader* reader(b.newCharReader());
-  Json::String errs;
+  JSONCPP_STRING errs;
   Json::Value root;
   char const doc[] =
       "{ \"pr佐藤erty\" :: \"value\" }";
@@ -1917,7 +1917,7 @@ JSONTEST_FIXTURE(CharReaderTest, parseChineseWithOneError) {
 JSONTEST_FIXTURE(CharReaderTest, parseWithDetailError) {
   Json::CharReaderBuilder b;
   Json::CharReader* reader(b.newCharReader());
-  Json::String errs;
+  JSONCPP_STRING errs;
   Json::Value root;
   char const doc[] =
       "{ \"property\" : \"v\\alue\" }";
@@ -1939,7 +1939,7 @@ JSONTEST_FIXTURE(CharReaderTest, parseWithStackLimit) {
   {
   b.settings_["stackLimit"] = 2;
   Json::CharReader* reader(b.newCharReader());
-  Json::String errs;
+  JSONCPP_STRING errs;
   bool ok = reader->parse(
       doc, doc + std::strlen(doc),
       &root, &errs);
@@ -1951,7 +1951,7 @@ JSONTEST_FIXTURE(CharReaderTest, parseWithStackLimit) {
   {
   b.settings_["stackLimit"] = 1;
   Json::CharReader* reader(b.newCharReader());
-  Json::String errs;
+  JSONCPP_STRING errs;
   JSONTEST_ASSERT_THROWS(reader->parse(
       doc, doc + std::strlen(doc),
       &root, &errs));
@@ -1969,7 +1969,7 @@ JSONTEST_FIXTURE(CharReaderStrictModeTest, dupKeys) {
   {
     b.strictMode(&b.settings_);
     Json::CharReader* reader(b.newCharReader());
-    Json::String errs;
+    JSONCPP_STRING errs;
     bool ok = reader->parse(
         doc, doc + std::strlen(doc),
         &root, &errs);
@@ -1993,7 +1993,7 @@ JSONTEST_FIXTURE(CharReaderFailIfExtraTest, issue164) {
   {
   b.settings_["failIfExtra"] = false;
   Json::CharReader* reader(b.newCharReader());
-  Json::String errs;
+  JSONCPP_STRING errs;
   bool ok = reader->parse(
       doc, doc + std::strlen(doc),
       &root, &errs);
@@ -2005,7 +2005,7 @@ JSONTEST_FIXTURE(CharReaderFailIfExtraTest, issue164) {
   {
   b.settings_["failIfExtra"] = true;
   Json::CharReader* reader(b.newCharReader());
-  Json::String errs;
+  JSONCPP_STRING errs;
   bool ok = reader->parse(
       doc, doc + std::strlen(doc),
       &root, &errs);
@@ -2020,7 +2020,7 @@ JSONTEST_FIXTURE(CharReaderFailIfExtraTest, issue164) {
   b.settings_["failIfExtra"] = false;
   b.strictMode(&b.settings_);
   Json::CharReader* reader(b.newCharReader());
-  Json::String errs;
+  JSONCPP_STRING errs;
   bool ok = reader->parse(
       doc, doc + std::strlen(doc),
       &root, &errs);
@@ -2040,7 +2040,7 @@ JSONTEST_FIXTURE(CharReaderFailIfExtraTest, issue107) {
       "1:2:3";
   b.settings_["failIfExtra"] = true;
   Json::CharReader* reader(b.newCharReader());
-  Json::String errs;
+  JSONCPP_STRING errs;
   bool ok = reader->parse(
       doc, doc + std::strlen(doc),
       &root, &errs);
@@ -2060,7 +2060,7 @@ JSONTEST_FIXTURE(CharReaderFailIfExtraTest, commentAfterObject) {
       "{ \"property\" : \"value\" } //trailing\n//comment\n";
   b.settings_["failIfExtra"] = true;
   Json::CharReader* reader(b.newCharReader());
-  Json::String errs;
+  JSONCPP_STRING errs;
   bool ok = reader->parse(
       doc, doc + std::strlen(doc),
       &root, &errs);
@@ -2077,7 +2077,7 @@ JSONTEST_FIXTURE(CharReaderFailIfExtraTest, commentAfterArray) {
       "[ \"property\" , \"value\" ] //trailing\n//comment\n";
   b.settings_["failIfExtra"] = true;
   Json::CharReader* reader(b.newCharReader());
-  Json::String errs;
+  JSONCPP_STRING errs;
   bool ok = reader->parse(
       doc, doc + std::strlen(doc),
       &root, &errs);
@@ -2093,7 +2093,7 @@ JSONTEST_FIXTURE(CharReaderFailIfExtraTest, commentAfterBool) {
       " true /*trailing\ncomment*/";
   b.settings_["failIfExtra"] = true;
   Json::CharReader* reader(b.newCharReader());
-  Json::String errs;
+  JSONCPP_STRING errs;
   bool ok = reader->parse(
       doc, doc + std::strlen(doc),
       &root, &errs);
@@ -2108,7 +2108,7 @@ JSONTEST_FIXTURE(CharReaderAllowDropNullTest, issue178) {
   Json::CharReaderBuilder b;
   b.settings_["allowDroppedNullPlaceholders"] = true;
   Json::Value root;
-  Json::String errs;
+  JSONCPP_STRING errs;
   Json::CharReader* reader(b.newCharReader());
   {
     char const doc[] = "{\"a\":,\"b\":true}";
@@ -2260,7 +2260,7 @@ JSONTEST_FIXTURE(CharReaderAllowSingleQuotesTest, issue182) {
   Json::CharReaderBuilder b;
   b.settings_["allowSingleQuotes"] = true;
   Json::Value root;
-  Json::String errs;
+  JSONCPP_STRING errs;
   Json::CharReader* reader(b.newCharReader());
   {
     char const doc[] = "{'a':true,\"b\":true}";
@@ -2293,7 +2293,7 @@ JSONTEST_FIXTURE(CharReaderAllowZeroesTest, issue176) {
   Json::CharReaderBuilder b;
   b.settings_["allowSingleQuotes"] = true;
   Json::Value root;
-  Json::String errs;
+  JSONCPP_STRING errs;
   Json::CharReader* reader(b.newCharReader());
   {
     char const doc[] = "{'a':true,\"b\":true}";
@@ -2326,7 +2326,7 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
   Json::CharReaderBuilder b;
   b.settings_["allowSpecialFloats"] = true;
   Json::Value root;
-  Json::String errs;
+  JSONCPP_STRING errs;
   Json::CharReader* reader(b.newCharReader());
   {
     char const doc[] = "{\"a\":NaN,\"b\":Infinity,\"c\":-Infinity}";
@@ -2345,7 +2345,7 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
   struct TestData {
     int line;
     bool ok;
-    Json::String in;
+    JSONCPP_STRING in;
   };
   const TestData test_data[] = {
     {__LINE__, 1, "{\"a\":9}"},
@@ -2425,7 +2425,7 @@ JSONTEST_FIXTURE(IteratorTest, distance) {
   json["k1"] = "a";
   json["k2"] = "b";
   int dist = 0;
-  Json::String str;
+  JSONCPP_STRING str;
   for (Json::ValueIterator it = json.begin(); it != json.end(); ++it) {
     dist = it - json.begin();
     str = it->asString().c_str();
@@ -2482,7 +2482,7 @@ JSONTEST_FIXTURE(IteratorTest, const) {
   {
     JSONCPP_OSTRINGSTREAM out;
     out << std::setw(2) << i;
-    Json::String str = out.str();
+    JSONCPP_STRING str = out.str();
     value[str] = str;
   }
 
@@ -2493,7 +2493,7 @@ JSONTEST_FIXTURE(IteratorTest, const) {
   {
     out << *iter << ',';
   }
-  Json::String expected = "\" 9\",\"10\",\"11\",";
+  JSONCPP_STRING expected = "\" 9\",\"10\",\"11\",";
   JSONTEST_ASSERT_STRING_EQUAL(expected, out.str());
 }
 
