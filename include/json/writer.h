@@ -39,7 +39,7 @@ Usage:
 */
 class JSON_API StreamWriter {
 protected:
-  Json::OStream* sout_;  // not owned; will not delete
+  JSONCPP_OSTREAM* sout_;  // not owned; will not delete
 public:
   StreamWriter();
   virtual ~StreamWriter();
@@ -49,7 +49,7 @@ public:
       \return zero on success (For now, we always return zero, so check the stream instead.)
       \throw std::exception possibly, depending on configuration
    */
-  virtual int write(Value const& root, Json::OStream* sout) = 0;
+  virtual int write(Value const& root, JSONCPP_OSTREAM* sout) = 0;
 
   /** \brief A simple abstract factory.
    */
@@ -281,7 +281,7 @@ public:
    * \note There is no point in deriving from Writer, since write() should not
    * return a value.
    */
-  void write(Json::OStream& out, const Value& root);
+  void write(JSONCPP_OSTREAM& out, const Value& root);
 
 private:
   void writeValue(const Value& value);
@@ -300,8 +300,8 @@ private:
   typedef std::vector<Json::String> ChildValues;
 
   ChildValues childValues_;
-  Json::OStream* document_;
-  Json::String indentString_;
+  JSONCPP_OSTREAM* document_;
+  std::string indentString_;
   unsigned int rightMargin_;
   Json::String indentation_;
   bool addChildValues_ : 1;
@@ -320,7 +320,7 @@ Json::String JSON_API valueToQuotedString(const char* value);
 
 /// \brief Output using the StyledStreamWriter.
 /// \see Json::operator>>()
-JSON_API Json::OStream& operator<<(Json::OStream&, const Value& root);
+JSON_API JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM&, const Value& root);
 
 } // namespace Json
 

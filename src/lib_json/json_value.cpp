@@ -87,7 +87,7 @@ static inline char* duplicateStringValue(const char* value,
 {
   // Avoid an integer overflow in the call to malloc below by limiting length
   // to a sane value.
-  if (length >= (size_t)Value::maxInt)
+  if (length >= static_cast<size_t>(Value::maxInt))
     length = Value::maxInt - 1;
 
   char* newString = static_cast<char*>(malloc(length + 1));
@@ -109,7 +109,7 @@ static inline char* duplicateAndPrefixStringValue(
 {
   // Avoid an integer overflow in the call to malloc below by limiting length
   // to a sane value.
-  JSON_ASSERT_MESSAGE(length <= (unsigned)Value::maxInt - sizeof(unsigned) - 1U,
+  JSON_ASSERT_MESSAGE(length <= static_cast<unsigned>(Value::maxInt) - sizeof(unsigned) - 1U,
                       "in Json::Value::duplicateAndPrefixStringValue(): "
                       "length too big for prefixing");
   unsigned actualLength = length + static_cast<unsigned>(sizeof(unsigned)) + 1U;
@@ -174,7 +174,7 @@ static inline void releaseStringValue(char* value, unsigned length) {
 
 namespace Json {
 
-Exception::Exception(Json::String const& msg)
+Exception::Exception(JSONCPP_STRING const& msg)
   : msg_(msg)
 {}
 Exception::~Exception() throw()
@@ -183,17 +183,17 @@ char const* Exception::what() const throw()
 {
   return msg_.c_str();
 }
-RuntimeError::RuntimeError(Json::String const& msg)
+RuntimeError::RuntimeError(JSONCPP_STRING const& msg)
   : Exception(msg)
 {}
-LogicError::LogicError(Json::String const& msg)
+LogicError::LogicError(JSONCPP_STRING const& msg)
   : Exception(msg)
 {}
-void throwRuntimeError(Json::String const& msg)
+void throwRuntimeError(JSONCPP_STRING const& msg)
 {
   throw RuntimeError(msg);
 }
-void throwLogicError(Json::String const& msg)
+void throwLogicError(JSONCPP_STRING const& msg)
 {
   throw LogicError(msg);
 }
@@ -293,6 +293,7 @@ bool Value::CZString::operator<(const CZString& other) const {
   unsigned this_len = this->storage_.length_;
   unsigned other_len = other.storage_.length_;
   unsigned min_len = std::min(this_len, other_len);
+  JSON_ASSERT(this->cstr_ && other.cstr_);
   int comp = memcmp(this->cstr_, other.cstr_, min_len);
   if (comp < 0) return true;
   if (comp > 0) return false;
@@ -306,6 +307,7 @@ bool Value::CZString::operator==(const CZString& other) const {
   unsigned this_len = this->storage_.length_;
   unsigned other_len = other.storage_.length_;
   if (this_len != other_len) return false;
+  JSON_ASSERT(this->cstr_ && other.cstr_);
   int comp = memcmp(this->cstr_, other.cstr_, this_len);
   return comp == 0;
 }
@@ -392,7 +394,11 @@ Value::Value(const char* beginValue, const char* endValue) {
       duplicateAndPrefixStringValue(beginValue, static_cast<unsigned>(endValue - beginValue));
 }
 
+<<<<<<< HEAD
 Value::Value(const Json::String& value) {
+=======
+Value::Value(const JSONCPP_STRING& value) {
+>>>>>>> upstream/JSONCPP_STRING
   initBasic(stringValue, true);
   value_.string_ =
       duplicateAndPrefixStringValue(value.data(), static_cast<unsigned>(value.length()));
@@ -553,6 +559,7 @@ bool Value::operator<(const Value& other) const {
     decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
     decodePrefixedString(other.allocated_, other.value_.string_, &other_len, &other_str);
     unsigned min_len = std::min(this_len, other_len);
+    JSON_ASSERT(this_str && other_str);
     int comp = memcmp(this_str, other_str, min_len);
     if (comp < 0) return true;
     if (comp > 0) return false;
@@ -608,6 +615,7 @@ bool Value::operator==(const Value& other) const {
     decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
     decodePrefixedString(other.allocated_, other.value_.string_, &other_len, &other_str);
     if (this_len != other_len) return false;
+    JSON_ASSERT(this_str && other_str);
     int comp = memcmp(this_str, other_str, this_len);
     return comp == 0;
   }
@@ -654,7 +662,11 @@ bool Value::getString(char const** str, char const** cend) const {
   return true;
 }
 
+<<<<<<< HEAD
 Json::String Value::asString() const {
+=======
+JSONCPP_STRING Value::asString() const {
+>>>>>>> upstream/JSONCPP_STRING
   switch (type_) {
   case nullValue:
     return "";
@@ -664,7 +676,11 @@ Json::String Value::asString() const {
     unsigned this_len;
     char const* this_str;
     decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
+<<<<<<< HEAD
     return Json::String(this_str, this_len);
+=======
+    return JSONCPP_STRING(this_str, this_len);
+>>>>>>> upstream/JSONCPP_STRING
   }
   case booleanValue:
     return value_.bool_ ? "true" : "false";
@@ -954,7 +970,7 @@ void Value::resize(ArrayIndex newSize) {
     for (ArrayIndex index = newSize; index < oldSize; ++index) {
       value_.map_->erase(index);
     }
-    assert(size() == newSize);
+    JSON_ASSERT(size() == newSize);
   }
 }
 
@@ -1074,7 +1090,11 @@ const Value& Value::operator[](const char* key) const
   if (!found) return nullRef;
   return *found;
 }
+<<<<<<< HEAD
 Value const& Value::operator[](Json::String const& key) const
+=======
+Value const& Value::operator[](JSONCPP_STRING const& key) const
+>>>>>>> upstream/JSONCPP_STRING
 {
   Value const* found = find(key.data(), key.data() + key.length());
   if (!found) return nullRef;
@@ -1085,7 +1105,11 @@ Value& Value::operator[](const char* key) {
   return resolveReference(key, key + strlen(key));
 }
 
+<<<<<<< HEAD
 Value& Value::operator[](const Json::String& key) {
+=======
+Value& Value::operator[](const JSONCPP_STRING& key) {
+>>>>>>> upstream/JSONCPP_STRING
   return resolveReference(key.data(), key.data() + key.length());
 }
 
@@ -1116,7 +1140,11 @@ Value Value::get(char const* key, Value const& defaultValue) const
 {
   return get(key, key + strlen(key), defaultValue);
 }
+<<<<<<< HEAD
 Value Value::get(Json::String const& key, Value const& defaultValue) const
+=======
+Value Value::get(JSONCPP_STRING const& key, Value const& defaultValue) const
+>>>>>>> upstream/JSONCPP_STRING
 {
   return get(key.data(), key.data() + key.length(), defaultValue);
 }
@@ -1139,7 +1167,11 @@ bool Value::removeMember(const char* key, Value* removed)
 {
   return removeMember(key, key + strlen(key), removed);
 }
+<<<<<<< HEAD
 bool Value::removeMember(Json::String const& key, Value* removed)
+=======
+bool Value::removeMember(JSONCPP_STRING const& key, Value* removed)
+>>>>>>> upstream/JSONCPP_STRING
 {
   return removeMember(key.data(), key.data() + key.length(), removed);
 }
@@ -1154,7 +1186,11 @@ Value Value::removeMember(const char* key)
   removeMember(key, key + strlen(key), &removed);
   return removed; // still null if removeMember() did nothing
 }
+<<<<<<< HEAD
 Value Value::removeMember(const Json::String& key)
+=======
+Value Value::removeMember(const JSONCPP_STRING& key)
+>>>>>>> upstream/JSONCPP_STRING
 {
   return removeMember(key.c_str());
 }
@@ -1198,7 +1234,11 @@ bool Value::isMember(char const* key) const
 {
   return isMember(key, key + strlen(key));
 }
+<<<<<<< HEAD
 bool Value::isMember(Json::String const& key) const
+=======
+bool Value::isMember(JSONCPP_STRING const& key) const
+>>>>>>> upstream/JSONCPP_STRING
 {
   return isMember(key.data(), key.data() + key.length());
 }
@@ -1220,7 +1260,11 @@ Value::Members Value::getMemberNames() const {
   ObjectValues::const_iterator it = value_.map_->begin();
   ObjectValues::const_iterator itEnd = value_.map_->end();
   for (; it != itEnd; ++it) {
+<<<<<<< HEAD
     members.push_back(Json::String((*it).first.data(),
+=======
+    members.push_back(JSONCPP_STRING((*it).first.data(),
+>>>>>>> upstream/JSONCPP_STRING
                                   (*it).first.length()));
   }
   return members;
@@ -1362,7 +1406,11 @@ void Value::setComment(const char* comment, CommentPlacement placement) {
   setComment(comment, strlen(comment), placement);
 }
 
+<<<<<<< HEAD
 void Value::setComment(const Json::String& comment, CommentPlacement placement) {
+=======
+void Value::setComment(const JSONCPP_STRING& comment, CommentPlacement placement) {
+>>>>>>> upstream/JSONCPP_STRING
   setComment(comment.c_str(), comment.length(), placement);
 }
 
@@ -1370,7 +1418,11 @@ bool Value::hasComment(CommentPlacement placement) const {
   return comments_ != 0 && comments_[placement].comment_ != 0;
 }
 
+<<<<<<< HEAD
 Json::String Value::getComment(CommentPlacement placement) const {
+=======
+JSONCPP_STRING Value::getComment(CommentPlacement placement) const {
+>>>>>>> upstream/JSONCPP_STRING
   if (hasComment(placement))
     return comments_[placement].comment_;
   return "";
@@ -1384,7 +1436,11 @@ ptrdiff_t Value::getOffsetStart() const { return start_; }
 
 ptrdiff_t Value::getOffsetLimit() const { return limit_; }
 
+<<<<<<< HEAD
 Json::String Value::toStyledString() const {
+=======
+JSONCPP_STRING Value::toStyledString() const {
+>>>>>>> upstream/JSONCPP_STRING
   StyledWriter writer;
   return writer.write(*this);
 }
@@ -1452,13 +1508,21 @@ PathArgument::PathArgument(ArrayIndex index)
 PathArgument::PathArgument(const char* key)
     : key_(key), index_(), kind_(kindKey) {}
 
+<<<<<<< HEAD
 PathArgument::PathArgument(const Json::String& key)
+=======
+PathArgument::PathArgument(const JSONCPP_STRING& key)
+>>>>>>> upstream/JSONCPP_STRING
     : key_(key.c_str()), index_(), kind_(kindKey) {}
 
 // class Path
 // //////////////////////////////////////////////////////////////////
 
+<<<<<<< HEAD
 Path::Path(const Json::String& path,
+=======
+Path::Path(const JSONCPP_STRING& path,
+>>>>>>> upstream/JSONCPP_STRING
            const PathArgument& a1,
            const PathArgument& a2,
            const PathArgument& a3,
@@ -1473,7 +1537,11 @@ Path::Path(const Json::String& path,
   makePath(path, in);
 }
 
+<<<<<<< HEAD
 void Path::makePath(const Json::String& path, const InArgs& in) {
+=======
+void Path::makePath(const JSONCPP_STRING& path, const InArgs& in) {
+>>>>>>> upstream/JSONCPP_STRING
   const char* current = path.c_str();
   const char* end = current + path.length();
   InArgs::const_iterator itInArg = in.begin();
@@ -1499,12 +1567,20 @@ void Path::makePath(const Json::String& path, const InArgs& in) {
       const char* beginName = current;
       while (current != end && !strchr("[.", *current))
         ++current;
+<<<<<<< HEAD
       args_.push_back(Json::String(beginName, current));
+=======
+      args_.push_back(JSONCPP_STRING(beginName, current));
+>>>>>>> upstream/JSONCPP_STRING
     }
   }
 }
 
+<<<<<<< HEAD
 void Path::addPathInArg(const Json::String& /*path*/,
+=======
+void Path::addPathInArg(const JSONCPP_STRING& /*path*/,
+>>>>>>> upstream/JSONCPP_STRING
                         const InArgs& in,
                         InArgs::const_iterator& itInArg,
                         PathArgument::Kind kind) {
@@ -1517,7 +1593,11 @@ void Path::addPathInArg(const Json::String& /*path*/,
   }
 }
 
+<<<<<<< HEAD
 void Path::invalidPath(const Json::String& /*path*/, int /*location*/) {
+=======
+void Path::invalidPath(const JSONCPP_STRING& /*path*/, int /*location*/) {
+>>>>>>> upstream/JSONCPP_STRING
   // Error: invalid path.
 }
 

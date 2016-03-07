@@ -184,7 +184,7 @@ static Json::String useStyledStreamWriter(
     Json::Value const& root)
 {
   Json::StyledStreamWriter writer;
-  Json::OStringStream sout;
+  JSONCPP_OSTRINGSTREAM sout;
   writer.write(sout, root);
   return sout.str();
 }

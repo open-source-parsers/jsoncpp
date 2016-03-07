@@ -618,7 +618,7 @@ bool Reader::decodeDouble(Token& token) {
 bool Reader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
   Json::String buffer(token.start_, token.end_);
-  Json::IStringStream is(buffer);
+  JSONCPP_ISTRINGSTREAM is(buffer);
   if (!(is >> value))
     return addError("'" + Json::String(token.start_, token.end_) +
                         "' is not a number.",
@@ -2008,10 +2008,10 @@ void CharReaderBuilder::setDefaults(Json::Value* settings)
 // global functions
 
 bool parseFromStream(
-    CharReader::Factory const& fact, std::istream& sin,
+    CharReader::Factory const& fact, JSONCPP_ISTREAM& sin,
     Value* root, Json::String* errs)
 {
-  Json::OStringStream ssin;
+  JSONCPP_OSTRINGSTREAM ssin;
   ssin << sin.rdbuf();
   Json::String doc = ssin.str();
   char const* begin = doc.data();
@@ -2021,7 +2021,7 @@ bool parseFromStream(
   return reader->parse(begin, end, root, errs);
 }
 
-std::istream& operator>>(std::istream& sin, Value& root) {
+JSONCPP_ISTREAM& operator>>(JSONCPP_ISTREAM& sin, Value& root) {
   CharReaderBuilder b;
   Json::String errs;
   bool ok = parseFromStream(b, sin, &root, &errs);

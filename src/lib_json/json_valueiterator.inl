@@ -92,12 +92,12 @@ UInt ValueIteratorBase::index() const {
   return Value::UInt(-1);
 }
 
-Json::String ValueIteratorBase::name() const {
+JSONCPP_STRING ValueIteratorBase::name() const {
   char const* keey;
   char const* end;
   keey = memberName(&end);
-  if (!keey) return Json::String();
-  return Json::String(keey, end);
+  if (!keey) return JSONCPP_STRING();
+  return JSONCPP_STRING(keey, end);
 }
 
 char const* ValueIteratorBase::memberName() const {

@@ -99,7 +99,7 @@ public:
 
   /// \brief Parse from input stream.
   /// \see Json::operator>>(std::istream&, Json::Value&).
-  bool parse(std::istream& is, Value& root, bool collectComments = true);
+  bool parse(JSONCPP_ISTREAM& is, Value& root, bool collectComments = true);
 
   /** \brief Returns a user friendly string that list errors in the parsed
    * document.
@@ -366,8 +366,8 @@ public:
   */
 bool JSON_API parseFromStream(
     CharReader::Factory const&,
-    std::istream&,
-    Value* root, Json::String* errs);
+    JSONCPP_ISTREAM&,
+    Value* root, std::string* errs);
 
 /** \brief Read from 'sin' into 'root'.
 
@@ -393,7 +393,7 @@ bool JSON_API parseFromStream(
  \throw std::exception on parse error.
  \see Json::operator<<()
 */
-JSON_API std::istream& operator>>(std::istream&, Value&);
+JSON_API JSONCPP_ISTREAM& operator>>(JSONCPP_ISTREAM&, Value&);
 
 } // namespace Json
 
