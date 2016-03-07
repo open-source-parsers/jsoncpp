@@ -66,7 +66,7 @@ public:
 /** \brief Write into stringstream, then return string, for convenience.
  * A StreamWriter will be created from the factory, used, and then deleted.
  */
-std::string JSON_API writeString(StreamWriter::Factory const& factory, Value const& root);
+JSONCPP_STRING JSON_API writeString(StreamWriter::Factory const& factory, Value const& root);
 
 
 /** \brief Build a StreamWriter implementation.
@@ -125,7 +125,7 @@ public:
   bool validate(Json::Value* invalid) const;
   /** A simple way to update a specific setting.
    */
-  Value& operator[](std::string key);
+  Value& operator[](JSONCPP_STRING key);
 
   /** Called by ctor, but you can use this to reset settings_.
    * \pre 'settings' != NULL (but Json::null is fine)
@@ -142,7 +142,7 @@ class JSON_API Writer {
 public:
   virtual ~Writer();
 
-  virtual std::string write(const Value& root) = 0;
+  virtual JSONCPP_STRING write(const Value& root) = 0;
 };
 
 /** \brief Outputs a Value in <a HREF="http://www.json.org">JSON</a> format
@@ -172,12 +172,12 @@ public:
   void omitEndingLineFeed();
 
 public: // overridden from Writer
-  std::string write(const Value& root) override;
+  JSONCPP_STRING write(const Value& root) override;
 
 private:
   void writeValue(const Value& value);
 
-  std::string document_;
+  JSONCPP_STRING document_;
   bool yamlCompatiblityEnabled_;
   bool dropNullPlaceholders_;
   bool omitEndingLineFeed_;
@@ -217,27 +217,27 @@ public: // overridden from Writer
    * \param root Value to serialize.
    * \return String containing the JSON document that represents the root value.
    */
-  std::string write(const Value& root) override;
+  JSONCPP_STRING write(const Value& root) override;
 
 private:
   void writeValue(const Value& value);
   void writeArrayValue(const Value& value);
   bool isMultineArray(const Value& value);
-  void pushValue(const std::string& value);
+  void pushValue(const JSONCPP_STRING& value);
   void writeIndent();
-  void writeWithIndent(const std::string& value);
+  void writeWithIndent(const JSONCPP_STRING& value);
   void indent();
   void unindent();
   void writeCommentBeforeValue(const Value& root);
   void writeCommentAfterValueOnSameLine(const Value& root);
   bool hasCommentForValue(const Value& value);
-  static std::string normalizeEOL(const std::string& text);
+  static JSONCPP_STRING normalizeEOL(const JSONCPP_STRING& text);
 
-  typedef std::vector<std::string> ChildValues;
+  typedef std::vector<JSONCPP_STRING> ChildValues;
 
   ChildValues childValues_;
-  std::string document_;
-  std::string indentString_;
+  JSONCPP_STRING document_;
+  JSONCPP_STRING indentString_;
   unsigned int rightMargin_;
   unsigned int indentSize_;
   bool addChildValues_;
@@ -271,7 +271,7 @@ private:
  */
 class JSON_API StyledStreamWriter {
 public:
-  StyledStreamWriter(std::string indentation = "\t");
+  StyledStreamWriter(JSONCPP_STRING indentation = "\t");
   ~StyledStreamWriter() {}
 
 public:
@@ -287,36 +287,36 @@ private:
   void writeValue(const Value& value);
   void writeArrayValue(const Value& value);
   bool isMultineArray(const Value& value);
-  void pushValue(const std::string& value);
+  void pushValue(const JSONCPP_STRING& value);
   void writeIndent();
-  void writeWithIndent(const std::string& value);
+  void writeWithIndent(const JSONCPP_STRING& value);
   void indent();
   void unindent();
   void writeCommentBeforeValue(const Value& root);
   void writeCommentAfterValueOnSameLine(const Value& root);
   bool hasCommentForValue(const Value& value);
-  static std::string normalizeEOL(const std::string& text);
+  static JSONCPP_STRING normalizeEOL(const JSONCPP_STRING& text);
 
-  typedef std::vector<std::string> ChildValues;
+  typedef std::vector<JSONCPP_STRING> ChildValues;
 
   ChildValues childValues_;
   JSONCPP_OSTREAM* document_;
-  std::string indentString_;
+  JSONCPP_STRING indentString_;
   unsigned int rightMargin_;
-  std::string indentation_;
+  JSONCPP_STRING indentation_;
   bool addChildValues_ : 1;
   bool indented_ : 1;
 };
 
 #if defined(JSON_HAS_INT64)
-std::string JSON_API valueToString(Int value);
-std::string JSON_API valueToString(UInt value);
+JSONCPP_STRING JSON_API valueToString(Int value);
+JSONCPP_STRING JSON_API valueToString(UInt value);
 #endif // if defined(JSON_HAS_INT64)
-std::string JSON_API valueToString(LargestInt value);
-std::string JSON_API valueToString(LargestUInt value);
-std::string JSON_API valueToString(double value);
-std::string JSON_API valueToString(bool value);
-std::string JSON_API valueToQuotedString(const char* value);
+JSONCPP_STRING JSON_API valueToString(LargestInt value);
+JSONCPP_STRING JSON_API valueToString(LargestUInt value);
+JSONCPP_STRING JSON_API valueToString(double value);
+JSONCPP_STRING JSON_API valueToString(bool value);
+JSONCPP_STRING JSON_API valueToQuotedString(const char* value);
 
 /// \brief Output using the StyledStreamWriter.
 /// \see Json::operator>>()

@@ -83,7 +83,8 @@ static inline bool InRange(double d, T min, U max) {
  * @return Pointer on the duplicate instance of string.
  */
 static inline char* duplicateStringValue(const char* value,
-                                         size_t length) {
+                                         size_t length)
+{
   // Avoid an integer overflow in the call to malloc below by limiting length
   // to a sane value.
   if (length >= static_cast<size_t>(Value::maxInt))
@@ -187,7 +188,8 @@ void throwLogicError(JSONCPP_STRING const& msg)
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-Value::CommentInfo::CommentInfo() : comment_(0) {}
+Value::CommentInfo::CommentInfo() : comment_(0)
+{}
 
 Value::CommentInfo::~CommentInfo() {
   if (comment_)
