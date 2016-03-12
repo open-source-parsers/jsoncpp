@@ -16,7 +16,7 @@ dox:
 	# Then 'git add -A' and 'git push' in jsoncpp-docs.
 build:
 	mkdir -p build/debug
-	cd build/debug; cmake -DCMAKE_BUILD_TYPE=debug -DBUILD_SHARED_LIBS=ON -G "Unix Makefiles" ../..
+	cd build/debug; cmake -DCMAKE_BUILD_TYPE=debug -DJSONCPP_LIBRARY_TYPE=SHARED -G "Unix Makefiles" ../..
 	make -C build/debug
 
 # Currently, this depends on include/json/version.h generated
