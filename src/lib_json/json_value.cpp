@@ -234,7 +234,7 @@ Value::CZString::CZString(const CZString& other)
   storage_.policy_ = static_cast<unsigned>(other.cstr_
                  ? (static_cast<DuplicationPolicy>(other.storage_.policy_) == noDuplication
                      ? noDuplication : duplicate)
-                 : static_cast<DuplicationPolicy>(other.storage_.policy_));
+                 : static_cast<DuplicationPolicy>(other.storage_.policy_)) & 3U;
   storage_.length_ = other.storage_.length_;
 }
 
