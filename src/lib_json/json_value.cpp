@@ -62,7 +62,7 @@ static inline bool InRange(double d, T min, U max) {
 }
 #else  // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 static inline double integerToDouble(Json::UInt64 value) {
-  return static_cast<double>(Int64(value / 2)) * 2.0 + Int64(value & 1);
+  return static_cast<double>(Int64(value / 2)) * 2.0 + static_cast<double>(Int64(value & 1));
 }
 
 template <typename T> static inline double integerToDouble(T value) {
