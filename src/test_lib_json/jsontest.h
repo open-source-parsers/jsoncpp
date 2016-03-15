@@ -193,7 +193,7 @@ TestResult& checkEqual(TestResult& result,
 
 JSONCPP_STRING ToJsonString(const char* toConvert);
 JSONCPP_STRING ToJsonString(JSONCPP_STRING in);
-#if JSON_USE_SECURE_MEMORY
+#if JSONCPP_USING_SECURE_MEMORY
 JSONCPP_STRING ToJsonString(std::string in);
 #endif
 

@@ -434,7 +434,7 @@ JSONCPP_STRING ToJsonString(JSONCPP_STRING in) {
   return in;
 }
 
-#if JSON_USE_SECURE_MEMORY
+#if JSONCPP_USING_SECURE_MEMORY
 JSONCPP_STRING ToJsonString(std::string in) {
   return JSONCPP_STRING(in.data(), in.data() + in.length());
 }

@@ -138,7 +138,29 @@ inline static void decodePrefixedString(
 }
 /** Free the string duplicated by duplicateStringValue()/duplicateAndPrefixStringValue().
  */
-static inline void releaseStringValue(char* value) { free(value); }
+#if JSONCPP_USING_SECURE_MEMORY
+static inline void releasePrefixedStringValue(char* value) {
+  unsigned length = 0;
+  char const* valueDecoded;
+  decodePrefixedString(true, value, &length, &valueDecoded);
+  size_t const size = sizeof(unsigned) + length + 1U;
+  memset(value, 0, size);
+  free(value);
+}
+static inline void releaseStringValue(char* value, unsigned length) {
+  // length==0 => we allocated the strings memory
+  size_t size = (length==0) ? strlen(value) : length;
+  memset(value, 0, size);
+  free(value);
+}
+#else // !JSONCPP_USING_SECURE_MEMORY
+static inline void releasePrefixedStringValue(char* value) {
+  free(value);
+}
+static inline void releaseStringValue(char* value, unsigned length) {
+  free(value);
+}
+#endif // JSONCPP_USING_SECURE_MEMORY
 
 } // namespace Json
 
@@ -193,12 +215,12 @@ Value::CommentInfo::CommentInfo() : comment_(0)
 
 Value::CommentInfo::~CommentInfo() {
   if (comment_)
-    releaseStringValue(comment_);
+    releaseStringValue(comment_, 0u);
 }
 
 void Value::CommentInfo::setComment(const char* text, size_t len) {
   if (comment_) {
-    releaseStringValue(comment_);
+    releaseStringValue(comment_, 0u);
     comment_ = 0;
   }
   JSON_ASSERT(text != 0);
@@ -229,10 +251,10 @@ Value::CZString::CZString(char const* str, unsigned ulength, DuplicationPolicy a
   storage_.length_ = ulength & 0x3FFFFFFF;
 }
 
-Value::CZString::CZString(const CZString& other)
-    : cstr_(other.storage_.policy_ != noDuplication && other.cstr_ != 0
-                ? duplicateStringValue(other.cstr_, other.storage_.length_)
-                : other.cstr_) {
+Value::CZString::CZString(const CZString& other) {
+  cstr_ = (other.storage_.policy_ != noDuplication && other.cstr_ != 0
+				 ? duplicateStringValue(other.cstr_, other.storage_.length_)
+				 : other.cstr_);
   storage_.policy_ = static_cast<unsigned>(other.cstr_
                  ? (static_cast<DuplicationPolicy>(other.storage_.policy_) == noDuplication
                      ? noDuplication : duplicate)
@@ -248,8 +270,9 @@ Value::CZString::CZString(CZString&& other)
 #endif
 
 Value::CZString::~CZString() {
-  if (cstr_ && storage_.policy_ == duplicate)
-    releaseStringValue(const_cast<char*>(cstr_));
+  if (cstr_ && storage_.policy_ == duplicate) {
+	  releaseStringValue(const_cast<char*>(cstr_), storage_.length_ + 1u); //+1 for null terminating character for sake of completeness but not actually necessary
+  }
 }
 
 void Value::CZString::swap(CZString& other) {
@@ -455,7 +478,7 @@ Value::~Value() {
     break;
   case stringValue:
     if (allocated_)
-      releaseStringValue(value_.string_);
+      releasePrefixedStringValue(value_.string_);
     break;
   case arrayValue:
   case objectValue:
@@ -467,6 +490,8 @@ Value::~Value() {
 
   if (comments_)
     delete[] comments_;
+
+  value_.uint_ = 0;
 }
 
 Value& Value::operator=(Value other) {
@@ -610,6 +635,18 @@ const char* Value::asCString() const {
   decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
   return this_str;
 }
+
+#if JSONCPP_USING_SECURE_MEMORY
+unsigned Value::getCStringLength() const {
+  JSON_ASSERT_MESSAGE(type_ == stringValue,
+	                  "in Json::Value::asCString(): requires stringValue");
+  if (value_.string_ == 0) return 0;
+  unsigned this_len;
+  char const* this_str;
+  decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
+  return this_len;
+}
+#endif
 
 bool Value::getString(char const** str, char const** cend) const {
   if (type_ != stringValue) return false;

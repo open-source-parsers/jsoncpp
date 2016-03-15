@@ -33,9 +33,6 @@ static JSONCPP_STRING normalizeFloatingPointStr(double value) {
 #endif
   buffer[sizeof(buffer) - 1] = 0;
   JSONCPP_STRING s(buffer);
-#if JSON_USE_SECURE_MEMORY
-  memset(&buffer, 0, sizeof(buffer));
-#endif
   JSONCPP_STRING::size_type index = s.find_last_of("eE");
   if (index != JSONCPP_STRING::npos) {
     JSONCPP_STRING::size_type hasSign =
@@ -69,9 +66,6 @@ static JSONCPP_STRING readInputTestFile(const char* path) {
   if (fread(buffer, 1, usize, file) == usize)
     text = buffer;
   fclose(file);
-#if JSON_USE_SECURE_MEMORY
-  memset(buffer, 0, static_cast<size_t>(size + 1));
-#endif
   delete[] buffer;
   return text;
 }
@@ -151,7 +145,7 @@ static int parseAndSaveValueTree(const JSONCPP_STRING& input,
                                  Json::Value* root)
 {
   Json::Reader reader(features);
-  bool parsingSuccessful = reader.parse(input, *root);
+  bool parsingSuccessful = reader.parse(input.data(), input.data() + input.size(), *root);
   if (!parsingSuccessful) {
     printf("Failed to parse %s file: \n%s\n",
            kind.c_str(),
