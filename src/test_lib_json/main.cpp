@@ -39,7 +39,7 @@ static inline double uint64ToDouble(Json::UInt64 value) {
 #else  // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 static inline double uint64ToDouble(Json::UInt64 value) {
   return static_cast<double>(Json::Int64(value / 2)) * 2.0 +
-         Json::Int64(value & 1);
+         static_cast<double>(Json::Int64(value & 1));
 }
 #endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 
