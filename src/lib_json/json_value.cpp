@@ -171,11 +171,11 @@ RuntimeError::RuntimeError(JSONCPP_STRING const& msg)
 LogicError::LogicError(JSONCPP_STRING const& msg)
   : Exception(msg)
 {}
-void throwRuntimeError(JSONCPP_STRING const& msg)
+JSONCPP_NORETURN void throwRuntimeError(JSONCPP_STRING const& msg)
 {
   throw RuntimeError(msg);
 }
-void throwLogicError(JSONCPP_STRING const& msg)
+JSONCPP_NORETURN void throwLogicError(JSONCPP_STRING const& msg)
 {
   throw LogicError(msg);
 }
