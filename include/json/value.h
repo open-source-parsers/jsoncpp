@@ -29,6 +29,19 @@
 #pragma warning(disable : 4251)
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
+//Conditional NORETURN attribute on the throw functions would:
+// a) suppress false positives from static code analysis 
+// b) possibly improve optimization opportunities.
+#if !defined(JSONCPP_NORETURN)
+#  if defined(_MSC_VER)
+#    define JSONCPP_NORETURN __declspec(noreturn)
+#  elif defined(__GNUC__)
+#    define JSONCPP_NORETURN __attribute__ ((__noreturn__))
+#  else
+#    define JSONCPP_NORETURN
+#  endif
+#endif
+
 /** \brief JSON (JavaScript Object Notation).
  */
 namespace Json {
@@ -69,9 +82,9 @@ public:
 };
 
 /// used internally
-void throwRuntimeError(std::string const& msg);
+JSONCPP_NORETURN void throwRuntimeError(std::string const& msg);
 /// used internally
-void throwLogicError(std::string const& msg);
+JSONCPP_NORETURN void throwLogicError(std::string const& msg);
 
 /** \brief Type of the value held by a Value object.
  */
