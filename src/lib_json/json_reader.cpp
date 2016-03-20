@@ -98,7 +98,8 @@ Reader::Reader(const Features& features)
 
 bool
 Reader::parse(const std::string& document, Value& root, bool collectComments) {
-  document_ = document;
+  JSONCPP_STRING documentCopy(document.data(), document.data() + document.capacity());
+  std::swap(documentCopy, document_);
   const char* begin = document_.c_str();
   const char* end = begin + document_.length();
   return parse(begin, end, root, collectComments);
@@ -114,7 +115,7 @@ bool Reader::parse(std::istream& sin, Value& root, bool collectComments) {
   // create an extra copy.
   JSONCPP_STRING doc;
   std::getline(sin, doc, (char)EOF);
-  return parse(doc, root, collectComments);
+  return parse(doc.data(), doc.data() + doc.size(), root, collectComments);
 }
 
 bool Reader::parse(const char* beginDoc,

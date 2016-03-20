@@ -69,6 +69,7 @@ jsoncpp_parse_version( ${JSONCPP_VERSION} JSONCPP_VERSION )
 #IF(NOT JSONCPP_VERSION_FOUND)
 #    MESSAGE(FATAL_ERROR "Failed to parse version string properly. Expect X.Y.Z")
 #ENDIF(NOT JSONCPP_VERSION_FOUND)
+SET( JSONCPP_USE_SECURE_MEMORY "0" CACHE STRING "-D...=1 to use memory-wiping allocator for STL" )
 
 MESSAGE(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
 # File version.h is only regenerated on CMake configure step

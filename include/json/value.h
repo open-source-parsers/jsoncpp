@@ -336,6 +336,9 @@ Json::Value obj_value(Json::objectValue); // {}
   int compare(const Value& other) const;
 
   const char* asCString() const; ///< Embedded zeroes could cause you trouble!
+#if JSONCPP_USING_SECURE_MEMORY
+  unsigned getCStringLength() const; //Allows you to understand the length of the CString
+#endif
   JSONCPP_STRING asString() const; ///< Embedded zeroes are possible.
   /** Get raw char* of string-value.
    *  \return false if !string. (Seg-fault if str or end are NULL.)

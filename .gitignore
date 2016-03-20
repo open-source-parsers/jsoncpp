@@ -45,3 +45,8 @@ jsoncpp_lib_static.dir/
 /src/lib_json/Makefile
 /src/test_lib_json/Makefile
 /src/test_lib_json/jsoncpp_test
+
+# eclipse project files
+.project
+.cproject
+/.settings/
