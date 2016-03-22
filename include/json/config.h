@@ -119,11 +119,15 @@
 #  define JSON_USE_INT64_DOUBLE_CONVERSION 1
 #endif
 
-#include "version.h"
+#if !defined(JSON_IS_AMALGAMATION)
 
-#if JSONCPP_USING_SECURE_MEMORY
-#include "allocator.h" //typedef Allocator
-#endif
+# include "version.h"
+
+# if JSONCPP_USING_SECURE_MEMORY
+#  include "allocator.h" //typedef Allocator
+# endif
+
+#endif // if !defined(JSON_IS_AMALGAMATION)
 
 namespace Json {
 typedef int Int;
