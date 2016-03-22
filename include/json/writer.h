@@ -112,12 +112,12 @@ public:
   Json::Value settings_;
 
   StreamWriterBuilder();
-  ~StreamWriterBuilder() override;
+  ~StreamWriterBuilder() JSONCPP_OVERRIDE;
 
   /**
    * \throw std::exception if something goes wrong (e.g. invalid settings)
    */
-  StreamWriter* newStreamWriter() const override;
+  StreamWriter* newStreamWriter() const JSONCPP_OVERRIDE;
 
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
@@ -158,7 +158,7 @@ class JSON_API FastWriter : public Writer {
 
 public:
   FastWriter();
-  ~FastWriter() override {}
+  ~FastWriter() JSONCPP_OVERRIDE {}
 
   void enableYAMLCompatibility();
 
@@ -172,7 +172,7 @@ public:
   void omitEndingLineFeed();
 
 public: // overridden from Writer
-  JSONCPP_STRING write(const Value& root) override;
+  JSONCPP_STRING write(const Value& root) JSONCPP_OVERRIDE;
 
 private:
   void writeValue(const Value& value);
@@ -210,14 +210,14 @@ private:
 class JSON_API StyledWriter : public Writer {
 public:
   StyledWriter();
-  ~StyledWriter() override {}
+  ~StyledWriter() JSONCPP_OVERRIDE {}
 
 public: // overridden from Writer
   /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
    * \param root Value to serialize.
    * \return String containing the JSON document that represents the root value.
    */
-  JSONCPP_STRING write(const Value& root) override;
+  JSONCPP_STRING write(const Value& root) JSONCPP_OVERRIDE;
 
 private:
   void writeValue(const Value& value);

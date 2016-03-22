@@ -839,7 +839,7 @@ struct BuiltStyledStreamWriter : public StreamWriter
       JSONCPP_STRING const& endingLineFeedSymbol,
       bool useSpecialFloats,
       unsigned int precision);
-  int write(Value const& root, JSONCPP_OSTREAM* sout) override;
+  int write(Value const& root, JSONCPP_OSTREAM* sout) JSONCPP_OVERRIDE;
 private:
   void writeValue(Value const& value);
   void writeArrayValue(Value const& value);
