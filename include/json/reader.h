@@ -333,9 +333,9 @@ public:
   Json::Value settings_;
 
   CharReaderBuilder();
-  ~CharReaderBuilder() override;
+  ~CharReaderBuilder() JSONCPP_OVERRIDE;
 
-  CharReader* newCharReader() const override;
+  CharReader* newCharReader() const JSONCPP_OVERRIDE;
 
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
