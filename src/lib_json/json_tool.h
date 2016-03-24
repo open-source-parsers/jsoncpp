@@ -63,7 +63,7 @@ typedef char UIntToStringBuffer[uintToStringBufferSize];
 static inline void uintToString(LargestUInt value, char*& current) {
   *--current = 0;
   do {
-    *--current = static_cast<signed char>(value % 10U + static_cast<unsigned>('0'));
+    *--current = static_cast<char>(value % 10U + static_cast<unsigned>('0'));
     value /= 10;
   } while (value != 0);
 }
