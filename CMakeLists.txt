@@ -82,10 +82,12 @@ CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/version.in"
 
 macro(UseCompilationWarningAsError)
 	if ( MSVC )
-        # Only enabled in debug because some old versions of VS STL generate
-        # warnings when compiled in release configuration.
-		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /WX ")
-	endif()
+    # Only enabled in debug because some old versions of VS STL generate
+    # warnings when compiled in release configuration.
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /WX ")
+  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_XX_COMPILER_ID MATCHES "Clang" )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+  endif()
 endmacro()
 
 # Include our configuration header
@@ -99,10 +101,10 @@ endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   # using regular Clang or AppleClang
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Werror -Wall -Wshadow -Wshorten-64-to-32")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wshadow -Wshorten-64-to-32")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # using GCC
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wshadow -Wextra -pedantic -Wno-long-long")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wshadow -Wextra -pedantic -Wno-long-long")
   # not yet ready for -Wsign-conversion
 endif()
 
