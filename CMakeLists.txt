@@ -81,7 +81,7 @@ CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/version.in"
                 NEWLINE_STYLE UNIX )
 
 macro(UseCompilationWarningAsError)
-	if ( MSVC )
+  if ( MSVC )
     # Only enabled in debug because some old versions of VS STL generate
     # warnings when compiled in release configuration.
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /WX ")
