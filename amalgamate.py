@@ -67,7 +67,7 @@ def amalgamate_source(source_top_dir=None,
     header.add_text("/// to prevent private header inclusion.")
     header.add_text("#define JSON_IS_AMALGAMATION")
     header.add_file("include/json/version.h")
-    header.add_file("include/json/allocator.h")
+    #header.add_file("include/json/allocator.h") # Not available here.
     header.add_file("include/json/config.h")
     header.add_file("include/json/forwards.h")
     header.add_file("include/json/features.h")
