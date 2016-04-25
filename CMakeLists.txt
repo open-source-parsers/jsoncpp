@@ -113,6 +113,13 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   if (JSONCPP_WITH_STRICT_ISO AND NOT JSONCPP_WITH_WARNING_AS_ERROR)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
   endif ()
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+  # using Intel compiler
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wconversion -Wshadow -Wextra -Werror=conversion")
+
+  if (JSONCPP_WITH_STRICT_ISO AND NOT JSONCPP_WITH_WARNING_AS_ERROR)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
+  endif ()
 endif()
 
 find_program(CCACHE_FOUND ccache)
