@@ -77,12 +77,14 @@
 
 #endif // defined(_MSC_VER)
 
-#if defined(_MSC_VER) && _MSC_VER <= 1600 // MSVC <= 2010
-# define JSONCPP_OVERRIDE
-#else
+// In c++11 the override keyword allows you to explicity define that a function
+// is intended to override the base-class version.  This makes the code more
+// managable and fixes a set of common hard-to-find bugs.
+#if __cplusplus >= 201103L
 # define JSONCPP_OVERRIDE override
-#endif // MSVC <= 2010
-
+#else
+# define JSONCPP_OVERRIDE
+#endif
 
 #ifndef JSON_HAS_RVALUE_REFERENCES
 
