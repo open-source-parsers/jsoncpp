@@ -44,8 +44,8 @@
 #pragma warning(disable : 4996)
 #endif
 
-static int const stackLimit_g = 1000;
-static int       stackDepth_g = 0;  // see readValue()
+thread_local static int const stackLimit_g = 1000;
+thread_local static int       stackDepth_g = 0;  // see readValue()
 
 namespace Json {
 
