@@ -58,7 +58,7 @@ static JSONCPP_STRING readInputTestFile(const char* path) {
     return JSONCPP_STRING("");
   fseek(file, 0, SEEK_END);
   long const size = ftell(file);
-  unsigned long const usize = static_cast<unsigned long const>(size);
+  unsigned long const usize = static_cast<unsigned long>(size);
   fseek(file, 0, SEEK_SET);
   JSONCPP_STRING text;
   char* buffer = new char[size + 1];
