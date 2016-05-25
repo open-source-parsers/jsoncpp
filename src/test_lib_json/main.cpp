@@ -320,16 +320,30 @@ JSONTEST_FIXTURE(ValueTest, strings) {
 
   // Always okay
   JSONTEST_ASSERT(string1_.isConvertibleTo(Json::stringValue));
+  JSONTEST_ASSERT(string1_.isConvertibleTo(Json::intValue));
+  JSONTEST_ASSERT(string1_.isConvertibleTo(Json::uintValue));
+  JSONTEST_ASSERT(string1_.isConvertibleTo(Json::realValue));
 
   // Never okay
   JSONTEST_ASSERT(!string1_.isConvertibleTo(Json::objectValue));
   JSONTEST_ASSERT(!string1_.isConvertibleTo(Json::arrayValue));
-  JSONTEST_ASSERT(!string1_.isConvertibleTo(Json::intValue));
-  JSONTEST_ASSERT(!string1_.isConvertibleTo(Json::uintValue));
-  JSONTEST_ASSERT(!string1_.isConvertibleTo(Json::realValue));
 
   JSONTEST_ASSERT_STRING_EQUAL("a", string1_.asString());
   JSONTEST_ASSERT_STRING_EQUAL("a", string1_.asCString());
+
+  JSONTEST_ASSERT_EQUAL(1, Json::Value("1").asInt());
+  JSONTEST_ASSERT_EQUAL(123, Json::Value("123").asInt());
+  JSONTEST_ASSERT_EQUAL(2.4444444444, Json::Value("2.4444444444").asDouble());
+  JSONTEST_ASSERT_EQUAL(9.22337e+18, Json::Value("9.22337e+18").asDouble());
+  JSONTEST_ASSERT_EQUAL(-9.22337e+18, Json::Value("-9.22337e+18").asDouble());
+  JSONTEST_ASSERT_EQUAL(-9.2F, Json::Value("-9.2F").asFloat());
+  JSONTEST_ASSERT_EQUAL(3u, Json::Value("3").asUInt());
+  JSONTEST_ASSERT_EQUAL(1099511627776LL, Json::Value("1099511627776").asInt64());
+  JSONTEST_ASSERT_EQUAL(1099511627776LLu, Json::Value("1099511627776").asUInt64());
+  JSONTEST_ASSERT_EQUAL(9223372036854775807LLu, Json::Value("9223372036854775807").asUInt64());
+  JSONTEST_ASSERT_EQUAL(true, Json::Value("true").asBool());
+  JSONTEST_ASSERT_EQUAL(false, Json::Value("false").asBool());
+  JSONTEST_ASSERT_EQUAL(false, Json::Value("nil").asBool());
 }
 
 JSONTEST_FIXTURE(ValueTest, bools) {
@@ -1485,31 +1499,24 @@ JSONTEST_FIXTURE(ValueTest, typeChecksThrowExceptions) {
   JSONTEST_ASSERT_THROWS(objVal.asString());
   JSONTEST_ASSERT_THROWS(arrVal.asString());
 
-  JSONTEST_ASSERT_THROWS(strVal.asInt());
   JSONTEST_ASSERT_THROWS(objVal.asInt());
   JSONTEST_ASSERT_THROWS(arrVal.asInt());
 
-  JSONTEST_ASSERT_THROWS(strVal.asUInt());
   JSONTEST_ASSERT_THROWS(objVal.asUInt());
   JSONTEST_ASSERT_THROWS(arrVal.asUInt());
 
-  JSONTEST_ASSERT_THROWS(strVal.asInt64());
   JSONTEST_ASSERT_THROWS(objVal.asInt64());
   JSONTEST_ASSERT_THROWS(arrVal.asInt64());
 
-  JSONTEST_ASSERT_THROWS(strVal.asUInt64());
   JSONTEST_ASSERT_THROWS(objVal.asUInt64());
   JSONTEST_ASSERT_THROWS(arrVal.asUInt64());
 
-  JSONTEST_ASSERT_THROWS(strVal.asDouble());
   JSONTEST_ASSERT_THROWS(objVal.asDouble());
   JSONTEST_ASSERT_THROWS(arrVal.asDouble());
 
-  JSONTEST_ASSERT_THROWS(strVal.asFloat());
   JSONTEST_ASSERT_THROWS(objVal.asFloat());
   JSONTEST_ASSERT_THROWS(arrVal.asFloat());
 
-  JSONTEST_ASSERT_THROWS(strVal.asBool());
   JSONTEST_ASSERT_THROWS(objVal.asBool());
   JSONTEST_ASSERT_THROWS(arrVal.asBool());
 
