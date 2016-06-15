@@ -261,6 +261,11 @@ public:
 #endif // ifndef JSON_USE_CPPTL_SMALLMAP
 #endif // ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
 
+private:
+  struct StaticInitTag {};
+  explicit Value(StaticInitTag) {} ///< A special constructor for Value::kNull.
+  static const Value kNull;
+
 public:
   /** \brief Create a default Value of the given type.
 
