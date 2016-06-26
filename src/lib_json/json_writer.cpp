@@ -135,6 +135,7 @@ JSONCPP_STRING valueToString(UInt value) {
 
 #endif // # if defined(JSON_HAS_INT64)
 
+namespace {
 JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int precision) {
   // Allocate a buffer that is more than large enough to store the 16 digits of
   // precision requested below.
@@ -163,6 +164,7 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
   assert(len >= 0);
   fixNumericLocale(buffer, buffer + len);
   return buffer;
+}
 }
 
 JSONCPP_STRING valueToString(double value) { return valueToString(value, false, 17); }
