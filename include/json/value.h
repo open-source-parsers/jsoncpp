@@ -216,7 +216,12 @@ public:
   static const UInt64 maxUInt64;
 #endif // defined(JSON_HAS_INT64)
 
+//MW: workaround for bug in NVIDIAs CUDA 7.5 nvcc compiler
+#ifdef  __NVCC__
+public:
+#else
 private:
+#endif //__NVCC__
 #ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
   class CZString {
   public:
