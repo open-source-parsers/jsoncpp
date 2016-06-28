@@ -18,6 +18,7 @@
 #endif
 #include <cstddef> // size_t
 #include <algorithm> // min()
+#include <string.h>
 
 #define JSON_ASSERT_UNREACHABLE assert(false)
 
@@ -190,6 +191,7 @@ static inline void releaseStringValue(char* value, unsigned) {
 
 namespace Json {
 
+#if JSON_USE_EXCEPTION
 Exception::Exception(JSONCPP_STRING const& msg)
   : msg_(msg)
 {}
@@ -213,6 +215,7 @@ JSONCPP_NORETURN void throwLogicError(JSONCPP_STRING const& msg)
 {
   throw LogicError(msg);
 }
+#endif
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////

@@ -18,6 +18,8 @@
 #include <memory>
 #include <set>
 #include <limits>
+#include <stdio.h>
+#include <string.h>
 
 #if defined(_MSC_VER)
 #if !defined(WINCE) && defined(__STDC_SECURE_LIB__) && _MSC_VER >= 1500 // VC++ 9.0 and above 
