@@ -39,8 +39,8 @@ namespace Json {
 // static
 Value const& Value::nullSingleton()
 {
- static Value const* nullStatic = new Value;
- return *nullStatic;
+ static Value const nullStatic;
+ return nullStatic;
 }
 
 // for backwards compatibility, we'll leave these global references around, but DO NOT
