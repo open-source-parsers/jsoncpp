@@ -20,7 +20,7 @@
 #include <limits>
 
 #if defined(_MSC_VER)
-#if !defined(WINCE) && defined(__STDC_SECURE_LIB__) && _MSC_VER >= 1500 // VC++ 9.0 and above 
+#if !defined(WINCE) && defined(__STDC_SECURE_LIB__) && _MSC_VER >= 1500 // VC++ 9.0 and above
 #define snprintf sprintf_s
 #elif _MSC_VER >= 1900 // VC++ 14.0 and above
 #define snprintf std::snprintf
@@ -385,7 +385,7 @@ bool Reader::readCppStyleComment() {
     if (c == '\r') {
       // Consume DOS EOL. It will be normalized in addComment.
       if (current_ != end_ && *current_ == '\n')
-        getNextChar();
+         (void)getNextChar();
       // Break on Moc OS 9 EOL.
       break;
     }
@@ -420,7 +420,7 @@ bool Reader::readString() {
   while (current_ != end_) {
     c = getNextChar();
     if (c == '\\')
-      getNextChar();
+       (void)getNextChar();
     else if (c == '"')
       break;
   }
@@ -1266,7 +1266,7 @@ bool OurReader::readCppStyleComment() {
     if (c == '\r') {
       // Consume DOS EOL. It will be normalized in addComment.
       if (current_ != end_ && *current_ == '\n')
-        getNextChar();
+         (void)getNextChar();
       // Break on Moc OS 9 EOL.
       break;
     }
@@ -1305,7 +1305,7 @@ bool OurReader::readString() {
   while (current_ != end_) {
     c = getNextChar();
     if (c == '\\')
-      getNextChar();
+       (void)getNextChar();
     else if (c == '"')
       break;
   }
@@ -1318,7 +1318,7 @@ bool OurReader::readStringSingleQuote() {
   while (current_ != end_) {
     c = getNextChar();
     if (c == '\\')
-      getNextChar();
+       (void)getNextChar();
     else if (c == '\'')
       break;
   }
