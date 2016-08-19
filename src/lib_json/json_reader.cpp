@@ -820,7 +820,9 @@ OurFeatures::OurFeatures()
     , allowDroppedNullPlaceholders_(false), allowNumericKeys_(false)
     , allowSingleQuotes_(false)
     , failIfExtra_(false)
+    , rejectDupKeys_(true)
     , allowSpecialFloats_(false)
+    , stackLimit_(0)
 {
 }
 
@@ -947,7 +949,7 @@ private:
 
 OurReader::OurReader(OurFeatures const& features)
     : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
-      lastValue_(), commentsBefore_(), features_(features), collectComments_() {
+      lastValue_(), commentsBefore_(), stackDepth_(0), features_(features), collectComments_() {
 }
 
 bool OurReader::parse(const char* beginDoc,
