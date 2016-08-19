@@ -215,10 +215,10 @@ bool Reader::readValue() {
 void Reader::skipCommentTokens(Token& token) {
   if (features_.allowComments_) {
     do {
-      readToken(token);
+       (void)readToken(token);
     } while (token.type_ == tokenComment);
   } else {
-    readToken(token);
+     (void)readToken(token);
   }
 }
 
@@ -484,7 +484,7 @@ bool Reader::readArray(Token& /*tokenStart*/) {
   if (*current_ == ']') // empty array
   {
     Token endArray;
-    readToken(endArray);
+    (void)readToken(endArray);
     return true;
   }
   int index = 0;
@@ -1088,10 +1088,10 @@ bool OurReader::readValue() {
 void OurReader::skipCommentTokens(Token& token) {
   if (features_.allowComments_) {
     do {
-      readToken(token);
+       (void)readToken(token);
     } while (token.type_ == tokenComment);
   } else {
-    readToken(token);
+     (void)readToken(token);
   }
 }
 
@@ -1192,7 +1192,7 @@ bool OurReader::readToken(Token& token) {
   if (!ok)
     token.type_ = tokenError;
   token.end_ = current_;
-  return true;
+  return ok;
 }
 
 void OurReader::skipSpaces() {
@@ -1395,7 +1395,7 @@ bool OurReader::readArray(Token& /*tokenStart*/) {
   if (*current_ == ']') // empty array
   {
     Token endArray;
-    readToken(endArray);
+    (void)readToken(endArray);
     return true;
   }
   int index = 0;
