@@ -353,7 +353,7 @@ void FastWriter::writeValue(const Value& value) {
     break;
   case stringValue:
   {
-    // Is NULL possible for value.string_?
+    // Is NULL possible for value.string_? No.
     char const* str;
     char const* end;
     bool ok = value.getString(&str, &end);
@@ -423,7 +423,7 @@ void StyledWriter::writeValue(const Value& value) {
     break;
   case stringValue:
   {
-    // Is NULL possible for value.string_?
+    // Is NULL possible for value.string_? No.
     char const* str;
     char const* end;
     bool ok = value.getString(&str, &end);
@@ -640,7 +640,7 @@ void StyledStreamWriter::writeValue(const Value& value) {
     break;
   case stringValue:
   {
-    // Is NULL possible for value.string_?
+    // Is NULL possible for value.string_? No.
     char const* str;
     char const* end;
     bool ok = value.getString(&str, &end);
@@ -921,7 +921,7 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
     break;
   case stringValue:
   {
-    // Is NULL is possible for value.string_?
+    // Is NULL is possible for value.string_? No.
     char const* str;
     char const* end;
     bool ok = value.getString(&str, &end);
