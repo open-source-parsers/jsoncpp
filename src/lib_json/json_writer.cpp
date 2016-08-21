@@ -1002,7 +1002,7 @@ void BuiltStyledStreamWriter::writeArrayValue(Value const& value) {
       if (!indentation_.empty()) *sout_ << " ";
       for (unsigned index = 0; index < size; ++index) {
         if (index > 0)
-          *sout_ << ", ";
+          *sout_ << ((!indentation_.empty()) ? ", " : ",");
         *sout_ << childValues_[index];
       }
       if (!indentation_.empty()) *sout_ << " ";
