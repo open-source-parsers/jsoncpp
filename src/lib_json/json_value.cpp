@@ -502,8 +502,7 @@ Value::~Value() {
     JSON_ASSERT_UNREACHABLE;
   }
 
-  if (comments_)
-    delete[] comments_;
+  delete[] comments_;
 
   value_.uint_ = 0;
 }
