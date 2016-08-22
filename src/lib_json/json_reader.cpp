@@ -290,7 +290,7 @@ bool Reader::readToken(Token& token) {
   if (!ok)
     token.type_ = tokenError;
   token.end_ = current_;
-  return true;
+  return ok;
 }
 
 void Reader::skipSpaces() {
