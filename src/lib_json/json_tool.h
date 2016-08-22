@@ -5,6 +5,7 @@
 
 #ifndef LIB_JSONCPP_JSON_TOOL_H_INCLUDED
 #define LIB_JSONCPP_JSON_TOOL_H_INCLUDED
+#include <clocale>
 
 /* This header provides common string manipulation support, such as UTF-8,
  * portable conversion from/to string...
@@ -79,6 +80,18 @@ static inline void fixNumericLocale(char* begin, char* end) {
       *begin = '.';
     }
     ++begin;
+  }
+}
+
+static inline void fixNumericLocaleInput(char* begin, char* end) {
+  struct lconv* lc = localeconv();
+  if ((lc != NULL) && (*(lc->decimal_point) != '.')) {
+    while (begin < end) {
+      if (*begin == '.') {
+        *begin = *(lc->decimal_point);
+      }
+      ++begin;
+    }
   }
 }
 
