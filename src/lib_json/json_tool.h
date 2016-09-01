@@ -15,6 +15,26 @@
 
 namespace Json {
 
+/// Fallback for decimal_point on android, where the lconv is an empty struct.
+template<typename Lconv, bool=(sizeof(Lconv) >= sizeof(char*))>
+struct Locale {
+  static char decimalPoint() {
+    return '\0';
+  }
+};
+
+/// Return decimal_point for the current locale.
+template<typename Lconv>
+struct Locale<Lconv, true> {
+  static char decimalPoint() {
+    Lconv* lc = localeconv();
+    if (lc == NULL) {
+      return '\0';
+    }
+    return *(lc->decimal_point);
+  }
+};
+
 /// Converts a unicode code-point to UTF-8.
 static inline JSONCPP_STRING codePointToUTF8(unsigned int cp) {
   JSONCPP_STRING result;
@@ -84,11 +104,11 @@ static inline void fixNumericLocale(char* begin, char* end) {
 }
 
 static inline void fixNumericLocaleInput(char* begin, char* end) {
-  struct lconv* lc = localeconv();
-  if ((lc != NULL) && (*(lc->decimal_point) != '.')) {
+  char decimalPoint = Locale<struct lconv>::decimalPoint();
+  if (decimalPoint != '\0' && decimalPoint != '.') {
     while (begin < end) {
       if (*begin == '.') {
-        *begin = *(lc->decimal_point);
+        *begin = decimalPoint;
       }
       ++begin;
     }
