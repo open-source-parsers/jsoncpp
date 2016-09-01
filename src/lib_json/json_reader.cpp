@@ -45,7 +45,6 @@
 #endif
 
 static int const stackLimit_g = 1000;
-static int       stackDepth_g = 0;  // see readValue()
 
 namespace Json {
 
@@ -138,7 +137,7 @@ bool Reader::parse(const char* beginDoc,
     nodes_.pop();
   nodes_.push(&root);
 
-  stackDepth_g = 0;  // Yes, this is bad coding, but options are limited.
+  stackDepth_ = 0;  // Yes, this is bad coding, but options are limited.
   bool successful = readValue();
   Token token;
   skipCommentTokens(token);
@@ -165,8 +164,8 @@ bool Reader::readValue() {
   // But this deprecated class has a security problem: Bad input can
   // cause a seg-fault. This seems like a fair, binary-compatible way
   // to prevent the problem.
-  if (stackDepth_g >= stackLimit_g) throwRuntimeError("Exceeded stackLimit in readValue().");
-  ++stackDepth_g;
+  if (stackDepth_ >= stackLimit_g) throwRuntimeError("Exceeded stackLimit in readValue().");
+  ++stackDepth_;
 
   Token token;
   skipCommentTokens(token);
@@ -240,7 +239,7 @@ bool Reader::readValue() {
     lastValue_ = &currentValue();
   }
 
-  --stackDepth_g;
+  --stackDepth_;
   return successful;
 }
 

@@ -240,6 +240,7 @@ private:
   JSONCPP_STRING commentsBefore_;
   Features features_;
   bool collectComments_;
+	int stackDepth_;
 };  // Reader
 
 /** Interface for reading JSON from a char array.
