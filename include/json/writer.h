@@ -219,6 +219,8 @@ public: // overridden from Writer
    */
   JSONCPP_STRING write(const Value& root) JSONCPP_OVERRIDE;
 
+  void omitEndingLineFeed();
+
 private:
   void writeValue(const Value& value);
   void writeArrayValue(const Value& value);
@@ -241,6 +243,7 @@ private:
   unsigned int rightMargin_;
   unsigned int indentSize_;
   bool addChildValues_;
+  bool omitEndingLineFeed_;
 };
 
 /** \brief Writes a Value in <a HREF="http://www.json.org">JSON</a> format in a
