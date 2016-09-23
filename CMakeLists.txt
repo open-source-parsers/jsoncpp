@@ -22,6 +22,11 @@ IF(NOT WIN32)
     ENDIF()
 ENDIF()
 
+# Enable runtime search path support for dynamic libraries on OSX
+IF(APPLE)
+    SET(CMAKE_MACOSX_RPATH 1)
+ENDIF()
+
 SET(DEBUG_LIBNAME_SUFFIX "" CACHE STRING "Optional suffix to append to the library name for a debug build")
 SET(LIB_SUFFIX "" CACHE STRING "Optional arch-dependent suffix for the library installation directory")
 
