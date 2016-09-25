@@ -46,6 +46,11 @@ IF(BUILD_SHARED_LIBS)
     SET_TARGET_PROPERTIES( jsoncpp_lib PROPERTIES OUTPUT_NAME jsoncpp
                            DEBUG_OUTPUT_NAME jsoncpp${DEBUG_LIBNAME_SUFFIX} )
 
+    # Set library's runtime search path on OSX
+    IF(APPLE)
+        SET_TARGET_PROPERTIES( jsoncpp_lib PROPERTIES INSTALL_RPATH "@loader_path/." )
+    ENDIF()
+
     INSTALL( TARGETS jsoncpp_lib ${INSTALL_EXPORT}
          RUNTIME DESTINATION ${RUNTIME_INSTALL_DIR}
          LIBRARY DESTINATION ${LIBRARY_INSTALL_DIR}
