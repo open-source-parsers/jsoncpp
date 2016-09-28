@@ -6,7 +6,7 @@
 #ifndef JSON_CONFIG_H_INCLUDED
 #define JSON_CONFIG_H_INCLUDED
 #include <stddef.h>
-#include <string> //typdef String
+#include <string> //typedef String
 #include <stdint.h> //typedef int64_t, uint64_t
 
 /// If defined, indicates that json library is embedded in CppTL library.
