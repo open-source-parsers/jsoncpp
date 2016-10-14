@@ -343,7 +343,7 @@ bool Value::CZString::isStaticString() const { return storage_.policy_ == noDupl
  * This optimization is used in ValueInternalMap fast allocator.
  */
 Value::Value(ValueType vtype) {
-  static char const empty[] = "";
+  static char const emptyString[] = "";
   initBasic(vtype);
   switch (vtype) {
   case nullValue:
@@ -357,7 +357,7 @@ Value::Value(ValueType vtype) {
     break;
   case stringValue:
     // allocated_ == false, so this is safe.
-    value_.string_ = const_cast<char*>(static_cast<char const*>(empty));
+    value_.string_ = const_cast<char*>(static_cast<char const*>(emptyString));
     break;
   case arrayValue:
   case objectValue:
