@@ -479,7 +479,7 @@ JSONTEST_FIXTURE(ValueTest, integers) {
   JSONTEST_ASSERT_EQUAL(0.0, val.asDouble());
   JSONTEST_ASSERT_EQUAL(0.0, val.asFloat());
   JSONTEST_ASSERT_EQUAL(false, val.asBool());
-  JSONTEST_ASSERT_STRING_EQUAL("0", val.asString());
+  JSONTEST_ASSERT_STRING_EQUAL("0.0", val.asString());
 
   // Zero (signed constructor arg)
   val = Json::Value(0);
@@ -563,7 +563,7 @@ JSONTEST_FIXTURE(ValueTest, integers) {
   JSONTEST_ASSERT_EQUAL(0.0, val.asDouble());
   JSONTEST_ASSERT_EQUAL(0.0, val.asFloat());
   JSONTEST_ASSERT_EQUAL(false, val.asBool());
-  JSONTEST_ASSERT_STRING_EQUAL("0", val.asString());
+  JSONTEST_ASSERT_STRING_EQUAL("0.0", val.asString());
 
   // 2^20 (signed constructor arg)
   val = Json::Value(1 << 20);
@@ -646,7 +646,7 @@ JSONTEST_FIXTURE(ValueTest, integers) {
   JSONTEST_ASSERT_EQUAL((1 << 20), val.asDouble());
   JSONTEST_ASSERT_EQUAL((1 << 20), val.asFloat());
   JSONTEST_ASSERT_EQUAL(true, val.asBool());
-  JSONTEST_ASSERT_STRING_EQUAL("1048576",
+  JSONTEST_ASSERT_STRING_EQUAL("1048576.0",
                                normalizeFloatingPointStr(JsonTest::ToJsonString(val.asString())));
 
   // -2^20
@@ -887,7 +887,7 @@ JSONTEST_FIXTURE(ValueTest, integers) {
   JSONTEST_ASSERT_EQUAL((Json::Int64(1) << 40), val.asDouble());
   JSONTEST_ASSERT_EQUAL((Json::Int64(1) << 40), val.asFloat());
   JSONTEST_ASSERT_EQUAL(true, val.asBool());
-  JSONTEST_ASSERT_STRING_EQUAL("1099511627776",
+  JSONTEST_ASSERT_STRING_EQUAL("1099511627776.0",
                                normalizeFloatingPointStr(JsonTest::ToJsonString(val.asString())));
 
   // -2^40
@@ -1259,7 +1259,7 @@ JSONTEST_FIXTURE(ValueTest, nonIntegers) {
   // A 16-digit floating point number.
   val = Json::Value(2199023255552000.0f);
   JSONTEST_ASSERT_EQUAL(float(2199023255552000.0f), val.asFloat());
-  JSONTEST_ASSERT_STRING_EQUAL("2199023255552000",
+  JSONTEST_ASSERT_STRING_EQUAL("2199023255552000.0",
                                normalizeFloatingPointStr(JsonTest::ToJsonString(val.asString())));
 
   // A very large floating point number.
