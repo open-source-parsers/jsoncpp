@@ -34,7 +34,7 @@ endif()
 
 if(NOT (HAVE_CLOCALE AND HAVE_LCONV_SIZE AND HAVE_DECIMAL_POINT AND HAVE_LOCALECONV))
 	message(WARNING "Locale functionality is not supported")
-	add_definitions(-DNO_LOCALE_SUPPORT)
+	add_definitions(-DJSONCPP_NO_LOCALE_SUPPORT)
 endif()
 
 SET( JSONCPP_INCLUDE_DIR ../../include )
