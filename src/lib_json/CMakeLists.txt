@@ -9,6 +9,34 @@ if( CMAKE_COMPILER_IS_GNUCXX )
   endif()
 endif( CMAKE_COMPILER_IS_GNUCXX )
 
+include(CheckIncludeFileCXX)
+include(CheckTypeSize)
+include(CheckStructHasMember)
+include(CheckCXXSymbolExists)
+
+check_include_file_cxx(clocale HAVE_CLOCALE)
+check_cxx_symbol_exists(localeconv clocale HAVE_LOCALECONV)
+
+if(CMAKE_VERSION VERSION_LESS 3.0.0)
+	# The "LANGUAGE CXX" parameter is not supported in CMake versions below 3,
+	# so the C compiler and header has to be used.
+	check_include_file(locale.h HAVE_LOCALE_H)
+	set(CMAKE_EXTRA_INCLUDE_FILES locale.h)
+	check_type_size("struct lconv" LCONV_SIZE)
+	unset(CMAKE_EXTRA_INCLUDE_FILES)
+	check_struct_has_member("struct lconv" decimal_point locale.h HAVE_DECIMAL_POINT)
+else()
+	set(CMAKE_EXTRA_INCLUDE_FILES clocale)
+	check_type_size(lconv LCONV_SIZE LANGUAGE CXX)
+	unset(CMAKE_EXTRA_INCLUDE_FILES)
+	check_struct_has_member(lconv decimal_point clocale HAVE_DECIMAL_POINT LANGUAGE CXX)
+endif()
+
+if(NOT (HAVE_CLOCALE AND HAVE_LCONV_SIZE AND HAVE_DECIMAL_POINT AND HAVE_LOCALECONV))
+	message(WARNING "Locale functionality is not supported")
+	add_definitions(-DJSONCPP_NO_LOCALE_SUPPORT)
+endif()
+
 SET( JSONCPP_INCLUDE_DIR ../../include )
 
 SET( PUBLIC_HEADERS
