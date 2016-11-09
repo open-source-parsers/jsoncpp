@@ -9,8 +9,8 @@
 install:
 # /usr/bin/gcc is 4.6 always, but gcc-X.Y is available.
 - if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
-# /usr/bin/clang is our version already, and clang-X.Y does not exist.
-#- if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
+# /usr/bin/clang has a conflict with gcc, so use clang-X.Y.
+- if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.5" CC="clang-3.5"; fi
 - echo ${PATH}
 - ls /usr/local
 - ls /usr/local/bin
@@ -22,10 +22,11 @@ addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.5
     packages:
     - gcc-4.9
     - g++-4.9
-    - clang
+    - clang-3.5
     - valgrind
 os:
   - linux
