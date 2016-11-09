@@ -30,8 +30,7 @@
 
 # CMake-generated files:
 CMakeFiles/
-CTestTestFile.cmake
-cmake_install.cmake
+*.cmake
 pkg-config/jsoncpp.pc
 jsoncpp_lib_static.dir/
 
@@ -45,6 +44,7 @@ jsoncpp_lib_static.dir/
 /src/lib_json/Makefile
 /src/test_lib_json/Makefile
 /src/test_lib_json/jsoncpp_test
+*.a
 
 # eclipse project files
 .project
