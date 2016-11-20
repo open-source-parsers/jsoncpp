@@ -1356,7 +1356,7 @@ bool Value::isIntegral() const {
 
 bool Value::isDouble() const { return type_ == realValue || isIntegral(); }
 
-bool Value::isNumeric() const { return isIntegral() || isDouble(); }
+bool Value::isNumeric() const { return isDouble(); }
 
 bool Value::isString() const { return type_ == stringValue; }
 
