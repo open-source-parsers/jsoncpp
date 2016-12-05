@@ -10,6 +10,8 @@
 #include "forwards.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
+#pragma pack(push, 8)
+
 namespace Json {
 
 /** \brief Configuration passed to reader and writer.
@@ -53,5 +55,7 @@ public:
 };
 
 } // namespace Json
+
+#pragma pack(pop)
 
 #endif // CPPTL_JSON_FEATURES_H_INCLUDED

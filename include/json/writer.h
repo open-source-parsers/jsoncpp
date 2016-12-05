@@ -20,6 +20,8 @@
 #pragma warning(disable : 4251)
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
+#pragma pack(push, 8)
+
 namespace Json {
 
 class Value;
@@ -323,6 +325,8 @@ JSONCPP_STRING JSON_API valueToQuotedString(const char* value);
 JSON_API JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM&, const Value& root);
 
 } // namespace Json
+
+#pragma pack(pop)
 
 #if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 #pragma warning(pop)

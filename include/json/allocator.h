@@ -9,6 +9,8 @@
 #include <cstring>
 #include <memory>
 
+#pragma pack(push, 8)
+
 namespace Json {
 template<typename T>
 class SecureAllocator {
@@ -90,5 +92,7 @@ bool operator!=(const SecureAllocator<T>&, const SecureAllocator<U>&) {
 }
 
 } //namespace Json
+
+#pragma pack(pop)
 
 #endif // CPPTL_JSON_ALLOCATOR_H_INCLUDED

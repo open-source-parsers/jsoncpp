@@ -42,6 +42,8 @@
 #pragma warning(disable : 4251)
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
+#pragma pack(push, 8)
+
 /** \brief JSON (JavaScript Object Notation).
  */
 namespace Json {
@@ -859,6 +861,7 @@ template<>
 inline void swap(Json::Value& a, Json::Value& b) { a.swap(b); }
 }
 
+#pragma pack(pop)
 
 #if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 #pragma warning(pop)
