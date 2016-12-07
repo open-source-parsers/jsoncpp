@@ -45,12 +45,12 @@
 #pragma warning(disable : 4996)
 #endif
 
-// Define JSONCPP_STACK_LIMIT as an appropriate integer at compile time to change the stack limit
-#if !defined(JSONCPP_STACK_LIMIT)
-#define JSONCPP_STACK_LIMIT 1000
+// Define JSONCPP_DEPRECATED_STACK_LIMIT as an appropriate integer at compile time to change the stack limit
+#if !defined(JSONCPP_DEPRECATED_STACK_LIMIT)
+#define JSONCPP_DEPRECATED_STACK_LIMIT 1000
 #endif
 
-static size_t const stackLimit_g = JSONCPP_STACK_LIMIT; // see readValue()
+static size_t const stackLimit_g = JSONCPP_DEPRECATED_STACK_LIMIT; // see readValue()
 
 namespace Json {
 
