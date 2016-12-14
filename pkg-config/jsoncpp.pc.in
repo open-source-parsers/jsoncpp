@@ -1,7 +1,7 @@
 prefix=@CMAKE_INSTALL_PREFIX@
 exec_prefix=${prefix}
-libdir=${exec_prefix}/@LIBRARY_INSTALL_DIR@
-includedir=${prefix}/@INCLUDE_INSTALL_DIR@
+libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
 
 Name: jsoncpp
 Description: A C++ library for interacting with JSON
