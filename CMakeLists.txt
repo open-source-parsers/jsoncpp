@@ -1,6 +1,6 @@
 # vim: et ts=4 sts=4 sw=4 tw=0
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 PROJECT(jsoncpp)
 ENABLE_TESTING()
 
@@ -27,20 +27,10 @@ IF(APPLE)
     SET(CMAKE_MACOSX_RPATH 1)
 ENDIF()
 
-SET(DEBUG_LIBNAME_SUFFIX "" CACHE STRING "Optional suffix to append to the library name for a debug build")
-SET(LIB_SUFFIX "" CACHE STRING "Optional arch-dependent suffix for the library installation directory")
+# Adhere to GNU filesystem layout conventions
+INCLUDE(GNUInstallDirs)
 
-SET(RUNTIME_INSTALL_DIR bin
-    CACHE PATH "Install dir for executables and dlls")
-SET(ARCHIVE_INSTALL_DIR lib${LIB_SUFFIX}
-    CACHE PATH "Install dir for static libraries")
-SET(LIBRARY_INSTALL_DIR lib${LIB_SUFFIX}
-    CACHE PATH "Install dir for shared libraries")
-SET(INCLUDE_INSTALL_DIR include
-    CACHE PATH "Install dir for headers")
-SET(PACKAGE_INSTALL_DIR lib${LIB_SUFFIX}/cmake
-    CACHE PATH "Install dir for cmake package config files")
-MARK_AS_ADVANCED( RUNTIME_INSTALL_DIR ARCHIVE_INSTALL_DIR INCLUDE_INSTALL_DIR PACKAGE_INSTALL_DIR )
+SET(DEBUG_LIBNAME_SUFFIX "" CACHE STRING "Optional suffix to append to the library name for a debug build")
 
 # Set variable named ${VAR_NAME} to value ${VALUE}
 FUNCTION(set_using_dynamic_name VAR_NAME VALUE)
@@ -86,70 +76,76 @@ CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/version.in"
                 "${PROJECT_SOURCE_DIR}/version"
                 NEWLINE_STYLE UNIX )
 
-macro(UseCompilationWarningAsError)
-	if ( MSVC )
+MACRO(UseCompilationWarningAsError)
+    IF(MSVC)
         # Only enabled in debug because some old versions of VS STL generate
         # warnings when compiled in release configuration.
-		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /WX ")
-  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
-    if (JSONCPP_WITH_STRICT_ISO)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic-errors")
-    endif ()
-	endif()
-endmacro()
+        SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /WX ")
+    ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+        IF(JSONCPP_WITH_STRICT_ISO)
+            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic-errors")
+        ENDIF()
+    ENDIF()
+ENDMACRO()
 
 # Include our configuration header
 INCLUDE_DIRECTORIES( ${jsoncpp_SOURCE_DIR}/include )
 
-if ( MSVC )
+IF(MSVC)
     # Only enabled in debug because some old versions of VS STL generate
     # unreachable code warning when compiled in release configuration.
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /W4 ")
-endif()
+    SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /W4 ")
+ENDIF()
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  # using regular Clang or AppleClang
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wconversion -Wshadow -Werror=conversion -Werror=sign-compare")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  # using GCC
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wconversion -Wshadow -Wextra")
-  # not yet ready for -Wsign-conversion
+# Require C++11 support, prefer ISO C++ over GNU variants,
+# as relying solely on ISO C++ is more portable.
+SET(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_EXTENSIONS OFF)
 
-  if (JSONCPP_WITH_STRICT_ISO AND NOT JSONCPP_WITH_WARNING_AS_ERROR)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=conversion -pedantic")
-  endif ()
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-  # using Intel compiler
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wconversion -Wshadow -Wextra -Werror=conversion")
+IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    # using regular Clang or AppleClang
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wconversion -Wshadow -Werror=conversion -Werror=sign-compare")
+ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # using GCC
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wconversion -Wshadow -Wextra")
+    # not yet ready for -Wsign-conversion
 
-  if (JSONCPP_WITH_STRICT_ISO AND NOT JSONCPP_WITH_WARNING_AS_ERROR)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
-  endif ()
-endif()
+    IF(JSONCPP_WITH_STRICT_ISO AND NOT JSONCPP_WITH_WARNING_AS_ERROR)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=conversion -pedantic")
+    ENDIF()
+ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+    # using Intel compiler
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wconversion -Wshadow -Wextra -Werror=conversion")
 
-find_program(CCACHE_FOUND ccache)
-if(CCACHE_FOUND)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-endif(CCACHE_FOUND)
+    IF(JSONCPP_WITH_STRICT_ISO AND NOT JSONCPP_WITH_WARNING_AS_ERROR)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
+    ENDIF()
+ENDIF()
+
+FIND_PROGRAM(CCACHE_FOUND ccache)
+IF(CCACHE_FOUND)
+    SET_PROPERTY(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+    SET_PROPERTY(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+ENDIF(CCACHE_FOUND)
 
 IF(JSONCPP_WITH_WARNING_AS_ERROR)
     UseCompilationWarningAsError()
 ENDIF()
 
 IF(JSONCPP_WITH_PKGCONFIG_SUPPORT)
-	CONFIGURE_FILE(
-		"pkg-config/jsoncpp.pc.in"
-		"pkg-config/jsoncpp.pc"
-		@ONLY)
-	INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/pkg-config/jsoncpp.pc"
-		DESTINATION "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/pkgconfig")
+    CONFIGURE_FILE(
+        "pkg-config/jsoncpp.pc.in"
+        "pkg-config/jsoncpp.pc"
+        @ONLY)
+    INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/pkg-config/jsoncpp.pc"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 ENDIF()
 
 IF(JSONCPP_WITH_CMAKE_PACKAGE)
         INSTALL(EXPORT jsoncpp
-                DESTINATION ${PACKAGE_INSTALL_DIR}/jsoncpp
+                DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp
                 FILE        jsoncppConfig.cmake)
 ENDIF()
 
