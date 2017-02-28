@@ -13,6 +13,7 @@ IF(BUILD_SHARED_LIBS)
 ELSE(BUILD_SHARED_LIBS)
     TARGET_LINK_LIBRARIES(jsoncpp_test jsoncpp_lib_static)
 ENDIF()
+cotire(jsoncpp_test)
 
 # another way to solve issue #90
 #set_target_properties(jsoncpp_test PROPERTIES COMPILE_FLAGS -ffloat-store)
