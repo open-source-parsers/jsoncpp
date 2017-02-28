@@ -66,6 +66,7 @@ jsoncpp_parse_version( ${JSONCPP_VERSION} JSONCPP_VERSION )
 #ENDIF(NOT JSONCPP_VERSION_FOUND)
 SET( JSONCPP_SOVERSION 11 )
 SET( JSONCPP_USE_SECURE_MEMORY "0" CACHE STRING "-D...=1 to use memory-wiping allocator for STL" )
+SET (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
 
 MESSAGE(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
 # File version.h is only regenerated on CMake configure step
@@ -148,6 +149,8 @@ IF(JSONCPP_WITH_CMAKE_PACKAGE)
                 DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp
                 FILE        jsoncppConfig.cmake)
 ENDIF()
+# compile time reducer
+INCLUDE(cotire)
 
 # Build the different applications
 ADD_SUBDIRECTORY( src )
