@@ -10,6 +10,7 @@ IF(BUILD_SHARED_LIBS)
 ELSE(BUILD_SHARED_LIBS)
     TARGET_LINK_LIBRARIES(jsontestrunner_exe jsoncpp_lib_static)
 ENDIF()
+cotire(jsontestrunner_exe)
 
 SET_TARGET_PROPERTIES(jsontestrunner_exe PROPERTIES OUTPUT_NAME jsontestrunner_exe)
 
