@@ -78,6 +78,8 @@ IF(BUILD_SHARED_LIBS)
     IF(APPLE)
         SET_TARGET_PROPERTIES( jsoncpp_lib PROPERTIES INSTALL_RPATH "@loader_path/." )
     ENDIF()
+    
+    cotire(jsoncpp_lib)
 
     INSTALL( TARGETS jsoncpp_lib ${INSTALL_EXPORT}
              RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -98,6 +100,8 @@ IF(BUILD_STATIC_LIBS)
     SET_TARGET_PROPERTIES( jsoncpp_lib_static PROPERTIES OUTPUT_NAME jsoncpp
                            DEBUG_OUTPUT_NAME jsoncpp${DEBUG_LIBNAME_SUFFIX} )
 
+    cotire(jsoncpp_lib_static)
+    
     INSTALL( TARGETS jsoncpp_lib_static ${INSTALL_EXPORT}
              RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
              LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
