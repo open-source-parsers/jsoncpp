@@ -398,6 +398,7 @@ Value::Value(double value) {
 
 Value::Value(const char* value) {
   initBasic(stringValue, true);
+  JSON_ASSERT_MESSAGE(value != NULL, "Null Value Passed to Value Constructor");	
   value_.string_ = duplicateAndPrefixStringValue(value, static_cast<unsigned>(strlen(value)));
 }
 
