@@ -920,8 +920,8 @@ OurFeatures OurFeatures::all() { return OurFeatures(); }
 // exact copy of Reader, renamed to OurReader
 class OurReader {
 public:
-  typedef char Char;
-  typedef const Char* Location;
+  using Char = char;
+  using Location = const Char*;
   struct StructuredError {
     ptrdiff_t offset_start;
     ptrdiff_t offset_limit;
@@ -977,7 +977,7 @@ private:
     Location extra_;
   };
 
-  typedef std::deque<ErrorInfo> Errors;
+  using Errors = std::deque<ErrorInfo>;
 
   bool readToken(Token& token);
   void skipSpaces();
@@ -1019,7 +1019,7 @@ private:
   void addComment(Location begin, Location end, CommentPlacement placement);
   void skipCommentTokens(Token& token);
 
-  typedef std::stack<Value*> Nodes;
+  using Nodes = std::stack<Value*>;
   Nodes nodes_;
   Errors errors_;
   JSONCPP_STRING document_;
