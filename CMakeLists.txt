@@ -112,8 +112,11 @@ ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wconversion -Wshadow -Wextra")
     # not yet ready for -Wsign-conversion
 
-    IF(JSONCPP_WITH_STRICT_ISO AND NOT JSONCPP_WITH_WARNING_AS_ERROR)
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=conversion -pedantic")
+    IF(JSONCPP_WITH_STRICT_ISO)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
+    ENDIF()
+    IF(JSONCPP_WITH_WARNING_AS_ERROR)
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=conversion")
     ENDIF()
 ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     # using Intel compiler
