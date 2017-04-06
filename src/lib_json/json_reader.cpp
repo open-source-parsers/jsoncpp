@@ -1653,6 +1653,7 @@ bool OurReader::decodeString(Token& token, JSONCPP_STRING& decoded) {
     else if (c == '\\') {
       if (current == end)
         return addError("Empty escape sequence in string", token, current);
+      decoded += '\\';
       Char escape = *current++;
       switch (escape) {
       case '"':
@@ -1665,19 +1666,19 @@ bool OurReader::decodeString(Token& token, JSONCPP_STRING& decoded) {
         decoded += '\\';
         break;
       case 'b':
-        decoded += '\b';
+        decoded += 'b';
         break;
       case 'f':
-        decoded += '\f';
+        decoded += 'f';
         break;
       case 'n':
-        decoded += '\n';
+        decoded += 'n';
         break;
       case 'r':
-        decoded += '\r';
+        decoded += 'r';
         break;
       case 't':
-        decoded += '\t';
+        decoded += 't';
         break;
       case 'u': {
         unsigned int unicode;
