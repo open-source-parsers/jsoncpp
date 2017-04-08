@@ -335,7 +335,7 @@ void FastWriter::dropNullPlaceholders() { dropNullPlaceholders_ = true; }
 void FastWriter::omitEndingLineFeed() { omitEndingLineFeed_ = true; }
 
 JSONCPP_STRING FastWriter::write(const Value& root) {
-  document_ = "";
+  document_.clear();
   writeValue(root);
   if (!omitEndingLineFeed_)
     document_ += "\n";
@@ -403,9 +403,9 @@ StyledWriter::StyledWriter()
     : rightMargin_(74), indentSize_(3), addChildValues_() {}
 
 JSONCPP_STRING StyledWriter::write(const Value& root) {
-  document_ = "";
+  document_.clear();
   addChildValues_ = false;
-  indentString_ = "";
+  indentString_.clear();
   writeCommentBeforeValue(root);
   writeValue(root);
   writeCommentAfterValueOnSameLine(root);
@@ -619,7 +619,7 @@ StyledStreamWriter::StyledStreamWriter(JSONCPP_STRING indentation)
 void StyledStreamWriter::write(JSONCPP_OSTREAM& out, const Value& root) {
   document_ = &out;
   addChildValues_ = false;
-  indentString_ = "";
+  indentString_.clear();
   indented_ = true;
   writeCommentBeforeValue(root);
   if (!indented_) writeIndent();
@@ -901,7 +901,7 @@ int BuiltStyledStreamWriter::write(Value const& root, JSONCPP_OSTREAM* sout)
   sout_ = sout;
   addChildValues_ = false;
   indented_ = true;
-  indentString_ = "";
+  indentString_.clear();
   writeCommentBeforeValue(root);
   if (!indented_) writeIndent();
   indented_ = true;
@@ -1155,10 +1155,10 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
   }
   JSONCPP_STRING nullSymbol = "null";
   if (dnp) {
-    nullSymbol = "";
+    nullSymbol.clear();
   }
   if (pre > 17) pre = 17;
-  JSONCPP_STRING endingLineFeedSymbol = "";
+  JSONCPP_STRING endingLineFeedSymbol;
   return new BuiltStyledStreamWriter(
       indentation, cs,
       colonSymbol, nullSymbol, endingLineFeedSymbol, usf, pre);
