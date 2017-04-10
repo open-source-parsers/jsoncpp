@@ -1,5 +1,7 @@
 # JsonCpp
 
+[![badge](https://img.shields.io/badge/conan.io-jsoncpp%2F1.8.0-green.svg?logo=data:image/png;base64%2CiVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAMAAAAolt3jAAAA1VBMVEUAAABhlctjlstkl8tlmMtlmMxlmcxmmcxnmsxpnMxpnM1qnc1sn85voM91oM11oc1xotB2oc56pNF6pNJ2ptJ8ptJ8ptN9ptN8p9N5qNJ9p9N9p9R8qtOBqdSAqtOAqtR%2BrNSCrNJ/rdWDrNWCsNWCsNaJs9eLs9iRvNuVvdyVv9yXwd2Zwt6axN6dxt%2Bfx%2BChyeGiyuGjyuCjyuGly%2BGlzOKmzOGozuKoz%2BKqz%2BOq0OOv1OWw1OWw1eWx1eWy1uay1%2Baz1%2Baz1%2Bez2Oe02Oe12ee22ujUGwH3AAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfgBQkREyOxFIh/AAAAiklEQVQI12NgAAMbOwY4sLZ2NtQ1coVKWNvoc/Eq8XDr2wB5Ig62ekza9vaOqpK2TpoMzOxaFtwqZua2Bm4makIM7OzMAjoaCqYuxooSUqJALjs7o4yVpbowvzSUy87KqSwmxQfnsrPISyFzWeWAXCkpMaBVIC4bmCsOdgiUKwh3JojLgAQ4ZCE0AMm2D29tZwe6AAAAAElFTkSuQmCC)](http://www.conan.io/source/jsoncpp/1.8.0/theirix/ci)
+
 [JSON][json-org] is a lightweight data-interchange format. It can represent
 numbers, strings, ordered sequences of values, and collections of name/value
 pairs.
@@ -30,12 +32,12 @@ format to store user input files.
 ## Using JsonCpp in your project
 
 The recommended approach to integrating JsonCpp in your project is to include
-the [amalgamated source](#generating-amalgamated-source-and-header) (a single 
-`.cpp` file and two `.h` files) in your project, and compile and build as you 
+the [amalgamated source](#generating-amalgamated-source-and-header) (a single
+`.cpp` file and two `.h` files) in your project, and compile and build as you
 would any other source file. This ensures consistency of compilation flags and
-ABI compatibility, issues which arise when building shared or static 
+ABI compatibility, issues which arise when building shared or static
 libraries. See the next section for instructions.
-  
+
 The `include/` should be added to your compiler include path. JsonCpp headers
 should be included as follow:
 
@@ -69,6 +71,43 @@ correct order and defining the macro `JSON_IS_AMALGAMATION` to prevent inclusion
 
 ## Contributing to JsonCpp
 
+### Building and testing with Conan
+
+[Conan](https://www.conan.io/#/) is an open source package manager intended for C/C++ projects.
+It is cross platform and build system agnostic.
+
+Conan requires Python for running, and can be installed using pip:
+
+    pip install conan
+
+ Detailed instructions can be found on [conan docs](http://docs.conan.io/en/latest/).
+
+For build jsoncpp with conan, you need to create a [conanfile.txt](http://docs.conan.io/en/latest/reference/conanfile_txt.html) or a [conanfile.py](http://docs.conan.io/en/latest/reference/conanfile.html). The first is simpler, but the second is more flexible.
+
+This is a sample conanfile.txt:
+
+```
+[requires]
+jsoncpp/1.8.0@theirix/ci
+
+[generators]
+cmake
+```
+
+**Note**: cmake is not required, you can use other [integrations](http://docs.conan.io/en/latest/integrations.html). Or you can set the appropriate environment variables, using [virtualenv generators](http://docs.conan.io/en/latest/mastering/virtualenv.html).
+
+Then run the following command from the conanfile directory:
+
+    conan install --build missing
+
+This will try to download the appropriate package for your settings (OS, compiler, architecture) from the [recipe packages](https://www.conan.io/source/jsoncpp/1.8.0/theirix/ci). If it is not found, the package will be built.
+
+**Note**: you do not need to install cmake to build jsoncpp using conan, because the recipe will download it automatically.
+
+If you need, you can customize the jsoncpp recipe. Just clone/fork [it from github](https://github.com/theirix/conan-jsoncpp/).
+
+See [integrations instructions](http://docs.conan.io/en/latest/integrations.html) for how to use your build system with conan.
+
 ### Building and testing with CMake
 
 [CMake][] is a C++ Makefiles/Solution generator. It is usually available on most Linux system as package. On Ubuntu:
@@ -85,7 +124,7 @@ When running CMake, a few parameters are required:
 * A build directory where the makefiles/solution are generated. It is also used
   to store objects, libraries and executables files.
 * The generator to use: makefiles or Visual Studio solution? What version or
-  Visual Studio, 32 or 64 bits solution? 
+  Visual Studio, 32 or 64 bits solution?
 
 Steps for generating solution/makefiles using `cmake-gui`:
 
@@ -154,17 +193,17 @@ In the instructions below, replace `path/to/jsontest` with the path of the
     cd test
     # This will run the Reader/Writer tests
     python runjsontests.py path/to/jsontest
-    
+
     # This will run the Reader/Writer tests, using JSONChecker test suite
     # (http://www.json.org/JSON_checker/).
     # Notes: not all tests pass: JsonCpp is too lenient (for example,
     # it allows an integer to start with '0'). The goal is to improve
     # strict mode parsing to get all tests to pass.
     python runjsontests.py --with-json-checker path/to/jsontest
-    
+
     # This will run the unit tests (mostly Value)
     python rununittests.py path/to/test_lib_json
-    
+
     # You can run the tests using valgrind:
     python rununittests.py --valgrind path/to/test_lib_json
 
