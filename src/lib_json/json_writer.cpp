@@ -400,7 +400,9 @@ void FastWriter::writeValue(const Value& value) {
 // //////////////////////////////////////////////////////////////////
 
 StyledWriter::StyledWriter()
-    : rightMargin_(74), indentSize_(3), addChildValues_() {}
+    : rightMargin_(74), indentSize_(3), addChildValues_(), omitEndingLineFeed_(false) {}
+    
+void StyledWriter::omitEndingLineFeed() { omitEndingLineFeed_ = true; }
 
 JSONCPP_STRING StyledWriter::write(const Value& root) {
   document_.clear();
@@ -409,7 +411,8 @@ JSONCPP_STRING StyledWriter::write(const Value& root) {
   writeCommentBeforeValue(root);
   writeValue(root);
   writeCommentAfterValueOnSameLine(root);
-  document_ += "\n";
+  if (!omitEndingLineFeed_)
+    document_ += "\n";
   return document_;
 }
 
