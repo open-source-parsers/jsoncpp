@@ -239,7 +239,8 @@ void Value::CommentInfo::setComment(const char* text, size_t len) {
   JSON_ASSERT_MESSAGE(
       text[0] == '\0' || text[0] == '/',
       "in Json::Value::setComment(): Comments must start with /");
-  // It seems that /**/ style comments are acceptable as well.
+  // It seems that /**/ style comments are acceptable as well.But ignore empty comments, these are unnecessary.
+  if((text[2] == '\n' || !strcmp(text+2,"*/"))) return;
   comment_ = duplicateStringValue(text, len);
 }
 
