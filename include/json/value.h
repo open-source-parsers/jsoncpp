@@ -364,6 +364,16 @@ Json::Value obj_value(Json::objectValue); // {}
   double asDouble() const;
   bool asBool() const;
 
+  operator const char*() const;
+  operator std::string() const;
+  operator Int() const;
+  operator UInt() const;
+  operator Int64() const;
+  operator UInt64() const;
+  operator float() const;
+  operator double() const;
+  operator bool() const;
+
   bool isNull() const;
   bool isBool() const;
   bool isInt() const;
