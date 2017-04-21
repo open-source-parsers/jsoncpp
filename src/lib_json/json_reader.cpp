@@ -43,7 +43,7 @@ static int       stackDepth_g = 0;  // see readValue()
 
 namespace Json {
 
-#if __GNUC__ >= 6
+#if JSON_HAS_UNIQUE_PTR
 typedef std::unique_ptr<CharReader> const  CharReaderPtr;
 #else
 typedef std::auto_ptr<CharReader>          CharReaderPtr;

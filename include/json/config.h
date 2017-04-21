@@ -51,6 +51,16 @@
 #define JSON_API
 #endif
 
+#if !defined(JSON_HAS_UNIQUE_PTR)
+#if __cplusplus >= 201103L
+#define JSON_HAS_UNIQUE_PTR (1)
+#elif _MSC_VER >= 1600
+#define JSON_HAS_UNIQUE_PTR (1)
+#else
+#define JSON_HAS_UNIQUE_PTR (0)
+#endif
+#endif
+
 // If JSON_NO_INT64 is defined, then Json only support C++ "int" type for
 // integer
 // Storages, and 64 bits integer support is disabled.
