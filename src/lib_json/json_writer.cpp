@@ -15,6 +15,8 @@
 #include <cassert>
 #include <cstring>
 #include <cstdio>
+#include <stdio.h>
+#include <string.h>
 
 #if defined(_MSC_VER) && _MSC_VER >= 1200 && _MSC_VER < 1800 // Between VC++ 6.0 and VC++ 11.0
 #include <float.h>
@@ -42,7 +44,9 @@
 #else
 #include <cmath>
 #if !(defined(__QNXNTO__)) // QNX already defines isfinite
+#ifndef isfinite
 #define isfinite std::isfinite
+#endif
 #endif
 #endif
 
@@ -143,7 +147,7 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
   int len = -1;
 
   char formatString[6];
-  sprintf(formatString, "%%.%dg", precision);
+  sprintf(formatString, "%%.%ug", precision);
 
   // Print into the buffer. We need not request the alternative representation
   // that always has a decimal point because JSON doesn't distingish the
