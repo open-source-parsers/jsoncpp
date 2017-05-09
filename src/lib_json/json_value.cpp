@@ -292,7 +292,7 @@ void Value::CZString::swap(CZString& other) {
   std::swap(index_, other.index_);
 }
 
-Value::CZString& Value::CZString::operator=(CZString other) {
+Value::CZString& Value::CZString::operator=(CZString& other) {
   swap(other);
   return *this;
 }
