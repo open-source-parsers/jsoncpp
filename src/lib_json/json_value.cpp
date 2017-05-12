@@ -1122,7 +1122,7 @@ Value const& Value::operator[](CppTL::ConstString const& key) const
 }
 #endif
 
-Value& Value::append(const Value& value) { return (*this)[size()] = value; }
+Value& Value::append(Value value) { return (*this)[size()] = std::move(value); }
 
 Value Value::get(char const* key, char const* cend, Value const& defaultValue) const
 {
