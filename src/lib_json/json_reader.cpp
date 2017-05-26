@@ -65,7 +65,8 @@ typedef std::auto_ptr<CharReader>   CharReaderPtr;
 
 Features::Features()
     : allowComments_(true), strictRoot_(false),
-      allowDroppedNullPlaceholders_(false), allowNumericKeys_(false) {}
+      allowDroppedNullPlaceholders_(false), allowNumericKeys_(false),
+      rejectDupKeys_(false) {}
 
 Features Features::all() { return Features(); }
 
@@ -491,6 +492,11 @@ bool Reader::readObject(Token& tokenStart) {
     if (!readToken(colon) || colon.type_ != tokenMemberSeparator) {
       return addErrorAndRecover(
           "Missing ':' after object member name", colon, tokenObjectEnd);
+    }
+    if (features_.rejectDupKeys_ && currentValue().isMember(name)) {
+      JSONCPP_STRING msg = "Duplicate key: '" + name + "'";
+      return addErrorAndRecover(
+          msg, tokenName, tokenObjectEnd);
     }
     Value& value = currentValue()[name];
     nodes_.push(&value);
