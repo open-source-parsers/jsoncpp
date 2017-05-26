@@ -52,6 +52,9 @@ public:
 
   /// \c true if numeric object key are allowed. Default: \c false.
   bool allowNumericKeys_;
+
+  /// \c true if duplicate keys within an object should be rejected. Default: \c false.
+  bool rejectDupKeys_;
 };
 
 } // namespace Json
