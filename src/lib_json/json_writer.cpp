@@ -142,7 +142,7 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
   char buffer[36];
   int len = -1;
 
-  char formatString[6];
+  char formatString[15];
   snprintf(formatString, sizeof(formatString), "%%.%dg", precision);
 
   // Print into the buffer. We need not request the alternative representation
