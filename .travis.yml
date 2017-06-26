@@ -7,14 +7,24 @@
 # to allow C++11, though we are not yet building with -std=c++11
 
 install:
+- if [[ $TRAVIS_OS_NAME == osx ]]; then
+     brew update;
+     brew install python3 ninja;
+     python3 -m venv venv;
+     source venv/bin/activate;
+  elif [[ $TRAVIS_OS_NAME == linux ]]; then
+     wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip;
+     unzip -q ninja-linux.zip -d build;
+  fi
+- pip3 install meson
 # /usr/bin/gcc is 4.6 always, but gcc-X.Y is available.
-- if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
+- if [[ $CXX = g++ ]]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
 # /usr/bin/clang has a conflict with gcc, so use clang-X.Y.
-- if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.5" CC="clang-3.5"; fi
+- if [[ $CXX = clang++ ]]; then export CXX="clang++-3.5" CC="clang-3.5"; fi
 - echo ${PATH}
 - ls /usr/local
 - ls /usr/local/bin
-- export PATH=/usr/local/bin:/usr/bin:${PATH}
+- export PATH="${PWD}"/build:/usr/local/bin:/usr/bin:${PATH}
 - echo ${CXX}
 - ${CXX} --version
 - which valgrind
@@ -23,10 +33,7 @@ addons:
     sources:
     - ubuntu-toolchain-r-test
     - llvm-toolchain-precise-3.5
-    - george-edison55-precise-backports # cmake 3.2.3
     packages:
-    - cmake
-    - cmake-data
     - gcc-4.9
     - g++-4.9
     - clang-3.5
@@ -40,8 +47,9 @@ compiler:
 script: ./travis.sh
 env:
   matrix:
-    - SHARED_LIB=ON  STATIC_LIB=ON CMAKE_PKG=ON  BUILD_TYPE=release VERBOSE_MAKE=false
-    - SHARED_LIB=OFF STATIC_LIB=ON CMAKE_PKG=OFF BUILD_TYPE=debug   VERBOSE_MAKE=true VERBOSE
+    - LIB_TYPE=static BUILD_TYPE=release
+    - LIB_TYPE=shared BUILD_TYPE=debug
 notifications:
   email: false
+dist: trusty
 sudo: false
