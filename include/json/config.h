@@ -7,7 +7,13 @@
 #define JSON_CONFIG_H_INCLUDED
 #include <stddef.h>
 #include <string> //typedef String
+
+#if defined(_MSC_VER) && (_MSC_VER <= 1500) // MSVC 9
+typedef signed __int64   int64_t;
+typedef unsigned __int64 uint64_t;
+#else
 #include <stdint.h> //typedef int64_t, uint64_t
+#endif
 
 /// If defined, indicates that json library is embedded in CppTL library.
 //# define JSON_IN_CPPTL 1
