@@ -233,7 +233,12 @@ private:
     CZString(CZString&& other);
 #endif
     ~CZString();
-    CZString& operator=(CZString other);
+    CZString& operator=(const CZString& other);
+
+#if JSON_HAS_RVALUE_REFERENCES
+    CZString& operator=(CZString&& other);
+#endif
+
     bool operator<(CZString const& other) const;
     bool operator==(CZString const& other) const;
     ArrayIndex index() const;
@@ -447,7 +452,7 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Equivalent to jsonvalue[jsonvalue.size()] = value;
   Value& append(const Value& value);
 
-#ifdef JSON_HAS_RVALUE_REFERENCES
+#if JSON_HAS_RVALUE_REFERENCES
   Value& append(Value&& value);
 #endif
 
