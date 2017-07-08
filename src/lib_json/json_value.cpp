@@ -398,7 +398,7 @@ Value::Value(double value) {
 
 Value::Value(const char* value) {
   initBasic(stringValue, true);
-  JSON_ASSERT_MESSAGE(value != NULL, "Null Value Passed to Value Constructor");	
+  JSON_ASSERT_MESSAGE(value != NULL, "Null Value Passed to Value Constructor");
   value_.string_ = duplicateAndPrefixStringValue(value, static_cast<unsigned>(strlen(value)));
 }
 
@@ -508,10 +508,18 @@ Value::~Value() {
   value_.uint_ = 0;
 }
 
-Value& Value::operator=(Value other) {
+Value& Value::operator=(const Value& other) {
+  swap(const_cast<Value&>(other));
+  return *this;
+}
+
+#if JSON_HAS_RVALUE_REFERENCES
+Value& Value::operator=(Value&& other) {
+  initBasic(nullValue);
   swap(other);
   return *this;
 }
+#endif
 
 void Value::swapPayload(Value& other) {
   ValueType temp = type_;
@@ -523,11 +531,24 @@ void Value::swapPayload(Value& other) {
   other.allocated_ = temp2 & 0x1;
 }
 
+void Value::copyPayload(const Value& other) {
+  type_ = other.type_;
+  value_ = other.value_;
+  allocated_ = other.allocated_;
+}
+
 void Value::swap(Value& other) {
   swapPayload(other);
   std::swap(comments_, other.comments_);
   std::swap(start_, other.start_);
   std::swap(limit_, other.limit_);
+}
+
+void Value::copy(const Value& other) {
+  copyPayload(other);
+  comments_ = other.comments_;
+  start_ = other.start_;
+  limit_ = other.limit_;
 }
 
 ValueType Value::type() const { return type_; }
