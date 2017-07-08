@@ -1145,6 +1145,10 @@ Value const& Value::operator[](CppTL::ConstString const& key) const
 
 Value& Value::append(const Value& value) { return (*this)[size()] = value; }
 
+#ifdef JSON_HAS_RVALUE_REFERENCES
+  Value& Value::append(Value&& value) { return (*this)[size()] = value; }
+#endif
+
 Value Value::get(char const* key, char const* cend, Value const& defaultValue) const
 {
   Value const* found = find(key, cend);

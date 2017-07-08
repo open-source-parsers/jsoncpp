@@ -447,6 +447,10 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Equivalent to jsonvalue[jsonvalue.size()] = value;
   Value& append(const Value& value);
 
+#ifdef JSON_HAS_RVALUE_REFERENCES
+  Value& append(Value&& value);
+#endif
+
   /// Access an object value by name, create a null member if it does not exist.
   /// \note Because of our implementation, keys are limited to 2^30 -1 chars.
   ///  Exceeding that will cause an exception.
