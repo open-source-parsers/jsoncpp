@@ -32,7 +32,7 @@ namespace Json {
  *
  * \deprecated Use CharReader and CharReaderBuilder.
  */
-class JSON_API Reader {
+class JSONCPP_DEPRECATED("Use CharReader and CharReaderBuilder instead") JSON_API Reader {
 public:
   typedef char Char;
   typedef const Char* Location;
@@ -229,6 +229,9 @@ private:
   JSONCPP_STRING getLocationLineAndColumn(Location location) const;
   void addComment(Location begin, Location end, CommentPlacement placement);
   void skipCommentTokens(Token& token);
+
+  static bool containsNewLine(Location begin, Location end);
+  static JSONCPP_STRING normalizeEOL(Location begin, Location end);
 
   typedef std::stack<Value*> Nodes;
   Nodes nodes_;

@@ -1453,8 +1453,13 @@ ptrdiff_t Value::getOffsetStart() const { return start_; }
 ptrdiff_t Value::getOffsetLimit() const { return limit_; }
 
 JSONCPP_STRING Value::toStyledString() const {
-  StyledWriter writer;
-  return writer.write(*this);
+  StreamWriterBuilder builder;
+
+  JSONCPP_STRING out = this->hasComment(commentBefore) ? "\n" : "";
+  out += Json::writeString(builder, *this);
+  out += "\n";
+
+  return out;
 }
 
 Value::const_iterator Value::begin() const {

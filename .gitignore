@@ -50,3 +50,6 @@ jsoncpp_lib_static.dir/
 .project
 .cproject
 /.settings/
+
+# DS_Store
+.DS_Store
