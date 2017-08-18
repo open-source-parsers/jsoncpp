@@ -62,7 +62,7 @@
 #endif
 #endif
 
-#if defined(__BORLANDC__)  
+#if defined(__BORLANDC__)
 #include <float.h>
 #define isfinite _finite
 #define snprintf _snprintf
@@ -172,7 +172,7 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
 }
 }
 
-JSONCPP_STRING valueToString(double value) { return valueToString(value, false, 17); }
+JSONCPP_STRING valueToString(double value) { return valueToString(value, false, 15); }
 
 JSONCPP_STRING valueToString(bool value) { return value ? "true" : "false"; }
 
@@ -1136,7 +1136,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
   JSONCPP_STRING cs_str = settings_["commentStyle"].asString();
   bool eyc = settings_["enableYAMLCompatibility"].asBool();
   bool dnp = settings_["dropNullPlaceholders"].asBool();
-  bool usf = settings_["useSpecialFloats"].asBool(); 
+  bool usf = settings_["useSpecialFloats"].asBool();
   unsigned int pre = settings_["precision"].asUInt();
   CommentStyle::Enum cs = CommentStyle::All;
   if (cs_str == "All") {
@@ -1156,7 +1156,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
   if (dnp) {
     nullSymbol.clear();
   }
-  if (pre > 17) pre = 17;
+  if (pre > 15) pre = 15;
   JSONCPP_STRING endingLineFeedSymbol;
   return new BuiltStyledStreamWriter(
       indentation, cs,
@@ -1202,7 +1202,7 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings)
   (*settings)["enableYAMLCompatibility"] = false;
   (*settings)["dropNullPlaceholders"] = false;
   (*settings)["useSpecialFloats"] = false;
-  (*settings)["precision"] = 17;
+  (*settings)["precision"] = 15;
   //! [StreamWriterBuilderDefaults]
 }
 
