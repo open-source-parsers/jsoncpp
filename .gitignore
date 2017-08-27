@@ -6,7 +6,6 @@
 *.process-output
 *.rewrite
 /bin/
-/buildscons/
 /libs/
 /doc/doxyfile
 /dist/
