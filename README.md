@@ -71,117 +71,23 @@ correct order and defining the macro `JSON_IS_AMALGAMATION` to prevent inclusion
 
 ## Contributing to JsonCpp
 
-### Building and testing with Conan
+### Building and testing with Meson/Ninja
+Thanks to David Seifert (@SoapGentoo), we (the maintainers) now use [meson](http://mesonbuild.com/) and [ninja](https://ninja-build.org/) to build for debugging, as well as for continuous integration (see [`travis.sh`](travis.sh) ). Other systems may work, but minor things like version strings might break.
 
-[Conan](https://www.conan.io/#/) is an open source package manager intended for C/C++ projects.
-It is cross platform and build system agnostic.
+First, install both meson (which requires Python3) and ninja.
 
-Conan requires Python for running, and can be installed using pip:
+Then,
 
-    pip install conan
+    cd jsoncpp/
+    BUILD_TYPE=shared
+    #BUILD_TYPE=static
+    LIB_TYPE=debug
+    #LIB_TYPE=release
+    meson --buildtype ${BUILD_TYPE} --default-library ${LIB_TYPE} . build-${LIB_TYPE}
+    ninja -v -C build-${LIB_TYPE} test
 
- Detailed instructions can be found on [conan docs](http://docs.conan.io/en/latest/).
-
-For build jsoncpp with conan, you need to create a [conanfile.txt](http://docs.conan.io/en/latest/reference/conanfile_txt.html) or a [conanfile.py](http://docs.conan.io/en/latest/reference/conanfile.html). The first is simpler, but the second is more flexible.
-
-This is a sample conanfile.txt:
-
-```
-[requires]
-jsoncpp/1.8.0@theirix/ci
-
-[generators]
-cmake
-```
-
-**Note**: cmake is not required, you can use other [integrations](http://docs.conan.io/en/latest/integrations.html). Or you can set the appropriate environment variables, using [virtualenv generators](http://docs.conan.io/en/latest/mastering/virtualenv.html).
-
-Then run the following command from the conanfile directory:
-
-    conan install --build missing
-
-This will try to download the appropriate package for your settings (OS, compiler, architecture) from the [recipe packages](https://www.conan.io/source/jsoncpp/1.8.0/theirix/ci). If it is not found, the package will be built.
-
-**Note**: you do not need to install cmake to build jsoncpp using conan, because the recipe will download it automatically.
-
-If you need, you can customize the jsoncpp recipe. Just clone/fork [it from github](https://github.com/theirix/conan-jsoncpp/).
-
-See [integrations instructions](http://docs.conan.io/en/latest/integrations.html) for how to use your build system with conan.
-
-### Building and testing with CMake
-
-[CMake][] is a C++ Makefiles/Solution generator. It is usually available on most Linux system as package. On Ubuntu:
-
-    sudo apt-get install cmake
-
-[CMake]: http://www.cmake.org
-
-Note that Python is also required to run the JSON reader/writer tests. If
-missing, the build will skip running those tests.
-
-When running CMake, a few parameters are required:
-
-* A build directory where the makefiles/solution are generated. It is also used
-  to store objects, libraries and executables files.
-* The generator to use: makefiles or Visual Studio solution? What version or
-  Visual Studio, 32 or 64 bits solution?
-
-Steps for generating solution/makefiles using `cmake-gui`:
-
-* Make "source code" point to the source directory.
-* Make "where to build the binary" point to the directory to use for the build.
-* Click on the "Grouped" check box.
-* Review JsonCpp build options (tick `BUILD_SHARED_LIBS` to build as a
-  dynamic library).
-* Click the configure button at the bottom, then the generate button.
-* The generated solution/makefiles can be found in the binary directory.
-
-Alternatively, from the command-line on Unix in the source directory:
-
-    mkdir -p build/debug
-    cd build/debug
-    cmake -DCMAKE_BUILD_TYPE=debug -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DARCHIVE_INSTALL_DIR=. -G "Unix Makefiles" ../..
-    make
-
-For a good pkg-config file, add:
-
-    -DCMAKE_INSTALL_INCLUDEDIR=include/jsoncpp
-
-Running `cmake -h` will display the list of available generators (passed using
-the `-G` option).
-
-By default CMake hides compilation commands. This can be modified by specifying
-`-DCMAKE_VERBOSE_MAKEFILE=true` when generating makefiles.
-
-### Building and testing with SCons
-
-**Note:** The SCons-based build system is deprecated. Please use CMake (see the
-section above).
-
-JsonCpp can use [Scons][] as a build system. Note that SCons requires Python to
-be installed.
-
-[SCons]: http://www.scons.org/
-
-Invoke SCons as follows:
-
-    scons platform=$PLATFORM [TARGET]
-
-where `$PLATFORM` may be one of:
-
-* `suncc`: Sun C++ (Solaris)
-* `vacpp`: Visual Age C++ (AIX)
-* `mingw`
-* `msvc6`: Microsoft Visual Studio 6 service pack 5-6
-* `msvc70`: Microsoft Visual Studio 2002
-* `msvc71`: Microsoft Visual Studio 2003
-* `msvc80`: Microsoft Visual Studio 2005
-* `msvc90`: Microsoft Visual Studio 2008
-* `linux-gcc`: Gnu C++ (linux, also reported to work for Mac OS X)
-
-If you are building with Microsoft Visual Studio 2008, you need to set up the
-environment by running `vcvars32.bat` (e.g. MSVC 2008 command prompt) before
-running SCons.
+### Building and testing with other build systems
+See https://github.com/open-source-parsers/jsoncpp/wiki/Building
 
 ### Running the tests manually
 
@@ -206,12 +112,6 @@ In the instructions below, replace `path/to/jsontest` with the path of the
 
     # You can run the tests using valgrind:
     python rununittests.py --valgrind path/to/test_lib_json
-
-### Running the tests using SCons
-
-Note that tests can be run using SCons using the `check` target:
-
-    scons platform=$PLATFORM check
 
 ### Building the documentation
 
