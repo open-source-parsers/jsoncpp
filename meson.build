@@ -1,7 +1,7 @@
 project(
   'jsoncpp',
   'cpp',
-  version : '1.8.1',
+  version : '1.8.2',
   default_options : [
     'buildtype=release',
     'warning_level=1'],
