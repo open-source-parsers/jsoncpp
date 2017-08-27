@@ -103,8 +103,7 @@ Reader::Reader(const Features& features)
 
 bool
 Reader::parse(const std::string& document, Value& root, bool collectComments) {
-  JSONCPP_STRING documentCopy(document.data(), document.data() + document.capacity());
-  std::swap(documentCopy, document_);
+  document_.assign(document.begin(), document.end());
   const char* begin = document_.c_str();
   const char* end = begin + document_.length();
   return parse(begin, end, root, collectComments);
