@@ -229,7 +229,10 @@ bool Reader::readValue() {
       currentValue().setOffsetStart(current_ - begin_ - 1);
       currentValue().setOffsetLimit(current_ - begin_);
       break;
-    } // Else, fall through...
+    } else { // else, fall through ...
+      current_--;
+      return false;
+    }
   default:
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -768,8 +771,9 @@ bool Reader::recoverFromError(TokenType skipUntilToken) {
     if (skip.type_ == skipUntilToken || skip.type_ == tokenEndOfStream)
       break;
   }
+  currentValue().clear();
   errors_.resize(errorCount);
-  return false;
+  return errorCount == 0;
 }
 
 bool Reader::addErrorAndRecover(const JSONCPP_STRING& message,

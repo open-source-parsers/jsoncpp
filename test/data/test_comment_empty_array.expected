@@ -1,0 +1,6 @@
+.=[]
+  // Simple comment
+  
+  /* C-Style comment 
+    second linee
+  */
