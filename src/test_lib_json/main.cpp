@@ -3,6 +3,9 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 #include "jsontest.h"
 #include <json/config.h>
 #include <json/json.h>
@@ -2587,3 +2590,5 @@ int main(int argc, const char* argv[]) {
 
   return runner.runCommandLine(argc, argv);
 }
+
+#pragma GCC diagnostic pop
