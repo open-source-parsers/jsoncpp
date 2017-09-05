@@ -38,12 +38,14 @@ First, install both meson (which requires Python3) and ninja.
 Then,
 
     cd jsoncpp/
-    BUILD_TYPE=shared
-    #BUILD_TYPE=static
-    LIB_TYPE=debug
-    #LIB_TYPE=release
+    BUILD_TYPE=debug
+    #BUILD_TYPE=release
+    LIB_TYPE=shared
+    #LIB_TYPE=static
     meson --buildtype ${BUILD_TYPE} --default-library ${LIB_TYPE} . build-${LIB_TYPE}
     ninja -v -C build-${LIB_TYPE} test
+    cd build-${LIB_TYPE}
+    sudo ninja install
 
 ### Building and testing with other build systems
 See https://github.com/open-source-parsers/jsoncpp/wiki/Building
