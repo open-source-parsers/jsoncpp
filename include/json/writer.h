@@ -159,7 +159,6 @@ public:
 #pragma warning(push)
 #pragma warning(disable:4996) // Deriving from deprecated class
 class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API FastWriter : public Writer {
-#pragma warning(pop)
 public:
   FastWriter();
   ~FastWriter() JSONCPP_OVERRIDE {}
@@ -186,6 +185,7 @@ private:
   bool dropNullPlaceholders_;
   bool omitEndingLineFeed_;
 };
+#pragma warning(pop)
 
 /** \brief Writes a Value in <a HREF="http://www.json.org">JSON</a> format in a
  *human friendly way.
@@ -214,7 +214,6 @@ private:
 #pragma warning(push)
 #pragma warning(disable:4996) // Deriving from deprecated class
 class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API StyledWriter : public Writer {
-#pragma warning(pop)
 public:
   StyledWriter();
   ~StyledWriter() JSONCPP_OVERRIDE {}
@@ -249,6 +248,7 @@ private:
   unsigned int indentSize_;
   bool addChildValues_;
 };
+#pragma warning(pop)
 
 /** \brief Writes a Value in <a HREF="http://www.json.org">JSON</a> format in a
  human friendly way,
@@ -275,6 +275,8 @@ private:
  * \sa Reader, Value, Value::setComment()
  * \deprecated Use StreamWriterBuilder.
  */
+#pragma warning(push)
+#pragma warning(disable:4996) // Deriving from deprecated class
 class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API StyledStreamWriter {
 public:
 /**
@@ -316,6 +318,7 @@ private:
   bool addChildValues_ : 1;
   bool indented_ : 1;
 };
+#pragma warning(pop)
 
 #if defined(JSON_HAS_INT64)
 JSONCPP_STRING JSON_API valueToString(Int value);
