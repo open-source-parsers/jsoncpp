@@ -156,8 +156,10 @@ public:
  * \sa Reader, Value
  * \deprecated Use StreamWriterBuilder.
  */
+#pragma warning(push)
+#pragma warning(disable:4996) // Deriving from deprecated class
 class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API FastWriter : public Writer {
-
+#pragma warning(pop)
 public:
   FastWriter();
   ~FastWriter() JSONCPP_OVERRIDE {}
@@ -209,7 +211,10 @@ private:
  * \sa Reader, Value, Value::setComment()
  * \deprecated Use StreamWriterBuilder.
  */
+#pragma warning(push)
+#pragma warning(disable:4996) // Deriving from deprecated class  
 class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API StyledWriter : public Writer {
+#pragma warning(pop)  
 public:
   StyledWriter();
   ~StyledWriter() JSONCPP_OVERRIDE {}
