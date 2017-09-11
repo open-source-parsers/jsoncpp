@@ -31,7 +31,7 @@ def find_program(*filenames):
     paths = os.environ.get('PATH', '').split(os.pathsep)
     suffixes = ('win32' in sys.platform) and '.exe .com .bat .cmd' or ''
     for filename in filenames:
-        for name in [filename+ext for ext in suffixes.split()]:
+        for name in [filename+ext for ext in suffixes.split(' ')]:
             for directory in paths:
                 full_path = os.path.join(directory, name)
                 if os.path.isfile(full_path):
@@ -72,7 +72,7 @@ def run_cmd(cmd, silent=False):
     if silent:
         status, output = getstatusoutput(cmd)
     else:
-        status, output = os.system(' '.join(cmd)), ''
+        status, output = subprocess.call(cmd), ''
     if status:
         msg = 'Error while %s ...\n\terror=%d, output="""%s"""' %(info, status, output)
         raise Exception(msg)

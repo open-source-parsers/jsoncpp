@@ -1,4 +1,5 @@
-// Copyright 2007-2011 Baptiste Lepilleur
+// Copyright 2007-2011 Baptiste Lepilleur and The JsonCpp Authors
+// Copyright (C) 2016 InfoTeCS JSC. All rights reserved.
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
@@ -17,10 +18,26 @@
 #include <sstream>
 #include <memory>
 #include <set>
-#include <stdexcept>
+#include <limits>
 
-#if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
+#if defined(_MSC_VER)
+#if !defined(WINCE) && defined(__STDC_SECURE_LIB__) && _MSC_VER >= 1500 // VC++ 9.0 and above 
+#define snprintf sprintf_s
+#elif _MSC_VER >= 1900 // VC++ 14.0 and above
+#define snprintf std::snprintf
+#else
 #define snprintf _snprintf
+#endif
+#elif defined(__ANDROID__) || defined(__QNXNTO__)
+#define snprintf snprintf
+#elif __cplusplus >= 201103L
+#if !defined(__MINGW32__) && !defined(__CYGWIN__)
+#define snprintf std::snprintf
+#endif
+#endif
+
+#if defined(__QNXNTO__)
+#define sscanf std::sscanf
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400 // VC++ 8.0
@@ -28,12 +45,16 @@
 #pragma warning(disable : 4996)
 #endif
 
-static int const stackLimit_g = 1000;
-static int       stackDepth_g = 0;  // see readValue()
+// Define JSONCPP_DEPRECATED_STACK_LIMIT as an appropriate integer at compile time to change the stack limit
+#if !defined(JSONCPP_DEPRECATED_STACK_LIMIT)
+#define JSONCPP_DEPRECATED_STACK_LIMIT 1000
+#endif
+
+static size_t const stackLimit_g = JSONCPP_DEPRECATED_STACK_LIMIT; // see readValue()
 
 namespace Json {
 
-#if __cplusplus >= 201103L
+#if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
 typedef std::unique_ptr<CharReader> CharReaderPtr;
 #else
 typedef std::auto_ptr<CharReader>   CharReaderPtr;
@@ -60,7 +81,7 @@ Features Features::strictMode() {
 // Implementation of class Reader
 // ////////////////////////////////
 
-static bool containsNewLine(Reader::Location begin, Reader::Location end) {
+bool Reader::containsNewLine(Reader::Location begin, Reader::Location end) {
   for (; begin < end; ++begin)
     if (*begin == '\n' || *begin == '\r')
       return true;
@@ -82,7 +103,7 @@ Reader::Reader(const Features& features)
 
 bool
 Reader::parse(const std::string& document, Value& root, bool collectComments) {
-  document_ = document;
+  document_.assign(document.begin(), document.end());
   const char* begin = document_.c_str();
   const char* end = begin + document_.length();
   return parse(begin, end, root, collectComments);
@@ -94,11 +115,11 @@ bool Reader::parse(std::istream& sin, Value& root, bool collectComments) {
   // Those would allow streamed input from a file, if parse() were a
   // template function.
 
-  // Since std::string is reference-counted, this at least does not
+  // Since JSONCPP_STRING is reference-counted, this at least does not
   // create an extra copy.
-  std::string doc;
+  JSONCPP_STRING doc;
   std::getline(sin, doc, (char)EOF);
-  return parse(doc, root, collectComments);
+  return parse(doc.data(), doc.data() + doc.size(), root, collectComments);
 }
 
 bool Reader::parse(const char* beginDoc,
@@ -115,13 +136,12 @@ bool Reader::parse(const char* beginDoc,
   current_ = begin_;
   lastValueEnd_ = 0;
   lastValue_ = 0;
-  commentsBefore_ = "";
+  commentsBefore_.clear();
   errors_.clear();
   while (!nodes_.empty())
     nodes_.pop();
   nodes_.push(&root);
 
-  stackDepth_g = 0;  // Yes, this is bad coding, but options are limited.
   bool successful = readValue();
   Token token;
   skipCommentTokens(token);
@@ -144,12 +164,10 @@ bool Reader::parse(const char* beginDoc,
 }
 
 bool Reader::readValue() {
-  // This is a non-reentrant way to support a stackLimit. Terrible!
-  // But this deprecated class has a security problem: Bad input can
-  // cause a seg-fault. This seems like a fair, binary-compatible way
-  // to prevent the problem.
-  if (stackDepth_g >= stackLimit_g) throw std::runtime_error("Exceeded stackLimit in readValue().");
-  ++stackDepth_g;
+  // readValue() may call itself only if it calls readObject() or ReadArray().
+  // These methods execute nodes_.push() just before and nodes_.pop)() just after calling readValue(). 
+  // parse() executes one nodes_.push(), so > instead of >=.
+  if (nodes_.size() > stackLimit_g) throwRuntimeError("Exceeded stackLimit in readValue().");
 
   Token token;
   skipCommentTokens(token);
@@ -157,7 +175,7 @@ bool Reader::readValue() {
 
   if (collectComments_ && !commentsBefore_.empty()) {
     currentValue().setComment(commentsBefore_, commentBefore);
-    commentsBefore_ = "";
+    commentsBefore_.clear();
   }
 
   switch (token.type_) {
@@ -200,6 +218,8 @@ bool Reader::readValue() {
     }
     break;
   case tokenArraySeparator:
+  case tokenObjectEnd:
+  case tokenArrayEnd:
     if (features_.allowDroppedNullPlaceholders_) {
       // "Un-read" the current token and mark the current value as a null
       // token.
@@ -209,8 +229,7 @@ bool Reader::readValue() {
       currentValue().setOffsetStart(current_ - begin_ - 1);
       currentValue().setOffsetLimit(current_ - begin_);
       break;
-    }
-  // Else, fall through...
+    } // Else, fall through...
   default:
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -222,7 +241,6 @@ bool Reader::readValue() {
     lastValue_ = &currentValue();
   }
 
-  --stackDepth_g;
   return successful;
 }
 
@@ -351,9 +369,9 @@ bool Reader::readComment() {
   return true;
 }
 
-static std::string normalizeEOL(Reader::Location begin, Reader::Location end) {
-  std::string normalized;
-  normalized.reserve(end - begin);
+JSONCPP_STRING Reader::normalizeEOL(Reader::Location begin, Reader::Location end) {
+  JSONCPP_STRING normalized;
+  normalized.reserve(static_cast<size_t>(end - begin));
   Reader::Location current = begin;
   while (current != end) {
     char c = *current++;
@@ -373,7 +391,7 @@ static std::string normalizeEOL(Reader::Location begin, Reader::Location end) {
 void
 Reader::addComment(Location begin, Location end, CommentPlacement placement) {
   assert(collectComments_);
-  const std::string& normalized = normalizeEOL(begin, end);
+  const JSONCPP_STRING& normalized = normalizeEOL(begin, end);
   if (placement == commentAfterOnSameLine) {
     assert(lastValue_ != 0);
     lastValue_->setComment(normalized, placement);
@@ -383,7 +401,7 @@ Reader::addComment(Location begin, Location end, CommentPlacement placement) {
 }
 
 bool Reader::readCStyleComment() {
-  while (current_ != end_) {
+  while ((current_ + 1) < end_) {
     Char c = getNextChar();
     if (c == '*' && *current_ == '/')
       break;
@@ -412,25 +430,25 @@ void Reader::readNumber() {
   char c = '0'; // stopgap for already consumed character
   // integral part
   while (c >= '0' && c <= '9')
-    c = (current_ = p) < end_ ? *p++ : 0;
+    c = (current_ = p) < end_ ? *p++ : '\0';
   // fractional part
   if (c == '.') {
-    c = (current_ = p) < end_ ? *p++ : 0;
+    c = (current_ = p) < end_ ? *p++ : '\0';
     while (c >= '0' && c <= '9')
-      c = (current_ = p) < end_ ? *p++ : 0;
+      c = (current_ = p) < end_ ? *p++ : '\0';
   }
   // exponential part
   if (c == 'e' || c == 'E') {
-    c = (current_ = p) < end_ ? *p++ : 0;
+    c = (current_ = p) < end_ ? *p++ : '\0';
     if (c == '+' || c == '-')
-      c = (current_ = p) < end_ ? *p++ : 0;
+      c = (current_ = p) < end_ ? *p++ : '\0';
     while (c >= '0' && c <= '9')
-      c = (current_ = p) < end_ ? *p++ : 0;
+      c = (current_ = p) < end_ ? *p++ : '\0';
   }
 }
 
 bool Reader::readString() {
-  Char c = 0;
+  Char c = '\0';
   while (current_ != end_) {
     c = getNextChar();
     if (c == '\\')
@@ -443,7 +461,7 @@ bool Reader::readString() {
 
 bool Reader::readObject(Token& tokenStart) {
   Token tokenName;
-  std::string name;
+  JSONCPP_STRING name;
   Value init(objectValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(tokenStart.start_ - begin_);
@@ -455,7 +473,7 @@ bool Reader::readObject(Token& tokenStart) {
       break;
     if (tokenName.type_ == tokenObjectEnd && name.empty()) // empty object
       return true;
-    name = "";
+    name.clear();
     if (tokenName.type_ == tokenString) {
       if (!decodeString(tokenName, name))
         return recoverFromError(tokenObjectEnd);
@@ -463,7 +481,7 @@ bool Reader::readObject(Token& tokenStart) {
       Value numberName;
       if (!decodeNumber(tokenName, numberName))
         return recoverFromError(tokenObjectEnd);
-      name = numberName.asString();
+      name = JSONCPP_STRING(numberName.asCString());
     } else {
       break;
     }
@@ -502,7 +520,7 @@ bool Reader::readArray(Token& tokenStart) {
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(tokenStart.start_ - begin_);
   skipSpaces();
-  if (*current_ == ']') // empty array
+  if (current_ != end_ && *current_ == ']') // empty array
   {
     Token endArray;
     readToken(endArray);
@@ -555,7 +573,7 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
     ++current;
   // TODO: Help the compiler do the div and mod at compile time or get rid of them.
   Value::LargestUInt maxIntegerValue =
-      isNegative ? Value::LargestUInt(-Value::minLargestInt)
+      isNegative ? Value::LargestUInt(Value::maxLargestInt) + 1
                  : Value::maxLargestUInt;
   Value::LargestUInt threshold = maxIntegerValue / 10;
   Value::LargestUInt value = 0;
@@ -563,7 +581,7 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
     Char c = *current++;
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
-    Value::UInt digit(c - '0');
+    Value::UInt digit(static_cast<Value::UInt>(c - '0'));
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, b) this is the last digit, and
@@ -576,7 +594,9 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
     }
     value = value * 10 + digit;
   }
-  if (isNegative)
+  if (isNegative && value == maxIntegerValue)
+    decoded = Value::minLargestInt;
+  else if (isNegative)
     decoded = -Value::LargestInt(value);
   else if (value <= Value::LargestUInt(Value::maxInt))
     decoded = Value::LargestInt(value);
@@ -597,34 +617,10 @@ bool Reader::decodeDouble(Token& token) {
 
 bool Reader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
-  const int bufferSize = 32;
-  int count;
-  int length = int(token.end_ - token.start_);
-
-  // Sanity check to avoid buffer overflow exploits.
-  if (length < 0) {
-    return addError("Unable to parse token length", token);
-  }
-
-  // Avoid using a string constant for the format control string given to
-  // sscanf, as this can cause hard to debug crashes on OS X. See here for more
-  // info:
-  //
-  //     http://developer.apple.com/library/mac/#DOCUMENTATION/DeveloperTools/gcc-4.0.1/gcc/Incompatibilities.html
-  char format[] = "%lf";
-
-  if (length <= bufferSize) {
-    Char buffer[bufferSize + 1];
-    memcpy(buffer, token.start_, length);
-    buffer[length] = 0;
-    count = sscanf(buffer, format, &value);
-  } else {
-    std::string buffer(token.start_, token.end_);
-    count = sscanf(buffer.c_str(), format, &value);
-  }
-
-  if (count != 1)
-    return addError("'" + std::string(token.start_, token.end_) +
+  JSONCPP_STRING buffer(token.start_, token.end_);
+  JSONCPP_ISTRINGSTREAM is(buffer);
+  if (!(is >> value))
+    return addError("'" + JSONCPP_STRING(token.start_, token.end_) +
                         "' is not a number.",
                     token);
   decoded = value;
@@ -632,7 +628,7 @@ bool Reader::decodeDouble(Token& token, Value& decoded) {
 }
 
 bool Reader::decodeString(Token& token) {
-  std::string decoded_string;
+  JSONCPP_STRING decoded_string;
   if (!decodeString(token, decoded_string))
     return false;
   Value decoded(decoded_string);
@@ -642,8 +638,8 @@ bool Reader::decodeString(Token& token) {
   return true;
 }
 
-bool Reader::decodeString(Token& token, std::string& decoded) {
-  decoded.reserve(token.end_ - token.start_ - 2);
+bool Reader::decodeString(Token& token, JSONCPP_STRING& decoded) {
+  decoded.reserve(static_cast<size_t>(token.end_ - token.start_ - 2));
   Location current = token.start_ + 1; // skip '"'
   Location end = token.end_ - 1;       // do not include '"'
   while (current != end) {
@@ -727,13 +723,13 @@ bool Reader::decodeUnicodeCodePoint(Token& token,
 bool Reader::decodeUnicodeEscapeSequence(Token& token,
                                          Location& current,
                                          Location end,
-                                         unsigned int& unicode) {
+                                         unsigned int& ret_unicode) {
   if (end - current < 4)
     return addError(
         "Bad unicode escape sequence in string: four digits expected.",
         token,
         current);
-  unicode = 0;
+  int unicode = 0;
   for (int index = 0; index < 4; ++index) {
     Char c = *current++;
     unicode *= 16;
@@ -749,11 +745,12 @@ bool Reader::decodeUnicodeEscapeSequence(Token& token,
           token,
           current);
   }
+  ret_unicode = static_cast<unsigned int>(unicode);
   return true;
 }
 
 bool
-Reader::addError(const std::string& message, Token& token, Location extra) {
+Reader::addError(const JSONCPP_STRING& message, Token& token, Location extra) {
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
@@ -763,7 +760,7 @@ Reader::addError(const std::string& message, Token& token, Location extra) {
 }
 
 bool Reader::recoverFromError(TokenType skipUntilToken) {
-  int errorCount = int(errors_.size());
+  size_t const errorCount = errors_.size();
   Token skip;
   for (;;) {
     if (!readToken(skip))
@@ -775,7 +772,7 @@ bool Reader::recoverFromError(TokenType skipUntilToken) {
   return false;
 }
 
-bool Reader::addErrorAndRecover(const std::string& message,
+bool Reader::addErrorAndRecover(const JSONCPP_STRING& message,
                                 Token& token,
                                 TokenType skipUntilToken) {
   addError(message, token);
@@ -813,29 +810,21 @@ void Reader::getLocationLineAndColumn(Location location,
   ++line;
 }
 
-std::string Reader::getLocationLineAndColumn(Location location) const {
+JSONCPP_STRING Reader::getLocationLineAndColumn(Location location) const {
   int line, column;
   getLocationLineAndColumn(location, line, column);
   char buffer[18 + 16 + 16 + 1];
-#if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__)
-#if defined(WINCE)
-  _snprintf(buffer, sizeof(buffer), "Line %d, Column %d", line, column);
-#else
-  sprintf_s(buffer, sizeof(buffer), "Line %d, Column %d", line, column);
-#endif
-#else
   snprintf(buffer, sizeof(buffer), "Line %d, Column %d", line, column);
-#endif
   return buffer;
 }
 
 // Deprecated. Preserved for backward compatibility
-std::string Reader::getFormatedErrorMessages() const {
+JSONCPP_STRING Reader::getFormatedErrorMessages() const {
   return getFormattedErrorMessages();
 }
 
-std::string Reader::getFormattedErrorMessages() const {
-  std::string formattedMessage;
+JSONCPP_STRING Reader::getFormattedErrorMessages() const {
+  JSONCPP_STRING formattedMessage;
   for (Errors::const_iterator itError = errors_.begin();
        itError != errors_.end();
        ++itError) {
@@ -865,8 +854,8 @@ std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
   return allErrors;
 }
 
-bool Reader::pushError(const Value& value, const std::string& message) {
-  size_t length = end_ - begin_;
+bool Reader::pushError(const Value& value, const JSONCPP_STRING& message) {
+  ptrdiff_t const length = end_ - begin_;
   if(value.getOffsetStart() > length
     || value.getOffsetLimit() > length)
     return false;
@@ -882,8 +871,8 @@ bool Reader::pushError(const Value& value, const std::string& message) {
   return true;
 }
 
-bool Reader::pushError(const Value& value, const std::string& message, const Value& extra) {
-  size_t length = end_ - begin_;
+bool Reader::pushError(const Value& value, const JSONCPP_STRING& message, const Value& extra) {
+  ptrdiff_t const length = end_ - begin_;
   if(value.getOffsetStart() > length
     || value.getOffsetLimit() > length
     || extra.getOffsetLimit() > length)
@@ -908,33 +897,21 @@ bool Reader::good() const {
 class OurFeatures {
 public:
   static OurFeatures all();
-  static OurFeatures strictMode();
-  OurFeatures();
   bool allowComments_;
   bool strictRoot_;
   bool allowDroppedNullPlaceholders_;
   bool allowNumericKeys_;
+  bool allowSingleQuotes_;
   bool failIfExtra_;
+  bool rejectDupKeys_;
+  bool allowSpecialFloats_;
   int stackLimit_;
 };  // OurFeatures
 
 // exact copy of Implementation of class Features
 // ////////////////////////////////
 
-OurFeatures::OurFeatures()
-    : allowComments_(true), strictRoot_(false),
-      allowDroppedNullPlaceholders_(false), allowNumericKeys_(false) {}
-
 OurFeatures OurFeatures::all() { return OurFeatures(); }
-
-OurFeatures OurFeatures::strictMode() {
-  OurFeatures features;
-  features.allowComments_ = false;
-  features.strictRoot_ = true;
-  features.allowDroppedNullPlaceholders_ = false;
-  features.allowNumericKeys_ = false;
-  return features;
-}
 
 // Implementation of class Reader
 // ////////////////////////////////
@@ -945,9 +922,9 @@ public:
   typedef char Char;
   typedef const Char* Location;
   struct StructuredError {
-    size_t offset_start;
-    size_t offset_limit;
-    std::string message;
+    ptrdiff_t offset_start;
+    ptrdiff_t offset_limit;
+    JSONCPP_STRING message;
   };
 
   OurReader(OurFeatures const& features);
@@ -955,10 +932,10 @@ public:
              const char* endDoc,
              Value& root,
              bool collectComments = true);
-  std::string getFormattedErrorMessages() const;
+  JSONCPP_STRING getFormattedErrorMessages() const;
   std::vector<StructuredError> getStructuredErrors() const;
-  bool pushError(const Value& value, const std::string& message);
-  bool pushError(const Value& value, const std::string& message, const Value& extra);
+  bool pushError(const Value& value, const JSONCPP_STRING& message);
+  bool pushError(const Value& value, const JSONCPP_STRING& message, const Value& extra);
   bool good() const;
 
 private:
@@ -976,6 +953,9 @@ private:
     tokenTrue,
     tokenFalse,
     tokenNull,
+    tokenNaN,
+    tokenPosInf,
+    tokenNegInf,
     tokenArraySeparator,
     tokenMemberSeparator,
     tokenComment,
@@ -992,7 +972,7 @@ private:
   class ErrorInfo {
   public:
     Token token_;
-    std::string message_;
+    JSONCPP_STRING message_;
     Location extra_;
   };
 
@@ -1005,14 +985,15 @@ private:
   bool readCStyleComment();
   bool readCppStyleComment();
   bool readString();
-  void readNumber();
+  bool readStringSingleQuote();
+  bool readNumber(bool checkInf);
   bool readValue();
   bool readObject(Token& token);
   bool readArray(Token& token);
   bool decodeNumber(Token& token);
   bool decodeNumber(Token& token, Value& decoded);
   bool decodeString(Token& token);
-  bool decodeString(Token& token, std::string& decoded);
+  bool decodeString(Token& token, JSONCPP_STRING& decoded);
   bool decodeDouble(Token& token);
   bool decodeDouble(Token& token, Value& decoded);
   bool decodeUnicodeCodePoint(Token& token,
@@ -1023,9 +1004,9 @@ private:
                                    Location& current,
                                    Location end,
                                    unsigned int& unicode);
-  bool addError(const std::string& message, Token& token, Location extra = 0);
+  bool addError(const JSONCPP_STRING& message, Token& token, Location extra = 0);
   bool recoverFromError(TokenType skipUntilToken);
-  bool addErrorAndRecover(const std::string& message,
+  bool addErrorAndRecover(const JSONCPP_STRING& message,
                           Token& token,
                           TokenType skipUntilToken);
   void skipUntilSpace();
@@ -1033,21 +1014,23 @@ private:
   Char getNextChar();
   void
   getLocationLineAndColumn(Location location, int& line, int& column) const;
-  std::string getLocationLineAndColumn(Location location) const;
+  JSONCPP_STRING getLocationLineAndColumn(Location location) const;
   void addComment(Location begin, Location end, CommentPlacement placement);
   void skipCommentTokens(Token& token);
+
+  static JSONCPP_STRING normalizeEOL(Location begin, Location end);
+  static bool containsNewLine(Location begin, Location end);
 
   typedef std::stack<Value*> Nodes;
   Nodes nodes_;
   Errors errors_;
-  std::string document_;
+  JSONCPP_STRING document_;
   Location begin_;
   Location end_;
   Location current_;
   Location lastValueEnd_;
   Value* lastValue_;
-  std::string commentsBefore_;
-  int stackDepth_;
+  JSONCPP_STRING commentsBefore_;
 
   OurFeatures const features_;
   bool collectComments_;
@@ -1055,9 +1038,17 @@ private:
 
 // complete copy of Read impl, for OurReader
 
+bool OurReader::containsNewLine(OurReader::Location begin, OurReader::Location end) {
+  for (; begin < end; ++begin)
+    if (*begin == '\n' || *begin == '\r')
+      return true;
+  return false;
+}
+
 OurReader::OurReader(OurFeatures const& features)
     : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
-      lastValue_(), commentsBefore_(), features_(features), collectComments_() {
+      lastValue_(), commentsBefore_(),
+      features_(features), collectComments_() {
 }
 
 bool OurReader::parse(const char* beginDoc,
@@ -1074,18 +1065,17 @@ bool OurReader::parse(const char* beginDoc,
   current_ = begin_;
   lastValueEnd_ = 0;
   lastValue_ = 0;
-  commentsBefore_ = "";
+  commentsBefore_.clear();
   errors_.clear();
   while (!nodes_.empty())
     nodes_.pop();
   nodes_.push(&root);
 
-  stackDepth_ = 0;
   bool successful = readValue();
   Token token;
   skipCommentTokens(token);
   if (features_.failIfExtra_) {
-    if (token.type_ != tokenError && token.type_ != tokenEndOfStream) {
+    if ((features_.strictRoot_ || token.type_ != tokenError) && token.type_ != tokenEndOfStream) {
       addError("Extra non-whitespace after JSON value.", token);
       return false;
     }
@@ -1109,15 +1099,15 @@ bool OurReader::parse(const char* beginDoc,
 }
 
 bool OurReader::readValue() {
-  if (stackDepth_ >= features_.stackLimit_) throw std::runtime_error("Exceeded stackLimit in readValue().");
-  ++stackDepth_;
+  //  To preserve the old behaviour we cast size_t to int.
+  if (static_cast<int>(nodes_.size()) > features_.stackLimit_) throwRuntimeError("Exceeded stackLimit in readValue().");
   Token token;
   skipCommentTokens(token);
   bool successful = true;
 
   if (collectComments_ && !commentsBefore_.empty()) {
     currentValue().setComment(commentsBefore_, commentBefore);
-    commentsBefore_ = "";
+    commentsBefore_.clear();
   }
 
   switch (token.type_) {
@@ -1159,7 +1149,33 @@ bool OurReader::readValue() {
     currentValue().setOffsetLimit(token.end_ - begin_);
     }
     break;
+  case tokenNaN:
+    {
+    Value v(std::numeric_limits<double>::quiet_NaN());
+    currentValue().swapPayload(v);
+    currentValue().setOffsetStart(token.start_ - begin_);
+    currentValue().setOffsetLimit(token.end_ - begin_);
+    }
+    break;
+  case tokenPosInf:
+    {
+    Value v(std::numeric_limits<double>::infinity());
+    currentValue().swapPayload(v);
+    currentValue().setOffsetStart(token.start_ - begin_);
+    currentValue().setOffsetLimit(token.end_ - begin_);
+    }
+    break;
+  case tokenNegInf:
+    {
+    Value v(-std::numeric_limits<double>::infinity());
+    currentValue().swapPayload(v);
+    currentValue().setOffsetStart(token.start_ - begin_);
+    currentValue().setOffsetLimit(token.end_ - begin_);
+    }
+    break;
   case tokenArraySeparator:
+  case tokenObjectEnd:
+  case tokenArrayEnd:
     if (features_.allowDroppedNullPlaceholders_) {
       // "Un-read" the current token and mark the current value as a null
       // token.
@@ -1169,8 +1185,7 @@ bool OurReader::readValue() {
       currentValue().setOffsetStart(current_ - begin_ - 1);
       currentValue().setOffsetLimit(current_ - begin_);
       break;
-    }
-  // Else, fall through...
+    } // else, fall through ...
   default:
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -1182,7 +1197,6 @@ bool OurReader::readValue() {
     lastValue_ = &currentValue();
   }
 
-  --stackDepth_;
   return successful;
 }
 
@@ -1218,6 +1232,12 @@ bool OurReader::readToken(Token& token) {
     token.type_ = tokenString;
     ok = readString();
     break;
+  case '\'':
+    if (features_.allowSingleQuotes_) {
+    token.type_ = tokenString;
+    ok = readStringSingleQuote();
+    break;
+    } // else continue
   case '/':
     token.type_ = tokenComment;
     ok = readComment();
@@ -1232,9 +1252,16 @@ bool OurReader::readToken(Token& token) {
   case '7':
   case '8':
   case '9':
-  case '-':
     token.type_ = tokenNumber;
-    readNumber();
+    readNumber(false);
+    break;
+  case '-':
+    if (readNumber(true)) {
+      token.type_ = tokenNumber;
+    } else {
+      token.type_ = tokenNegInf;
+      ok = features_.allowSpecialFloats_ && match("nfinity", 7);
+    }
     break;
   case 't':
     token.type_ = tokenTrue;
@@ -1247,6 +1274,22 @@ bool OurReader::readToken(Token& token) {
   case 'n':
     token.type_ = tokenNull;
     ok = match("ull", 3);
+    break;
+  case 'N':
+    if (features_.allowSpecialFloats_) {
+      token.type_ = tokenNaN;
+      ok = match("aN", 2);
+    } else {
+      ok = false;
+    }
+    break;
+  case 'I':
+    if (features_.allowSpecialFloats_) {
+      token.type_ = tokenPosInf;
+      ok = match("nfinity", 7);
+    } else {
+      ok = false;
+    }
     break;
   case ',':
     token.type_ = tokenArraySeparator;
@@ -1311,10 +1354,29 @@ bool OurReader::readComment() {
   return true;
 }
 
+JSONCPP_STRING OurReader::normalizeEOL(OurReader::Location begin, OurReader::Location end) {
+  JSONCPP_STRING normalized;
+  normalized.reserve(static_cast<size_t>(end - begin));
+  OurReader::Location current = begin;
+  while (current != end) {
+    char c = *current++;
+    if (c == '\r') {
+      if (current != end && *current == '\n')
+         // convert dos EOL
+         ++current;
+      // convert Mac EOL
+      normalized += '\n';
+    } else {
+      normalized += c;
+    }
+  }
+  return normalized;
+}
+
 void
 OurReader::addComment(Location begin, Location end, CommentPlacement placement) {
   assert(collectComments_);
-  const std::string& normalized = normalizeEOL(begin, end);
+  const JSONCPP_STRING& normalized = normalizeEOL(begin, end);
   if (placement == commentAfterOnSameLine) {
     assert(lastValue_ != 0);
     lastValue_->setComment(normalized, placement);
@@ -1324,7 +1386,7 @@ OurReader::addComment(Location begin, Location end, CommentPlacement placement) 
 }
 
 bool OurReader::readCStyleComment() {
-  while (current_ != end_) {
+  while ((current_ + 1) < end_) {
     Char c = getNextChar();
     if (c == '*' && *current_ == '/')
       break;
@@ -1348,28 +1410,32 @@ bool OurReader::readCppStyleComment() {
   return true;
 }
 
-void OurReader::readNumber() {
+bool OurReader::readNumber(bool checkInf) {
   const char *p = current_;
+  if (checkInf && p != end_ && *p == 'I') {
+    current_ = ++p;
+    return false;
+  }
   char c = '0'; // stopgap for already consumed character
   // integral part
   while (c >= '0' && c <= '9')
-    c = (current_ = p) < end_ ? *p++ : 0;
+    c = (current_ = p) < end_ ? *p++ : '\0';
   // fractional part
   if (c == '.') {
-    c = (current_ = p) < end_ ? *p++ : 0;
+    c = (current_ = p) < end_ ? *p++ : '\0';
     while (c >= '0' && c <= '9')
-      c = (current_ = p) < end_ ? *p++ : 0;
+      c = (current_ = p) < end_ ? *p++ : '\0';
   }
   // exponential part
   if (c == 'e' || c == 'E') {
-    c = (current_ = p) < end_ ? *p++ : 0;
+    c = (current_ = p) < end_ ? *p++ : '\0';
     if (c == '+' || c == '-')
-      c = (current_ = p) < end_ ? *p++ : 0;
+      c = (current_ = p) < end_ ? *p++ : '\0';
     while (c >= '0' && c <= '9')
-      c = (current_ = p) < end_ ? *p++ : 0;
+      c = (current_ = p) < end_ ? *p++ : '\0';
   }
+  return true;
 }
-
 bool OurReader::readString() {
   Char c = 0;
   while (current_ != end_) {
@@ -1382,9 +1448,22 @@ bool OurReader::readString() {
   return c == '"';
 }
 
+
+bool OurReader::readStringSingleQuote() {
+  Char c = 0;
+  while (current_ != end_) {
+    c = getNextChar();
+    if (c == '\\')
+      getNextChar();
+    else if (c == '\'')
+      break;
+  }
+  return c == '\'';
+}
+
 bool OurReader::readObject(Token& tokenStart) {
   Token tokenName;
-  std::string name;
+  JSONCPP_STRING name;
   Value init(objectValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(tokenStart.start_ - begin_);
@@ -1396,7 +1475,7 @@ bool OurReader::readObject(Token& tokenStart) {
       break;
     if (tokenName.type_ == tokenObjectEnd && name.empty()) // empty object
       return true;
-    name = "";
+    name.clear();
     if (tokenName.type_ == tokenString) {
       if (!decodeString(tokenName, name))
         return recoverFromError(tokenObjectEnd);
@@ -1413,6 +1492,12 @@ bool OurReader::readObject(Token& tokenStart) {
     if (!readToken(colon) || colon.type_ != tokenMemberSeparator) {
       return addErrorAndRecover(
           "Missing ':' after object member name", colon, tokenObjectEnd);
+    }
+    if (name.length() >= (1U<<30)) throwRuntimeError("keylength >= 2^30");
+    if (features_.rejectDupKeys_ && currentValue().isMember(name)) {
+      JSONCPP_STRING msg = "Duplicate key: '" + name + "'";
+      return addErrorAndRecover(
+          msg, tokenName, tokenObjectEnd);
     }
     Value& value = currentValue()[name];
     nodes_.push(&value);
@@ -1443,7 +1528,7 @@ bool OurReader::readArray(Token& tokenStart) {
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(tokenStart.start_ - begin_);
   skipSpaces();
-  if (*current_ == ']') // empty array
+  if (current_ != end_ && *current_ == ']') // empty array
   {
     Token endArray;
     readToken(endArray);
@@ -1504,7 +1589,7 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
     Char c = *current++;
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
-    Value::UInt digit(c - '0');
+    Value::UInt digit(static_cast<Value::UInt>(c - '0'));
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, b) this is the last digit, and
@@ -1540,12 +1625,13 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
   const int bufferSize = 32;
   int count;
-  int length = int(token.end_ - token.start_);
+  ptrdiff_t const length = token.end_ - token.start_;
 
   // Sanity check to avoid buffer overflow exploits.
   if (length < 0) {
     return addError("Unable to parse token length", token);
   }
+  size_t const ulength = static_cast<size_t>(length);
 
   // Avoid using a string constant for the format control string given to
   // sscanf, as this can cause hard to debug crashes on OS X. See here for more
@@ -1556,16 +1642,17 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
 
   if (length <= bufferSize) {
     Char buffer[bufferSize + 1];
-    memcpy(buffer, token.start_, length);
+    memcpy(buffer, token.start_, ulength);
     buffer[length] = 0;
+    fixNumericLocaleInput(buffer, buffer + length);
     count = sscanf(buffer, format, &value);
   } else {
-    std::string buffer(token.start_, token.end_);
+    JSONCPP_STRING buffer(token.start_, token.end_);
     count = sscanf(buffer.c_str(), format, &value);
   }
 
   if (count != 1)
-    return addError("'" + std::string(token.start_, token.end_) +
+    return addError("'" + JSONCPP_STRING(token.start_, token.end_) +
                         "' is not a number.",
                     token);
   decoded = value;
@@ -1573,7 +1660,7 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
 }
 
 bool OurReader::decodeString(Token& token) {
-  std::string decoded_string;
+  JSONCPP_STRING decoded_string;
   if (!decodeString(token, decoded_string))
     return false;
   Value decoded(decoded_string);
@@ -1583,8 +1670,8 @@ bool OurReader::decodeString(Token& token) {
   return true;
 }
 
-bool OurReader::decodeString(Token& token, std::string& decoded) {
-  decoded.reserve(token.end_ - token.start_ - 2);
+bool OurReader::decodeString(Token& token, JSONCPP_STRING& decoded) {
+  decoded.reserve(static_cast<size_t>(token.end_ - token.start_ - 2));
   Location current = token.start_ + 1; // skip '"'
   Location end = token.end_ - 1;       // do not include '"'
   while (current != end) {
@@ -1668,13 +1755,13 @@ bool OurReader::decodeUnicodeCodePoint(Token& token,
 bool OurReader::decodeUnicodeEscapeSequence(Token& token,
                                          Location& current,
                                          Location end,
-                                         unsigned int& unicode) {
+                                         unsigned int& ret_unicode) {
   if (end - current < 4)
     return addError(
         "Bad unicode escape sequence in string: four digits expected.",
         token,
         current);
-  unicode = 0;
+  int unicode = 0;
   for (int index = 0; index < 4; ++index) {
     Char c = *current++;
     unicode *= 16;
@@ -1690,11 +1777,12 @@ bool OurReader::decodeUnicodeEscapeSequence(Token& token,
           token,
           current);
   }
+  ret_unicode = static_cast<unsigned int>(unicode);
   return true;
 }
 
 bool
-OurReader::addError(const std::string& message, Token& token, Location extra) {
+OurReader::addError(const JSONCPP_STRING& message, Token& token, Location extra) {
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
@@ -1704,7 +1792,7 @@ OurReader::addError(const std::string& message, Token& token, Location extra) {
 }
 
 bool OurReader::recoverFromError(TokenType skipUntilToken) {
-  int errorCount = int(errors_.size());
+  size_t errorCount = errors_.size();
   Token skip;
   for (;;) {
     if (!readToken(skip))
@@ -1716,7 +1804,7 @@ bool OurReader::recoverFromError(TokenType skipUntilToken) {
   return false;
 }
 
-bool OurReader::addErrorAndRecover(const std::string& message,
+bool OurReader::addErrorAndRecover(const JSONCPP_STRING& message,
                                 Token& token,
                                 TokenType skipUntilToken) {
   addError(message, token);
@@ -1754,24 +1842,16 @@ void OurReader::getLocationLineAndColumn(Location location,
   ++line;
 }
 
-std::string OurReader::getLocationLineAndColumn(Location location) const {
+JSONCPP_STRING OurReader::getLocationLineAndColumn(Location location) const {
   int line, column;
   getLocationLineAndColumn(location, line, column);
   char buffer[18 + 16 + 16 + 1];
-#if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__)
-#if defined(WINCE)
-  _snprintf(buffer, sizeof(buffer), "Line %d, Column %d", line, column);
-#else
-  sprintf_s(buffer, sizeof(buffer), "Line %d, Column %d", line, column);
-#endif
-#else
   snprintf(buffer, sizeof(buffer), "Line %d, Column %d", line, column);
-#endif
   return buffer;
 }
 
-std::string OurReader::getFormattedErrorMessages() const {
-  std::string formattedMessage;
+JSONCPP_STRING OurReader::getFormattedErrorMessages() const {
+  JSONCPP_STRING formattedMessage;
   for (Errors::const_iterator itError = errors_.begin();
        itError != errors_.end();
        ++itError) {
@@ -1801,8 +1881,8 @@ std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
   return allErrors;
 }
 
-bool OurReader::pushError(const Value& value, const std::string& message) {
-  size_t length = end_ - begin_;
+bool OurReader::pushError(const Value& value, const JSONCPP_STRING& message) {
+  ptrdiff_t length = end_ - begin_;
   if(value.getOffsetStart() > length
     || value.getOffsetLimit() > length)
     return false;
@@ -1818,8 +1898,8 @@ bool OurReader::pushError(const Value& value, const std::string& message) {
   return true;
 }
 
-bool OurReader::pushError(const Value& value, const std::string& message, const Value& extra) {
-  size_t length = end_ - begin_;
+bool OurReader::pushError(const Value& value, const JSONCPP_STRING& message, const Value& extra) {
+  ptrdiff_t length = end_ - begin_;
   if(value.getOffsetStart() > length
     || value.getOffsetLimit() > length
     || extra.getOffsetLimit() > length)
@@ -1851,9 +1931,9 @@ public:
   : collectComments_(collectComments)
   , reader_(features)
   {}
-  virtual bool parse(
+  bool parse(
       char const* beginDoc, char const* endDoc,
-      Value* root, std::string* errs) {
+      Value* root, JSONCPP_STRING* errs) JSONCPP_OVERRIDE {
     bool ok = reader_.parse(beginDoc, endDoc, *root, collectComments_);
     if (errs) {
       *errs = reader_.getFormattedErrorMessages();
@@ -1876,11 +1956,14 @@ CharReader* CharReaderBuilder::newCharReader() const
   features.strictRoot_ = settings_["strictRoot"].asBool();
   features.allowDroppedNullPlaceholders_ = settings_["allowDroppedNullPlaceholders"].asBool();
   features.allowNumericKeys_ = settings_["allowNumericKeys"].asBool();
+  features.allowSingleQuotes_ = settings_["allowSingleQuotes"].asBool();
   features.stackLimit_ = settings_["stackLimit"].asInt();
   features.failIfExtra_ = settings_["failIfExtra"].asBool();
+  features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
+  features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
   return new OurCharReader(collectComments, features);
 }
-static void getValidReaderKeys(std::set<std::string>* valid_keys)
+static void getValidReaderKeys(std::set<JSONCPP_STRING>* valid_keys)
 {
   valid_keys->clear();
   valid_keys->insert("collectComments");
@@ -1888,26 +1971,32 @@ static void getValidReaderKeys(std::set<std::string>* valid_keys)
   valid_keys->insert("strictRoot");
   valid_keys->insert("allowDroppedNullPlaceholders");
   valid_keys->insert("allowNumericKeys");
+  valid_keys->insert("allowSingleQuotes");
   valid_keys->insert("stackLimit");
   valid_keys->insert("failIfExtra");
+  valid_keys->insert("rejectDupKeys");
+  valid_keys->insert("allowSpecialFloats");
 }
 bool CharReaderBuilder::validate(Json::Value* invalid) const
 {
   Json::Value my_invalid;
   if (!invalid) invalid = &my_invalid;  // so we do not need to test for NULL
   Json::Value& inv = *invalid;
-  bool valid = true;
-  std::set<std::string> valid_keys;
+  std::set<JSONCPP_STRING> valid_keys;
   getValidReaderKeys(&valid_keys);
   Value::Members keys = settings_.getMemberNames();
   size_t n = keys.size();
   for (size_t i = 0; i < n; ++i) {
-    std::string const& key = keys[i];
+    JSONCPP_STRING const& key = keys[i];
     if (valid_keys.find(key) == valid_keys.end()) {
       inv[key] = settings_[key];
     }
   }
-  return valid;
+  return 0u == inv.size();
+}
+Value& CharReaderBuilder::operator[](JSONCPP_STRING key)
+{
+  return settings_[key];
 }
 // static
 void CharReaderBuilder::strictMode(Json::Value* settings)
@@ -1917,7 +2006,11 @@ void CharReaderBuilder::strictMode(Json::Value* settings)
   (*settings)["strictRoot"] = true;
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
+  (*settings)["allowSingleQuotes"] = false;
+  (*settings)["stackLimit"] = 1000;
   (*settings)["failIfExtra"] = true;
+  (*settings)["rejectDupKeys"] = true;
+  (*settings)["allowSpecialFloats"] = false;
 //! [CharReaderBuilderStrictMode]
 }
 // static
@@ -1929,8 +2022,11 @@ void CharReaderBuilder::setDefaults(Json::Value* settings)
   (*settings)["strictRoot"] = false;
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
+  (*settings)["allowSingleQuotes"] = false;
   (*settings)["stackLimit"] = 1000;
   (*settings)["failIfExtra"] = false;
+  (*settings)["rejectDupKeys"] = false;
+  (*settings)["allowSpecialFloats"] = false;
 //! [CharReaderBuilderDefaults]
 }
 
@@ -1938,12 +2034,12 @@ void CharReaderBuilder::setDefaults(Json::Value* settings)
 // global functions
 
 bool parseFromStream(
-    CharReader::Factory const& fact, std::istream& sin,
-    Value* root, std::string* errs)
+    CharReader::Factory const& fact, JSONCPP_ISTREAM& sin,
+    Value* root, JSONCPP_STRING* errs)
 {
-  std::ostringstream ssin;
+  JSONCPP_OSTRINGSTREAM ssin;
   ssin << sin.rdbuf();
-  std::string doc = ssin.str();
+  JSONCPP_STRING doc = ssin.str();
   char const* begin = doc.data();
   char const* end = begin + doc.size();
   // Note that we do not actually need a null-terminator.
@@ -1951,16 +2047,12 @@ bool parseFromStream(
   return reader->parse(begin, end, root, errs);
 }
 
-std::istream& operator>>(std::istream& sin, Value& root) {
+JSONCPP_ISTREAM& operator>>(JSONCPP_ISTREAM& sin, Value& root) {
   CharReaderBuilder b;
-  std::string errs;
+  JSONCPP_STRING errs;
   bool ok = parseFromStream(b, sin, &root, &errs);
   if (!ok) {
-    fprintf(stderr,
-            "Error from reader: %s",
-            errs.c_str());
-
-    JSON_FAIL_MESSAGE("reader error");
+    throwRuntimeError(errs);
   }
   return sin;
 }

@@ -1,0 +1,22 @@
+clone_folder: c:\projects\jsoncpp
+
+environment:
+  matrix:
+    - CMAKE_GENERATOR: Visual Studio 12 2013
+    - CMAKE_GENERATOR: Visual Studio 12 2013 Win64
+    - CMAKE_GENERATOR: Visual Studio 14 2015
+    - CMAKE_GENERATOR: Visual Studio 14 2015 Win64
+
+build_script:
+  - cmake --version
+  - cd c:\projects\jsoncpp
+  - cmake -G "%CMAKE_GENERATOR%" -DCMAKE_INSTALL_PREFIX=%CD:\=/%/install -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON .
+  - cmake --build . --config Release --target install
+
+deploy:
+    provider: GitHub
+    auth_token:
+        secure: K2Tp1q8pIZ7rs0Ot24ZMWuwr12Ev6Tc6QkhMjGQxoQG3ng1pXtgPasiJ45IDXGdg
+    on:
+        branch: master
+        appveyor_repo_tag: true

@@ -10,23 +10,23 @@
                 "Visual Studio 10 Win64",
                 "Visual Studio 11",
                 "Visual Studio 11 Win64"
-                ] 
+                ]
             },
-            {"generator": ["MinGW Makefiles"], 
+            {"generator": ["MinGW Makefiles"],
              "env_prepend": [{"path": "c:/wut/prg/MinGW/bin"}]
             }
-         ] 
+         ]
         },
         {"name": "shared_dll",
          "variables": [
-            ["JSONCPP_LIB_BUILD_SHARED=true"],
-            ["JSONCPP_LIB_BUILD_SHARED=false"]
+            ["BUILD_SHARED_LIBS=true"],
+            ["BUILD_SHARED_LIBS=false"]
           ]
         },
         {"name": "build_type",
          "build_types": [
-            "debug", 
-            "release" 
+            "debug",
+            "release"
             ]
         }
     ]

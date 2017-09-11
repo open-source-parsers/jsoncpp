@@ -1,4 +1,4 @@
-// Copyright 2007-2010 Baptiste Lepilleur
+// Copyright 2007-2010 Baptiste Lepilleur and The JsonCpp Authors
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
@@ -81,7 +81,7 @@ TestResult::TestResult()
   predicateStackTail_ = &rootPredicateNode_;
 }
 
-void TestResult::setTestName(const std::string& name) { name_ = name; }
+void TestResult::setTestName(const JSONCPP_STRING& name) { name_ = name; }
 
 TestResult&
 TestResult::addFailure(const char* file, unsigned int line, const char* expr) {
@@ -163,7 +163,7 @@ void TestResult::printFailure(bool printTestName) const {
   Failures::const_iterator itEnd = failures_.end();
   for (Failures::const_iterator it = failures_.begin(); it != itEnd; ++it) {
     const Failure& failure = *it;
-    std::string indent(failure.nestingLevel_ * 2, ' ');
+    JSONCPP_STRING indent(failure.nestingLevel_ * 2, ' ');
     if (failure.file_) {
       printf("%s%s(%d): ", indent.c_str(), failure.file_, failure.line_);
     }
@@ -173,19 +173,19 @@ void TestResult::printFailure(bool printTestName) const {
       printf("\n");
     }
     if (!failure.message_.empty()) {
-      std::string reindented = indentText(failure.message_, indent + "  ");
+      JSONCPP_STRING reindented = indentText(failure.message_, indent + "  ");
       printf("%s\n", reindented.c_str());
     }
   }
 }
 
-std::string TestResult::indentText(const std::string& text,
-                                   const std::string& indent) {
-  std::string reindented;
-  std::string::size_type lastIndex = 0;
+JSONCPP_STRING TestResult::indentText(const JSONCPP_STRING& text,
+                                   const JSONCPP_STRING& indent) {
+  JSONCPP_STRING reindented;
+  JSONCPP_STRING::size_type lastIndex = 0;
   while (lastIndex < text.size()) {
-    std::string::size_type nextIndex = text.find('\n', lastIndex);
-    if (nextIndex == std::string::npos) {
+    JSONCPP_STRING::size_type nextIndex = text.find('\n', lastIndex);
+    if (nextIndex == JSONCPP_STRING::npos) {
       nextIndex = text.size() - 1;
     }
     reindented += indent;
@@ -195,7 +195,7 @@ std::string TestResult::indentText(const std::string& text,
   return reindented;
 }
 
-TestResult& TestResult::addToLastFailure(const std::string& message) {
+TestResult& TestResult::addToLastFailure(const JSONCPP_STRING& message) {
   if (messageTarget_ != 0) {
     messageTarget_->message_ += message;
   }
@@ -240,9 +240,9 @@ unsigned int Runner::testCount() const {
   return static_cast<unsigned int>(tests_.size());
 }
 
-std::string Runner::testNameAt(unsigned int index) const {
+JSONCPP_STRING Runner::testNameAt(unsigned int index) const {
   TestCase* test = tests_[index]();
-  std::string name = test->testName();
+  JSONCPP_STRING name = test->testName();
   delete test;
   return name;
 }
@@ -303,7 +303,7 @@ bool Runner::runAllTest(bool printSummary) const {
   }
 }
 
-bool Runner::testIndex(const std::string& testName,
+bool Runner::testIndex(const JSONCPP_STRING& testName,
                        unsigned int& indexOut) const {
   unsigned int count = testCount();
   for (unsigned int index = 0; index < count; ++index) {
@@ -323,10 +323,10 @@ void Runner::listTests() const {
 }
 
 int Runner::runCommandLine(int argc, const char* argv[]) const {
-  // typedef std::deque<std::string> TestNames;
+  // typedef std::deque<JSONCPP_STRING> TestNames;
   Runner subrunner;
   for (int index = 1; index < argc; ++index) {
-    std::string opt = argv[index];
+    JSONCPP_STRING opt = argv[index];
     if (opt == "--list-tests") {
       listTests();
       return 0;
@@ -426,9 +426,23 @@ void Runner::printUsage(const char* appName) {
 // Assertion functions
 // //////////////////////////////////////////////////////////////////
 
+JSONCPP_STRING ToJsonString(const char* toConvert) {
+  return JSONCPP_STRING(toConvert);
+}
+
+JSONCPP_STRING ToJsonString(JSONCPP_STRING in) {
+  return in;
+}
+
+#if JSONCPP_USING_SECURE_MEMORY
+JSONCPP_STRING ToJsonString(std::string in) {
+  return JSONCPP_STRING(in.data(), in.data() + in.length());
+}
+#endif
+
 TestResult& checkStringEqual(TestResult& result,
-                             const std::string& expected,
-                             const std::string& actual,
+                             const JSONCPP_STRING& expected,
+                             const JSONCPP_STRING& actual,
                              const char* file,
                              unsigned int line,
                              const char* expr) {

@@ -1,4 +1,4 @@
-// Copyright 2007-2010 Baptiste Lepilleur
+// Copyright 2007-2010 Baptiste Lepilleur and The JsonCpp Authors
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
@@ -32,8 +32,8 @@ class Failure {
 public:
   const char* file_;
   unsigned int line_;
-  std::string expr_;
-  std::string message_;
+  JSONCPP_STRING expr_;
+  JSONCPP_STRING message_;
   unsigned int nestingLevel_;
 };
 
@@ -65,7 +65,7 @@ public:
   /// \internal Implementation detail for predicate macros
   PredicateContext* predicateStackTail_;
 
-  void setTestName(const std::string& name);
+  void setTestName(const JSONCPP_STRING& name);
 
   /// Adds an assertion failure.
   TestResult&
@@ -82,7 +82,7 @@ public:
 
   // Generic operator that will work with anything ostream can deal with.
   template <typename T> TestResult& operator<<(const T& value) {
-    std::ostringstream oss;
+    JSONCPP_OSTRINGSTREAM oss;
     oss.precision(16);
     oss.setf(std::ios_base::floatfield);
     oss << value;
@@ -96,19 +96,19 @@ public:
   TestResult& operator<<(Json::UInt64 value);
 
 private:
-  TestResult& addToLastFailure(const std::string& message);
+  TestResult& addToLastFailure(const JSONCPP_STRING& message);
   unsigned int getAssertionNestingLevel() const;
   /// Adds a failure or a predicate context
   void addFailureInfo(const char* file,
                       unsigned int line,
                       const char* expr,
                       unsigned int nestingLevel);
-  static std::string indentText(const std::string& text,
-                                const std::string& indent);
+  static JSONCPP_STRING indentText(const JSONCPP_STRING& text,
+                                const JSONCPP_STRING& indent);
 
   typedef std::deque<Failure> Failures;
   Failures failures_;
-  std::string name_;
+  JSONCPP_STRING name_;
   PredicateContext rootPredicateNode_;
   PredicateContext::Id lastUsedPredicateId_;
   /// Failure which is the target of the messages added using operator <<
@@ -155,7 +155,7 @@ public:
   unsigned int testCount() const;
 
   /// Returns the name of the test case at the specified index
-  std::string testNameAt(unsigned int index) const;
+  JSONCPP_STRING testNameAt(unsigned int index) const;
 
   /// Runs the test case at the specified index using the specified TestResult
   void runTestAt(unsigned int index, TestResult& result) const;
@@ -168,7 +168,7 @@ private: // prevents copy construction and assignment
 
 private:
   void listTests() const;
-  bool testIndex(const std::string& testName, unsigned int& index) const;
+  bool testIndex(const JSONCPP_STRING& testName, unsigned int& index) const;
   static void preventDialogOnCrash();
 
 private:
@@ -191,9 +191,15 @@ TestResult& checkEqual(TestResult& result,
   return result;
 }
 
+JSONCPP_STRING ToJsonString(const char* toConvert);
+JSONCPP_STRING ToJsonString(JSONCPP_STRING in);
+#if JSONCPP_USING_SECURE_MEMORY
+JSONCPP_STRING ToJsonString(std::string in);
+#endif
+
 TestResult& checkStringEqual(TestResult& result,
-                             const std::string& expected,
-                             const std::string& actual,
+                             const JSONCPP_STRING& expected,
+                             const JSONCPP_STRING& actual,
                              const char* file,
                              unsigned int line,
                              const char* expr);
@@ -235,8 +241,8 @@ TestResult& checkStringEqual(TestResult& result,
 /// \brief Asserts that two values are equals.
 #define JSONTEST_ASSERT_STRING_EQUAL(expected, actual)                         \
   JsonTest::checkStringEqual(*result_,                                         \
-                             std::string(expected),                            \
-                             std::string(actual),                              \
+		                 JsonTest::ToJsonString(expected),                 \
+		                     JsonTest::ToJsonString(actual),                   \
                              __FILE__,                                         \
                              __LINE__,                                         \
                              #expected " == " #actual)
@@ -265,8 +271,8 @@ TestResult& checkStringEqual(TestResult& result,
     }                                                                          \
                                                                                \
   public: /* overidden from TestCase */                                        \
-    virtual const char* testName() const { return #FixtureType "/" #name; }    \
-    virtual void runTestCase();                                                \
+    const char* testName() const JSONCPP_OVERRIDE { return #FixtureType "/" #name; }    \
+    void runTestCase() JSONCPP_OVERRIDE;                                                \
   };                                                                           \
                                                                                \
   void Test##FixtureType##name::runTestCase()
