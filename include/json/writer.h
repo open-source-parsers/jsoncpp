@@ -157,7 +157,7 @@ public:
  * \deprecated Use StreamWriterBuilder.
  */
 #pragma warning(push)
-#pragma warning(disable:4996) // Deriving from depricated class
+#pragma warning(disable:4996) // Deriving from deprecated class
 class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API FastWriter : public Writer {
 #pragma warning(pop)
 public:
@@ -212,7 +212,7 @@ private:
  * \deprecated Use StreamWriterBuilder.
  */
 #pragma warning(push)
-#pragma warning(disable:4996) // Deriving from depricated class  
+#pragma warning(disable:4996) // Deriving from deprecated class  
 class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API StyledWriter : public Writer {
 #pragma warning(pop)  
 public:
