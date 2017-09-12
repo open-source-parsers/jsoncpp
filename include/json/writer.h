@@ -156,8 +156,9 @@ public:
  * \sa Reader, Value
  * \deprecated Use StreamWriterBuilder.
  */
+#pragma warning(push)
+#pragma warning(disable:4996) // Deriving from deprecated class
 class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API FastWriter : public Writer {
-
 public:
   FastWriter();
   ~FastWriter() JSONCPP_OVERRIDE {}
@@ -184,6 +185,7 @@ private:
   bool dropNullPlaceholders_;
   bool omitEndingLineFeed_;
 };
+#pragma warning(pop)
 
 /** \brief Writes a Value in <a HREF="http://www.json.org">JSON</a> format in a
  *human friendly way.
@@ -209,6 +211,8 @@ private:
  * \sa Reader, Value, Value::setComment()
  * \deprecated Use StreamWriterBuilder.
  */
+#pragma warning(push)
+#pragma warning(disable:4996) // Deriving from deprecated class
 class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API StyledWriter : public Writer {
 public:
   StyledWriter();
@@ -244,6 +248,7 @@ private:
   unsigned int indentSize_;
   bool addChildValues_;
 };
+#pragma warning(pop)
 
 /** \brief Writes a Value in <a HREF="http://www.json.org">JSON</a> format in a
  human friendly way,

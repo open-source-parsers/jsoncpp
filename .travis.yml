@@ -38,6 +38,7 @@ addons:
     - g++-4.9
     - clang-3.5
     - valgrind
+    - python3
 os:
   - linux
 language: cpp

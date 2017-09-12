@@ -1,7 +1,7 @@
 project(
   'jsoncpp',
   'cpp',
-  version : '1.8.1',
+  version : '1.8.3',
   default_options : [
     'buildtype=release',
     'warning_level=1'],
@@ -18,6 +18,7 @@ jsoncpp_cdata.set('JSONCPP_VERSION', meson.project_version())
 jsoncpp_cdata.set('JSONCPP_VERSION_MAJOR', jsoncpp_major_version)
 jsoncpp_cdata.set('JSONCPP_VERSION_MINOR', jsoncpp_minor_version)
 jsoncpp_cdata.set('JSONCPP_VERSION_PATCH', jsoncpp_patch_version)
+jsoncpp_cdata.set('JSONCPP_USE_SECURE_MEMORY',0)
 
 jsoncpp_gen_sources = configure_file(
   input : 'src/lib_json/version.h.in',
@@ -52,7 +53,7 @@ jsoncpp_lib = library(
     'src/lib_json/json_reader.cpp',
     'src/lib_json/json_value.cpp',
     'src/lib_json/json_writer.cpp'],
-  soversion : 18,
+  soversion : 19,
   install : true,
   include_directories : jsoncpp_include_directories)
 
