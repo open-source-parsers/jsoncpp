@@ -15,7 +15,7 @@
 
 // Disable warning C4251: <data member>: <type> needs to have dll-interface to
 // be used by...
-#if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
+#if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING) && defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable : 4251)
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
@@ -156,8 +156,10 @@ public:
  * \sa Reader, Value
  * \deprecated Use StreamWriterBuilder.
  */
+#if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable:4996) // Deriving from deprecated class
+#endif
 class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API FastWriter : public Writer {
 public:
   FastWriter();
@@ -185,7 +187,9 @@ private:
   bool dropNullPlaceholders_;
   bool omitEndingLineFeed_;
 };
+#if defined(_MSC_VER)
 #pragma warning(pop)
+#endif
 
 /** \brief Writes a Value in <a HREF="http://www.json.org">JSON</a> format in a
  *human friendly way.
@@ -211,8 +215,10 @@ private:
  * \sa Reader, Value, Value::setComment()
  * \deprecated Use StreamWriterBuilder.
  */
+#if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable:4996) // Deriving from deprecated class
+#endif
 class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API StyledWriter : public Writer {
 public:
   StyledWriter();
@@ -248,7 +254,9 @@ private:
   unsigned int indentSize_;
   bool addChildValues_;
 };
+#if defined(_MSC_VER)
 #pragma warning(pop)
+#endif
 
 /** \brief Writes a Value in <a HREF="http://www.json.org">JSON</a> format in a
  human friendly way,
@@ -275,8 +283,10 @@ private:
  * \sa Reader, Value, Value::setComment()
  * \deprecated Use StreamWriterBuilder.
  */
+#if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable:4996) // Deriving from deprecated class
+#endif
 class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API StyledStreamWriter {
 public:
 /**
@@ -318,7 +328,9 @@ private:
   bool addChildValues_ : 1;
   bool indented_ : 1;
 };
+#if defined(_MSC_VER)
 #pragma warning(pop)
+#endif
 
 #if defined(JSON_HAS_INT64)
 JSONCPP_STRING JSON_API valueToString(Int value);
