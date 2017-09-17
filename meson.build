@@ -65,7 +65,7 @@ import('pkgconfig').generate(
   description : 'A C++ library for interacting with JSON')
 
 # for libraries bundling jsoncpp
-declare_dependency(
+jsoncpp_dep = declare_dependency(
   include_directories : jsoncpp_include_directories,
   link_with : jsoncpp_lib,
   version : meson.project_version(),
