@@ -1200,7 +1200,14 @@ Value Value::removeMember(const char* key)
 }
 Value Value::removeMember(const JSONCPP_STRING& key)
 {
-  return removeMember(key.c_str());
+  JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == objectValue,
+                      "in Json::Value::removeMember(): requires objectValue");
+  if (type_ == nullValue)
+    return nullSingleton();
+
+  Value removed;  // null
+  removeMember(key.c_str(), key.c_str() + key.size(), &removed);
+  return removed; // still null if removeMember() did nothing
 }
 
 bool Value::removeIndex(ArrayIndex index, Value* removed) {
