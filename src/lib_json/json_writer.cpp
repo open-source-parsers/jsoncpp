@@ -182,8 +182,8 @@ static unsigned int utf8ToCodepoint(const char*& s, const char* e) {
     if (e - s < 2)
       return REPLACEMENT_CHARACTER;
 
-    unsigned int calculated = ((firstByte & ~0xE0) << 6)
-      | (static_cast<unsigned char>(s[1]) & ~0xC0);
+    unsigned int calculated = ((firstByte & 0x1F) << 6)
+      | (static_cast<unsigned int>(s[1]) & 0x3F);
     s += 1;
     // oversized encoded characters are invalid
     return calculated < 0x80 ? REPLACEMENT_CHARACTER : calculated;
@@ -193,14 +193,14 @@ static unsigned int utf8ToCodepoint(const char*& s, const char* e) {
     if (e - s < 3)
       return REPLACEMENT_CHARACTER;
 
-    unsigned int calculated = ((firstByte & ~0xF0) << 12)
-      | ((static_cast<unsigned char>(s[1]) & ~0xC0) << 6)
-      | (static_cast<unsigned char>(s[2]) & ~0xC0);
+    unsigned int calculated = ((firstByte & 0x0F) << 12)
+      | ((static_cast<unsigned int>(s[1]) & 0x3F) << 6)
+      |  (static_cast<unsigned int>(s[2]) & 0x3F);
     s += 2;
     // surrogates aren't valid codepoints itself
     // shouldn't be UTF-8 encoded
     if (calculated >= 0xD800 && calculated >= 0xDFFF)
-      return REPLACEMENT_CHARACTER; 
+      return REPLACEMENT_CHARACTER;
     // oversized encoded characters are invalid
     return calculated < 0x800 ? REPLACEMENT_CHARACTER : calculated;
   }
@@ -209,10 +209,10 @@ static unsigned int utf8ToCodepoint(const char*& s, const char* e) {
     if (e - s < 4)
       return REPLACEMENT_CHARACTER;
 
-    unsigned int calculated = ((firstByte & ~0xF0) << 24)
-      | ((static_cast<unsigned char>(s[1]) & ~0xC0) << 12)
-      | ((static_cast<unsigned char>(s[2]) & ~0xC0) << 6)
-      | (static_cast<unsigned char>(s[3]) & ~0xC0);
+    unsigned int calculated = ((firstByte & 0x07) << 24)
+      | ((static_cast<unsigned int>(s[1]) & 0x3F) << 12)
+      | ((static_cast<unsigned int>(s[2]) & 0x3F) << 6)
+      |  (static_cast<unsigned int>(s[3]) & 0x3F);
     s += 3;
     // oversized encoded characters are invalid
     return calculated < 0x10000 ? REPLACEMENT_CHARACTER : calculated;
@@ -323,7 +323,7 @@ static JSONCPP_STRING valueToQuotedStringN(const char* value, unsigned length) {
 }
 
 JSONCPP_STRING valueToQuotedString(const char* value) {
-  return valueToQuotedStringN(value, strlen(value));
+  return valueToQuotedStringN(value, static_cast<unsigned int>(strlen(value)));
 }
 
 // Class Writer
