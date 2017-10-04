@@ -54,7 +54,7 @@ static size_t const stackLimit_g = JSONCPP_DEPRECATED_STACK_LIMIT; // see readVa
 
 namespace Json {
 
-#if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
+#if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520) && (_GLIBCXX_USE_CXX11_ABI > 0)
 typedef std::unique_ptr<CharReader> CharReaderPtr;
 #else
 typedef std::auto_ptr<CharReader>   CharReaderPtr;
