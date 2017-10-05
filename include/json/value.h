@@ -534,6 +534,7 @@ Json::Value obj_value(Json::objectValue); // {}
   /** \brief Remove the named map member.
 
       Update 'removed' iff removed.
+      'removed' can be NULL if removed value is negligible.
       \param key may contain embedded nulls.
       \return true iff removed (no exceptions)
   */
@@ -544,6 +545,7 @@ Json::Value obj_value(Json::objectValue); // {}
 
       O(n) expensive operations.
       Update 'removed' iff removed.
+      'removed' can be NULL if removed value is negligible.
       \return true iff removed (no exceptions)
   */
   bool removeIndex(ArrayIndex i, Value* removed);

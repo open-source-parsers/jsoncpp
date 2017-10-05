@@ -217,6 +217,15 @@ JSONTEST_FIXTURE(ValueTest, objects) {
   did = object1_.removeMember("some other id", &got);
   JSONTEST_ASSERT_EQUAL(Json::Value("bar"), got);
   JSONTEST_ASSERT_EQUAL(false, did);
+
+  // Remove negligible value.
+  object1_["negligible"] = "foo";
+  Json::ArrayIndex objectSize = object1_.size();
+  JSONTEST_ASSERT_EQUAL(Json::Value("foo"), object1_["negligible"]);
+  JSONTEST_ASSERT_EQUAL(true, object1_.removeMember("negligible", NULL));
+  JSONTEST_ASSERT_EQUAL(objectSize - 1, object1_.size());
+  JSONTEST_ASSERT_EQUAL(false, object1_.removeMember("negligible", NULL));
+  JSONTEST_ASSERT_EQUAL(objectSize - 1, object1_.size());
 }
 
 JSONTEST_FIXTURE(ValueTest, arrays) {
@@ -263,7 +272,13 @@ JSONTEST_FIXTURE(ValueTest, arrays) {
   JSONTEST_ASSERT_EQUAL(true, array1_.removeIndex(2, &got));
   JSONTEST_ASSERT_EQUAL(Json::Value(17), got);
   JSONTEST_ASSERT_EQUAL(false, array1_.removeIndex(2, &got)); // gone now
+
+  // Remove negligible value.
+  Json::ArrayIndex arraySize = array1_.size();
+  JSONTEST_ASSERT_EQUAL(true, array1_.removeIndex(0, NULL));
+  JSONTEST_ASSERT_EQUAL(arraySize -1, array1_.size());
 }
+
 JSONTEST_FIXTURE(ValueTest, arrayIssue252)
 {
   int count = 5;
