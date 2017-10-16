@@ -1187,18 +1187,17 @@ bool Value::removeMember(JSONCPP_STRING const& key, Value* removed)
 {
   return removeMember(key.data(), key.data() + key.length(), removed);
 }
-Value Value::removeMember(const char* key)
+void Value::removeMember(const char* key)
 {
   JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == objectValue,
                       "in Json::Value::removeMember(): requires objectValue");
   if (type_ == nullValue)
-    return nullSingleton();
+    return;
 
-  Value removed;  // null
-  removeMember(key, key + strlen(key), &removed);
-  return removed; // still null if removeMember() did nothing
+  CZString actualKey(key, strlen(key), CZString::noDuplication);
+  value_.map_->erase(actualKey);
 }
-Value Value::removeMember(const JSONCPP_STRING& key)
+void Value::removeMember(const JSONCPP_STRING& key)
 {
   return removeMember(key.c_str());
 }
