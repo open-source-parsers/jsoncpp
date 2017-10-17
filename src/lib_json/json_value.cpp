@@ -1194,12 +1194,12 @@ void Value::removeMember(const char* key)
   if (type_ == nullValue)
     return;
 
-  CZString actualKey(key, strlen(key), CZString::noDuplication);
+  CZString actualKey(key, unsigned(strlen(key)), CZString::noDuplication);
   value_.map_->erase(actualKey);
 }
 void Value::removeMember(const JSONCPP_STRING& key)
 {
-  return removeMember(key.c_str());
+  removeMember(key.c_str());
 }
 
 bool Value::removeIndex(ArrayIndex index, Value* removed) {
