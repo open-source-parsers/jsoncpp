@@ -400,9 +400,6 @@ Json::Value obj_value(Json::objectValue); // {}
   /// otherwise, false.
   bool empty() const;
 
-  /// Return isNull()
-  bool operator!() const;
-
   /// Return !isNull()
   operator bool() const;
 
