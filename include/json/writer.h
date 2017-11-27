@@ -99,7 +99,7 @@ public:
     - "dropNullPlaceholders": false or true
       - Drop the "null" string from the writer's output for nullValues.
         Strictly speaking, this is not valid JSON. But when the output is being
-        fed to a browser's Javascript, it makes for smaller output and the
+        fed to a browser's JavaScript, it makes for smaller output and the
         browser can handle the output just fine.
     - "useSpecialFloats": false or true
       - If true, outputs non-finite floating point values in the following way:
@@ -169,7 +169,7 @@ public:
 
   /** \brief Drop the "null" string from the writer's output for nullValues.
    * Strictly speaking, this is not valid JSON. But when the output is being
-   * fed to a browser's Javascript, it makes for smaller output and the
+   * fed to a browser's JavaScript, it makes for smaller output and the
    * browser can handle the output just fine.
    */
   void dropNullPlaceholders();
