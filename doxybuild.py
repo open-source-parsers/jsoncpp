@@ -156,7 +156,7 @@ def build_doc(options,  make_release=False):
 def main():
     usage = """%prog
     Generates doxygen documentation in build/doxygen.
-    Optionaly makes a tarball of the documentation to dist/.
+    Optionally makes a tarball of the documentation to dist/.
 
     Must be started in the project top directory.    
     """
