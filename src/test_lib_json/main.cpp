@@ -2040,7 +2040,7 @@ JSONTEST_FIXTURE(CharReaderFailIfExtraTest, issue164) {
   }
 }
 JSONTEST_FIXTURE(CharReaderFailIfExtraTest, issue107) {
-  // This is interpretted as an int value followed by a colon.
+  // This is interpreted as an int value followed by a colon.
   Json::CharReaderBuilder b;
   Json::Value root;
   char const doc[] =
