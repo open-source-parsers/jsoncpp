@@ -25,9 +25,9 @@
 #define JSON_USE_EXCEPTION 1
 #endif
 
-/// If defined, indicates that the source file is amalgated
+/// If defined, indicates that the source file is amalgamated
 /// to prevent private header inclusion.
-/// Remarks: it is automatically defined in the generated amalgated header.
+/// Remarks: it is automatically defined in the generated amalgamated header.
 // #define JSON_IS_AMALGAMATION
 
 #ifdef JSON_IN_CPPTL
