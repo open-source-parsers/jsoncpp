@@ -183,7 +183,7 @@ private:
   void writeValue(const Value& value);
 
   JSONCPP_STRING document_;
-  bool yamlCompatiblityEnabled_;
+  bool yamlCompatibilityEnabled_;
   bool dropNullPlaceholders_;
   bool omitEndingLineFeed_;
 };

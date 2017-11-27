@@ -334,10 +334,10 @@ Writer::~Writer() {}
 // //////////////////////////////////////////////////////////////////
 
 FastWriter::FastWriter()
-    : yamlCompatiblityEnabled_(false), dropNullPlaceholders_(false),
+    : yamlCompatibilityEnabled_(false), dropNullPlaceholders_(false),
       omitEndingLineFeed_(false) {}
 
-void FastWriter::enableYAMLCompatibility() { yamlCompatiblityEnabled_ = true; }
+void FastWriter::enableYAMLCompatibility() { yamlCompatibilityEnabled_ = true; }
 
 void FastWriter::dropNullPlaceholders() { dropNullPlaceholders_ = true; }
 
@@ -397,7 +397,7 @@ void FastWriter::writeValue(const Value& value) {
       if (it != members.begin())
         document_ += ',';
       document_ += valueToQuotedStringN(name.data(), static_cast<unsigned>(name.length()));
-      document_ += yamlCompatiblityEnabled_ ? ": " : ":";
+      document_ += yamlCompatibilityEnabled_ ? ": " : ":";
       writeValue(value[name]);
     }
     document_ += '}';
