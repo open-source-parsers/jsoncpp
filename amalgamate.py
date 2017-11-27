@@ -149,7 +149,7 @@ Generate a single amalgamated source and header file from the sources.
         sys.stderr.write(msg + "\n")
         sys.exit(1)
     else:
-        print("Source succesfully amalgamated")
+        print("Source successfully amalgamated")
 
 if __name__ == "__main__":
     main()
