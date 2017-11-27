@@ -234,7 +234,7 @@ public: // overridden from Writer
 private:
   void writeValue(const Value& value);
   void writeArrayValue(const Value& value);
-  bool isMultineArray(const Value& value);
+  bool isMultilineArray(const Value& value);
   void pushValue(const JSONCPP_STRING& value);
   void writeIndent();
   void writeWithIndent(const JSONCPP_STRING& value);
@@ -307,7 +307,7 @@ public:
 private:
   void writeValue(const Value& value);
   void writeArrayValue(const Value& value);
-  bool isMultineArray(const Value& value);
+  bool isMultilineArray(const Value& value);
   void pushValue(const JSONCPP_STRING& value);
   void writeIndent();
   void writeWithIndent(const JSONCPP_STRING& value);
