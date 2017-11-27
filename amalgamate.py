@@ -56,7 +56,7 @@ def amalgamate_source(source_top_dir=None,
            target_source_path: output .cpp path
            header_include_path: generated header path relative to target_source_path.
     """
-    print("Amalgating header...")
+    print("Amalgamating header...")
     header = AmalgamationFile(source_top_dir)
     header.add_text("/// Json-cpp amalgamated header (http://jsoncpp.sourceforge.net/).")
     header.add_text('/// It is intended to be used with #include "%s"' % header_include_path)
@@ -83,7 +83,7 @@ def amalgamate_source(source_top_dir=None,
 
     base, ext = os.path.splitext(header_include_path)
     forward_header_include_path = base + "-forwards" + ext
-    print("Amalgating forward header...")
+    print("Amalgamating forward header...")
     header = AmalgamationFile(source_top_dir)
     header.add_text("/// Json-cpp amalgamated forward header (http://jsoncpp.sourceforge.net/).")
     header.add_text('/// It is intended to be used with #include "%s"' % forward_header_include_path)
@@ -103,7 +103,7 @@ def amalgamate_source(source_top_dir=None,
     print("Writing amalgamated forward header to %r" % target_forward_header_path)
     header.write_to(target_forward_header_path)
 
-    print("Amalgating source...")
+    print("Amalgamating source...")
     source = AmalgamationFile(source_top_dir)
     source.add_text("/// Json-cpp amalgamated source (http://jsoncpp.sourceforge.net/).")
     source.add_text('/// It is intended to be used with #include "%s"' % header_include_path)
