@@ -401,7 +401,7 @@ Json::Value obj_value(Json::objectValue); // {}
   bool empty() const;
 
   /// Return !isNull()
-  operator bool() const;
+  explicit operator bool() const;
 
   /// Remove all object members and array elements.
   /// \pre type() is arrayValue, objectValue, or nullValue
