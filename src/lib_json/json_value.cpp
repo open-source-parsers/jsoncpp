@@ -478,7 +478,7 @@ Value::Value(Value const& other)
     comments_ = new CommentInfo[numberOfCommentPlacement];
     for (int comment = 0; comment < numberOfCommentPlacement; ++comment) {
       const CommentInfo& otherComment = other.comments_[comment];
-      if (otherComment.comment_)
+      if (otherComment && otherComment.comment_)
         comments_[comment].setComment(
             otherComment.comment_, strlen(otherComment.comment_));
     }
