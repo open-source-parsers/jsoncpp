@@ -6,7 +6,7 @@
 # http://stackoverflow.com/questions/22111549/travis-ci-with-clang-3-4-and-c11/30925448#30925448
 # to allow C++11, though we are not yet building with -std=c++11
 
-before_install: pyenv global 3.5
+before_install: pyenv install 3.5.4 && pyenv global 3.5.4
 install:
 - if [[ $TRAVIS_OS_NAME == osx ]]; then
      brew update;
