@@ -199,7 +199,7 @@ static unsigned int utf8ToCodepoint(const char*& s, const char* e) {
     s += 2;
     // surrogates aren't valid codepoints itself
     // shouldn't be UTF-8 encoded
-    if (calculated >= 0xD800 && calculated >= 0xDFFF)
+    if (calculated >= 0xD800 && calculated <= 0xDFFF)
       return REPLACEMENT_CHARACTER;
     // oversized encoded characters are invalid
     return calculated < 0x800 ? REPLACEMENT_CHARACTER : calculated;
