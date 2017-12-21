@@ -4,6 +4,7 @@ project(
   version : '1.8.4',
   default_options : [
     'buildtype=release',
+    'cpp_std=c++11',
     'warning_level=1'],
   license : 'Public Domain',
   meson_version : '>= 0.41.1')
