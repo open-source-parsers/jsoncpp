@@ -962,7 +962,7 @@ bool Value::empty() const {
     return false;
 }
 
-bool Value::operator!() const { return isNull(); }
+Value::operator bool() const { return ! isNull(); }
 
 void Value::clear() {
   JSON_ASSERT_MESSAGE(type_ == nullValue || type_ == arrayValue ||

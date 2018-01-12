@@ -3,8 +3,12 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
+#if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(_MSC_VER)
+#pragma warning(disable : 4996)
+#endif
 
 #include "jsontest.h"
 #include <json/config.h>
@@ -304,6 +308,12 @@ JSONTEST_FIXTURE(ValueTest, null) {
   JSONTEST_ASSERT_STRING_EQUAL("", null_.asString());
 
   JSONTEST_ASSERT_EQUAL(Json::Value::null, null_);
+
+  // Test using a Value in a boolean context (false iff null)
+  JSONTEST_ASSERT_EQUAL(null_,false);
+  JSONTEST_ASSERT_EQUAL(object1_,true);
+  JSONTEST_ASSERT_EQUAL(!null_,true);
+  JSONTEST_ASSERT_EQUAL(!object1_,false);
 }
 
 JSONTEST_FIXTURE(ValueTest, strings) {
@@ -2036,7 +2046,7 @@ JSONTEST_FIXTURE(CharReaderFailIfExtraTest, issue164) {
   }
 }
 JSONTEST_FIXTURE(CharReaderFailIfExtraTest, issue107) {
-  // This is interpretted as an int value followed by a colon.
+  // This is interpreted as an int value followed by a colon.
   Json::CharReaderBuilder b;
   Json::Value root;
   char const doc[] =
@@ -2591,4 +2601,6 @@ int main(int argc, const char* argv[]) {
   return runner.runCommandLine(argc, argv);
 }
 
+#if defined(__GNUC__)
 #pragma GCC diagnostic pop
+#endif

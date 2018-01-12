@@ -1,9 +1,10 @@
 project(
   'jsoncpp',
   'cpp',
-  version : '1.8.3',
+  version : '1.8.4',
   default_options : [
     'buildtype=release',
+    'cpp_std=c++11',
     'warning_level=1'],
   license : 'Public Domain',
   meson_version : '>= 0.41.1')
@@ -53,7 +54,7 @@ jsoncpp_lib = library(
     'src/lib_json/json_reader.cpp',
     'src/lib_json/json_value.cpp',
     'src/lib_json/json_writer.cpp'],
-  soversion : 19,
+  soversion : 20,
   install : true,
   include_directories : jsoncpp_include_directories)
 

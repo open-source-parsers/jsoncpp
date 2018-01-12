@@ -125,10 +125,10 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
   int len = -1;
 
   char formatString[15];
-  snprintf(formatString, sizeof(formatString), "%%.%dg", precision);
+  snprintf(formatString, sizeof(formatString), "%%.%ug", precision);
 
   // Print into the buffer. We need not request the alternative representation
-  // that always has a decimal point because JSON doesn't distingish the
+  // that always has a decimal point because JSON doesn't distinguish the
   // concepts of reals and integers.
   if (isfinite(value)) {
     len = snprintf(buffer, sizeof(buffer), formatString, value);
@@ -199,7 +199,7 @@ static unsigned int utf8ToCodepoint(const char*& s, const char* e) {
     s += 2;
     // surrogates aren't valid codepoints itself
     // shouldn't be UTF-8 encoded
-    if (calculated >= 0xD800 && calculated >= 0xDFFF)
+    if (calculated >= 0xD800 && calculated <= 0xDFFF)
       return REPLACEMENT_CHARACTER;
     // oversized encoded characters are invalid
     return calculated < 0x800 ? REPLACEMENT_CHARACTER : calculated;
@@ -334,10 +334,10 @@ Writer::~Writer() {}
 // //////////////////////////////////////////////////////////////////
 
 FastWriter::FastWriter()
-    : yamlCompatiblityEnabled_(false), dropNullPlaceholders_(false),
+    : yamlCompatibilityEnabled_(false), dropNullPlaceholders_(false),
       omitEndingLineFeed_(false) {}
 
-void FastWriter::enableYAMLCompatibility() { yamlCompatiblityEnabled_ = true; }
+void FastWriter::enableYAMLCompatibility() { yamlCompatibilityEnabled_ = true; }
 
 void FastWriter::dropNullPlaceholders() { dropNullPlaceholders_ = true; }
 
@@ -397,7 +397,7 @@ void FastWriter::writeValue(const Value& value) {
       if (it != members.begin())
         document_ += ',';
       document_ += valueToQuotedStringN(name.data(), static_cast<unsigned>(name.length()));
-      document_ += yamlCompatiblityEnabled_ ? ": " : ":";
+      document_ += yamlCompatibilityEnabled_ ? ": " : ":";
       writeValue(value[name]);
     }
     document_ += '}';
@@ -486,7 +486,7 @@ void StyledWriter::writeArrayValue(const Value& value) {
   if (size == 0)
     pushValue("[]");
   else {
-    bool isArrayMultiLine = isMultineArray(value);
+    bool isArrayMultiLine = isMultilineArray(value);
     if (isArrayMultiLine) {
       writeWithIndent("[");
       indent();
@@ -524,7 +524,7 @@ void StyledWriter::writeArrayValue(const Value& value) {
   }
 }
 
-bool StyledWriter::isMultineArray(const Value& value) {
+bool StyledWriter::isMultilineArray(const Value& value) {
   ArrayIndex const size = value.size();
   bool isMultiLine = size * 3 >= rightMargin_;
   childValues_.clear();
@@ -703,7 +703,7 @@ void StyledStreamWriter::writeArrayValue(const Value& value) {
   if (size == 0)
     pushValue("[]");
   else {
-    bool isArrayMultiLine = isMultineArray(value);
+    bool isArrayMultiLine = isMultilineArray(value);
     if (isArrayMultiLine) {
       writeWithIndent("[");
       indent();
@@ -743,7 +743,7 @@ void StyledStreamWriter::writeArrayValue(const Value& value) {
   }
 }
 
-bool StyledStreamWriter::isMultineArray(const Value& value) {
+bool StyledStreamWriter::isMultilineArray(const Value& value) {
   ArrayIndex const size = value.size();
   bool isMultiLine = size * 3 >= rightMargin_;
   childValues_.clear();
@@ -860,7 +860,7 @@ struct BuiltStyledStreamWriter : public StreamWriter
 private:
   void writeValue(Value const& value);
   void writeArrayValue(Value const& value);
-  bool isMultineArray(Value const& value);
+  bool isMultilineArray(Value const& value);
   void pushValue(JSONCPP_STRING const& value);
   void writeIndent();
   void writeWithIndent(JSONCPP_STRING const& value);
@@ -984,7 +984,7 @@ void BuiltStyledStreamWriter::writeArrayValue(Value const& value) {
   if (size == 0)
     pushValue("[]");
   else {
-    bool isMultiLine = (cs_ == CommentStyle::All) || isMultineArray(value);
+    bool isMultiLine = (cs_ == CommentStyle::All) || isMultilineArray(value);
     if (isMultiLine) {
       writeWithIndent("[");
       indent();
@@ -1026,7 +1026,7 @@ void BuiltStyledStreamWriter::writeArrayValue(Value const& value) {
   }
 }
 
-bool BuiltStyledStreamWriter::isMultineArray(Value const& value) {
+bool BuiltStyledStreamWriter::isMultilineArray(Value const& value) {
   ArrayIndex const size = value.size();
   bool isMultiLine = size * 3 >= rightMargin_;
   childValues_.clear();

@@ -265,7 +265,7 @@ Performs an svn export of tag release version, and build a source tarball.
 
 Must be started in the project top directory.
 
-Warning: --force should only be used when developping/testing the release script.
+Warning: --force should only be used when developing/testing the release script.
 """
     from optparse import OptionParser
     parser = OptionParser(usage=usage)
@@ -377,7 +377,7 @@ Warning: --force should only be used when developping/testing the release script
                                          user=options.user, sftp=options.sftp)
             print('Source and doc release tarballs uploaded')
         else:
-            print('No upload user specified. Web site and download tarbal were not uploaded.')
+            print('No upload user specified. Web site and download tarball were not uploaded.')
             print('Tarball can be found at:', doc_tarball_path)
 
         # Set next version number and commit            
