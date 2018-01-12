@@ -606,7 +606,9 @@ Json::Value obj_value(Json::objectValue); // {}
 
 private:
   void initBasic(ValueType type, bool allocated = false);
+  void dupPayload(const Value& other);
   void releasePayload();
+  void dupMeta(const Value& other);
 
   Value& resolveReference(const char* key);
   Value& resolveReference(const char* key, const char* end);
