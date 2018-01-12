@@ -345,6 +345,21 @@ JSONTEST_FIXTURE(ValueTest, strings) {
   JSONTEST_ASSERT_STRING_EQUAL("a", string1_.asCString());
 }
 
+JSONTEST_FIXTURE(ValueTest, binary) {
+  std::string s;
+  for(auto _=0;_<1000*1000;++_) {
+    s += char(rand() % 0xFF);
+  }
+
+  Json::Value a = s;
+  JSONTEST_ASSERT(a.asString()==s);
+
+  std::istringstream iss(a.toStyledString());
+  Json::Value b;
+  iss >> b;
+  JSONTEST_ASSERT(b.asString()==s);
+}
+
 JSONTEST_FIXTURE(ValueTest, bools) {
   JSONTEST_ASSERT_EQUAL(Json::booleanValue, false_.type());
 
@@ -2532,6 +2547,7 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, arrayIssue252);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, null);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, strings);
+  JSONTEST_REGISTER_FIXTURE(runner, ValueTest, binary);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, bools);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, integers);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, nonIntegers);
