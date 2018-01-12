@@ -1433,6 +1433,40 @@ JSONTEST_FIXTURE(ValueTest, compareType) {
                                    Json::Value(Json::objectValue)));
 }
 
+JSONTEST_FIXTURE(ValueTest, CopyObject) {
+  Json::Value arrayVal;
+  arrayVal.append("val1");
+  arrayVal.append("val2");
+  arrayVal.append("val3");
+  Json::Value stringVal("string value");
+  Json::Value copy1, copy2;
+  {
+    Json::Value arrayCopy, stringCopy;
+    arrayCopy.copy(arrayVal);
+    stringCopy.copy(stringVal);
+    JSONTEST_ASSERT_PRED(checkIsEqual(arrayCopy, arrayVal));
+    JSONTEST_ASSERT_PRED(checkIsEqual(stringCopy, stringVal));
+    arrayCopy.append("val4");
+    JSONTEST_ASSERT(arrayCopy.size() == 4);
+    arrayVal.append("new4");
+    arrayVal.append("new5");
+    JSONTEST_ASSERT(arrayVal.size() == 5);
+    JSONTEST_ASSERT(!(arrayCopy == arrayVal));
+    stringCopy = "another string";
+    JSONTEST_ASSERT(!(stringCopy == stringVal));
+    copy1.copy(arrayCopy);
+    copy2.copy(stringCopy);
+  }
+  JSONTEST_ASSERT(arrayVal.size() == 5);
+  JSONTEST_ASSERT(stringVal == "string value");
+  JSONTEST_ASSERT(copy1.size() == 4);
+  JSONTEST_ASSERT(copy2 == "another string");
+  copy1.copy(stringVal);
+  JSONTEST_ASSERT(copy1 == "string value");
+  copy2.copy(arrayVal);
+  JSONTEST_ASSERT(copy2.size() == 5);
+}
+
 void ValueTest::checkIsLess(const Json::Value& x, const Json::Value& y) {
   JSONTEST_ASSERT(x < y);
   JSONTEST_ASSERT(y > x);
@@ -2544,6 +2578,7 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, compareArray);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, compareObject);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, compareType);
+  JSONTEST_REGISTER_FIXTURE(runner, ValueTest, CopyObject);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, offsetAccessors);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, typeChecksThrowExceptions);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, StaticString);
