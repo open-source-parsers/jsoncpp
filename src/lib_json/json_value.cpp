@@ -1186,10 +1186,11 @@ bool Value::removeMember(const char* key, const char* cend, Value* removed)
   ObjectValues::iterator it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
     return false;
+  if (removed)
 #if JSON_HAS_RVALUE_REFERENCES
-  *removed = std::move(it->second);
+    *removed = std::move(it->second);
 #else
-  *removed = it->second;
+    *removed = it->second;
 #endif
   value_.map_->erase(it);
   return true;
