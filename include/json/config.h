@@ -80,7 +80,7 @@
 
 // In c++11 the override keyword allows you to explicitly define that a function
 // is intended to override the base-class version.  This makes the code more
-// managable and fixes a set of common hard-to-find bugs.
+// manageable and fixes a set of common hard-to-find bugs.
 #if __cplusplus >= 201103L
 # define JSONCPP_OVERRIDE override
 # define JSONCPP_NOEXCEPT noexcept
