@@ -152,7 +152,7 @@ public:
  *
  * The JSON document is written in a single line. It is not intended for 'human'
  *consumption,
- * but may be usefull to support feature such as RPC where bandwith is limited.
+ * but may be useful to support feature such as RPC where bandwidth is limited.
  * \sa Reader, Value
  * \deprecated Use StreamWriterBuilder.
  */

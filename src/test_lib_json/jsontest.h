@@ -270,7 +270,7 @@ TestResult& checkStringEqual(TestResult& result,
       return new Test##FixtureType##name();                                    \
     }                                                                          \
                                                                                \
-  public: /* overidden from TestCase */                                        \
+  public: /* overridden from TestCase */                                        \
     const char* testName() const JSONCPP_OVERRIDE { return #FixtureType "/" #name; }    \
     void runTestCase() JSONCPP_OVERRIDE;                                                \
   };                                                                           \
