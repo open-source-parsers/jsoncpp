@@ -154,7 +154,7 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
 }
 }
 
-JSONCPP_STRING valueToString(double value) { return valueToString(value, false, 17); }
+JSONCPP_STRING valueToString(double value) { return valueToString(value, false, 15); }
 
 JSONCPP_STRING valueToString(bool value) { return value ? "true" : "false"; }
 
