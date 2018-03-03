@@ -687,6 +687,8 @@ Value::Int Value::asInt() const {
     return 0;
   case booleanValue:
     return value_.bool_ ? 1 : 0;
+  case stringValue:
+    return std::stoi(asCString());
   default:
     break;
   }
@@ -709,6 +711,8 @@ Value::UInt Value::asUInt() const {
     return 0;
   case booleanValue:
     return value_.bool_ ? 1 : 0;
+  case stringValue:
+    return (unsigned)std::stoul(asCString());
   default:
     break;
   }
@@ -732,6 +736,8 @@ Value::Int64 Value::asInt64() const {
     return 0;
   case booleanValue:
     return value_.bool_ ? 1 : 0;
+  case stringValue:
+     return std::stoll(asCString());
   default:
     break;
   }
@@ -753,6 +759,8 @@ Value::UInt64 Value::asUInt64() const {
     return 0;
   case booleanValue:
     return value_.bool_ ? 1 : 0;
+  case stringValue:
+    return std::stoull(asCString());
   default:
     break;
   }
@@ -792,6 +800,8 @@ double Value::asDouble() const {
     return 0.0;
   case booleanValue:
     return value_.bool_ ? 1.0 : 0.0;
+  case stringValue:
+    return std::stod(asCString());
   default:
     break;
   }
@@ -815,6 +825,8 @@ float Value::asFloat() const {
     return 0.0;
   case booleanValue:
     return value_.bool_ ? 1.0f : 0.0f;
+  case stringValue:
+    return std::stof(asCString());
   default:
     break;
   }
@@ -834,6 +846,8 @@ bool Value::asBool() const {
   case realValue:
     // This is kind of strange. Not recommended.
     return (value_.real_ != 0.0) ? true : false;
+  case stringValue:
+    return strcmp(asCString(),"true") == 0;
   default:
     break;
   }
@@ -852,15 +866,15 @@ bool Value::isConvertibleTo(ValueType other) const {
   case intValue:
     return isInt() ||
            (type_ == realValue && InRange(value_.real_, minInt, maxInt)) ||
-           type_ == booleanValue || type_ == nullValue;
+           type_ == booleanValue || type_ == nullValue || type_ == stringValue;
   case uintValue:
     return isUInt() ||
            (type_ == realValue && InRange(value_.real_, 0, maxUInt)) ||
-           type_ == booleanValue || type_ == nullValue;
+           type_ == booleanValue || type_ == nullValue || type_ == stringValue;
   case realValue:
-    return isNumeric() || type_ == booleanValue || type_ == nullValue;
+    return isNumeric() || type_ == booleanValue || type_ == nullValue || type_ == stringValue;
   case booleanValue:
-    return isNumeric() || type_ == booleanValue || type_ == nullValue;
+    return isNumeric() || type_ == booleanValue || type_ == nullValue || type_ == stringValue;
   case stringValue:
     return isNumeric() || type_ == booleanValue || type_ == stringValue ||
            type_ == nullValue;
