@@ -125,7 +125,7 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
   int len = -1;
 
   char formatString[15];
-  snprintf(formatString, sizeof(formatString), "%%.%ug", precision);
+  snprintf(formatString, sizeof(formatString), "%%.%uf", precision);
 
   // Print into the buffer. We need not request the alternative representation
   // that always has a decimal point because JSON doesn't distinguish the
@@ -133,6 +133,7 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
   if (isfinite(value)) {
     len = snprintf(buffer, sizeof(buffer), formatString, value);
     fixNumericLocale(buffer, buffer + len);
+    fixZerosInTheEnd(buffer, buffer + len);
 
     // try to ensure we preserve the fact that this was given to us as a double on input
     if (!strchr(buffer, '.') && !strchr(buffer, 'e')) {
@@ -154,7 +155,7 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
 }
 }
 
-JSONCPP_STRING valueToString(double value) { return valueToString(value, false, 15); }
+JSONCPP_STRING valueToString(double value, unsigned int precision) { return valueToString(value, false, precision); }
 
 JSONCPP_STRING valueToString(bool value) { return value ? "true" : "false"; }
 
@@ -335,13 +336,16 @@ Writer::~Writer() {}
 
 FastWriter::FastWriter()
     : yamlCompatibilityEnabled_(false), dropNullPlaceholders_(false),
-      omitEndingLineFeed_(false) {}
+      omitEndingLineFeed_(false),
+      realPrecision_(Value::defaultRealPrecision) {}
 
 void FastWriter::enableYAMLCompatibility() { yamlCompatibilityEnabled_ = true; }
 
 void FastWriter::dropNullPlaceholders() { dropNullPlaceholders_ = true; }
 
 void FastWriter::omitEndingLineFeed() { omitEndingLineFeed_ = true; }
+
+void FastWriter::setRealPrecision(unsigned int realPrecision) { realPrecision_ = realPrecision; }
 
 JSONCPP_STRING FastWriter::write(const Value& root) {
   document_.clear();
@@ -364,7 +368,7 @@ void FastWriter::writeValue(const Value& value) {
     document_ += valueToString(value.asLargestUInt());
     break;
   case realValue:
-    document_ += valueToString(value.asDouble());
+    document_ += valueToString(value.asDouble(), realPrecision_);
     break;
   case stringValue:
   {
@@ -409,7 +413,9 @@ void FastWriter::writeValue(const Value& value) {
 // //////////////////////////////////////////////////////////////////
 
 StyledWriter::StyledWriter()
-    : rightMargin_(74), indentSize_(3), addChildValues_() {}
+    : rightMargin_(74), indentSize_(3), realPrecision_(Value::defaultRealPrecision), addChildValues_() {}
+
+void StyledWriter::setRealPrecision(unsigned int realPrecision) { realPrecision_ = realPrecision; }
 
 JSONCPP_STRING StyledWriter::write(const Value& root) {
   document_.clear();
@@ -434,7 +440,7 @@ void StyledWriter::writeValue(const Value& value) {
     pushValue(valueToString(value.asLargestUInt()));
     break;
   case realValue:
-    pushValue(valueToString(value.asDouble()));
+    pushValue(valueToString(value.asDouble(), realPrecision_));
     break;
   case stringValue:
   {
@@ -622,8 +628,10 @@ bool StyledWriter::hasCommentForValue(const Value& value) {
 // //////////////////////////////////////////////////////////////////
 
 StyledStreamWriter::StyledStreamWriter(JSONCPP_STRING indentation)
-    : document_(NULL), rightMargin_(74), indentation_(indentation),
-      addChildValues_() {}
+    : document_(NULL), rightMargin_(74), realPrecision_(Value::defaultRealPrecision),
+      indentation_(indentation), addChildValues_() {}
+
+void StyledStreamWriter::setRealPrecision(unsigned int realPrecision) { realPrecision_ = realPrecision; }
 
 void StyledStreamWriter::write(JSONCPP_OSTREAM& out, const Value& root) {
   document_ = &out;
@@ -651,7 +659,7 @@ void StyledStreamWriter::writeValue(const Value& value) {
     pushValue(valueToString(value.asLargestUInt()));
     break;
   case realValue:
-    pushValue(valueToString(value.asDouble()));
+    pushValue(valueToString(value.asDouble(), realPrecision_));
     break;
   case stringValue:
   {

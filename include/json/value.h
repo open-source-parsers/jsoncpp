@@ -220,6 +220,9 @@ public:
   static const UInt64 maxUInt64;
 #endif // defined(JSON_HAS_INT64)
 
+  /// Default precision for real value for string representation.
+  static const UInt defaultRealPrecision;
+
 // Workaround for bug in the NVIDIAs CUDA 9.1 nvcc compiler
 // when using gcc and clang backend compilers.  CZString
 // cannot be defined as private.  See issue #486

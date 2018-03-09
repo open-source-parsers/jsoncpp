@@ -109,6 +109,20 @@ static inline void fixNumericLocaleInput(char* begin, char* end) {
   }
 }
 
+/**
+ * Delete zeros in the end of string, if it isn't last zero before '.' character.
+ */
+static inline void fixZerosInTheEnd(char* begin, char* end) {
+  end--;
+  while ((begin < end) && (*end == '0')) {
+    // don't delete last zero before point.
+    if (*(end - 1) != '.') {
+      *end = '\0';
+    }
+    end--;
+  }
+}
+
 } // namespace Json {
 
 #endif // LIB_JSONCPP_JSON_TOOL_H_INCLUDED
