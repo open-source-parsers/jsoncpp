@@ -64,7 +64,7 @@ const LargestInt Value::minLargestInt = LargestInt(~(LargestUInt(-1) / 2));
 const LargestInt Value::maxLargestInt = LargestInt(LargestUInt(-1) / 2);
 const LargestUInt Value::maxLargestUInt = LargestUInt(-1);
 
-const UInt Value::defaultRealPrecision = 15;
+const UInt Value::defaultRealPrecision = 17;
 
 #if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 template <typename T, typename U>
@@ -657,7 +657,7 @@ JSONCPP_STRING Value::asString() const {
   case uintValue:
     return valueToString(value_.uint_);
   case realValue:
-    return valueToString(value_.real_, Value::defaultRealPrecision);
+    return valueToString(value_.real_, Value::defaultRealPrecision, false);
   default:
     JSON_FAIL_MESSAGE("Type is not convertible to string");
   }

@@ -189,6 +189,7 @@ private:
   bool dropNullPlaceholders_;
   bool omitEndingLineFeed_;
   UInt realPrecision_;
+  bool isCustomRealPrecision_;
 };
 #if defined(_MSC_VER)
 #pragma warning(pop)
@@ -259,6 +260,7 @@ private:
   unsigned int indentSize_;
   unsigned int realPrecision_;
   bool addChildValues_;
+  bool isCustomRealPrecision_;
 };
 #if defined(_MSC_VER)
 #pragma warning(pop)
@@ -333,6 +335,7 @@ private:
   JSONCPP_STRING indentString_;
   unsigned int rightMargin_;
   unsigned int realPrecision_;
+  bool isCustomRealPrecision_;
   JSONCPP_STRING indentation_;
   bool addChildValues_ : 1;
   bool indented_ : 1;
@@ -347,7 +350,7 @@ JSONCPP_STRING JSON_API valueToString(UInt value);
 #endif // if defined(JSON_HAS_INT64)
 JSONCPP_STRING JSON_API valueToString(LargestInt value);
 JSONCPP_STRING JSON_API valueToString(LargestUInt value);
-JSONCPP_STRING JSON_API valueToString(double value, unsigned int precision);
+JSONCPP_STRING JSON_API valueToString(double value, unsigned int precision, bool isCustomPrecision);
 JSONCPP_STRING JSON_API valueToString(bool value);
 JSONCPP_STRING JSON_API valueToQuotedString(const char* value);
 
