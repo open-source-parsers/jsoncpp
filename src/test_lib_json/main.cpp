@@ -1757,6 +1757,27 @@ JSONTEST_FIXTURE(ValueTest, precision) {
     expected = "0.25634569487374054";
     result = Json::writeString(b, v);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+
+    b.settings_["precision"] = 5;
+    b.settings_["precisionType"] = "decimal";
+    v = 0.256345694873740545068;
+    expected = "0.25635";
+    result = Json::writeString(b, v);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+
+    b.settings_["precision"] = 1;
+    b.settings_["precisionType"] = "decimal";
+    v = 0.256345694873740545068;
+    expected = "0.3";
+    result = Json::writeString(b, v);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+
+    b.settings_["precision"] = 10;
+    b.settings_["precisionType"] = "decimal";
+    v = 0.23300000;
+    expected = "0.233";
+    result = Json::writeString(b, v);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 }
 
 struct WriterTest : JsonTest::TestCase {};
