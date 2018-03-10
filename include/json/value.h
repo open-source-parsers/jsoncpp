@@ -109,6 +109,13 @@ enum CommentPlacement {
   numberOfCommentPlacement
 };
 
+/** \brief Type of precision for formatting of real values.
+ */
+enum PrecisionType {
+  significantDigits = 0, ///< we set max number of significant digits in string
+  decimalPlaces          ///< we set max number of digits after "." in string
+};
+
 //# ifdef JSON_USE_CPPTL
 //   typedef CppTL::AnyEnumerator<const char *> EnumMemberNames;
 //   typedef CppTL::AnyEnumerator<const Value &> EnumValues;

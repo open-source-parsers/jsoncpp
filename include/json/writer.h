@@ -176,7 +176,8 @@ public:
 
   void omitEndingLineFeed();
 
-  void setRealPrecision(unsigned int realPrecision);
+  void setPrecision(unsigned int precision);
+  void setPrecisionType(PrecisionType precisionType);
 
 public: // overridden from Writer
   JSONCPP_STRING write(const Value& root) JSONCPP_OVERRIDE;
@@ -188,8 +189,8 @@ private:
   bool yamlCompatibilityEnabled_;
   bool dropNullPlaceholders_;
   bool omitEndingLineFeed_;
-  UInt realPrecision_;
-  bool isCustomRealPrecision_;
+  UInt precision_;
+  PrecisionType precisionType_;
 };
 #if defined(_MSC_VER)
 #pragma warning(pop)
@@ -235,7 +236,8 @@ public: // overridden from Writer
    */
   JSONCPP_STRING write(const Value& root) JSONCPP_OVERRIDE;
 
-  void setRealPrecision(unsigned int realPrecision);
+  void setPrecision(unsigned int precision);
+  void setPrecisionType(PrecisionType precisionType);
 
 private:
   void writeValue(const Value& value);
@@ -258,9 +260,9 @@ private:
   JSONCPP_STRING indentString_;
   unsigned int rightMargin_;
   unsigned int indentSize_;
-  unsigned int realPrecision_;
   bool addChildValues_;
-  bool isCustomRealPrecision_;
+  UInt precision_;
+  PrecisionType precisionType_;
 };
 #if defined(_MSC_VER)
 #pragma warning(pop)
@@ -312,7 +314,8 @@ public:
    */
   void write(JSONCPP_OSTREAM& out, const Value& root);
 
-  void setRealPrecision(unsigned int realPrecision);
+  void setPrecision(unsigned int precision);
+  void setPrecisionType(PrecisionType precisionType);
 
 private:
   void writeValue(const Value& value);
@@ -334,8 +337,8 @@ private:
   JSONCPP_OSTREAM* document_;
   JSONCPP_STRING indentString_;
   unsigned int rightMargin_;
-  unsigned int realPrecision_;
-  bool isCustomRealPrecision_;
+  UInt precision_;
+  PrecisionType precisionType_;
   JSONCPP_STRING indentation_;
   bool addChildValues_ : 1;
   bool indented_ : 1;
@@ -350,7 +353,7 @@ JSONCPP_STRING JSON_API valueToString(UInt value);
 #endif // if defined(JSON_HAS_INT64)
 JSONCPP_STRING JSON_API valueToString(LargestInt value);
 JSONCPP_STRING JSON_API valueToString(LargestUInt value);
-JSONCPP_STRING JSON_API valueToString(double value, unsigned int precision, bool isCustomPrecision);
+JSONCPP_STRING JSON_API valueToString(double value, unsigned int precision, PrecisionType precisionType);
 JSONCPP_STRING JSON_API valueToString(bool value);
 JSONCPP_STRING JSON_API valueToQuotedString(const char* value);
 
