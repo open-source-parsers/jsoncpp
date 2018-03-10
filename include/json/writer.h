@@ -93,7 +93,8 @@ public:
   /** Configuration of this builder.
     Available settings (case-sensitive):
     - "commentStyle": "None" or "All"
-    - "indentation":  "<anything>"
+    - "indentation":  "<anything>".
+      - Setting this to an empty string also omits newline characters.
     - "enableYAMLCompatibility": false or true
       - slightly change the whitespace around colons
     - "dropNullPlaceholders": false or true

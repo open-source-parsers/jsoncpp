@@ -890,14 +890,9 @@ public:
   pointer operator->() const { return &deref(); }
 };
 
+inline void swap(Value& a, Value& b) { a.swap(b); }
+
 } // namespace Json
-
-
-namespace std {
-/// Specialize std::swap() for Json::Value.
-template<>
-inline void swap(Json::Value& a, Json::Value& b) { a.swap(b); }
-}
 
 #pragma pack(pop)
 

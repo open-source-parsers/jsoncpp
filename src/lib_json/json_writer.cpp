@@ -644,7 +644,8 @@ bool StyledWriter::hasCommentForValue(const Value& value) {
 
 StyledStreamWriter::StyledStreamWriter(JSONCPP_STRING indentation)
     : document_(NULL), rightMargin_(74), precision_(Value::defaultRealPrecision),
-      precisionType_(PrecisionType::significantDigits), indentation_(indentation), addChildValues_() {}
+      precisionType_(PrecisionType::significantDigits), indentation_(indentation),
+      addChildValues_(), indented_(false) {}
 
 void StyledStreamWriter::setPrecision(unsigned int precision) { precision_ = precision; }
 
