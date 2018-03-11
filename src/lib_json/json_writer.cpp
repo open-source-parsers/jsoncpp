@@ -345,19 +345,13 @@ Writer::~Writer() {}
 
 FastWriter::FastWriter()
     : yamlCompatibilityEnabled_(false), dropNullPlaceholders_(false),
-      omitEndingLineFeed_(false),
-      precision_(Value::defaultRealPrecision),
-      precisionType_(PrecisionType::significantDigits) {}
+      omitEndingLineFeed_(false) {}
 
 void FastWriter::enableYAMLCompatibility() { yamlCompatibilityEnabled_ = true; }
 
 void FastWriter::dropNullPlaceholders() { dropNullPlaceholders_ = true; }
 
 void FastWriter::omitEndingLineFeed() { omitEndingLineFeed_ = true; }
-
-void FastWriter::setPrecision(unsigned int precision) { precision_ = precision; }
-
-void FastWriter::setPrecisionType(PrecisionType precisionType) { precisionType_ = precisionType; }
 
 JSONCPP_STRING FastWriter::write(const Value& root) {
   document_.clear();
@@ -380,7 +374,7 @@ void FastWriter::writeValue(const Value& value) {
     document_ += valueToString(value.asLargestUInt());
     break;
   case realValue:
-    document_ += valueToString(value.asDouble(), precision_, precisionType_);
+    document_ += valueToString(value.asDouble(), Value::defaultRealPrecision);
     break;
   case stringValue:
   {
@@ -425,12 +419,7 @@ void FastWriter::writeValue(const Value& value) {
 // //////////////////////////////////////////////////////////////////
 
 StyledWriter::StyledWriter()
-    : rightMargin_(74), indentSize_(3), addChildValues_(), precision_(Value::defaultRealPrecision),
-      precisionType_(PrecisionType::significantDigits) {}
-
-void StyledWriter::setPrecision(unsigned int precision) { precision_ = precision; }
-
-void StyledWriter::setPrecisionType(PrecisionType precisionType) { precisionType_ = precisionType; }
+    : rightMargin_(74), indentSize_(3), addChildValues_() {}
 
 JSONCPP_STRING StyledWriter::write(const Value& root) {
   document_.clear();
@@ -455,7 +444,7 @@ void StyledWriter::writeValue(const Value& value) {
     pushValue(valueToString(value.asLargestUInt()));
     break;
   case realValue:
-    pushValue(valueToString(value.asDouble(), precision_, precisionType_));
+    pushValue(valueToString(value.asDouble(), Value::defaultRealPrecision));
     break;
   case stringValue:
   {
@@ -643,13 +632,7 @@ bool StyledWriter::hasCommentForValue(const Value& value) {
 // //////////////////////////////////////////////////////////////////
 
 StyledStreamWriter::StyledStreamWriter(JSONCPP_STRING indentation)
-    : document_(NULL), rightMargin_(74), precision_(Value::defaultRealPrecision),
-      precisionType_(PrecisionType::significantDigits), indentation_(indentation),
-      addChildValues_(), indented_(false) {}
-
-void StyledStreamWriter::setPrecision(unsigned int precision) { precision_ = precision; }
-
-void StyledStreamWriter::setPrecisionType(PrecisionType precisionType) { precisionType_ = precisionType; }
+    : document_(NULL), rightMargin_(74), indentation_(indentation), addChildValues_(), indented_(false) {}
 
 void StyledStreamWriter::write(JSONCPP_OSTREAM& out, const Value& root) {
   document_ = &out;
@@ -677,7 +660,7 @@ void StyledStreamWriter::writeValue(const Value& value) {
     pushValue(valueToString(value.asLargestUInt()));
     break;
   case realValue:
-    pushValue(valueToString(value.asDouble(), precision_, precisionType_));
+    pushValue(valueToString(value.asDouble(), Value::defaultRealPrecision));
     break;
   case stringValue:
   {

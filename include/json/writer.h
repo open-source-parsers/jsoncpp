@@ -106,6 +106,10 @@ public:
       - If true, outputs non-finite floating point values in the following way:
         NaN values as "NaN", positive infinity as "Infinity", and negative infinity
         as "-Infinity".
+    - "precision": int
+      - Number of precision digits for formatting of real values.
+    - "precisionType": "significant"(default) or "decimal"
+      - Type of precision for formatting of real values.
 
     You can examine 'settings_` yourself
     to see the defaults. You can also write and read them just like any
@@ -177,9 +181,6 @@ public:
 
   void omitEndingLineFeed();
 
-  void setPrecision(unsigned int precision);
-  void setPrecisionType(PrecisionType precisionType);
-
 public: // overridden from Writer
   JSONCPP_STRING write(const Value& root) JSONCPP_OVERRIDE;
 
@@ -190,8 +191,6 @@ private:
   bool yamlCompatibilityEnabled_;
   bool dropNullPlaceholders_;
   bool omitEndingLineFeed_;
-  UInt precision_;
-  PrecisionType precisionType_;
 };
 #if defined(_MSC_VER)
 #pragma warning(pop)
@@ -237,9 +236,6 @@ public: // overridden from Writer
    */
   JSONCPP_STRING write(const Value& root) JSONCPP_OVERRIDE;
 
-  void setPrecision(unsigned int precision);
-  void setPrecisionType(PrecisionType precisionType);
-
 private:
   void writeValue(const Value& value);
   void writeArrayValue(const Value& value);
@@ -262,8 +258,6 @@ private:
   unsigned int rightMargin_;
   unsigned int indentSize_;
   bool addChildValues_;
-  UInt precision_;
-  PrecisionType precisionType_;
 };
 #if defined(_MSC_VER)
 #pragma warning(pop)
@@ -315,9 +309,6 @@ public:
    */
   void write(JSONCPP_OSTREAM& out, const Value& root);
 
-  void setPrecision(unsigned int precision);
-  void setPrecisionType(PrecisionType precisionType);
-
 private:
   void writeValue(const Value& value);
   void writeArrayValue(const Value& value);
@@ -338,8 +329,6 @@ private:
   JSONCPP_OSTREAM* document_;
   JSONCPP_STRING indentString_;
   unsigned int rightMargin_;
-  UInt precision_;
-  PrecisionType precisionType_;
   JSONCPP_STRING indentation_;
   bool addChildValues_ : 1;
   bool indented_ : 1;
@@ -354,7 +343,8 @@ JSONCPP_STRING JSON_API valueToString(UInt value);
 #endif // if defined(JSON_HAS_INT64)
 JSONCPP_STRING JSON_API valueToString(LargestInt value);
 JSONCPP_STRING JSON_API valueToString(LargestUInt value);
-JSONCPP_STRING JSON_API valueToString(double value, unsigned int precision, PrecisionType precisionType);
+JSONCPP_STRING JSON_API valueToString(double value, unsigned int precision,
+                                      PrecisionType precisionType = PrecisionType::significantDigits);
 JSONCPP_STRING JSON_API valueToString(bool value);
 JSONCPP_STRING JSON_API valueToQuotedString(const char* value);
 
