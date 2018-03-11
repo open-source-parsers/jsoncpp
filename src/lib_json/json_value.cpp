@@ -657,7 +657,7 @@ JSONCPP_STRING Value::asString() const {
   case uintValue:
     return valueToString(value_.uint_);
   case realValue:
-    return valueToString(value_.real_, Value::defaultRealPrecision, PrecisionType::significantDigits);
+    return valueToString(value_.real_);
   default:
     JSON_FAIL_MESSAGE("Type is not convertible to string");
   }

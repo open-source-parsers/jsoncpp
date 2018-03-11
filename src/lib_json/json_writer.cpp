@@ -374,7 +374,7 @@ void FastWriter::writeValue(const Value& value) {
     document_ += valueToString(value.asLargestUInt());
     break;
   case realValue:
-    document_ += valueToString(value.asDouble(), Value::defaultRealPrecision);
+    document_ += valueToString(value.asDouble());
     break;
   case stringValue:
   {
@@ -444,7 +444,7 @@ void StyledWriter::writeValue(const Value& value) {
     pushValue(valueToString(value.asLargestUInt()));
     break;
   case realValue:
-    pushValue(valueToString(value.asDouble(), Value::defaultRealPrecision));
+    pushValue(valueToString(value.asDouble()));
     break;
   case stringValue:
   {
@@ -632,7 +632,9 @@ bool StyledWriter::hasCommentForValue(const Value& value) {
 // //////////////////////////////////////////////////////////////////
 
 StyledStreamWriter::StyledStreamWriter(JSONCPP_STRING indentation)
-    : document_(NULL), rightMargin_(74), indentation_(indentation), addChildValues_(), indented_(false) {}
+    : document_(NULL), rightMargin_(74), indentation_(indentation),
+      addChildValues_(), indented_(false)
+{}
 
 void StyledStreamWriter::write(JSONCPP_OSTREAM& out, const Value& root) {
   document_ = &out;
@@ -660,7 +662,7 @@ void StyledStreamWriter::writeValue(const Value& value) {
     pushValue(valueToString(value.asLargestUInt()));
     break;
   case realValue:
-    pushValue(valueToString(value.asDouble(), Value::defaultRealPrecision));
+    pushValue(valueToString(value.asDouble()));
     break;
   case stringValue:
   {
