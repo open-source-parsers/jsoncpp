@@ -1724,7 +1724,7 @@ JSONTEST_FIXTURE(ValueTest, specialFloats) {
 
 JSONTEST_FIXTURE(ValueTest, precision) {
     Json::StreamWriterBuilder b;
-    b.settings_["precision"] = 5;
+    b.settings_["floatPrecision"] = 5;
 
     Json::Value v = 100.0/3;
     JSONCPP_STRING expected = "33.333";
@@ -1741,39 +1741,39 @@ JSONTEST_FIXTURE(ValueTest, precision) {
     result = Json::writeString(b, v);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 
-    b.settings_["precision"] = 1;
+    b.settings_["floatPrecision"] = 1;
     expected = "0.3";
     result = Json::writeString(b, v);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 
-    b.settings_["precision"] = 17;
+    b.settings_["floatPrecision"] = 17;
     v = 1234857476305.256345694873740545068;
     expected = "1234857476305.2563";
     result = Json::writeString(b, v);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 
-    b.settings_["precision"] = 24;
+    b.settings_["floatPrecision"] = 24;
     v = 0.256345694873740545068;
     expected = "0.25634569487374054";
     result = Json::writeString(b, v);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 
-    b.settings_["precision"] = 5;
-    b.settings_["precisionType"] = "decimal";
+    b.settings_["floatPrecision"] = 5;
+    b.settings_["floatFormat"] = "decimal";
     v = 0.256345694873740545068;
     expected = "0.25635";
     result = Json::writeString(b, v);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 
-    b.settings_["precision"] = 1;
-    b.settings_["precisionType"] = "decimal";
+    b.settings_["floatPrecision"] = 1;
+    b.settings_["floatFormat"] = "decimal";
     v = 0.256345694873740545068;
     expected = "0.3";
     result = Json::writeString(b, v);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 
-    b.settings_["precision"] = 10;
-    b.settings_["precisionType"] = "decimal";
+    b.settings_["floatPrecision"] = 10;
+    b.settings_["floatFormat"] = "decimal";
     v = 0.23300000;
     expected = "0.233";
     result = Json::writeString(b, v);

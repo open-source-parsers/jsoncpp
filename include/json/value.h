@@ -111,7 +111,7 @@ enum CommentPlacement {
 
 /** \brief Type of precision for formatting of real values.
  */
-enum PrecisionType {
+enum FloatFormat {
   significantDigits = 0, ///< we set max number of significant digits in string
   decimalPlaces          ///< we set max number of digits after "." in string
 };
