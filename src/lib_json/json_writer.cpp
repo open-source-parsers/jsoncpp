@@ -118,14 +118,18 @@ JSONCPP_STRING valueToString(UInt value) {
 #endif // # if defined(JSON_HAS_INT64)
 
 namespace {
-JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int precision) {
+JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int precision, PrecisionType precisionType) {
   // Allocate a buffer that is more than large enough to store the 16 digits of
   // precision requested below.
   char buffer[36];
   int len = -1;
 
   char formatString[15];
-  snprintf(formatString, sizeof(formatString), "%%.%ug", precision);
+  if (precisionType == PrecisionType::significantDigits) {
+    snprintf(formatString, sizeof(formatString), "%%.%ug", precision);
+  } else {
+    snprintf(formatString, sizeof(formatString), "%%.%uf", precision);
+  }
 
   // Print into the buffer. We need not request the alternative representation
   // that always has a decimal point because JSON doesn't distinguish the
@@ -133,6 +137,10 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
   if (isfinite(value)) {
     len = snprintf(buffer, sizeof(buffer), formatString, value);
     fixNumericLocale(buffer, buffer + len);
+    // to delete use-less too much zeros in the end of string
+    if (precisionType == PrecisionType::decimalPlaces) {
+      fixZerosInTheEnd(buffer, buffer + len);
+    }
 
     // try to ensure we preserve the fact that this was given to us as a double on input
     if (!strchr(buffer, '.') && !strchr(buffer, 'e')) {
@@ -154,7 +162,9 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
 }
 }
 
-JSONCPP_STRING valueToString(double value) { return valueToString(value, false, 17); }
+JSONCPP_STRING valueToString(double value, unsigned int precision, PrecisionType precisionType) {
+  return valueToString(value, false, precision, precisionType);
+}
 
 JSONCPP_STRING valueToString(bool value) { return value ? "true" : "false"; }
 
@@ -856,7 +866,8 @@ struct BuiltStyledStreamWriter : public StreamWriter
       JSONCPP_STRING const& nullSymbol,
       JSONCPP_STRING const& endingLineFeedSymbol,
       bool useSpecialFloats,
-      unsigned int precision);
+      unsigned int precision,
+      PrecisionType precisionType);
   int write(Value const& root, JSONCPP_OSTREAM* sout) JSONCPP_OVERRIDE;
 private:
   void writeValue(Value const& value);
@@ -885,6 +896,7 @@ private:
   bool indented_ : 1;
   bool useSpecialFloats_ : 1;
   unsigned int precision_;
+  PrecisionType precisionType_;
 };
 BuiltStyledStreamWriter::BuiltStyledStreamWriter(
       JSONCPP_STRING const& indentation,
@@ -893,7 +905,8 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
       JSONCPP_STRING const& nullSymbol,
       JSONCPP_STRING const& endingLineFeedSymbol,
       bool useSpecialFloats,
-      unsigned int precision)
+      unsigned int precision,
+      PrecisionType precisionType)
   : rightMargin_(74)
   , indentation_(indentation)
   , cs_(cs)
@@ -904,6 +917,7 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
   , indented_(false)
   , useSpecialFloats_(useSpecialFloats)
   , precision_(precision)
+  , precisionType_(precisionType)
 {
 }
 int BuiltStyledStreamWriter::write(Value const& root, JSONCPP_OSTREAM* sout)
@@ -933,7 +947,7 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
     pushValue(valueToString(value.asLargestUInt()));
     break;
   case realValue:
-    pushValue(valueToString(value.asDouble(), useSpecialFloats_, precision_));
+    pushValue(valueToString(value.asDouble(), useSpecialFloats_, precision_, precisionType_));
     break;
   case stringValue:
   {
@@ -1145,6 +1159,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
 {
   JSONCPP_STRING indentation = settings_["indentation"].asString();
   JSONCPP_STRING cs_str = settings_["commentStyle"].asString();
+  JSONCPP_STRING pt_str = settings_["precisionType"].asString();
   bool eyc = settings_["enableYAMLCompatibility"].asBool();
   bool dnp = settings_["dropNullPlaceholders"].asBool();
   bool usf = settings_["useSpecialFloats"].asBool(); 
@@ -1156,6 +1171,14 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
     cs = CommentStyle::None;
   } else {
     throwRuntimeError("commentStyle must be 'All' or 'None'");
+  }
+  PrecisionType precisionType(significantDigits);
+  if (pt_str == "significant") {
+    precisionType = PrecisionType::significantDigits;
+  } else if (pt_str == "decimal") {
+    precisionType = PrecisionType::decimalPlaces;
+  } else {
+    throwRuntimeError("precisionType must be 'significant' or 'decimal'");
   }
   JSONCPP_STRING colonSymbol = " : ";
   if (eyc) {
@@ -1171,7 +1194,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const
   JSONCPP_STRING endingLineFeedSymbol;
   return new BuiltStyledStreamWriter(
       indentation, cs,
-      colonSymbol, nullSymbol, endingLineFeedSymbol, usf, pre);
+      colonSymbol, nullSymbol, endingLineFeedSymbol, usf, pre, precisionType);
 }
 static void getValidWriterKeys(std::set<JSONCPP_STRING>* valid_keys)
 {
@@ -1182,6 +1205,7 @@ static void getValidWriterKeys(std::set<JSONCPP_STRING>* valid_keys)
   valid_keys->insert("dropNullPlaceholders");
   valid_keys->insert("useSpecialFloats");
   valid_keys->insert("precision");
+  valid_keys->insert("precisionType");
 }
 bool StreamWriterBuilder::validate(Json::Value* invalid) const
 {
@@ -1214,6 +1238,7 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings)
   (*settings)["dropNullPlaceholders"] = false;
   (*settings)["useSpecialFloats"] = false;
   (*settings)["precision"] = 17;
+  (*settings)["precisionType"] = "significant";
   //! [StreamWriterBuilderDefaults]
 }
 

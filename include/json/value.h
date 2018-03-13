@@ -109,6 +109,13 @@ enum CommentPlacement {
   numberOfCommentPlacement
 };
 
+/** \brief Type of precision for formatting of real values.
+ */
+enum PrecisionType {
+  significantDigits = 0, ///< we set max number of significant digits in string
+  decimalPlaces          ///< we set max number of digits after "." in string
+};
+
 //# ifdef JSON_USE_CPPTL
 //   typedef CppTL::AnyEnumerator<const char *> EnumMemberNames;
 //   typedef CppTL::AnyEnumerator<const Value &> EnumValues;
@@ -219,6 +226,9 @@ public:
   /// Maximum unsigned 64 bits int value that can be stored in a Json::Value.
   static const UInt64 maxUInt64;
 #endif // defined(JSON_HAS_INT64)
+
+  /// Default precision for real value for string representation.
+  static const UInt defaultRealPrecision;
 
 // Workaround for bug in the NVIDIAs CUDA 9.1 nvcc compiler
 // when using gcc and clang backend compilers.  CZString
