@@ -106,9 +106,9 @@ public:
       - If true, outputs non-finite floating point values in the following way:
         NaN values as "NaN", positive infinity as "Infinity", and negative infinity
         as "-Infinity".
-    - "floatPrecision": int
+    - "precision": int
       - Number of precision digits for formatting of real values.
-    - "floatFormat": "significant"(default) or "decimal"
+    - "precisionType": "significant"(default) or "decimal"
       - Type of precision for formatting of real values.
 
     You can examine 'settings_` yourself
@@ -344,7 +344,7 @@ JSONCPP_STRING JSON_API valueToString(UInt value);
 JSONCPP_STRING JSON_API valueToString(LargestInt value);
 JSONCPP_STRING JSON_API valueToString(LargestUInt value);
 JSONCPP_STRING JSON_API valueToString(double value, unsigned int precision = Value::defaultRealPrecision,
-                                      FloatFormat floatFormat = FloatFormat::significantDigits);
+                                      PrecisionType precisionType = PrecisionType::significantDigits);
 JSONCPP_STRING JSON_API valueToString(bool value);
 JSONCPP_STRING JSON_API valueToQuotedString(const char* value);
 
