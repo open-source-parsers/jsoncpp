@@ -149,7 +149,7 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
 
   } else {
     // IEEE standard states that NaN values will not compare to themselves
-    if (value != value) {
+    if (isnan(value)) {
       len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "NaN" : "null");
     } else if (value < 0) {
       len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "-Infinity" : "-1e+9999");
