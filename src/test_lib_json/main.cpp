@@ -18,6 +18,7 @@
 #include <sstream>
 #include <string>
 #include <iomanip>
+#include <cmath>
 
 // Make numeric limits more convenient to talk about.
 // Assumes int type in 32 bits.
@@ -2405,7 +2406,7 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
     JSONTEST_ASSERT_STRING_EQUAL("", errs);
     JSONTEST_ASSERT_EQUAL(3u, root.size());
     double n = root["a"].asDouble();
-    JSONTEST_ASSERT(isnan(n));
+    JSONTEST_ASSERT(std::isnan(n));
     JSONTEST_ASSERT_EQUAL(std::numeric_limits<double>::infinity(), root.get("b", 0.0));
     JSONTEST_ASSERT_EQUAL(-std::numeric_limits<double>::infinity(), root.get("c", 0.0));
   }

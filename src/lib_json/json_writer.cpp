@@ -68,6 +68,25 @@
 #define snprintf _snprintf
 #endif
 
+#if defined(_MSC_VER) && !defined(__clang__)
+#if _MSC_VER >= 1900 && defined(_WIN64)
+#include <math.h>
+#define isnan _isnanf
+#else
+#include <float.h>
+#define isnan _isnan
+#endif
+#elif __cplusplus >= 201103L
+#include <cmath>
+#define isnan std::isnan
+#else
+#include <math.h>
+#if !define(isnan)
+// IEEE standard states that NaN values will not compare to themselves
+#define isnan(x) (x!=x)
+#endif
+#endif
+
 #if defined(_MSC_VER) && _MSC_VER >= 1400 // VC++ 8.0
 // Disable warning about strdup being deprecated.
 #pragma warning(disable : 4996)
@@ -148,7 +167,7 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
     }
 
   } else {
-    // IEEE standard states that NaN values will not compare to themselves
+
     if (isnan(value)) {
       len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "NaN" : "null");
     } else if (value < 0) {
