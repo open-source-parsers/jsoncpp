@@ -14,77 +14,66 @@
 #include <set>
 #include <cassert>
 #include <cstring>
-#include <cstdio>
 
-#if defined(_MSC_VER) && _MSC_VER >= 1200 && _MSC_VER < 1800 // Between VC++ 6.0 and VC++ 11.0
-#include <float.h>
-#define isfinite _finite
-#elif defined(__sun) && defined(__SVR4) //Solaris
-#if !defined(isfinite)
-#include <ieeefp.h>
-#define isfinite finite
-#endif
-#elif defined(_AIX)
-#if !defined(isfinite)
-#include <math.h>
-#define isfinite finite
-#endif
-#elif defined(__hpux)
-#if !defined(isfinite)
-#if defined(__ia64) && !defined(finite)
-#define isfinite(x) ((sizeof(x) == sizeof(float) ? \
-                     _Isfinitef(x) : _IsFinite(x)))
-#else
-#include <math.h>
-#define isfinite finite
-#endif
-#endif
-#else
-#include <cmath>
-#if !(defined(__QNXNTO__)) // QNX already defines isfinite
-#define isfinite std::isfinite
-#endif
-#endif
+#if __cplusplus >= 201103L
+  #include <cmath>
+  #include <cstdio>
 
-#if defined(_MSC_VER)
-#if !defined(WINCE) && defined(__STDC_SECURE_LIB__) && _MSC_VER >= 1500 // VC++ 9.0 and above
-#define snprintf sprintf_s
-#elif _MSC_VER >= 1900 // VC++ 14.0 and above
-#define snprintf std::snprintf
-#else
-#define snprintf _snprintf
-#endif
-#elif defined(__ANDROID__) || defined(__QNXNTO__)
-#define snprintf snprintf
-#elif __cplusplus >= 201103L
-#if !defined(__MINGW32__) && !defined(__CYGWIN__)
-#define snprintf std::snprintf
-#endif
-#endif
+  #if !defined(isnan)
+    #define isnan std::isnan
+  #endif
 
-#if defined(__BORLANDC__)  
-#include <float.h>
-#define isfinite _finite
-#define snprintf _snprintf
-#endif
+  #if !defined(isfinite)
+    #define isfinite std::isfinite
+  #endif
 
-#if defined(_MSC_VER) && !defined(__clang__)
-#if _MSC_VER >= 1900 && defined(_WIN64)
-#include <math.h>
-#define isnan _isnanf
+  #if !defined(snprintf)
+    #define snprintf std::snprintf
+  #endif
 #else
-#include <float.h>
-#define isnan _isnan
-#endif
-#elif __cplusplus >= 201103L
-#include <cmath>
-#define isnan std::isnan
-#else
-#include <math.h>
-#if !define(isnan)
-// IEEE standard states that NaN values will not compare to themselves
-#define isnan(x) (x!=x)
-#endif
+  #include <math.h>
+  #include <stdio.h>
+
+  #if defined(_MSC_VER)
+    #if !defined(isnan)
+      #include <float.h>
+      #define isnan _isnan
+    #endif
+
+    #if !defined(isfinite)
+      #include <float.h>
+      #define isfinite _finite
+    #endif
+
+    #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
+    #if !defined(snprintf)
+      #define snprintf _snprintf
+    #endif
+  #endif
+
+  #if defined(__sun) && defined(__SVR4) //Solaris
+    #if !defined(isfinite)
+      #include <ieeefp.h>
+      #define isfinite finite
+    #endif
+  #endif
+
+  #if defined(__hpux)
+    #if !defined(isfinite)
+      #if defined(__ia64) && !defined(finite)
+        #define isfinite(x) ((sizeof(x) == sizeof(float) ? _Isfinitef(x) : _IsFinite(x)))
+      #endif
+    #endif
+  #endif
+
+  #if !defined(isnan)
+    // IEEE standard states that NaN values will not compare to themselves
+    #define isnan(x) (x!=x)
+  #endif
+
+  #if !defined(isfinite)
+    #define isfinite finite
+  #endif
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400 // VC++ 8.0

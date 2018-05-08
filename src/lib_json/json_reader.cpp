@@ -11,7 +11,6 @@
 #include "json_tool.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <utility>
-#include <cstdio>
 #include <cassert>
 #include <cstring>
 #include <istream>
@@ -20,24 +19,25 @@
 #include <set>
 #include <limits>
 
-#if defined(_MSC_VER)
-#if !defined(WINCE) && defined(__STDC_SECURE_LIB__) && _MSC_VER >= 1500 // VC++ 9.0 and above 
-#define snprintf sprintf_s
-#elif _MSC_VER >= 1900 // VC++ 14.0 and above
-#define snprintf std::snprintf
-#else
-#define snprintf _snprintf
-#endif
-#elif defined(__ANDROID__) || defined(__QNXNTO__)
-#define snprintf snprintf
-#elif __cplusplus >= 201103L
-#if !defined(__MINGW32__) && !defined(__CYGWIN__)
-#define snprintf std::snprintf
-#endif
-#endif
+#if __cplusplus >= 201103L
+  #include <cstdio>
 
-#if defined(__QNXNTO__)
-#define sscanf std::sscanf
+  #if !defined(snprintf)
+    #define snprintf std::snprintf
+  #endif
+
+  #if !defined(sscanf)
+    #define sscanf std::sscanf
+  #endif
+#else
+  #include <stdio.h>
+
+  #if defined(_MSC_VER)
+    #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
+    #if !defined(snprintf)
+      #define snprintf _snprintf
+    #endif
+  #endif
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400 // VC++ 8.0
