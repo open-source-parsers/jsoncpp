@@ -144,6 +144,13 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
   // concepts of reals and integers.
   if (isfinite(value)) {
     len = snprintf(buffer, sizeof(buffer), formatString, value);
+
+    // For decimalPlaces type value, the string may exceed the buffer size.
+    // For this case, use significantDigits type instead.
+    if (len < 0 || len > sizeof(buffer)) {
+      len = snprintf(buffer, sizeof(buffer), "%.17g", value);
+    }
+
     fixNumericLocale(buffer, buffer + len);
     // to delete use-less too much zeros in the end of string
     if (precisionType == PrecisionType::decimalPlaces) {
