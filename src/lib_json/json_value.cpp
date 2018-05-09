@@ -19,6 +19,11 @@
 #include <cstddef> // size_t
 #include <algorithm> // min()
 
+// Disable warning C4702 : unreachable code
+#if defined(_MSC_VER) && _MSC_VER >= 1800 // VC++ 12.0 and above
+#pragma warning(disable:4702)
+#endif
+
 #define JSON_ASSERT_UNREACHABLE assert(false)
 
 namespace Json {
