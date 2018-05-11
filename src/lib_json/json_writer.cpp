@@ -127,9 +127,9 @@ JSONCPP_STRING valueToString(UInt value) {
 
 namespace {
 JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int precision, PrecisionType precisionType) {
-  // Allocate a buffer that is more than large enough to store the 16 digits of
-  // precision requested below.
-  char buffer[36];
+  // Since the max double value is abour 1.8*10^308, allocate a buffer that is large enough to
+  // store the 16 digits of precision requested below (for both significantDigits type and decimalPlaces type).
+  char buffer[360];
   int len = -1;
 
   char formatString[15];
@@ -144,12 +144,6 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
   // concepts of reals and integers.
   if (isfinite(value)) {
     len = snprintf(buffer, sizeof(buffer), formatString, value);
-
-    // For decimalPlaces type value, the string may exceed the buffer size.
-    // For this case, use significantDigits type instead.
-    if (len < 0 || len > sizeof(buffer)) {
-      len = snprintf(buffer, sizeof(buffer), "%.17g", value);
-    }
 
     fixNumericLocale(buffer, buffer + len);
     // to delete use-less too much zeros in the end of string
@@ -172,7 +166,7 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
       len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "Infinity" : "1e+9999");
     }
   }
-  assert(len >= 0);
+  assert(len >= 0 && len < sizeof(buffer));
   return buffer;
 }
 }
