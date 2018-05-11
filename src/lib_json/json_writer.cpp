@@ -127,48 +127,45 @@ JSONCPP_STRING valueToString(UInt value) {
 
 namespace {
 JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int precision, PrecisionType precisionType) {
-  // Allocate a buffer that is more than large enough to store the 16 digits of
-  // precision requested below.
-  char buffer[36];
-  int len = -1;
-
-  char formatString[15];
-  if (precisionType == PrecisionType::significantDigits) {
-    snprintf(formatString, sizeof(formatString), "%%.%ug", precision);
-  } else {
-    snprintf(formatString, sizeof(formatString), "%%.%uf", precision);
-  }
-
   // Print into the buffer. We need not request the alternative representation
   // that always has a decimal point because JSON doesn't distinguish the
   // concepts of reals and integers.
-  if (isfinite(value)) {
-    len = snprintf(buffer, sizeof(buffer), formatString, value);
-    fixNumericLocale(buffer, buffer + len);
-    // to delete use-less too much zeros in the end of string
-    if (precisionType == PrecisionType::decimalPlaces) {
-      fixZerosInTheEnd(buffer, buffer + len);
-    }
-
-    // try to ensure we preserve the fact that this was given to us as a double on input
-    if (!strchr(buffer, '.') && !strchr(buffer, 'e')) {
-      strcat(buffer, ".0");
-    }
-
-  } else {
-
-    if (isnan(value)) {
-      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "NaN" : "null");
-    } else if (value < 0) {
-      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "-Infinity" : "-1e+9999");
-    } else {
-      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "Infinity" : "1e+9999");
-    }
+  if (!isfinite(value)) {
+    static const char* const reps[2][3] = {
+      {"NaN", "-Infinity", "Infinity"},
+      {"null", "-1e+9999", "1e+9999"}};
+    return reps[useSpecialFloats ? 0 : 1][isnan(value) ? 0 : (value < 0) ? 1 : 2];
   }
-  assert(len >= 0);
+
+  JSONCPP_STRING buffer(36, '\0');
+  while (true) {
+      int len = snprintf(&*buffer.begin(), buffer.size(),
+                         (precisionType == PrecisionType::significantDigits) ? "%.*g" : "%.*f",
+                         precision, value);
+      assert(len >= 0);
+      size_t wouldPrint = static_cast<size_t>(len);
+      if (wouldPrint >= buffer.size()) {
+         buffer.resize(wouldPrint + 1);
+         continue;
+      }
+      buffer.resize(wouldPrint);
+      break;
+  }
+
+  buffer.erase(fixNumericLocale(buffer.begin(), buffer.end()), buffer.end());
+
+  // strip the zero padding from the right
+  if (precisionType == PrecisionType::decimalPlaces) {
+    buffer.erase(fixZerosInTheEnd(buffer.begin(), buffer.end()), buffer.end());
+  }
+
+  // try to ensure we preserve the fact that this was given to us as a double on input
+  if (buffer.find('.') == buffer.npos && buffer.find('e') == buffer.npos) {
+    buffer += ".0";
+  }
   return buffer;
 }
-}
+}  // namespace
 
 JSONCPP_STRING valueToString(double value, unsigned int precision, PrecisionType precisionType) {
   return valueToString(value, false, precision, precisionType);
