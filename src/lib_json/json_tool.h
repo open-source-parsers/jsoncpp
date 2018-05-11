@@ -117,7 +117,6 @@ void fixNumericLocaleInput(Iter begin, Iter end) {
  */
 template <typename Iter>
 Iter fixZerosInTheEnd(Iter begin, Iter end) {
-
   for (; begin != end; --end) {
     if (*(end-1) != '0') {
       return end;
@@ -128,7 +127,6 @@ Iter fixZerosInTheEnd(Iter begin, Iter end) {
     }
   }
   return end;
-
 }
 
 } // namespace Json
