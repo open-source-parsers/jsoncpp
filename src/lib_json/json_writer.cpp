@@ -127,7 +127,7 @@ JSONCPP_STRING valueToString(UInt value) {
 
 namespace {
 JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int precision, PrecisionType precisionType) {
-  // Since the max double value is abour 1.8*10^308, allocate a buffer that is large enough to
+  // Since the max double value is about 1.8*10^308, allocate a buffer that is large enough to
   // store the 16 digits of precision requested below (for both significantDigits type and decimalPlaces type).
   char buffer[360];
   int len = -1;
