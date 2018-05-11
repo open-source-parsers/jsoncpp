@@ -137,7 +137,7 @@ JSONCPP_STRING valueToString(double value, bool useSpecialFloats, unsigned int p
     return reps[useSpecialFloats ? 0 : 1][isnan(value) ? 0 : (value < 0) ? 1 : 2];
   }
 
-  JSONCPP_STRING buffer(36, '\0');
+  JSONCPP_STRING buffer(36);
   while (true) {
       int len = snprintf(&*buffer.begin(), buffer.size(),
                          (precisionType == PrecisionType::significantDigits) ? "%.*g" : "%.*f",
