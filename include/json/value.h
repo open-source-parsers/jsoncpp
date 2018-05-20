@@ -9,9 +9,9 @@
 #if !defined(JSON_IS_AMALGAMATION)
 #include "forwards.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
+#include <exception>
 #include <string>
 #include <vector>
-#include <exception>
 
 #ifndef JSON_USE_CPPTL_SMALLMAP
 #include <map>
@@ -22,17 +22,17 @@
 #include <cpptl/forwards.h>
 #endif
 
-//Conditional NORETURN attribute on the throw functions would:
+// Conditional NORETURN attribute on the throw functions would:
 // a) suppress false positives from static code analysis
 // b) possibly improve optimization opportunities.
 #if !defined(JSONCPP_NORETURN)
-#  if defined(_MSC_VER)
-#    define JSONCPP_NORETURN __declspec(noreturn)
-#  elif defined(__GNUC__)
-#    define JSONCPP_NORETURN __attribute__ ((__noreturn__))
-#  else
-#    define JSONCPP_NORETURN
-#  endif
+#if defined(_MSC_VER)
+#define JSONCPP_NORETURN __declspec(noreturn)
+#elif defined(__GNUC__)
+#define JSONCPP_NORETURN __attribute__((__noreturn__))
+#else
+#define JSONCPP_NORETURN
+#endif
 #endif
 
 // Disable warning C4251: <data member>: <type> needs to have dll-interface to
@@ -57,6 +57,7 @@ public:
   Exception(JSONCPP_STRING const& msg);
   ~Exception() JSONCPP_NOEXCEPT JSONCPP_OVERRIDE;
   char const* what() const JSONCPP_NOEXCEPT JSONCPP_OVERRIDE;
+
 protected:
   JSONCPP_STRING msg_;
 };
@@ -183,6 +184,7 @@ private:
  */
 class JSON_API Value {
   friend class ValueIteratorBase;
+
 public:
   typedef std::vector<JSONCPP_STRING> Members;
   typedef ValueIterator iterator;
@@ -200,8 +202,10 @@ public:
   // Required for boost integration, e. g. BOOST_TEST
   typedef std::string value_type;
 
-  static const Value& null;  ///< We regret this reference to a global instance; prefer the simpler Value().
-  static const Value& nullRef;  ///< just a kludge for binary-compatibility; same as null
+  static const Value& null; ///< We regret this reference to a global instance;
+                            ///< prefer the simpler Value().
+  static const Value& nullRef; ///< just a kludge for binary-compatibility; same
+                               ///< as null
   static Value const& nullSingleton(); ///< Prefer this to null or nullRef.
 
   /// Minimum signed integer value that can be stored in a Json::Value.
@@ -241,11 +245,7 @@ private:
 #ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
   class CZString {
   public:
-    enum DuplicationPolicy {
-      noDuplication = 0,
-      duplicate,
-      duplicateOnCopy
-    };
+    enum DuplicationPolicy { noDuplication = 0, duplicate, duplicateOnCopy };
     CZString(ArrayIndex index);
     CZString(char const* str, unsigned length, DuplicationPolicy allocate);
     CZString(CZString const& other);
@@ -262,7 +262,7 @@ private:
     bool operator<(CZString const& other) const;
     bool operator==(CZString const& other) const;
     ArrayIndex index() const;
-    //const char* c_str() const; ///< \deprecated
+    // const char* c_str() const; ///< \deprecated
     char const* data() const;
     unsigned length() const;
     bool isStaticString() const;
@@ -271,11 +271,11 @@ private:
     void swap(CZString& other);
 
     struct StringStorage {
-      unsigned policy_: 2;
-      unsigned length_: 30; // 1GB max
+      unsigned policy_ : 2;
+      unsigned length_ : 30; // 1GB max
     };
 
-    char const* cstr_;  // actually, a prefixed string, unless policy is noDup
+    char const* cstr_; // actually, a prefixed string, unless policy is noDup
     union {
       ArrayIndex index_;
       StringStorage storage_;
@@ -332,7 +332,8 @@ Json::Value obj_value(Json::objectValue); // {}
    * \endcode
    */
   Value(const StaticString& value);
-  Value(const JSONCPP_STRING& value); ///< Copy data() til size(). Embedded zeroes too.
+  Value(const JSONCPP_STRING& value); ///< Copy data() til size(). Embedded
+                                      ///< zeroes too.
 #ifdef JSON_USE_CPPTL
   Value(const CppTL::ConstString& value);
 #endif
@@ -346,7 +347,8 @@ Json::Value obj_value(Json::objectValue); // {}
   ~Value();
 
   /// Deep copy, then swap(other).
-  /// \note Over-write existing comments. To preserve comments, use #swapPayload().
+  /// \note Over-write existing comments. To preserve comments, use
+  /// #swapPayload().
   Value& operator=(Value other);
 
   /// Swap everything.
@@ -372,14 +374,14 @@ Json::Value obj_value(Json::objectValue); // {}
 
   const char* asCString() const; ///< Embedded zeroes could cause you trouble!
 #if JSONCPP_USING_SECURE_MEMORY
-  unsigned getCStringLength() const; //Allows you to understand the length of the CString
+  unsigned getCStringLength() const; // Allows you to understand the length of
+                                     // the CString
 #endif
   JSONCPP_STRING asString() const; ///< Embedded zeroes are possible.
   /** Get raw char* of string-value.
    *  \return false if !string. (Seg-fault if str or end are NULL.)
    */
-  bool getString(
-      char const** begin, char const** end) const;
+  bool getString(char const** begin, char const** end) const;
 #ifdef JSON_USE_CPPTL
   CppTL::ConstString asConstString() const;
 #endif
@@ -490,7 +492,8 @@ Json::Value obj_value(Json::objectValue); // {}
   /** \brief Access an object value by name, create a null member if it does not
    exist.
 
-   * If the object has no entry for that name, then the member name used to store
+   * If the object has no entry for that name, then the member name used to
+   store
    * the new entry is not duplicated.
    * Example of use:
    * \code
@@ -513,7 +516,8 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
   /// \note key may contain embedded nulls.
-  Value get(const char* begin, const char* end, const Value& defaultValue) const;
+  Value
+  get(const char* begin, const char* end, const Value& defaultValue) const;
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
   /// \param key may contain embedded nulls.
@@ -646,12 +650,14 @@ private:
     LargestUInt uint_;
     double real_;
     bool bool_;
-    char* string_;  // actually ptr to unsigned, followed by str, unless !allocated_
+    char* string_; // actually ptr to unsigned, followed by str, unless
+                   // !allocated_
     ObjectValues* map_;
   } value_;
   ValueType type_ : 8;
-  unsigned int allocated_ : 1; // Notes: if declared as bool, bitfield is useless.
-                               // If not allocated_, string_ must be null-terminated.
+  unsigned int allocated_ : 1; // Notes: if declared as bool, bitfield is
+                               // useless. If not allocated_, string_ must be
+                               // null-terminated.
   CommentInfo* comments_;
 
   // [start, limit) byte offsets in the source JSON text from which this Value
@@ -673,11 +679,7 @@ public:
   PathArgument(const JSONCPP_STRING& key);
 
 private:
-  enum Kind {
-    kindNone = 0,
-    kindIndex,
-    kindKey
-  };
+  enum Kind { kindNone = 0, kindIndex, kindKey };
   JSONCPP_STRING key_;
   ArrayIndex index_;
   Kind kind_;
@@ -745,7 +747,8 @@ public:
   /// Value.
   Value key() const;
 
-  /// Return the index of the referenced Value, or -1 if it is not an arrayValue.
+  /// Return the index of the referenced Value, or -1 if it is not an
+  /// arrayValue.
   UInt index() const;
 
   /// Return the member name of the referenced Value, or "" if it is not an
@@ -755,7 +758,8 @@ public:
 
   /// Return the member name of the referenced Value. "" if it is not an
   /// objectValue.
-  /// \deprecated This cannot be used for UTF-8 strings, since there can be embedded nulls.
+  /// \deprecated This cannot be used for UTF-8 strings, since there can be
+  /// embedded nulls.
   JSONCPP_DEPRECATED("Use `key = name();` instead.")
   char const* memberName() const;
   /// Return the member name of the referenced Value, or NULL if it is not an
@@ -796,8 +800,8 @@ class JSON_API ValueConstIterator : public ValueIteratorBase {
 
 public:
   typedef const Value value_type;
-  //typedef unsigned int size_t;
-  //typedef int difference_type;
+  // typedef unsigned int size_t;
+  // typedef int difference_type;
   typedef const Value& reference;
   typedef const Value* pointer;
   typedef ValueConstIterator SelfType;
@@ -806,9 +810,10 @@ public:
   ValueConstIterator(ValueIterator const& other);
 
 private:
-/*! \internal Use by Value to create an iterator.
- */
+  /*! \internal Use by Value to create an iterator.
+   */
   explicit ValueConstIterator(const Value::ObjectValues::iterator& current);
+
 public:
   SelfType& operator=(const ValueIteratorBase& other);
 
@@ -857,9 +862,10 @@ public:
   ValueIterator(const ValueIterator& other);
 
 private:
-/*! \internal Use by Value to create an iterator.
- */
+  /*! \internal Use by Value to create an iterator.
+   */
   explicit ValueIterator(const Value::ObjectValues::iterator& current);
+
 public:
   SelfType& operator=(const SelfType& other);
 
