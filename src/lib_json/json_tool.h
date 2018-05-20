@@ -6,6 +6,7 @@
 #ifndef LIB_JSONCPP_JSON_TOOL_H_INCLUDED
 #define LIB_JSONCPP_JSON_TOOL_H_INCLUDED
 
+#include <json/config.h>
 
 // Also support old flag NO_LOCALE_SUPPORT
 #ifdef NO_LOCALE_SUPPORT
@@ -23,7 +24,7 @@
  */
 
 namespace Json {
-static char getDecimalPoint() {
+static inline char getDecimalPoint() {
 #ifdef JSONCPP_NO_LOCALE_SUPPORT
   return '\0';
 #else
