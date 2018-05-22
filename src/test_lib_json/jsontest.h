@@ -6,12 +6,12 @@
 #ifndef JSONTEST_H_INCLUDED
 #define JSONTEST_H_INCLUDED
 
+#include <deque>
 #include <json/config.h>
 #include <json/value.h>
 #include <json/writer.h>
-#include <stdio.h>
-#include <deque>
 #include <sstream>
+#include <stdio.h>
 #include <string>
 
 // //////////////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ private:
                       const char* expr,
                       unsigned int nestingLevel);
   static JSONCPP_STRING indentText(const JSONCPP_STRING& text,
-                                const JSONCPP_STRING& indent);
+                                   const JSONCPP_STRING& indent);
 
   typedef std::deque<Failure> Failures;
   Failures failures_;
@@ -212,7 +212,7 @@ TestResult& checkStringEqual(TestResult& result,
 #define JSONTEST_ASSERT(expr)                                                  \
   if (expr) {                                                                  \
   } else                                                                       \
-  result_->addFailure(__FILE__, __LINE__, #expr)
+    result_->addFailure(__FILE__, __LINE__, #expr)
 
 /// \brief Asserts that the given predicate is true.
 /// The predicate may do other assertions and be a member function of the
@@ -231,21 +231,14 @@ TestResult& checkStringEqual(TestResult& result,
 
 /// \brief Asserts that two values are equals.
 #define JSONTEST_ASSERT_EQUAL(expected, actual)                                \
-  JsonTest::checkEqual(*result_,                                               \
-                       expected,                                               \
-                       actual,                                                 \
-                       __FILE__,                                               \
-                       __LINE__,                                               \
+  JsonTest::checkEqual(*result_, expected, actual, __FILE__, __LINE__,         \
                        #expected " == " #actual)
 
 /// \brief Asserts that two values are equals.
 #define JSONTEST_ASSERT_STRING_EQUAL(expected, actual)                         \
-  JsonTest::checkStringEqual(*result_,                                         \
-		                 JsonTest::ToJsonString(expected),                 \
-		                     JsonTest::ToJsonString(actual),                   \
-                             __FILE__,                                         \
-                             __LINE__,                                         \
-                             #expected " == " #actual)
+  JsonTest::checkStringEqual(*result_, JsonTest::ToJsonString(expected),       \
+                             JsonTest::ToJsonString(actual), __FILE__,         \
+                             __LINE__, #expected " == " #actual)
 
 /// \brief Asserts that a given expression throws an exception
 #define JSONTEST_ASSERT_THROWS(expr)                                           \
@@ -253,13 +246,12 @@ TestResult& checkStringEqual(TestResult& result,
     bool _threw = false;                                                       \
     try {                                                                      \
       expr;                                                                    \
-    }                                                                          \
-    catch (...) {                                                              \
+    } catch (...) {                                                            \
       _threw = true;                                                           \
     }                                                                          \
     if (!_threw)                                                               \
-      result_->addFailure(                                                     \
-          __FILE__, __LINE__, "expected exception thrown: " #expr);            \
+      result_->addFailure(__FILE__, __LINE__,                                  \
+                          "expected exception thrown: " #expr);                \
   }
 
 /// \brief Begin a fixture test case.
@@ -270,9 +262,11 @@ TestResult& checkStringEqual(TestResult& result,
       return new Test##FixtureType##name();                                    \
     }                                                                          \
                                                                                \
-  public: /* overridden from TestCase */                                        \
-    const char* testName() const JSONCPP_OVERRIDE { return #FixtureType "/" #name; }    \
-    void runTestCase() JSONCPP_OVERRIDE;                                                \
+  public: /* overridden from TestCase */                                       \
+    const char* testName() const JSONCPP_OVERRIDE {                            \
+      return #FixtureType "/" #name;                                           \
+    }                                                                          \
+    void runTestCase() JSONCPP_OVERRIDE;                                       \
   };                                                                           \
                                                                                \
   void Test##FixtureType##name::runTestCase()
