@@ -542,8 +542,8 @@ bool Reader::readArray(Token& token) {
     while (currentToken.type_ == tokenComment && ok) {
       ok = readToken(currentToken);
     }
-    bool badTokenType =
-        (currentToken.type_ != tokenArraySeparator && currentToken.type_ != tokenArrayEnd);
+    bool badTokenType = (currentToken.type_ != tokenArraySeparator &&
+                         currentToken.type_ != tokenArrayEnd);
     if (!ok || badTokenType) {
       return addErrorAndRecover("Missing ',' or ']' in array declaration",
                                 currentToken, tokenArrayEnd);
@@ -1538,8 +1538,8 @@ bool OurReader::readArray(Token& token) {
     while (currentToken.type_ == tokenComment && ok) {
       ok = readToken(currentToken);
     }
-    bool badTokenType =
-        (currentToken.type_ != tokenArraySeparator && token.type_ != tokenArrayEnd);
+    bool badTokenType = (currentToken.type_ != tokenArraySeparator &&
+                         token.type_ != tokenArrayEnd);
     if (!ok || badTokenType) {
       return addErrorAndRecover("Missing ',' or ']' in array declaration",
                                 currentToken, tokenArrayEnd);

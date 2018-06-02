@@ -420,8 +420,8 @@ Value::Value(const char* value) {
 
 Value::Value(const char* begin, const char* end) {
   initBasic(stringValue, true);
-  value_.string_ = duplicateAndPrefixStringValue(
-      begin, static_cast<unsigned>(end - begin));
+  value_.string_ =
+      duplicateAndPrefixStringValue(begin, static_cast<unsigned>(end - begin));
 }
 
 Value::Value(const JSONCPP_STRING& value) {
