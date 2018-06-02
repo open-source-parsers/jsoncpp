@@ -720,7 +720,7 @@ private:
                     const InArgs& in,
                     InArgs::const_iterator& itInArg,
                     PathArgument::Kind kind);
-  void invalidPath(const JSONCPP_STRING& path, int location);
+  static void invalidPath(const JSONCPP_STRING& path, int location);
 
   Args args_;
 };

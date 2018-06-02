@@ -249,7 +249,7 @@ private:
   void unindent();
   void writeCommentBeforeValue(const Value& root);
   void writeCommentAfterValueOnSameLine(const Value& root);
-  bool hasCommentForValue(const Value& value);
+  static bool hasCommentForValue(const Value& value);
   static JSONCPP_STRING normalizeEOL(const JSONCPP_STRING& text);
 
   typedef std::vector<JSONCPP_STRING> ChildValues;
@@ -323,7 +323,7 @@ private:
   void unindent();
   void writeCommentBeforeValue(const Value& root);
   void writeCommentAfterValueOnSameLine(const Value& root);
-  bool hasCommentForValue(const Value& value);
+  static bool hasCommentForValue(const Value& value);
   static JSONCPP_STRING normalizeEOL(const JSONCPP_STRING& text);
 
   typedef std::vector<JSONCPP_STRING> ChildValues;
