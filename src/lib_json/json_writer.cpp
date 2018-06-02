@@ -643,7 +643,7 @@ bool StyledWriter::hasCommentForValue(const Value& value) {
 // Class StyledStreamWriter
 // //////////////////////////////////////////////////////////////////
 
-StyledStreamWriter::StyledStreamWriter(JSONCPP_STRING indentation)
+StyledStreamWriter::StyledStreamWriter(const JSONCPP_STRING& indentation)
     : document_(NULL), rightMargin_(74), indentation_(indentation),
       addChildValues_(), indented_(false) {}
 

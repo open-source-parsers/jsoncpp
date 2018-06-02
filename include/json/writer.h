@@ -300,7 +300,7 @@ public:
   /**
    * \param indentation Each level will be indented by this amount extra.
    */
-  StyledStreamWriter(JSONCPP_STRING indentation = "\t");
+  StyledStreamWriter(const JSONCPP_STRING& indentation = "\t");
   ~StyledStreamWriter() {}
 
 public:
