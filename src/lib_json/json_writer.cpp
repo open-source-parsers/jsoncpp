@@ -1245,10 +1245,10 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings) {
   //! [StreamWriterBuilderDefaults]
 }
 
-JSONCPP_STRING writeString(StreamWriter::Factory const& builder,
+JSONCPP_STRING writeString(StreamWriter::Factory const& factory,
                            Value const& root) {
   JSONCPP_OSTRINGSTREAM sout;
-  StreamWriterPtr const writer(builder.newStreamWriter());
+  StreamWriterPtr const writer(factory.newStreamWriter());
   writer->write(root, &sout);
   return sout.str();
 }
