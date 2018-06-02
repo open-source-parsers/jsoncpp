@@ -97,7 +97,6 @@ public:
 
 private:
   TestResult& addToLastFailure(const JSONCPP_STRING& message);
-  unsigned int getAssertionNestingLevel() const;
   /// Adds a failure or a predicate context
   void addFailureInfo(const char* file,
                       unsigned int line,

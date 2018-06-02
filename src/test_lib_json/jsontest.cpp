@@ -140,16 +140,6 @@ TestResult& TestResult::popPredicateContext() {
 
 bool TestResult::failed() const { return !failures_.empty(); }
 
-unsigned int TestResult::getAssertionNestingLevel() const {
-  unsigned int level = 0;
-  const PredicateContext* lastNode = &rootPredicateNode_;
-  while (lastNode->next_ != 0) {
-    lastNode = lastNode->next_;
-    ++level;
-  }
-  return level;
-}
-
 void TestResult::printFailure(bool printTestName) const {
   if (failures_.empty()) {
     return;
