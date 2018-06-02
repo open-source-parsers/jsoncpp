@@ -106,9 +106,9 @@ static void printValueTree(FILE* fout,
     for (Json::ArrayIndex index = 0; index < size; ++index) {
       static char buffer[16];
 #if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__)
-      sprintf_s(buffer, sizeof(buffer), "[%d]", index);
+      sprintf_s(buffer, sizeof(buffer), "[%u]", index);
 #else
-      snprintf(buffer, sizeof(buffer), "[%d]", index);
+      snprintf(buffer, sizeof(buffer), "[%u]", index);
 #endif
       printValueTree(fout, value[index], path + buffer);
     }

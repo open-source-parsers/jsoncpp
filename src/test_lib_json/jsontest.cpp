@@ -165,7 +165,7 @@ void TestResult::printFailure(bool printTestName) const {
     const Failure& failure = *it;
     JSONCPP_STRING indent(failure.nestingLevel_ * 2, ' ');
     if (failure.file_) {
-      printf("%s%s(%d): ", indent.c_str(), failure.file_, failure.line_);
+      printf("%s%s(%u): ", indent.c_str(), failure.file_, failure.line_);
     }
     if (!failure.expr_.empty()) {
       printf("%s\n", failure.expr_.c_str());
@@ -281,7 +281,7 @@ bool Runner::runAllTest(bool printSummary) const {
 
   if (failures.empty()) {
     if (printSummary) {
-      printf("All %d tests passed\n", count);
+      printf("All %u tests passed\n", count);
     }
     return true;
   } else {
@@ -293,7 +293,7 @@ bool Runner::runAllTest(bool printSummary) const {
     if (printSummary) {
       unsigned int failedCount = static_cast<unsigned int>(failures.size());
       unsigned int passedCount = count - failedCount;
-      printf("%d/%d tests passed (%d failure(s))\n", passedCount, count,
+      printf("%u/%u tests passed (%u failure(s))\n", passedCount, count,
              failedCount);
     }
     return false;
