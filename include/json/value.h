@@ -427,12 +427,12 @@ Json::Value obj_value(Json::objectValue); // {}
   /// \post type() is unchanged
   void clear();
 
-  /// Resize the array to size elements.
+  /// Resize the array to newSize elements.
   /// New elements are initialized to null.
   /// May only be called on nullValue or arrayValue.
   /// \pre type() is arrayValue or nullValue
   /// \post type() is arrayValue
-  void resize(ArrayIndex size);
+  void resize(ArrayIndex newSize);
 
   /// Access an array element (zero based index ).
   /// If the array contains less than index element, then null value are
@@ -562,10 +562,10 @@ Json::Value obj_value(Json::objectValue); // {}
   /** \brief Remove the indexed array element.
 
       O(n) expensive operations.
-      Update 'removed' iff removed.
-      \return true iff removed (no exceptions)
+      Update 'removed' if removed.
+      \return true if removed (no exceptions)
   */
-  bool removeIndex(ArrayIndex i, Value* removed);
+  bool removeIndex(ArrayIndex index, Value* removed);
 
   /// Return true if the object has a member named key.
   /// \note 'key' must be null-terminated.
@@ -720,7 +720,7 @@ private:
                     const InArgs& in,
                     InArgs::const_iterator& itInArg,
                     PathArgument::Kind kind);
-  void invalidPath(const JSONCPP_STRING& path, int location);
+  static void invalidPath(const JSONCPP_STRING& path, int location);
 
   Args args_;
 };

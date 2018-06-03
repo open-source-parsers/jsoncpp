@@ -112,8 +112,8 @@ bool Reader::parse(const std::string& document,
   return parse(begin, end, root, collectComments);
 }
 
-bool Reader::parse(std::istream& sin, Value& root, bool collectComments) {
-  // std::istream_iterator<char> begin(sin);
+bool Reader::parse(std::istream& is, Value& root, bool collectComments) {
+  // std::istream_iterator<char> begin(is);
   // std::istream_iterator<char> end;
   // Those would allow streamed input from a file, if parse() were a
   // template function.
@@ -121,7 +121,7 @@ bool Reader::parse(std::istream& sin, Value& root, bool collectComments) {
   // Since JSONCPP_STRING is reference-counted, this at least does not
   // create an extra copy.
   JSONCPP_STRING doc;
-  std::getline(sin, doc, (char)EOF);
+  std::getline(is, doc, (char)EOF);
   return parse(doc.data(), doc.data() + doc.size(), root, collectComments);
 }
 
@@ -460,12 +460,12 @@ bool Reader::readString() {
   return c == '"';
 }
 
-bool Reader::readObject(Token& tokenStart) {
+bool Reader::readObject(Token& token) {
   Token tokenName;
   JSONCPP_STRING name;
   Value init(objectValue);
   currentValue().swapPayload(init);
-  currentValue().setOffsetStart(tokenStart.start_ - begin_);
+  currentValue().setOffsetStart(token.start_ - begin_);
   while (readToken(tokenName)) {
     bool initialTokenOk = true;
     while (tokenName.type_ == tokenComment && initialTokenOk)
@@ -516,10 +516,10 @@ bool Reader::readObject(Token& tokenStart) {
                             tokenObjectEnd);
 }
 
-bool Reader::readArray(Token& tokenStart) {
+bool Reader::readArray(Token& token) {
   Value init(arrayValue);
   currentValue().swapPayload(init);
-  currentValue().setOffsetStart(tokenStart.start_ - begin_);
+  currentValue().setOffsetStart(token.start_ - begin_);
   skipSpaces();
   if (current_ != end_ && *current_ == ']') // empty array
   {
@@ -536,19 +536,19 @@ bool Reader::readArray(Token& tokenStart) {
     if (!ok) // error already set
       return recoverFromError(tokenArrayEnd);
 
-    Token token;
+    Token currentToken;
     // Accept Comment after last item in the array.
-    ok = readToken(token);
-    while (token.type_ == tokenComment && ok) {
-      ok = readToken(token);
+    ok = readToken(currentToken);
+    while (currentToken.type_ == tokenComment && ok) {
+      ok = readToken(currentToken);
     }
-    bool badTokenType =
-        (token.type_ != tokenArraySeparator && token.type_ != tokenArrayEnd);
+    bool badTokenType = (currentToken.type_ != tokenArraySeparator &&
+                         currentToken.type_ != tokenArrayEnd);
     if (!ok || badTokenType) {
       return addErrorAndRecover("Missing ',' or ']' in array declaration",
-                                token, tokenArrayEnd);
+                                currentToken, tokenArrayEnd);
     }
-    if (token.type_ == tokenArrayEnd)
+    if (currentToken.type_ == tokenArrayEnd)
       break;
   }
   return true;
@@ -706,8 +706,8 @@ bool Reader::decodeUnicodeCodePoint(Token& token,
       return addError(
           "additional six characters expected to parse unicode surrogate pair.",
           token, current);
-    unsigned int surrogatePair;
     if (*(current++) == '\\' && *(current++) == 'u') {
+      unsigned int surrogatePair;
       if (decodeUnicodeEscapeSequence(token, current, end, surrogatePair)) {
         unicode = 0x10000 + ((unicode & 0x3FF) << 10) + (surrogatePair & 0x3FF);
       } else
@@ -1450,12 +1450,12 @@ bool OurReader::readStringSingleQuote() {
   return c == '\'';
 }
 
-bool OurReader::readObject(Token& tokenStart) {
+bool OurReader::readObject(Token& token) {
   Token tokenName;
   JSONCPP_STRING name;
   Value init(objectValue);
   currentValue().swapPayload(init);
-  currentValue().setOffsetStart(tokenStart.start_ - begin_);
+  currentValue().setOffsetStart(token.start_ - begin_);
   while (readToken(tokenName)) {
     bool initialTokenOk = true;
     while (tokenName.type_ == tokenComment && initialTokenOk)
@@ -1512,10 +1512,10 @@ bool OurReader::readObject(Token& tokenStart) {
                             tokenObjectEnd);
 }
 
-bool OurReader::readArray(Token& tokenStart) {
+bool OurReader::readArray(Token& token) {
   Value init(arrayValue);
   currentValue().swapPayload(init);
-  currentValue().setOffsetStart(tokenStart.start_ - begin_);
+  currentValue().setOffsetStart(token.start_ - begin_);
   skipSpaces();
   if (current_ != end_ && *current_ == ']') // empty array
   {
@@ -1532,19 +1532,19 @@ bool OurReader::readArray(Token& tokenStart) {
     if (!ok) // error already set
       return recoverFromError(tokenArrayEnd);
 
-    Token token;
+    Token currentToken;
     // Accept Comment after last item in the array.
-    ok = readToken(token);
-    while (token.type_ == tokenComment && ok) {
-      ok = readToken(token);
+    ok = readToken(currentToken);
+    while (currentToken.type_ == tokenComment && ok) {
+      ok = readToken(currentToken);
     }
-    bool badTokenType =
-        (token.type_ != tokenArraySeparator && token.type_ != tokenArrayEnd);
+    bool badTokenType = (currentToken.type_ != tokenArraySeparator &&
+                         currentToken.type_ != tokenArrayEnd);
     if (!ok || badTokenType) {
       return addErrorAndRecover("Missing ',' or ']' in array declaration",
-                                token, tokenArrayEnd);
+                                currentToken, tokenArrayEnd);
     }
-    if (token.type_ == tokenArrayEnd)
+    if (currentToken.type_ == tokenArrayEnd)
       break;
   }
   return true;
@@ -1726,8 +1726,8 @@ bool OurReader::decodeUnicodeCodePoint(Token& token,
       return addError(
           "additional six characters expected to parse unicode surrogate pair.",
           token, current);
-    unsigned int surrogatePair;
     if (*(current++) == '\\' && *(current++) == 'u') {
+      unsigned int surrogatePair;
       if (decodeUnicodeEscapeSequence(token, current, end, surrogatePair)) {
         unicode = 0x10000 + ((unicode & 0x3FF) << 10) + (surrogatePair & 0x3FF);
       } else

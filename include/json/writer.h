@@ -249,7 +249,7 @@ private:
   void unindent();
   void writeCommentBeforeValue(const Value& root);
   void writeCommentAfterValueOnSameLine(const Value& root);
-  bool hasCommentForValue(const Value& value);
+  static bool hasCommentForValue(const Value& value);
   static JSONCPP_STRING normalizeEOL(const JSONCPP_STRING& text);
 
   typedef std::vector<JSONCPP_STRING> ChildValues;
@@ -300,7 +300,7 @@ public:
   /**
    * \param indentation Each level will be indented by this amount extra.
    */
-  StyledStreamWriter(JSONCPP_STRING indentation = "\t");
+  StyledStreamWriter(const JSONCPP_STRING& indentation = "\t");
   ~StyledStreamWriter() {}
 
 public:
@@ -323,7 +323,7 @@ private:
   void unindent();
   void writeCommentBeforeValue(const Value& root);
   void writeCommentAfterValueOnSameLine(const Value& root);
-  bool hasCommentForValue(const Value& value);
+  static bool hasCommentForValue(const Value& value);
   static JSONCPP_STRING normalizeEOL(const JSONCPP_STRING& text);
 
   typedef std::vector<JSONCPP_STRING> ChildValues;

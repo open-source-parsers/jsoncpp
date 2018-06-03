@@ -97,7 +97,6 @@ public:
 
 private:
   TestResult& addToLastFailure(const JSONCPP_STRING& message);
-  unsigned int getAssertionNestingLevel() const;
   /// Adds a failure or a predicate context
   void addFailureInfo(const char* file,
                       unsigned int line,
@@ -168,7 +167,7 @@ private: // prevents copy construction and assignment
 
 private:
   void listTests() const;
-  bool testIndex(const JSONCPP_STRING& testName, unsigned int& index) const;
+  bool testIndex(const JSONCPP_STRING& testName, unsigned int& indexOut) const;
   static void preventDialogOnCrash();
 
 private:

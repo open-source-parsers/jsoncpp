@@ -643,7 +643,7 @@ bool StyledWriter::hasCommentForValue(const Value& value) {
 // Class StyledStreamWriter
 // //////////////////////////////////////////////////////////////////
 
-StyledStreamWriter::StyledStreamWriter(JSONCPP_STRING indentation)
+StyledStreamWriter::StyledStreamWriter(const JSONCPP_STRING& indentation)
     : document_(NULL), rightMargin_(74), indentation_(indentation),
       addChildValues_(), indented_(false) {}
 
@@ -1245,10 +1245,10 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings) {
   //! [StreamWriterBuilderDefaults]
 }
 
-JSONCPP_STRING writeString(StreamWriter::Factory const& builder,
+JSONCPP_STRING writeString(StreamWriter::Factory const& factory,
                            Value const& root) {
   JSONCPP_OSTRINGSTREAM sout;
-  StreamWriterPtr const writer(builder.newStreamWriter());
+  StreamWriterPtr const writer(factory.newStreamWriter());
   writer->write(root, &sout);
   return sout.str();
 }
