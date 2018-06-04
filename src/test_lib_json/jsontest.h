@@ -203,6 +203,12 @@ TestResult& checkStringEqual(TestResult& result,
                              unsigned int line,
                              const char* expr);
 
+void checkStringEmpty(TestResult& result,
+                      const JSONCPP_STRING& actual,
+                      const char* file,
+                      unsigned int line,
+                      const char* expr);
+
 } // namespace JsonTest
 
 /// \brief Asserts that the given expression is true.
@@ -238,6 +244,10 @@ TestResult& checkStringEqual(TestResult& result,
   JsonTest::checkStringEqual(*result_, JsonTest::ToJsonString(expected),       \
                              JsonTest::ToJsonString(actual), __FILE__,         \
                              __LINE__, #expected " == " #actual)
+
+/// \brief Asserts that string is empty.
+#define JSONTEST_ASSERT_STRING_EMPTY(actual)                                   \
+  JsonTest::checkStringEmpty(*result_, (actual), __FILE__, __LINE__, #actual);
 
 /// \brief Asserts that a given expression throws an exception
 #define JSONTEST_ASSERT_THROWS(expr)                                           \

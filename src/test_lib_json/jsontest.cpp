@@ -436,4 +436,16 @@ TestResult& checkStringEqual(TestResult& result,
   return result;
 }
 
+void checkStringEmpty(TestResult& result,
+                      const JSONCPP_STRING& actual,
+                      const char* file,
+                      unsigned int line,
+                      const char* expr) {
+  if (!actual.empty()) {
+    auto errorString = ToJsonString(expr) + ".empty()";
+    result.addFailure(file, line, errorString.c_str());
+    result << "Expected " << expr << " to be empty\n"
+           << "Actual  : '" << actual << "'";
+  }
+}
 } // namespace JsonTest
