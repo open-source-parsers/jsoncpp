@@ -1491,7 +1491,7 @@ JSONCPP_STRING Value::toStyledString() const {
 
   JSONCPP_STRING out = this->hasComment(commentBefore) ? "\n" : "";
   out += Json::writeString(builder, *this);
-  out += "\n";
+  out += '\n';
 
   return out;
 }

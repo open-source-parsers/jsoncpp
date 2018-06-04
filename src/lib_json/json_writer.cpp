@@ -366,7 +366,7 @@ JSONCPP_STRING FastWriter::write(const Value& root) {
   document_.clear();
   writeValue(root);
   if (!omitEndingLineFeed_)
-    document_ += "\n";
+    document_ += '\n';
   return document_;
 }
 
@@ -438,7 +438,7 @@ JSONCPP_STRING StyledWriter::write(const Value& root) {
   writeCommentBeforeValue(root);
   writeValue(root);
   writeCommentAfterValueOnSameLine(root);
-  document_ += "\n";
+  document_ += '\n';
   return document_;
 }
 
@@ -608,7 +608,7 @@ void StyledWriter::writeCommentBeforeValue(const Value& root) {
   if (!root.hasComment(commentBefore))
     return;
 
-  document_ += "\n";
+  document_ += '\n';
   writeIndent();
   const JSONCPP_STRING& comment = root.getComment(commentBefore);
   JSONCPP_STRING::const_iterator iter = comment.begin();
@@ -620,7 +620,7 @@ void StyledWriter::writeCommentBeforeValue(const Value& root) {
   }
 
   // Comments are stripped of trailing newlines, so add one here
-  document_ += "\n";
+  document_ += '\n';
 }
 
 void StyledWriter::writeCommentAfterValueOnSameLine(const Value& root) {
@@ -628,9 +628,9 @@ void StyledWriter::writeCommentAfterValueOnSameLine(const Value& root) {
     document_ += " " + root.getComment(commentAfterOnSameLine);
 
   if (root.hasComment(commentAfter)) {
-    document_ += "\n";
+    document_ += '\n';
     document_ += root.getComment(commentAfter);
-    document_ += "\n";
+    document_ += '\n';
   }
 }
 
