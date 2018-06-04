@@ -107,7 +107,7 @@ static inline char* duplicateStringValue(const char* value, size_t length) {
   if (length >= static_cast<size_t>(Value::maxInt))
     length = Value::maxInt - 1;
 
-  char* newString = static_cast<char*>(malloc(length + 1));
+  auto* newString = static_cast<char*>(malloc(length + 1));
   if (newString == NULL) {
     throwRuntimeError("in Json::Value::duplicateStringValue(): "
                       "Failed to allocate string value buffer");
@@ -128,7 +128,7 @@ static inline char* duplicateAndPrefixStringValue(const char* value,
                       "in Json::Value::duplicateAndPrefixStringValue(): "
                       "length too big for prefixing");
   unsigned actualLength = length + static_cast<unsigned>(sizeof(unsigned)) + 1U;
-  char* newString = static_cast<char*>(malloc(actualLength));
+  auto* newString = static_cast<char*>(malloc(actualLength));
   if (newString == 0) {
     throwRuntimeError("in Json::Value::duplicateAndPrefixStringValue(): "
                       "Failed to allocate string value buffer");
@@ -553,7 +553,8 @@ bool Value::operator<(const Value& other) const {
   }
   case arrayValue:
   case objectValue: {
-    int delta = int(value_.map_->size() - other.value_.map_->size());
+    auto delta =
+        static_cast<int>(value_.map_->size() - other.value_.map_->size());
     if (delta)
       return delta < 0;
     return (*value_.map_) < (*other.value_.map_);
@@ -867,8 +868,7 @@ bool Value::isConvertibleTo(ValueType other) const {
            (type_ == booleanValue && value_.bool_ == false) ||
            (type_ == stringValue && asString().empty()) ||
            (type_ == arrayValue && value_.map_->empty()) ||
-           (type_ == objectValue && value_.map_->empty()) ||
-           type_ == nullValue;
+           (type_ == objectValue && value_.map_->empty()) || type_ == nullValue;
   case intValue:
     return isInt() ||
            (type_ == realValue && InRange(value_.real_, minInt, maxInt)) ||
@@ -967,7 +967,7 @@ Value& Value::operator[](ArrayIndex index) {
   if (type_ == nullValue)
     *this = Value(arrayValue);
   CZString key(index);
-  ObjectValues::iterator it = value_.map_->lower_bound(key);
+  auto it = value_.map_->lower_bound(key);
   if (it != value_.map_->end() && (*it).first == key)
     return (*it).second;
 
@@ -1090,7 +1090,7 @@ Value& Value::resolveReference(const char* key) {
     *this = Value(objectValue);
   CZString actualKey(key, static_cast<unsigned>(strlen(key)),
                      CZString::noDuplication); // NOTE!
-  ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
+  auto it = value_.map_->lower_bound(actualKey);
   if (it != value_.map_->end() && (*it).first == actualKey)
     return (*it).second;
 
@@ -1109,7 +1109,7 @@ Value& Value::resolveReference(char const* key, char const* end) {
     *this = Value(objectValue);
   CZString actualKey(key, static_cast<unsigned>(end - key),
                      CZString::duplicateOnCopy);
-  ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
+  auto it = value_.map_->lower_bound(actualKey);
   if (it != value_.map_->end() && (*it).first == actualKey)
     return (*it).second;
 
@@ -1203,7 +1203,7 @@ bool Value::removeMember(const char* begin, const char* end, Value* removed) {
   }
   CZString actualKey(begin, static_cast<unsigned>(end - begin),
                      CZString::noDuplication);
-  ObjectValues::iterator it = value_.map_->find(actualKey);
+  auto it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
     return false;
   if (removed)
@@ -1239,7 +1239,7 @@ bool Value::removeIndex(ArrayIndex index, Value* removed) {
     return false;
   }
   CZString key(index);
-  ObjectValues::iterator it = value_.map_->find(key);
+  auto it = value_.map_->find(key);
   if (it == value_.map_->end()) {
     return false;
   }
@@ -1252,8 +1252,7 @@ bool Value::removeIndex(ArrayIndex index, Value* removed) {
   }
   // erase the last one ("leftover")
   CZString keyLast(oldSize - 1);
-  ObjectValues::iterator itLast = value_.map_->find(keyLast);
-  value_.map_->erase(itLast);
+  value_.map_->erase(keyLast);
   return true;
 }
 
@@ -1584,7 +1583,7 @@ Path::Path(const JSONCPP_STRING& path,
 void Path::makePath(const JSONCPP_STRING& path, const InArgs& in) {
   const char* current = path.c_str();
   const char* end = current + path.length();
-  InArgs::const_iterator itInArg = in.begin();
+  auto itInArg = in.begin();
   while (current != end) {
     if (*current == '[') {
       ++current;
@@ -1631,8 +1630,7 @@ void Path::invalidPath(const JSONCPP_STRING& /*path*/, int /*location*/) {
 
 const Value& Path::resolve(const Value& root) const {
   const Value* node = &root;
-  for (Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
-    const PathArgument& arg = *it;
+  for (const PathArgument& arg : args_) {
     if (arg.kind_ == PathArgument::kindIndex) {
       if (!node->isArray() || !node->isValidIndex(arg.index_)) {
         // Error: unable to resolve path (array value expected at position...
@@ -1657,8 +1655,7 @@ const Value& Path::resolve(const Value& root) const {
 
 Value Path::resolve(const Value& root, const Value& defaultValue) const {
   const Value* node = &root;
-  for (Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
-    const PathArgument& arg = *it;
+  for (const PathArgument& arg : args_) {
     if (arg.kind_ == PathArgument::kindIndex) {
       if (!node->isArray() || !node->isValidIndex(arg.index_))
         return defaultValue;
@@ -1676,8 +1673,7 @@ Value Path::resolve(const Value& root, const Value& defaultValue) const {
 
 Value& Path::make(Value& root) const {
   Value* node = &root;
-  for (Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
-    const PathArgument& arg = *it;
+  for (const PathArgument& arg : args_) {
     if (arg.kind_ == PathArgument::kindIndex) {
       if (!node->isArray()) {
         // Error: node is not an array at position ...

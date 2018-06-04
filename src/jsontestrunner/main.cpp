@@ -60,10 +60,10 @@ static JSONCPP_STRING readInputTestFile(const char* path) {
     return JSONCPP_STRING("");
   fseek(file, 0, SEEK_END);
   long const size = ftell(file);
-  unsigned long const usize = static_cast<unsigned long>(size);
+  const auto usize = static_cast<unsigned long>(size);
   fseek(file, 0, SEEK_SET);
   JSONCPP_STRING text;
-  char* buffer = new char[size + 1];
+  auto* buffer = new char[size + 1];
   buffer[size] = 0;
   if (fread(buffer, 1, usize, file) == usize)
     text = buffer;
@@ -118,9 +118,7 @@ static void printValueTree(FILE* fout,
     Json::Value::Members members(value.getMemberNames());
     std::sort(members.begin(), members.end());
     JSONCPP_STRING suffix = *(path.end() - 1) == '.' ? "" : ".";
-    for (Json::Value::Members::iterator it = members.begin();
-         it != members.end(); ++it) {
-      const JSONCPP_STRING name = *it;
+    for (const JSONCPP_STRING& name : members) {
       printValueTree(fout, value[name], path + suffix + name);
     }
   } break;

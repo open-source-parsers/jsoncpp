@@ -583,7 +583,7 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
     Char c = *current++;
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
-    Value::UInt digit(static_cast<Value::UInt>(c - '0'));
+    auto digit(static_cast<Value::UInt>(c - '0'));
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, b) this is the last digit, and
@@ -824,9 +824,7 @@ JSONCPP_STRING Reader::getFormatedErrorMessages() const {
 
 JSONCPP_STRING Reader::getFormattedErrorMessages() const {
   JSONCPP_STRING formattedMessage;
-  for (Errors::const_iterator itError = errors_.begin();
-       itError != errors_.end(); ++itError) {
-    const ErrorInfo& error = *itError;
+  for (const ErrorInfo& error : errors_) {
     formattedMessage +=
         "* " + getLocationLineAndColumn(error.token_.start_) + "\n";
     formattedMessage += "  " + error.message_ + "\n";
@@ -839,14 +837,13 @@ JSONCPP_STRING Reader::getFormattedErrorMessages() const {
 
 std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
   std::vector<Reader::StructuredError> allErrors;
-  for (Errors::const_iterator itError = errors_.begin();
-       itError != errors_.end(); ++itError) {
-    const ErrorInfo& error = *itError;
-    Reader::StructuredError structured;
+  allErrors.reserve(errors_.size());
+  for (const ErrorInfo& error : errors_) {
+    allErrors.emplace_back();
+    Reader::StructuredError& structured = allErrors.back();
     structured.offset_start = error.token_.start_ - begin_;
     structured.offset_limit = error.token_.end_ - begin_;
     structured.message = error.message_;
-    allErrors.push_back(structured);
   }
   return allErrors;
 }
@@ -1579,7 +1576,7 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
     Char c = *current++;
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
-    Value::UInt digit(static_cast<Value::UInt>(c - '0'));
+    auto digit(static_cast<Value::UInt>(c - '0'));
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, b) this is the last digit, and
@@ -1621,7 +1618,7 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
   if (length < 0) {
     return addError("Unable to parse token length", token);
   }
-  size_t const ulength = static_cast<size_t>(length);
+  const auto ulength = static_cast<size_t>(length);
 
   // Avoid using a string constant for the format control string given to
   // sscanf, as this can cause hard to debug crashes on OS X. See here for more
@@ -1839,9 +1836,7 @@ JSONCPP_STRING OurReader::getLocationLineAndColumn(Location location) const {
 
 JSONCPP_STRING OurReader::getFormattedErrorMessages() const {
   JSONCPP_STRING formattedMessage;
-  for (Errors::const_iterator itError = errors_.begin();
-       itError != errors_.end(); ++itError) {
-    const ErrorInfo& error = *itError;
+  for (const ErrorInfo& error : errors_) {
     formattedMessage +=
         "* " + getLocationLineAndColumn(error.token_.start_) + "\n";
     formattedMessage += "  " + error.message_ + "\n";
@@ -1854,14 +1849,13 @@ JSONCPP_STRING OurReader::getFormattedErrorMessages() const {
 
 std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
   std::vector<OurReader::StructuredError> allErrors;
-  for (Errors::const_iterator itError = errors_.begin();
-       itError != errors_.end(); ++itError) {
-    const ErrorInfo& error = *itError;
-    OurReader::StructuredError structured;
+  allErrors.reserve(errors_.size());
+  for (const ErrorInfo& error : errors_) {
+    allErrors.emplace_back();
+    OurReader::StructuredError& structured = allErrors.back();
     structured.offset_start = error.token_.start_ - begin_;
     structured.offset_limit = error.token_.end_ - begin_;
     structured.message = error.message_;
-    allErrors.push_back(structured);
   }
   return allErrors;
 }

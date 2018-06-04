@@ -1030,7 +1030,7 @@ JSONTEST_FIXTURE(ValueTest, integers) {
       normalizeFloatingPointStr(JsonTest::ToJsonString(val.asString())));
 
   // 10^19
-  const Json::UInt64 ten_to_19 = static_cast<Json::UInt64>(1e19);
+  const auto ten_to_19 = static_cast<Json::UInt64>(1e19);
   val = Json::Value(Json::UInt64(ten_to_19));
 
   JSONTEST_ASSERT_EQUAL(Json::uintValue, val.type());
@@ -2358,8 +2358,7 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
     { __LINE__, 0, "{\"a\":.Infinity}" }, { __LINE__, 0, "{\"a\":_Infinity}" },
     { __LINE__, 0, "{\"a\":_nfinity}" },  { __LINE__, 1, "{\"a\":-Infinity}" }
   };
-  for (size_t tdi = 0; tdi < sizeof(test_data) / sizeof(*test_data); ++tdi) {
-    const TestData& td = test_data[tdi];
+  for (const TestData& td : test_data) {
     bool ok = reader->parse(&*td.in.begin(), &*td.in.begin() + td.in.size(),
                             &root, &errs);
     JSONTEST_ASSERT(td.ok == ok) << "line:" << td.line << "\n"
