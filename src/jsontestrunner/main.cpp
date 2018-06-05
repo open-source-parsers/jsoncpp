@@ -15,6 +15,7 @@
 
 #include <algorithm> // sort
 #include <json/json.h>
+#include <fstream>
 #include <sstream>
 #include <stdio.h>
 
@@ -55,20 +56,15 @@ static JSONCPP_STRING normalizeFloatingPointStr(double value) {
 }
 
 static JSONCPP_STRING readInputTestFile(const char* path) {
-  FILE* file = fopen(path, "rb");
+  std::ifstream file(path, std::ios::binary);
   if (!file)
-    return JSONCPP_STRING("");
-  fseek(file, 0, SEEK_END);
-  long const size = ftell(file);
-  const auto usize = static_cast<unsigned long>(size);
-  fseek(file, 0, SEEK_SET);
-  JSONCPP_STRING text;
-  auto* buffer = new char[size + 1];
-  buffer[size] = 0;
-  if (fread(buffer, 1, usize, file) == usize)
-    text = buffer;
-  fclose(file);
-  delete[] buffer;
+    return JSONCPP_STRING();
+  file.seekg(0, file.end);
+  const auto file_size = static_cast<size_t>(file.tellg());
+  file.seekg(0, file.beg);
+  JSONCPP_STRING text(file_size, 0);
+  if (file.read(&text.front(), file_size).gcount() != file_size)
+    return JSONCPP_STRING();
   return text;
 }
 

@@ -10,6 +10,7 @@
 #include <json/reader.h>
 #include <json/value.h>
 #endif // if !defined(JSON_IS_AMALGAMATION)
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <istream>
@@ -583,7 +584,7 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
     Char c = *current++;
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
-    auto digit(static_cast<Value::UInt>(c - '0'));
+    auto digit = static_cast<Value::UInt>(c - '0');
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, b) this is the last digit, and
@@ -838,13 +839,11 @@ JSONCPP_STRING Reader::getFormattedErrorMessages() const {
 std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
   std::vector<Reader::StructuredError> allErrors;
   allErrors.reserve(errors_.size());
-  for (const ErrorInfo& error : errors_) {
-    allErrors.emplace_back();
-    Reader::StructuredError& structured = allErrors.back();
-    structured.offset_start = error.token_.start_ - begin_;
-    structured.offset_limit = error.token_.end_ - begin_;
-    structured.message = error.message_;
-  }
+  std::transform(
+      errors_.begin(), errors_.end(), std::back_inserter(allErrors),
+      [this](const ErrorInfo& e) -> Reader::StructuredError {
+        return { e.token_.start_ - begin_, e.token_.end_ - begin_, e.message_ };
+      });
   return allErrors;
 }
 
@@ -1576,7 +1575,7 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
     Char c = *current++;
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
-    auto digit(static_cast<Value::UInt>(c - '0'));
+    auto digit = static_cast<Value::UInt>(c - '0');
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, b) this is the last digit, and
@@ -1850,13 +1849,11 @@ JSONCPP_STRING OurReader::getFormattedErrorMessages() const {
 std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
   std::vector<OurReader::StructuredError> allErrors;
   allErrors.reserve(errors_.size());
-  for (const ErrorInfo& error : errors_) {
-    allErrors.emplace_back();
-    OurReader::StructuredError& structured = allErrors.back();
-    structured.offset_start = error.token_.start_ - begin_;
-    structured.offset_limit = error.token_.end_ - begin_;
-    structured.message = error.message_;
-  }
+  std::transform(
+      errors_.begin(), errors_.end(), std::back_inserter(allErrors),
+      [this](const ErrorInfo& e) -> OurReader::StructuredError {
+        return { e.token_.start_ - begin_, e.token_.end_ - begin_, e.message_ };
+      });
   return allErrors;
 }
 

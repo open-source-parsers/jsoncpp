@@ -273,7 +273,7 @@ bool Runner::runAllTest(bool printSummary) const {
     }
     return true;
   } else {
-    for (const TestResult& result : failures) {
+    for (TestResult& result : failures) {
       result.printFailure(count > 1);
     }
 
@@ -436,16 +436,17 @@ TestResult& checkStringEqual(TestResult& result,
   return result;
 }
 
-void checkStringEmpty(TestResult& result,
-                      const JSONCPP_STRING& actual,
-                      const char* file,
-                      unsigned int line,
-                      const char* expr) {
+TestResult& checkStringEmpty(TestResult& result,
+                             const JSONCPP_STRING& actual,
+                             const char* file,
+                             unsigned int line,
+                             const char* expr) {
   if (!actual.empty()) {
     auto errorString = ToJsonString(expr) + ".empty()";
     result.addFailure(file, line, errorString.c_str());
     result << "Expected " << expr << " to be empty\n"
            << "Actual  : '" << actual << "'";
   }
+  return result;
 }
 } // namespace JsonTest
