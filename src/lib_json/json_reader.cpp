@@ -14,6 +14,7 @@
 #include <cassert>
 #include <cstring>
 #include <istream>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <set>
