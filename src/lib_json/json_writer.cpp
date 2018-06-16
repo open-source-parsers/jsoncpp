@@ -16,6 +16,9 @@
 #include <cstring>
 #include <cstdio>
 
+#if defined(__BORLANDC__)
+#include <stdio.h>
+#endif
 #if defined(_MSC_VER) && _MSC_VER >= 1200 && _MSC_VER < 1800 // Between VC++ 6.0 and VC++ 11.0
 #include <float.h>
 #define isfinite _finite

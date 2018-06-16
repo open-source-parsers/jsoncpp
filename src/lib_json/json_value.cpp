@@ -18,7 +18,9 @@
 #endif
 #include <cstddef> // size_t
 #include <algorithm> // min()
-
+#if defined(__BORLANDC__)
+#include <mem.h>
+#endif
 #define JSON_ASSERT_UNREACHABLE assert(false)
 
 namespace Json {

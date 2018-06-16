@@ -18,7 +18,9 @@
 #include <memory>
 #include <set>
 #include <limits>
-
+#if defined(__BORLANDC__)
+#include <stdio.h>
+#endif
 #if defined(_MSC_VER)
 #if !defined(WINCE) && defined(__STDC_SECURE_LIB__) && _MSC_VER >= 1500 // VC++ 9.0 and above 
 #define snprintf sprintf_s
