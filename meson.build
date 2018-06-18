@@ -46,6 +46,14 @@ install_headers(
   jsoncpp_headers,
   subdir : 'json')
 
+if get_option('default_library') == 'shared' and meson.get_compiler('cpp').get_id() == 'msvc'
+  dll_export_flag = '-DJSON_DLL_BUILD'
+  dll_import_flag = '-DJSON_DLL'
+else
+  dll_export_flag = ''
+  dll_import_flag = ''
+endif
+
 jsoncpp_lib = library(
   'jsoncpp',
   [ jsoncpp_gen_sources,
@@ -56,7 +64,8 @@ jsoncpp_lib = library(
     'src/lib_json/json_writer.cpp'],
   soversion : 20,
   install : true,
-  include_directories : jsoncpp_include_directories)
+  include_directories : jsoncpp_include_directories,
+  cpp_args: dll_export_flag)
 
 import('pkgconfig').generate(
   libraries : jsoncpp_lib,
@@ -82,7 +91,8 @@ jsoncpp_test = executable(
     'src/test_lib_json/main.cpp'],
   include_directories : jsoncpp_include_directories,
   link_with : jsoncpp_lib,
-  install : false)
+  install : false,
+  cpp_args: dll_import_flag)
 test(
   'unittest_jsoncpp_test',
   jsoncpp_test)
@@ -92,7 +102,8 @@ jsontestrunner = executable(
   'src/jsontestrunner/main.cpp',
   include_directories : jsoncpp_include_directories,
   link_with : jsoncpp_lib,
-  install : false)
+  install : false,
+  cpp_args: dll_import_flag)
 test(
   'unittest_jsontestrunner',
   python,
