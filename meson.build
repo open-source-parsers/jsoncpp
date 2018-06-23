@@ -50,8 +50,8 @@ if get_option('default_library') == 'shared' and meson.get_compiler('cpp').get_i
   dll_export_flag = '-DJSON_DLL_BUILD'
   dll_import_flag = '-DJSON_DLL'
 else
-  dll_export_flag = ''
-  dll_import_flag = ''
+  dll_export_flag = []
+  dll_import_flag = []
 endif
 
 jsoncpp_lib = library(
