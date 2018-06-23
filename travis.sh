@@ -17,6 +17,8 @@ set -vex
 
 env | sort
 
+meson --version
+ninja --version
 meson --buildtype ${BUILD_TYPE} --default-library ${LIB_TYPE} . build-${LIB_TYPE}
 ninja -v -C build-${LIB_TYPE}
 ninja -v -C build-${LIB_TYPE} test
