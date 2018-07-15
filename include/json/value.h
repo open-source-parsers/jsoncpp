@@ -562,7 +562,7 @@ Json::Value obj_value(Json::objectValue); // {}
   /** \brief Remove the indexed array element.
 
       O(n) expensive operations.
-      Update 'removed' if removed.
+      Update 'removed' iff removed.
       \return true if removed (no exceptions)
   */
   bool removeIndex(ArrayIndex index, Value* removed);

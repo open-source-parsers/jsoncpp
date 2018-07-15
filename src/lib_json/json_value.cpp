@@ -1243,7 +1243,8 @@ bool Value::removeIndex(ArrayIndex index, Value* removed) {
   if (it == value_.map_->end()) {
     return false;
   }
-  *removed = it->second;
+  if (removed)
+    *removed = it->second;
   ArrayIndex oldSize = size();
   // shift left all items left, into the place of the "removed"
   for (ArrayIndex i = index; i < (oldSize - 1); ++i) {
