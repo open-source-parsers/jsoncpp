@@ -2499,6 +2499,17 @@ JSONTEST_FIXTURE(RValueTest, moveConstruction) {
 #endif
 }
 
+struct ErrorTest : JsonTest::TestCase {};
+JSONTEST_FIXTURE(ErrorTest, getErrorWorksFineWithStreams)
+{
+  const char TEST_VALUE[] = R"__({"X":3, "Y":oops})__";
+  JSONCPP_ISTRINGSTREAM ss(TEST_VALUE);
+  Json::Reader reader;
+  Json::Value result;
+  JSONTEST_ASSERT(!reader.parse(ss, result));
+  JSONTEST_ASSERT(reader.getFormattedErrorMessages().size());
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -2577,6 +2588,7 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, const);
 
   JSONTEST_REGISTER_FIXTURE(runner, RValueTest, moveConstruction);
+  JSONTEST_REGISTER_FIXTURE(runner, ErrorTest, getErrorWorksFineWithStreams);
 
   return runner.runCommandLine(argc, argv);
 }
