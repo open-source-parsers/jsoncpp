@@ -2507,7 +2507,8 @@ JSONTEST_FIXTURE(ErrorTest, getErrorWorksFineWithStreams)
   Json::Reader reader;
   Json::Value result;
   JSONTEST_ASSERT(!reader.parse(ss, result));
-  JSONTEST_ASSERT(reader.getFormattedErrorMessages().size());
+  JSONTEST_ASSERT(!reader.getFormattedErrorMessages().empty());
+  JSONTEST_ASSERT_STRING_EQUAL("* Line 1, Column 13\n  Syntax error: value, object or array expected.\n", reader.getFormattedErrorMessages().c_str());
 }
 
 int main(int argc, const char* argv[]) {
