@@ -1497,6 +1497,21 @@ JSONCPP_STRING Value::toStyledString() const {
   return out;
 }
 
+JSONCPP_STRING Value::toString() const {
+      StreamWriterBuilder builder;
+
+      printf("SETTINGS:\n%s\n\n", builder.settings_.toStyledString().c_str());
+
+      builder.settings_["indentation"]= "";
+      builder.settings_["enableYAMLCompatibility"]=true;
+      JSONCPP_STRING out = this->hasComment(commentBefore) ? "\n" : "";
+      out += Json::writeString(builder, *this);
+//      out += '\n';
+
+      return out;
+    }
+
+
 Value::const_iterator Value::begin() const {
   switch (type_) {
   case arrayValue:

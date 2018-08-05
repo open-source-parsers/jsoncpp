@@ -603,7 +603,8 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Include delimiters and embedded newlines.
   JSONCPP_STRING getComment(CommentPlacement placement) const;
 
-  JSONCPP_STRING toStyledString() const;
+        JSONCPP_STRING toStyledString() const;
+        JSONCPP_STRING toString() const;
 
   const_iterator begin() const;
   const_iterator end() const;
