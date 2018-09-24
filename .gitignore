@@ -1,5 +1,6 @@
 /build/
 /build-*/
+/installed/
 *.pyc
 *.swp
 *.actual
