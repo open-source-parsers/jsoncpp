@@ -394,7 +394,7 @@ void FastWriter::writeValue(const Value& value) {
 // //////////////////////////////////////////////////////////////////
 
 StyledWriter::StyledWriter()
-    : rightMargin_(74), indentSize_(3), addChildValues_() {}
+    : rightMargin_(74), indentSize_(3), addChildValues_(false) {}
 
 JSONCPP_STRING StyledWriter::write(const Value& root) {
   document_ = "";
