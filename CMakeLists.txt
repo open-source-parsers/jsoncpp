@@ -1,6 +1,13 @@
 # vim: et ts=4 sts=4 sw=4 tw=0
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+
+# Ensures that CMAKE_BUILD_TYPE has a default value
+IF(NOT DEFINED CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE Release CACHE STRING
+        "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Coverage.")
+ENDIF()
+
 PROJECT(jsoncpp)
 ENABLE_TESTING()
 
@@ -11,15 +18,6 @@ OPTION(JSONCPP_WITH_STRICT_ISO "Issue all the warnings demanded by strict ISO C 
 OPTION(JSONCPP_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" ON)
 OPTION(JSONCPP_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ON)
 OPTION(BUILD_SHARED_LIBS "Build jsoncpp_lib as a shared library." OFF)
-
-# Ensures that CMAKE_BUILD_TYPE is visible in cmake-gui on Unix
-IF(NOT WIN32)
-    IF(NOT CMAKE_BUILD_TYPE)
-        SET(CMAKE_BUILD_TYPE Release CACHE STRING
-            "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Coverage."
-            FORCE)
-    ENDIF()
-ENDIF()
 
 # Enable runtime search path support for dynamic libraries on OSX
 IF(APPLE)
