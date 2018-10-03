@@ -6,10 +6,8 @@ ADD_EXECUTABLE(jsontestrunner_exe
 
 IF(BUILD_SHARED_LIBS)
     ADD_DEFINITIONS( -DJSON_DLL )
-    TARGET_LINK_LIBRARIES(jsontestrunner_exe jsoncpp_lib)
-ELSE(BUILD_SHARED_LIBS)
-    TARGET_LINK_LIBRARIES(jsontestrunner_exe jsoncpp_lib_static)
 ENDIF()
+TARGET_LINK_LIBRARIES(jsontestrunner_exe jsoncpp_lib)
 
 SET_TARGET_PROPERTIES(jsontestrunner_exe PROPERTIES OUTPUT_NAME jsontestrunner_exe)
 
