@@ -10,7 +10,7 @@ environment:
 build_script:
   - cmake --version
   - cd c:\projects\jsoncpp
-  - cmake -G "%CMAKE_GENERATOR%" -DCMAKE_INSTALL_PREFIX=%CD:\=/%/install -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON .
+  - cmake -G "%CMAKE_GENERATOR%" -DCMAKE_INSTALL_PREFIX=%CD:\=/%/install -DBUILD_SHARED_LIBS=ON .
   - cmake --build . --config Release --target install
 
 deploy:
