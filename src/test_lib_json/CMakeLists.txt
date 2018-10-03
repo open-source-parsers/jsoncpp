@@ -24,12 +24,12 @@ IF(JSONCPP_WITH_POST_BUILD_UNITTEST)
         ADD_CUSTOM_COMMAND( TARGET jsoncpp_test
                             POST_BUILD
                             COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:jsoncpp_lib> $<TARGET_FILE_DIR:jsoncpp_test>
-                            COMMAND $<TARGET_FILE:jsoncpp_test>)
+                            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:jsoncpp_test>)
     ELSE(BUILD_SHARED_LIBS)
         # Just run the test executable.
         ADD_CUSTOM_COMMAND( TARGET jsoncpp_test
                             POST_BUILD
-                            COMMAND $<TARGET_FILE:jsoncpp_test>)
+                            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:jsoncpp_test>)
     ENDIF()
 ENDIF()
 
