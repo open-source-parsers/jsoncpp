@@ -128,6 +128,9 @@ When a test is run, output files are generated beside the input test files. Belo
 ### Amalgamated source
 https://github.com/open-source-parsers/jsoncpp/wiki/Amalgamated
 
+### The Meson Build System
+If you are using the [Meson Build System](http://mesonbuild.com), then you can get a wrap file by downloading it from [Meson WrapDB](https://wrapdb.mesonbuild.com/jsoncpp), or simply use `meson wrap install jsoncpp`.
+
 ### Other ways
 If you have trouble, see the Wiki, or post a question as an Issue.
 
