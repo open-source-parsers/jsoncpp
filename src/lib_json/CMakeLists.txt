@@ -97,7 +97,7 @@ IF(BUILD_STATIC_LIBS)
     ADD_LIBRARY(jsoncpp_lib_static STATIC ${PUBLIC_HEADERS} ${jsoncpp_sources})
     SET_TARGET_PROPERTIES( jsoncpp_lib_static PROPERTIES VERSION ${JSONCPP_VERSION} SOVERSION ${JSONCPP_SOVERSION})
     # avoid name clashes on windows as the shared import lib is also named jsoncpp.lib
-    if (NOT DEFINED STATIC_SUFFIX AND BUILD_SHARED_LIBS)
+    if (NOT DEFINED STATIC_SUFFIX AND NOT BUILD_SHARED_LIBS)
       set (STATIC_SUFFIX "_static")
     endif ()
     set_target_properties (jsoncpp_lib_static PROPERTIES OUTPUT_NAME jsoncpp${STATIC_SUFFIX}

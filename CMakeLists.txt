@@ -32,7 +32,7 @@ ENDIF()
 # Adhere to GNU filesystem layout conventions
 INCLUDE(GNUInstallDirs)
 
-SET(DEBUG_LIBNAME_SUFFIX "" CACHE STRING "Optional suffix to append to the library name for a debug build")
+SET(DEBUG_LIBNAME_SUFFIX "_d" CACHE STRING "Optional suffix to append to the library name for a debug build")
 
 # Set variable named ${VAR_NAME} to value ${VALUE}
 FUNCTION(set_using_dynamic_name VAR_NAME VALUE)
