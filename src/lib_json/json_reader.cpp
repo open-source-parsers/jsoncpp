@@ -19,19 +19,20 @@
 #include <sstream>
 #include <utility>
 
-#if __cplusplus >= 201103L
 #include <cstdio>
+#if __cplusplus >= 201103L
 
 #if !defined(sscanf)
 #define sscanf std::sscanf
 #endif
-#else
-#include <cstdio>
+
+#endif //__cplusplus
 
 #if defined(_MSC_VER)
+#if !defined(_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
-#endif
-#endif
+#endif  //_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
+#endif  //_MSC_VER
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400 // VC++ 8.0
 // Disable warning about strdup being deprecated.
