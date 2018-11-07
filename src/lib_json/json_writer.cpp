@@ -42,8 +42,11 @@
 #define isfinite _finite
 #endif
 
+#if !defined(_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
-#endif
+#endif  //_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
+
+#endif //_MSC_VER
 
 #if defined(__sun) && defined(__SVR4) // Solaris
 #if !defined(isfinite)
