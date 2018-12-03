@@ -72,8 +72,10 @@
 #define isnan(x) (x != x)
 #endif
 
+#if !defined(__APPLE__)
 #if !defined(isfinite)
 #define isfinite finite
+#endif
 #endif
 #endif
 
