@@ -1564,7 +1564,7 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   // TODO: Help the compiler do the div and mod at compile time or get rid of
   // them.
   Value::LargestUInt maxIntegerValue =
-      isNegative ? Value::LargestUInt(-Value::minLargestInt)
+      isNegative ? Value::LargestUInt(Value::minLargestInt)
                  : Value::maxLargestUInt;
   Value::LargestUInt threshold = maxIntegerValue / 10;
   Value::LargestUInt value = 0;
