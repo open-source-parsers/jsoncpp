@@ -2350,14 +2350,14 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
     JSONCPP_STRING in;
   };
   const TestData test_data[] = {
-    { __LINE__, 1, "{\"a\":9}" },         { __LINE__, 0, "{\"a\":0Infinity}" },
-    { __LINE__, 0, "{\"a\":1Infinity}" }, { __LINE__, 0, "{\"a\":9Infinity}" },
-    { __LINE__, 0, "{\"a\":0nfinity}" },  { __LINE__, 0, "{\"a\":1nfinity}" },
-    { __LINE__, 0, "{\"a\":9nfinity}" },  { __LINE__, 0, "{\"a\":nfinity}" },
-    { __LINE__, 0, "{\"a\":.nfinity}" },  { __LINE__, 0, "{\"a\":9nfinity}" },
-    { __LINE__, 0, "{\"a\":-nfinity}" },  { __LINE__, 1, "{\"a\":Infinity}" },
-    { __LINE__, 0, "{\"a\":.Infinity}" }, { __LINE__, 0, "{\"a\":_Infinity}" },
-    { __LINE__, 0, "{\"a\":_nfinity}" },  { __LINE__, 1, "{\"a\":-Infinity}" }
+    { __LINE__, true, "{\"a\":9}" },         { __LINE__, false, "{\"a\":0Infinity}" },
+    { __LINE__, false, "{\"a\":1Infinity}" }, { __LINE__, false, "{\"a\":9Infinity}" },
+    { __LINE__, false, "{\"a\":0nfinity}" },  { __LINE__, false, "{\"a\":1nfinity}" },
+    { __LINE__, false, "{\"a\":9nfinity}" },  { __LINE__, false, "{\"a\":nfinity}" },
+    { __LINE__, false, "{\"a\":.nfinity}" },  { __LINE__, false, "{\"a\":9nfinity}" },
+    { __LINE__, false, "{\"a\":-nfinity}" },  { __LINE__, true, "{\"a\":Infinity}" },
+    { __LINE__, false, "{\"a\":.Infinity}" }, { __LINE__, false, "{\"a\":_Infinity}" },
+    { __LINE__, false, "{\"a\":_nfinity}" },  { __LINE__, true, "{\"a\":-Infinity}" }
   };
   for (size_t tdi = 0; tdi < sizeof(test_data) / sizeof(*test_data); ++tdi) {
     const TestData& td = test_data[tdi];
