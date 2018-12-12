@@ -173,7 +173,7 @@ private:
  * The get() methods can be used to obtain default value in the case the
  * required element does not exist.
  *
- * It is possible to iterate over the list of a #objectValue values using
+ * It is possible to iterate over the list of member keys of an object using
  * the getMemberNames() method.
  *
  * \note #Value string-length fit in size_t, but keys must be < 2^30.
