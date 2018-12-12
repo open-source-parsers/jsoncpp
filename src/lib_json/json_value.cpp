@@ -1507,7 +1507,7 @@ Value::const_iterator Value::begin() const {
   default:
     break;
   }
-  return const_iterator();
+  return {};
 }
 
 Value::const_iterator Value::end() const {
@@ -1520,7 +1520,7 @@ Value::const_iterator Value::end() const {
   default:
     break;
   }
-  return const_iterator();
+  return {};
 }
 
 Value::iterator Value::begin() {
