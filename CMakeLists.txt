@@ -8,7 +8,14 @@ if(NOT DEFINED CMAKE_BUILD_TYPE)
         "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Coverage.")
 endif()
 
-project(jsoncpp)
+project(JSONCPP
+        VERSION 1.8.4 # <major>[.<minor>[.<patch>[.<tweak>]]]
+        LANGUAGES CXX)
+
+set( JSONCPP_VERSION ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH} )
+message(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
+set( JSONCPP_SOVERSION 19 )
+
 enable_testing()
 
 option(JSONCPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executables" ON)
@@ -34,37 +41,8 @@ function(set_using_dynamic_name VAR_NAME VALUE)
     set( "${VAR_NAME}" "${VALUE}" PARENT_SCOPE)
 endfunction()
 
-# Extract major, minor, patch from version text
-# Parse a version string "X.Y.Z" and outputs
-# version parts in ${OUPUT_PREFIX}_MAJOR, _MINOR, _PATCH.
-# If parse succeeds then ${OUPUT_PREFIX}_FOUND is TRUE.
-macro(jsoncpp_parse_version VERSION_TEXT OUPUT_PREFIX)
-    set(VERSION_REGEX "[0-9]+\\.[0-9]+\\.[0-9]+(-[a-zA-Z0-9_]+)?")
-    if( ${VERSION_TEXT} MATCHES ${VERSION_REGEX} )
-        string(REGEX MATCHALL "[0-9]+|-([A-Za-z0-9_]+)" VERSION_PARTS ${VERSION_TEXT})
-        list(GET VERSION_PARTS 0 ${OUPUT_PREFIX}_MAJOR)
-        list(GET VERSION_PARTS 1 ${OUPUT_PREFIX}_MINOR)
-        list(GET VERSION_PARTS 2 ${OUPUT_PREFIX}_PATCH)
-        set_using_dynamic_name( "${OUPUT_PREFIX}_FOUND" TRUE )
-    else( ${VERSION_TEXT} MATCHES ${VERSION_REGEX} )
-        set_using_dynamic_name( "${OUPUT_PREFIX}_FOUND" FALSE )
-    endif()
-endmacro()
-
-# Read out version from "version" file
-#file(STRINGS "version" JSONCPP_VERSION)
-#set( JSONCPP_VERSION_MAJOR X )
-#set( JSONCPP_VERSION_MINOR Y )
-#set( JSONCPP_VERSION_PATCH Z )
-set( JSONCPP_VERSION 1.8.4 )
-jsoncpp_parse_version( ${JSONCPP_VERSION} JSONCPP_VERSION )
-#if(NOT JSONCPP_VERSION_FOUND)
-#    message(FATAL_ERROR "Failed to parse version string properly. Expect X.Y.Z")
-#endif(NOT JSONCPP_VERSION_FOUND)
-set( JSONCPP_SOVERSION 19 )
 set( JSONCPP_USE_SECURE_MEMORY "0" CACHE STRING "-D...=1 to use memory-wiping allocator for STL" )
 
-message(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
 # File version.h is only regenerated on CMake configure step
 configure_file( "${PROJECT_SOURCE_DIR}/src/lib_json/version.h.in"
                 "${PROJECT_BINARY_DIR}/include/json/version.h"
