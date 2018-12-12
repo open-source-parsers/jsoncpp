@@ -19,6 +19,29 @@
 #include <algorithm> // min()
 #include <cstddef>   // size_t
 
+// Provide implementation equivalent of std::snprintf for older _MSC compilers
+#if defined(_MSC_VER) && _MSC_VER < 1900
+#include <stdarg.h>  
+static int msvc_pre1900_c99_vsnprintf(char *outBuf, size_t size, const char *format, va_list ap)
+{
+    int count = -1;
+    if (size != 0)
+        count = _vsnprintf_s(outBuf, size, _TRUNCATE, format, ap);
+    if (count == -1)
+        count = _vscprintf(format, ap);
+    return count;
+}
+
+int JSON_API msvc_pre1900_c99_snprintf(char *outBuf, size_t size, const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    const int count = msvc_pre1900_c99_vsnprintf(outBuf, size, format, ap);
+    va_end(ap);
+    return count;
+}
+#endif
+
 // Disable warning C4702 : unreachable code
 #if defined(_MSC_VER) && _MSC_VER >= 1800 // VC++ 12.0 and above
 #pragma warning(disable : 4702)

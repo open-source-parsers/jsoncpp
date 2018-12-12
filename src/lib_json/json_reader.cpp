@@ -22,21 +22,14 @@
 #if __cplusplus >= 201103L
 #include <cstdio>
 
-#if !defined(snprintf)
-#define snprintf std::snprintf
-#endif
-
 #if !defined(sscanf)
 #define sscanf std::sscanf
 #endif
 #else
-#include <stdio.h>
+#include <cstdio>
 
 #if defined(_MSC_VER)
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
-#if !defined(snprintf)
-#define snprintf _snprintf
-#endif
 #endif
 #endif
 
@@ -813,7 +806,7 @@ JSONCPP_STRING Reader::getLocationLineAndColumn(Location location) const {
   int line, column;
   getLocationLineAndColumn(location, line, column);
   char buffer[18 + 16 + 16 + 1];
-  snprintf(buffer, sizeof(buffer), "Line %d, Column %d", line, column);
+  jsoncpp_snprintf(buffer, sizeof(buffer), "Line %d, Column %d", line, column);
   return buffer;
 }
 
@@ -1833,7 +1826,7 @@ JSONCPP_STRING OurReader::getLocationLineAndColumn(Location location) const {
   int line, column;
   getLocationLineAndColumn(location, line, column);
   char buffer[18 + 16 + 16 + 1];
-  snprintf(buffer, sizeof(buffer), "Line %d, Column %d", line, column);
+  jsoncpp_snprintf(buffer, sizeof(buffer), "Line %d, Column %d", line, column);
   return buffer;
 }
 

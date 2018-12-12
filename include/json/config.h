@@ -54,6 +54,14 @@
 #define JSON_API
 #endif
 
+#if defined(_MSC_VER) && _MSC_VER < 1900
+// As recommended at https://stackoverflow.com/questions/2915672/snprintf-and-visual-studio-2010
+   extern JSON_API int msvc_pre1900_c99_snprintf(char *outBuf, size_t size, const char *format, ...);
+#  define jsoncpp_snprintf msvc_pre1900_c99_snprintf
+#else
+#  define jsoncpp_snprintf std::snprintf
+#endif
+
 // If JSON_NO_INT64 is defined, then Json only support C++ "int" type for
 // integer
 // Storages, and 64 bits integer support is disabled.

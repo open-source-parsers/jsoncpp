@@ -28,11 +28,7 @@ struct Options {
 
 static JSONCPP_STRING normalizeFloatingPointStr(double value) {
   char buffer[32];
-#if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__)
-  sprintf_s(buffer, sizeof(buffer), "%.16g", value);
-#else
-  snprintf(buffer, sizeof(buffer), "%.16g", value);
-#endif
+  jsoncpp_snprintf(buffer, sizeof(buffer), "%.16g", value);
   buffer[sizeof(buffer) - 1] = 0;
   JSONCPP_STRING s(buffer);
   JSONCPP_STRING::size_type index = s.find_last_of("eE");
@@ -105,11 +101,7 @@ static void printValueTree(FILE* fout,
     Json::ArrayIndex size = value.size();
     for (Json::ArrayIndex index = 0; index < size; ++index) {
       static char buffer[16];
-#if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__)
-      sprintf_s(buffer, sizeof(buffer), "[%u]", index);
-#else
-      snprintf(buffer, sizeof(buffer), "[%u]", index);
-#endif
+      jsoncpp_snprintf(buffer, sizeof(buffer), "[%u]", index);
       printValueTree(fout, value[index], path + buffer);
     }
   } break;
