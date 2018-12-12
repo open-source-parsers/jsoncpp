@@ -27,9 +27,6 @@
 #define isfinite std::isfinite
 #endif
 
-#if !defined(snprintf)
-#define snprintf std::snprintf
-#endif
 #else
 #include <math.h>
 #include <stdio.h>
@@ -46,9 +43,6 @@
 #endif
 
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
-#if !defined(snprintf)
-#define snprintf _snprintf
-#endif
 #endif
 
 #if defined(__sun) && defined(__SVR4) // Solaris
@@ -145,7 +139,7 @@ JSONCPP_STRING valueToString(double value,
 
   JSONCPP_STRING buffer(size_t(36), '\0');
   while (true) {
-    int len = snprintf(
+    int len = jsoncpp_snprintf(
         &*buffer.begin(), buffer.size(),
         (precisionType == PrecisionType::significantDigits) ? "%.*g" : "%.*f",
         precision, value);
