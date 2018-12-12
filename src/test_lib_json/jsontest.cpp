@@ -74,10 +74,10 @@ namespace JsonTest {
 // //////////////////////////////////////////////////////////////////
 
 TestResult::TestResult()
-    : predicateId_(1), lastUsedPredicateId_(0), messageTarget_(0) {
+    : predicateId_(1), lastUsedPredicateId_(0), messageTarget_(nullptr) {
   // The root predicate has id 0
   rootPredicateNode_.id_ = 0;
-  rootPredicateNode_.next_ = 0;
+  rootPredicateNode_.next_ = nullptr;
   predicateStackTail_ = &rootPredicateNode_;
 }
 
@@ -89,7 +89,7 @@ TestResult::addFailure(const char* file, unsigned int line, const char* expr) {
   /// added.
   unsigned int nestingLevel = 0;
   PredicateContext* lastNode = rootPredicateNode_.next_;
-  for (; lastNode != 0; lastNode = lastNode->next_) {
+  for (; lastNode != nullptr; lastNode = lastNode->next_) {
     if (lastNode->id_ > lastUsedPredicateId_) // new PredicateContext
     {
       lastUsedPredicateId_ = lastNode->id_;
@@ -124,17 +124,17 @@ void TestResult::addFailureInfo(const char* file,
 
 TestResult& TestResult::popPredicateContext() {
   PredicateContext* lastNode = &rootPredicateNode_;
-  while (lastNode->next_ != 0 && lastNode->next_->next_ != 0) {
+  while (lastNode->next_ != nullptr && lastNode->next_->next_ != nullptr) {
     lastNode = lastNode->next_;
   }
   // Set message target to popped failure
   PredicateContext* tail = lastNode->next_;
-  if (tail != 0 && tail->failure_ != 0) {
+  if (tail != nullptr && tail->failure_ != nullptr) {
     messageTarget_ = tail->failure_;
   }
   // Remove tail from list
   predicateStackTail_ = lastNode;
-  lastNode->next_ = 0;
+  lastNode->next_ = nullptr;
   return *this;
 }
 
@@ -186,7 +186,7 @@ JSONCPP_STRING TestResult::indentText(const JSONCPP_STRING& text,
 }
 
 TestResult& TestResult::addToLastFailure(const JSONCPP_STRING& message) {
-  if (messageTarget_ != 0) {
+  if (messageTarget_ != nullptr) {
     messageTarget_->message_ += message;
   }
   return *this;
@@ -207,7 +207,7 @@ TestResult& TestResult::operator<<(bool value) {
 // class TestCase
 // //////////////////////////////////////////////////////////////////
 
-TestCase::TestCase() : result_(0) {}
+TestCase::TestCase() : result_(nullptr) {}
 
 TestCase::~TestCase() {}
 

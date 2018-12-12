@@ -69,7 +69,7 @@ public:
 
   /// Adds an assertion failure.
   TestResult&
-  addFailure(const char* file, unsigned int line, const char* expr = 0);
+  addFailure(const char* file, unsigned int line, const char* expr = nullptr);
 
   /// Removes the last PredicateContext added to the predicate stack
   /// chained list.

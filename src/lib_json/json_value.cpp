@@ -108,7 +108,7 @@ static inline char* duplicateStringValue(const char* value, size_t length) {
     length = Value::maxInt - 1;
 
   char* newString = static_cast<char*>(malloc(length + 1));
-  if (newString == NULL) {
+  if (newString == nullptr) {
     throwRuntimeError("in Json::Value::duplicateStringValue(): "
                       "Failed to allocate string value buffer");
   }
@@ -129,7 +129,7 @@ static inline char* duplicateAndPrefixStringValue(const char* value,
                       "length too big for prefixing");
   unsigned actualLength = length + static_cast<unsigned>(sizeof(unsigned)) + 1U;
   char* newString = static_cast<char*>(malloc(actualLength));
-  if (newString == 0) {
+  if (newString == nullptr) {
     throwRuntimeError("in Json::Value::duplicateAndPrefixStringValue(): "
                       "Failed to allocate string value buffer");
   }
@@ -210,7 +210,7 @@ JSONCPP_NORETURN void throwLogicError(JSONCPP_STRING const& msg) {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-Value::CommentInfo::CommentInfo() : comment_(0) {}
+Value::CommentInfo::CommentInfo() : comment_(nullptr) {}
 
 Value::CommentInfo::~CommentInfo() {
   if (comment_)
@@ -220,9 +220,9 @@ Value::CommentInfo::~CommentInfo() {
 void Value::CommentInfo::setComment(const char* text, size_t len) {
   if (comment_) {
     releaseStringValue(comment_, 0u);
-    comment_ = 0;
+    comment_ = nullptr;
   }
-  JSON_ASSERT(text != 0);
+  JSON_ASSERT(text != nullptr);
   JSON_ASSERT_MESSAGE(
       text[0] == '\0' || text[0] == '/',
       "in Json::Value::setComment(): Comments must start with /");
@@ -241,7 +241,7 @@ void Value::CommentInfo::setComment(const char* text, size_t len) {
 // Notes: policy_ indicates if the string was allocated when
 // a string is stored.
 
-Value::CZString::CZString(ArrayIndex index) : cstr_(0), index_(index) {}
+Value::CZString::CZString(ArrayIndex index) : cstr_(nullptr), index_(index) {}
 
 Value::CZString::CZString(char const* str,
                           unsigned length,
@@ -253,7 +253,7 @@ Value::CZString::CZString(char const* str,
 }
 
 Value::CZString::CZString(const CZString& other) {
-  cstr_ = (other.storage_.policy_ != noDuplication && other.cstr_ != 0
+  cstr_ = (other.storage_.policy_ != noDuplication && other.cstr_ != nullptr
                ? duplicateStringValue(other.cstr_, other.storage_.length_)
                : other.cstr_);
   storage_.policy_ =
@@ -413,7 +413,7 @@ Value::Value(double value) {
 
 Value::Value(const char* value) {
   initBasic(stringValue, true);
-  JSON_ASSERT_MESSAGE(value != NULL, "Null Value Passed to Value Constructor");
+  JSON_ASSERT_MESSAGE(value != nullptr, "Null Value Passed to Value Constructor");
   value_.string_ = duplicateAndPrefixStringValue(
       value, static_cast<unsigned>(strlen(value)));
 }
@@ -528,7 +528,7 @@ bool Value::operator<(const Value& other) const {
   case booleanValue:
     return value_.bool_ < other.value_.bool_;
   case stringValue: {
-    if ((value_.string_ == 0) || (other.value_.string_ == 0)) {
+    if ((value_.string_ == nullptr) || (other.value_.string_ == nullptr)) {
       if (other.value_.string_)
         return true;
       else
@@ -590,7 +590,7 @@ bool Value::operator==(const Value& other) const {
   case booleanValue:
     return value_.bool_ == other.value_.bool_;
   case stringValue: {
-    if ((value_.string_ == 0) || (other.value_.string_ == 0)) {
+    if ((value_.string_ == nullptr) || (other.value_.string_ == nullptr)) {
       return (value_.string_ == other.value_.string_);
     }
     unsigned this_len;
@@ -622,8 +622,8 @@ bool Value::operator!=(const Value& other) const { return !(*this == other); }
 const char* Value::asCString() const {
   JSON_ASSERT_MESSAGE(type_ == stringValue,
                       "in Json::Value::asCString(): requires stringValue");
-  if (value_.string_ == 0)
-    return 0;
+  if (value_.string_ == nullptr)
+    return nullptr;
   unsigned this_len;
   char const* this_str;
   decodePrefixedString(this->allocated_, this->value_.string_, &this_len,
@@ -648,7 +648,7 @@ unsigned Value::getCStringLength() const {
 bool Value::getString(char const** begin, char const** end) const {
   if (type_ != stringValue)
     return false;
-  if (value_.string_ == 0)
+  if (value_.string_ == nullptr)
     return false;
   unsigned length;
   decodePrefixedString(this->allocated_, this->value_.string_, &length, begin);
@@ -661,7 +661,7 @@ JSONCPP_STRING Value::asString() const {
   case nullValue:
     return "";
   case stringValue: {
-    if (value_.string_ == 0)
+    if (value_.string_ == nullptr)
       return "";
     unsigned this_len;
     char const* this_str;
@@ -1006,7 +1006,7 @@ const Value& Value::operator[](int index) const {
 void Value::initBasic(ValueType type, bool allocated) {
   type_ = type;
   allocated_ = allocated;
-  comments_ = 0;
+  comments_ = nullptr;
   start_ = 0;
   limit_ = 0;
 }
@@ -1073,7 +1073,7 @@ void Value::dupMeta(const Value& other) {
                                       strlen(otherComment.comment_));
     }
   } else {
-    comments_ = 0;
+    comments_ = nullptr;
   }
   start_ = other.start_;
   limit_ = other.limit_;
@@ -1131,12 +1131,12 @@ Value const* Value::find(char const* begin, char const* end) const {
                       "in Json::Value::find(key, end, found): requires "
                       "objectValue or nullValue");
   if (type_ == nullValue)
-    return NULL;
+    return nullptr;
   CZString actualKey(begin, static_cast<unsigned>(end - begin),
                      CZString::noDuplication);
   ObjectValues::const_iterator it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
-    return NULL;
+    return nullptr;
   return &(*it).second;
 }
 const Value& Value::operator[](const char* key) const {
@@ -1267,7 +1267,7 @@ Value Value::get(const CppTL::ConstString& key,
 
 bool Value::isMember(char const* begin, char const* end) const {
   Value const* value = find(begin, end);
-  return NULL != value;
+  return nullptr != value;
 }
 bool Value::isMember(char const* key) const {
   return isMember(key, key + strlen(key));
@@ -1470,7 +1470,7 @@ void Value::setComment(const JSONCPP_STRING& comment,
 }
 
 bool Value::hasComment(CommentPlacement placement) const {
-  return comments_ != 0 && comments_[placement].comment_ != 0;
+  return comments_ != nullptr && comments_[placement].comment_ != nullptr;
 }
 
 JSONCPP_STRING Value::getComment(CommentPlacement placement) const {

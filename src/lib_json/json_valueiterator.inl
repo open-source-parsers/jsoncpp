@@ -108,8 +108,8 @@ char const* ValueIteratorBase::memberName() const {
 char const* ValueIteratorBase::memberName(char const** end) const {
   const char* cname = (*current_).first.data();
   if (!cname) {
-    *end = NULL;
-    return NULL;
+    *end = nullptr;
+    return nullptr;
   }
   *end = cname + (*current_).first.length();
   return cname;
