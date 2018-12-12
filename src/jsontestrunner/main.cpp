@@ -16,7 +16,7 @@
 #include <algorithm> // sort
 #include <json/json.h>
 #include <sstream>
-#include <stdio.h>
+#include <cstdio>
 
 struct Options {
   JSONCPP_STRING path;

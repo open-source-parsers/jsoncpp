@@ -28,8 +28,8 @@
 #endif
 
 #else
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
 
 #if defined(_MSC_VER)
 #if !defined(isnan)

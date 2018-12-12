@@ -10,7 +10,7 @@
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <cassert>
 #include <cstring>
-#include <math.h>
+#include <cmath>
 #include <sstream>
 #include <utility>
 #ifdef JSON_USE_CPPTL
