@@ -11,7 +11,7 @@
 #include <json/value.h>
 #include <json/writer.h>
 #include <sstream>
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 
 // //////////////////////////////////////////////////////////////////
