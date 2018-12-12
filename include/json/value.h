@@ -792,8 +792,9 @@ public:
   explicit ValueIteratorBase(const Value::ObjectValues::iterator& current);
 };
 
-/** \brief const iterator for object and array value.
+/** \brief const iterator for object and array values.
  *
+ * Used to iterate over the values of an object or an array.
  */
 class JSON_API ValueConstIterator : public ValueIteratorBase {
   friend class Value;
@@ -844,7 +845,9 @@ public:
   pointer operator->() const { return &deref(); }
 };
 
-/** \brief Iterator for object and array value.
+/** \brief Iterator for object and array values.
+ *
+ * Used to iterate over the values of an object or an array.
  */
 class JSON_API ValueIterator : public ValueIteratorBase {
   friend class Value;
