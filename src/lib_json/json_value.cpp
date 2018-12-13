@@ -1145,7 +1145,7 @@ const Value& Value::operator[](const char* key) const {
     return nullSingleton();
   return *found;
 }
-Value const& Value::operator[](JSONCPP_STRING const& key) const {
+Value const& Value::operator[](const JSONCPP_STRING& key) const {
   Value const* found = find(key.data(), key.data() + key.length());
   if (!found)
     return nullSingleton();
