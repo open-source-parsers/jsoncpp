@@ -132,7 +132,7 @@ public:
   bool validate(Json::Value* invalid) const;
   /** A simple way to update a specific setting.
    */
-  Value& operator[](JSONCPP_STRING key);
+  Value& operator[](const JSONCPP_STRING& key);
 
   /** Called by ctor, but you can use this to reset settings_.
    * \pre 'settings' != NULL (but Json::null is fine)

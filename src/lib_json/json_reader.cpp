@@ -1969,7 +1969,7 @@ bool CharReaderBuilder::validate(Json::Value* invalid) const {
   }
   return 0u == inv.size();
 }
-Value& CharReaderBuilder::operator[](JSONCPP_STRING key) {
+Value& CharReaderBuilder::operator[](const JSONCPP_STRING& key) {
   return settings_[key];
 }
 // static
