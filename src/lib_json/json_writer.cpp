@@ -275,7 +275,7 @@ static JSONCPP_STRING toHex16Bit(unsigned int x) {
 }
 
 static JSONCPP_STRING valueToQuotedStringN(const char* value, unsigned length) {
-  if (value == NULL)
+  if (value == nullptr)
     return "";
 
   if (!isAnyCharRequiredQuoting(value, length))
@@ -646,7 +646,7 @@ bool StyledWriter::hasCommentForValue(const Value& value) {
 // //////////////////////////////////////////////////////////////////
 
 StyledStreamWriter::StyledStreamWriter(const JSONCPP_STRING& indentation)
-    : document_(NULL), rightMargin_(74), indentation_(indentation),
+    : document_(nullptr), rightMargin_(74), indentation_(indentation),
       addChildValues_(), indented_(false) {}
 
 void StyledStreamWriter::write(JSONCPP_OSTREAM& out, const Value& root) {
@@ -661,7 +661,7 @@ void StyledStreamWriter::write(JSONCPP_OSTREAM& out, const Value& root) {
   writeValue(root);
   writeCommentAfterValueOnSameLine(root);
   *document_ << "\n";
-  document_ = NULL; // Forget the stream, for safety.
+  document_ = nullptr; // Forget the stream, for safety.
 }
 
 void StyledStreamWriter::writeValue(const Value& value) {
@@ -940,7 +940,7 @@ int BuiltStyledStreamWriter::write(Value const& root, JSONCPP_OSTREAM* sout) {
   writeValue(root);
   writeCommentAfterValueOnSameLine(root);
   *sout_ << endingLineFeedSymbol_;
-  sout_ = NULL;
+  sout_ = nullptr;
   return 0;
 }
 void BuiltStyledStreamWriter::writeValue(Value const& value) {
@@ -1158,7 +1158,7 @@ bool BuiltStyledStreamWriter::hasCommentForValue(const Value& value) {
 ///////////////
 // StreamWriter
 
-StreamWriter::StreamWriter() : sout_(NULL) {}
+StreamWriter::StreamWriter() : sout_(nullptr) {}
 StreamWriter::~StreamWriter() {}
 StreamWriter::Factory::~Factory() {}
 StreamWriterBuilder::StreamWriterBuilder() { setDefaults(&settings_); }

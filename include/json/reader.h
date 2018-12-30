@@ -221,7 +221,7 @@ private:
                                    Location end,
                                    unsigned int& unicode);
   bool
-  addError(const JSONCPP_STRING& message, Token& token, Location extra = 0);
+  addError(const JSONCPP_STRING& message, Token& token, Location extra = nullptr);
   bool recoverFromError(TokenType skipUntilToken);
   bool addErrorAndRecover(const JSONCPP_STRING& message,
                           Token& token,
