@@ -34,7 +34,7 @@
 #endif  //_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
 #endif  //_MSC_VER
 
-#if defined(_MSC_VER) && _MSC_VER >= 1400 // VC++ 8.0
+#if defined(_MSC_VER)
 // Disable warning about strdup being deprecated.
 #pragma warning(disable : 4996)
 #endif

@@ -43,7 +43,7 @@ int JSON_API msvc_pre1900_c99_snprintf(char *outBuf, size_t size, const char *fo
 #endif
 
 // Disable warning C4702 : unreachable code
-#if defined(_MSC_VER) && _MSC_VER >= 1800 // VC++ 12.0 and above
+#if defined(_MSC_VER)
 #pragma warning(disable : 4702)
 #endif
 
