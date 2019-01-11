@@ -262,10 +262,10 @@ TestResult& checkStringEqual(TestResult& result,
     }                                                                          \
                                                                                \
   public: /* overridden from TestCase */                                       \
-    const char* testName() const JSONCPP_OVERRIDE {                            \
+    const char* testName() const override {                                    \
       return #FixtureType "/" #name;                                           \
     }                                                                          \
-    void runTestCase() JSONCPP_OVERRIDE;                                       \
+    void runTestCase() override;                                               \
   };                                                                           \
                                                                                \
   void Test##FixtureType##name::runTestCase()

@@ -880,7 +880,7 @@ struct BuiltStyledStreamWriter : public StreamWriter {
                           bool useSpecialFloats,
                           unsigned int precision,
                           PrecisionType precisionType);
-  int write(Value const& root, JSONCPP_OSTREAM* sout) JSONCPP_OVERRIDE;
+  int write(Value const& root, JSONCPP_OSTREAM* sout) override;
 
 private:
   void writeValue(Value const& value);
