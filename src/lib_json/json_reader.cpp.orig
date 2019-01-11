@@ -19,9 +19,18 @@
 #include <sstream>
 #include <utility>
 
+#if __cplusplus >= 201103L
 #include <cstdio>
+
 #if !defined(sscanf)
 #define sscanf std::sscanf
+#endif
+#else
+#include <cstdio>
+
+#if defined(_MSC_VER)
+#define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
+#endif
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400 // VC++ 8.0
@@ -40,7 +49,15 @@ static size_t const stackLimit_g =
 
 namespace Json {
 
-typedef std::unique_ptr<CharReader> CharReaderPtr;
+#if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
+using CharReaderPtr = std::unique_ptr<CharReader>;
+#else
+<<<<<<< HEAD
+typedef std::auto_ptr<CharReader> CharReaderPtr;
+=======
+using CharReaderPtr = std::auto_ptr<CharReader>;
+>>>>>>> 3ad6dcf8f622f26a5ee40044049bc653d6e7bff2
+#endif
 
 // Implementation of class Features
 // ////////////////////////////////
@@ -894,8 +911,8 @@ OurFeatures OurFeatures::all() { return {}; }
 // exact copy of Reader, renamed to OurReader
 class OurReader {
 public:
-  typedef char Char;
-  typedef const Char* Location;
+  using Char = char;
+  using Location = const Char*;
   struct StructuredError {
     ptrdiff_t offset_start;
     ptrdiff_t offset_limit;
@@ -953,7 +970,7 @@ private:
     Location extra_;
   };
 
-  typedef std::deque<ErrorInfo> Errors;
+  using Errors = std::deque<ErrorInfo>;
 
   bool readToken(Token& token);
   void skipSpaces();
@@ -996,10 +1013,14 @@ private:
   void addComment(Location begin, Location end, CommentPlacement placement);
   void skipCommentTokens(Token& token);
 
+<<<<<<< HEAD
   static JSONCPP_STRING normalizeEOL(Location begin, Location end);
   static bool containsNewLine(Location begin, Location end);
 
   typedef std::stack<Value*> Nodes;
+=======
+  using Nodes = std::stack<Value*>;
+>>>>>>> 3ad6dcf8f622f26a5ee40044049bc653d6e7bff2
   Nodes nodes_;
   Errors errors_;
   JSONCPP_STRING document_;

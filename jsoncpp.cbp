@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="jsoncpp"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\src\;CMake Files\src\lib_json\;CMake Files\src\jsontestrunner\;CMake Files\src\test_lib_json\;CMake Files\pkg-config\;CMake Files\include\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install/strip">
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 install/strip"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install">
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 install"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="list_install_components">
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 list_install_components"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install/local">
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 install/local"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test">
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 test"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="jsoncpp_lib">
+				<Option output="/Users/johnsonhj/src/jsoncpp/src/lib_json/libjsoncpp.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp/src/lib_json"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/johnsonhj/src/jsoncpp/include"/>
+					<Add directory="/Users/johnsonhj/src/jsoncpp/src/lib_json/../../include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/lib_json/Makefile&quot;  VERBOSE=1 jsoncpp_lib"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/lib_json/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/lib_json/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/lib_json/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="jsoncpp_lib/fast">
+				<Option output="/Users/johnsonhj/src/jsoncpp/src/lib_json/libjsoncpp.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp/src/lib_json"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/johnsonhj/src/jsoncpp/include"/>
+					<Add directory="/Users/johnsonhj/src/jsoncpp/src/lib_json/../../include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/lib_json/Makefile&quot;  VERBOSE=1 jsoncpp_lib/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/lib_json/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/lib_json/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/lib_json/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="jsoncpp_check">
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp/src/jsontestrunner"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 jsoncpp_check"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="jsoncpp_readerwriter_tests">
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp/src/jsontestrunner"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 jsoncpp_readerwriter_tests"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="jsontestrunner_exe">
+				<Option output="/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/jsontestrunner_exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp/src/jsontestrunner"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/johnsonhj/src/jsoncpp/include"/>
+					<Add directory="/Users/johnsonhj/src/jsoncpp/src/lib_json/../../include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 jsontestrunner_exe"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="jsontestrunner_exe/fast">
+				<Option output="/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/jsontestrunner_exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp/src/jsontestrunner"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/johnsonhj/src/jsoncpp/include"/>
+					<Add directory="/Users/johnsonhj/src/jsoncpp/src/lib_json/../../include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 jsontestrunner_exe/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="jsoncpp_test">
+				<Option output="/Users/johnsonhj/src/jsoncpp/src/test_lib_json/jsoncpp_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp/src/test_lib_json"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/johnsonhj/src/jsoncpp/include"/>
+					<Add directory="/Users/johnsonhj/src/jsoncpp/src/lib_json/../../include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/test_lib_json/Makefile&quot;  VERBOSE=1 jsoncpp_test"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/test_lib_json/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/test_lib_json/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/test_lib_json/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="jsoncpp_test/fast">
+				<Option output="/Users/johnsonhj/src/jsoncpp/src/test_lib_json/jsoncpp_test" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/johnsonhj/src/jsoncpp/src/test_lib_json"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/johnsonhj/src/jsoncpp/include"/>
+					<Add directory="/Users/johnsonhj/src/jsoncpp/src/lib_json/../../include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/test_lib_json/Makefile&quot;  VERBOSE=1 jsoncpp_test/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/test_lib_json/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/test_lib_json/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/Users/johnsonhj/src/jsoncpp/src/test_lib_json/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/include/json/assertions.h">
+			<Option target="jsoncpp_lib"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/include/json/config.h">
+			<Option target="jsoncpp_lib"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/include/json/features.h">
+			<Option target="jsoncpp_lib"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/include/json/forwards.h">
+			<Option target="jsoncpp_lib"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/include/json/reader.h">
+			<Option target="jsoncpp_lib"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/include/json/value.h">
+			<Option target="jsoncpp_lib"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/include/json/version.h">
+			<Option target="jsoncpp_lib"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/include/json/writer.h">
+			<Option target="jsoncpp_lib"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/main.cpp">
+			<Option target="jsontestrunner_exe"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/src/lib_json/json_reader.cpp">
+			<Option target="jsoncpp_lib"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/src/lib_json/json_tool.h">
+			<Option target="jsoncpp_lib"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/src/lib_json/json_value.cpp">
+			<Option target="jsoncpp_lib"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/src/lib_json/json_valueiterator.inl">
+			<Option target="jsoncpp_lib"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/src/lib_json/json_writer.cpp">
+			<Option target="jsoncpp_lib"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/src/lib_json/version.h.in">
+			<Option target="jsoncpp_lib"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/src/test_lib_json/jsontest.cpp">
+			<Option target="jsoncpp_test"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/src/test_lib_json/jsontest.h">
+			<Option target="jsoncpp_test"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/src/test_lib_json/main.cpp">
+			<Option target="jsoncpp_test"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/version.in">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/src/lib_json/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\lib_json\"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/src/lib_json/version.h.in">
+			<Option virtualFolder="CMake Files\src\lib_json\"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\jsontestrunner\"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/src/test_lib_json/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\test_lib_json\"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/pkg-config/jsoncpp.pc.in">
+			<Option virtualFolder="CMake Files\pkg-config\"/>
+		</Unit>
+		<Unit filename="/Users/johnsonhj/src/jsoncpp/include/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\include\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,32 @@
+[
+{
+  "directory": "/Users/johnsonhj/src/jsoncpp/src/lib_json",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -I/Users/johnsonhj/src/jsoncpp/include -I/Users/johnsonhj/src/jsoncpp/src/lib_json/../../include   -Wall -Wconversion -Wshadow -Werror=conversion -Werror=sign-compare -g -fPIC   -std=c++11 -o CMakeFiles/jsoncpp_lib.dir/json_reader.cpp.o -c /Users/johnsonhj/src/jsoncpp/src/lib_json/json_reader.cpp",
+  "file": "/Users/johnsonhj/src/jsoncpp/src/lib_json/json_reader.cpp"
+},
+{
+  "directory": "/Users/johnsonhj/src/jsoncpp/src/lib_json",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -I/Users/johnsonhj/src/jsoncpp/include -I/Users/johnsonhj/src/jsoncpp/src/lib_json/../../include   -Wall -Wconversion -Wshadow -Werror=conversion -Werror=sign-compare -g -fPIC   -std=c++11 -o CMakeFiles/jsoncpp_lib.dir/json_value.cpp.o -c /Users/johnsonhj/src/jsoncpp/src/lib_json/json_value.cpp",
+  "file": "/Users/johnsonhj/src/jsoncpp/src/lib_json/json_value.cpp"
+},
+{
+  "directory": "/Users/johnsonhj/src/jsoncpp/src/lib_json",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -I/Users/johnsonhj/src/jsoncpp/include -I/Users/johnsonhj/src/jsoncpp/src/lib_json/../../include   -Wall -Wconversion -Wshadow -Werror=conversion -Werror=sign-compare -g -fPIC   -std=c++11 -o CMakeFiles/jsoncpp_lib.dir/json_writer.cpp.o -c /Users/johnsonhj/src/jsoncpp/src/lib_json/json_writer.cpp",
+  "file": "/Users/johnsonhj/src/jsoncpp/src/lib_json/json_writer.cpp"
+},
+{
+  "directory": "/Users/johnsonhj/src/jsoncpp/src/jsontestrunner",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -I/Users/johnsonhj/src/jsoncpp/include -I/Users/johnsonhj/src/jsoncpp/src/lib_json/../../include   -Wall -Wconversion -Wshadow -Werror=conversion -Werror=sign-compare -g   -std=c++11 -o CMakeFiles/jsontestrunner_exe.dir/main.cpp.o -c /Users/johnsonhj/src/jsoncpp/src/jsontestrunner/main.cpp",
+  "file": "/Users/johnsonhj/src/jsoncpp/src/jsontestrunner/main.cpp"
+},
+{
+  "directory": "/Users/johnsonhj/src/jsoncpp/src/test_lib_json",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -I/Users/johnsonhj/src/jsoncpp/include -I/Users/johnsonhj/src/jsoncpp/src/lib_json/../../include   -Wall -Wconversion -Wshadow -Werror=conversion -Werror=sign-compare -g   -std=c++11 -o CMakeFiles/jsoncpp_test.dir/jsontest.cpp.o -c /Users/johnsonhj/src/jsoncpp/src/test_lib_json/jsontest.cpp",
+  "file": "/Users/johnsonhj/src/jsoncpp/src/test_lib_json/jsontest.cpp"
+},
+{
+  "directory": "/Users/johnsonhj/src/jsoncpp/src/test_lib_json",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -I/Users/johnsonhj/src/jsoncpp/include -I/Users/johnsonhj/src/jsoncpp/src/lib_json/../../include   -Wall -Wconversion -Wshadow -Werror=conversion -Werror=sign-compare -g   -std=c++11 -o CMakeFiles/jsoncpp_test.dir/main.cpp.o -c /Users/johnsonhj/src/jsoncpp/src/test_lib_json/main.cpp",
+  "file": "/Users/johnsonhj/src/jsoncpp/src/test_lib_json/main.cpp"
+}
+]

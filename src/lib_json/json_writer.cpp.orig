@@ -15,6 +15,7 @@
 #include <sstream>
 #include <utility>
 
+#if __cplusplus >= 201103L
 #include <cmath>
 #include <cstdio>
 
@@ -24,6 +25,16 @@
 
 #if !defined(isfinite)
 #define isfinite std::isfinite
+#endif
+
+#else
+#include <cmath>
+#include <cstdio>
+
+#if defined(_MSC_VER)
+#if !defined(isnan)
+#include <float.h>
+#define isnan _isnan
 #endif
 
 #if !defined(isfinite)
@@ -69,7 +80,11 @@
 
 namespace Json {
 
+#if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
 typedef std::unique_ptr<StreamWriter> StreamWriterPtr;
+#else
+typedef std::auto_ptr<StreamWriter> StreamWriterPtr;
+#endif
 
 JSONCPP_STRING valueToString(LargestInt value) {
   UIntToStringBuffer buffer;
@@ -115,6 +130,7 @@ JSONCPP_STRING valueToString(double value,
   // Print into the buffer. We need not request the alternative representation
   // that always has a decimal point because JSON doesn't distinguish the
   // concepts of reals and integers.
+<<<<<<< HEAD
   if (!isfinite(value)) {
     static const char* const reps[2][3] = { { "NaN", "-Infinity", "Infinity" },
                                             { "null", "-1e+9999", "1e+9999" } };
@@ -133,6 +149,21 @@ JSONCPP_STRING valueToString(double value,
     if (wouldPrint >= buffer.size()) {
       buffer.resize(wouldPrint + 1);
       continue;
+=======
+  if (isfinite(value)) {
+    len = snprintf(buffer, sizeof(buffer), formatString, value);
+    if (len == 1) {
+      len = snprintf(buffer, sizeof(buffer), "%.1f", value);
+    }
+  } else {
+    // IEEE standard states that NaN values will not compare to themselves
+    if (value != value) {
+      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "NaN" : "null");
+    } else if (value < 0) {
+      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "-Infinity" : "-1e+9999");
+    } else {
+      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "Infinity" : "1e+9999");
+>>>>>>> ya1gaurav-patch-31
     }
     buffer.resize(wouldPrint);
     break;
