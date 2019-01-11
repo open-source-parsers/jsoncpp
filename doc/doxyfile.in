@@ -1944,7 +1944,7 @@ INCLUDE_FILE_PATTERNS  = *.h
 # recursively expanded use the := operator instead of the = operator.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
-PREDEFINED             = "_MSC_VER=1400" \
+PREDEFINED             = "_MSC_VER=1800" \
                          _CPPRTTI \
                          _WIN32 \
                          JSONCPP_DOC_EXCLUDE_IMPLEMENTATION

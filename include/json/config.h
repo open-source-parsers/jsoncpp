@@ -54,6 +54,10 @@
 #define JSON_API
 #endif
 
+#if defined(_MSC_VER) && _MSC_VER < 1800
+  #error "ERROR:  Visual Studio 12 (2013) with _MSC_VER=1800 is the oldest supported compiler with sufficient C++11 capabilities"
+#endif
+
 #if defined(_MSC_VER) && _MSC_VER < 1900
 // As recommended at https://stackoverflow.com/questions/2915672/snprintf-and-visual-studio-2010
    extern JSON_API int msvc_pre1900_c99_snprintf(char *outBuf, size_t size, const char *format, ...);
@@ -68,22 +72,7 @@
 // #define JSON_NO_INT64 1
 
 #if defined(_MSC_VER) // MSVC
-#if _MSC_VER <= 1200  // MSVC 6
-// Microsoft Visual Studio 6 only support conversion from __int64 to double
-// (no conversion from unsigned __int64).
-#define JSON_USE_INT64_DOUBLE_CONVERSION 1
-// Disable warning 4786 for VS6 caused by STL (identifier was truncated to '255'
-// characters in the debug information)
-// All projects I've ever seen with VS6 were using this globally (not bothering
-// with pragma push/pop).
-#pragma warning(disable : 4786)
-#endif // MSVC 6
-
-#if _MSC_VER >= 1500 // MSVC 2008
-                     /// Indicates that the following function is deprecated.
 #define JSONCPP_DEPRECATED(message) __declspec(deprecated(message))
-#endif
-
 #endif // defined(_MSC_VER)
 
 // In c++11 the override keyword allows you to explicitly define that a function
@@ -93,13 +82,9 @@
 #if __cplusplus >= 201103L
 #define JSONCPP_NOEXCEPT noexcept
 #define JSONCPP_OP_EXPLICIT explicit
-#elif defined(_MSC_VER) && _MSC_VER > 1600 && _MSC_VER < 1900
+#elif defined(_MSC_VER) && _MSC_VER < 1900
 #define JSONCPP_NOEXCEPT throw()
-#if _MSC_VER >= 1800 // MSVC 2013
 #define JSONCPP_OP_EXPLICIT explicit
-#else
-#define JSONCPP_OP_EXPLICIT
-#endif
 #elif defined(_MSC_VER) && _MSC_VER >= 1900
 #define JSONCPP_NOEXCEPT noexcept
 #define JSONCPP_OP_EXPLICIT explicit
@@ -110,9 +95,9 @@
 
 #ifndef JSON_HAS_RVALUE_REFERENCES
 
-#if defined(_MSC_VER) && _MSC_VER >= 1600 // MSVC >= 2010
+#if defined(_MSC_VER)
 #define JSON_HAS_RVALUE_REFERENCES 1
-#endif // MSVC >= 2010
+#endif // MSVC >= 2013
 
 #ifdef __clang__
 #if __has_feature(cxx_rvalue_references)
