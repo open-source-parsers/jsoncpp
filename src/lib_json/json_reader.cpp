@@ -1906,7 +1906,7 @@ public:
   bool parse(char const* beginDoc,
              char const* endDoc,
              Value* root,
-             JSONCPP_STRING* errs) JSONCPP_OVERRIDE {
+             JSONCPP_STRING* errs) override {
     bool ok = reader_.parse(beginDoc, endDoc, *root, collectComments_);
     if (errs) {
       *errs = reader_.getFormattedErrorMessages();
