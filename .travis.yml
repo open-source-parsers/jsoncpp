@@ -5,12 +5,12 @@
 # See also
 # http://stackoverflow.com/questions/22111549/travis-ci-with-clang-3-4-and-c11/30925448#30925448
 # to allow C++11, though we are not yet building with -std=c++11
-
-before_install:
-- source travis.before_install.${TRAVIS_OS_NAME}.sh
-install:
-- source travis.install.${TRAVIS_OS_NAME}.sh
+language: cpp
+sudo: false
 addons:
+  homebrew:
+    packages: meson ninja
+    update: false # do not update homebrew by default
   apt:
     sources:
     #- ubuntu-toolchain-r-test
@@ -20,16 +20,16 @@ addons:
     #- g++-4.9
     - clang-3.5
     - valgrind
-language: cpp
-script: ./travis.sh
 matrix:
   allow_failures:
     - os: osx
-matrix:
   include:
     - os: osx
       osx_image: xcode9.4
       compiler: clang
+      addons:
+         homebrew:
+         packages: meson ninja
       #env: PYENV_ROOT=/usr/local/var/pyenv
       env: LIB_TYPE=static BUILD_TYPE=release HOMEBREW_LOGS=~/homebrew-logs HOMEBREW_TEMP=~/homebrew-temp
       #- LIB_TYPE=shared BUILD_TYPE=debug
@@ -39,4 +39,9 @@ matrix:
       env: LIB_TYPE=static BUILD_TYPE=release
 notifications:
   email: false
-sudo: false
+
+before_install:
+- source ./travis.before_install.${TRAVIS_OS_NAME}.sh
+install:
+- source ./travis.install.${TRAVIS_OS_NAME}.sh
+script: ./travis.sh

@@ -17,6 +17,9 @@ set -vex
 
 env | sort
 
+which python3
+which meson
+which ninja
 echo ${CXX}
 ${CXX} --version
 python3 --version
