@@ -9,7 +9,9 @@ language: cpp
 sudo: false
 addons:
   homebrew:
-    packages: meson ninja
+    packages:
+    - meson
+    - ninja
     update: false # do not update homebrew by default
   apt:
     sources:
@@ -27,12 +29,7 @@ matrix:
     - os: osx
       osx_image: xcode9.4
       compiler: clang
-      addons:
-         homebrew:
-         packages: meson ninja
-      #env: PYENV_ROOT=/usr/local/var/pyenv
-      env: LIB_TYPE=static BUILD_TYPE=release HOMEBREW_LOGS=~/homebrew-logs HOMEBREW_TEMP=~/homebrew-temp
-      #- LIB_TYPE=shared BUILD_TYPE=debug
+      env: LIB_TYPE=static BUILD_TYPE=release
     - os: linux
       dist: trusty
       compiler: clang
@@ -41,7 +38,7 @@ notifications:
   email: false
 
 before_install:
-- source ./travis.before_install.${TRAVIS_OS_NAME}.sh
+- source ./.travis_scripts/travis.before_install.${TRAVIS_OS_NAME}.sh
 install:
-- source ./travis.install.${TRAVIS_OS_NAME}.sh
-script: ./travis.sh
+- source ./.travis_scripts/travis.install.${TRAVIS_OS_NAME}.sh
+script: ./.travis_scripts/travis.sh
