@@ -26,19 +26,52 @@ matrix:
   allow_failures:
     - os: osx
   include:
-    - os: osx
+    - name: Mac clang meson static release testing
+      os: osx
       osx_image: xcode9.4
       compiler: clang
-      env: LIB_TYPE=static BUILD_TYPE=release
-    - os: linux
+      env: 
+         CXX="clang++-3.5" 
+         CC="clang-3.5"
+         LIB_TYPE=static
+         BUILD_TYPE=release
+      script: ./.travis_scripts/meson_builder.sh
+    - name: trusty clang meson static release testing
+      os: linux
       dist: trusty
       compiler: clang
-      env: LIB_TYPE=static BUILD_TYPE=release
+      env: 
+         CXX="clang++-3.5" 
+         CC="clang-3.5"
+         LIB_TYPE=static
+         BUILD_TYPE=release
+      # before_install and install steps only needed for linux meson builds
+      before_install:
+          - source ./.travis_scripts/travis.before_install.${TRAVIS_OS_NAME}.sh
+      install:
+           - source ./.travis_scripts/travis.install.${TRAVIS_OS_NAME}.sh
+      script: ./.travis_scripts/meson_builder.sh
+    - name: xenial gcc cmake coverage
+      os: linux
+      dist: xenial
+      compiler: gcc
+      env: 
+        CXX=g++
+        CC=gcc
+        DO_Coverage=ON
+        BUILD_TOOL="Unix Makefiles"
+        BUILD_TYPE=Debug 
+        LIB_TYPE=shared 
+        DESTDIR=/tmp/cmake_json_cpp
+      script: ./.travis_scripts/cmake_builder.sh
+#   Valgrind has too many false positives from the python wrapping.  Need a good suppression file
+#    - name: xenial gcc cmake coverage
+#      os: linux
+#      dist: xenial
+#      compiler: gcc
+#      env: DO_MemCheck=ON CXX=/usr/bin/g++  BUILD_TOOL="Unix Makefiles" BUILD_TYPE=Debug LIB_TYPE=shared DESTDIR=/tmp/cmake_json_cpp
+#      script: ./.travis_scripts/cmake_builder.sh
 notifications:
   email: false
 
-before_install:
-- source ./.travis_scripts/travis.before_install.${TRAVIS_OS_NAME}.sh
-install:
-- source ./.travis_scripts/travis.install.${TRAVIS_OS_NAME}.sh
-script: ./.travis_scripts/travis.sh
+

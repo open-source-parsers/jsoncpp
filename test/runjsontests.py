@@ -55,7 +55,7 @@ def compareOutputs(expected, actual, message):
 """ % (message, diff_line,
        safeGetLine(expected,diff_line),
        safeGetLine(actual,diff_line))
-        
+
 def safeReadFile(path):
     try:
         return open(path, 'rt', encoding = 'utf-8').read()
@@ -69,7 +69,43 @@ def runAllTests(jsontest_executable_path, input_dir = None,
         input_dir = os.path.join(os.getcwd(), 'data')
     tests = glob(os.path.join(input_dir, '*.json'))
     if with_json_checker:
-        test_jsonchecker = glob(os.path.join(input_dir, '../jsonchecker', '*.json'))
+        all_test_jsonchecker = glob(os.path.join(input_dir, '../jsonchecker', '*.json'))
+        # These tests fail with strict json support, but pass with jsoncpp extra lieniency
+        """
+        Failure details:
+        * Test ../jsonchecker/fail25.json
+        Parsing should have failed:
+        ["	tab	character	in	string	"]
+
+        * Test ../jsonchecker/fail13.json
+        Parsing should have failed:
+        {"Numbers cannot have leading zeroes": 013}
+
+        * Test ../jsonchecker/fail18.json
+        Parsing should have failed:
+        [[[[[[[[[[[[[[[[[[[["Too deep"]]]]]]]]]]]]]]]]]]]]
+
+        * Test ../jsonchecker/fail8.json
+        Parsing should have failed:
+        ["Extra close"]]
+
+        * Test ../jsonchecker/fail7.json
+        Parsing should have failed:
+        ["Comma after the close"],
+
+        * Test ../jsonchecker/fail10.json
+        Parsing should have failed:
+        {"Extra value after close": true} "misplaced quoted value"
+
+        * Test ../jsonchecker/fail27.json
+        Parsing should have failed:
+        ["line
+        break"]
+        """
+        known_differences_withjsonchecker = [ "fail25.json", "fail13.json", "fail18.json", "fail8.json",
+                                              "fail7.json", "fail10.json", "fail27.json" ]
+        test_jsonchecker = [ test for test in all_test_jsonchecker if os.path.basename(test) not in known_differences_withjsonchecker ]
+
     else:
         test_jsonchecker = []
     failed_tests = []

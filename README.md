@@ -31,7 +31,11 @@ format to store user input files.
 ## Contributing to JsonCpp
 
 ### Building and testing with Meson/Ninja
-Thanks to David Seifert (@SoapGentoo), we (the maintainers) now use [meson](http://mesonbuild.com/) and [ninja](https://ninja-build.org/) to build for debugging, as well as for continuous integration (see [`travis.sh`](travis.sh) ). Other systems may work, but minor things like version strings might break.
+Thanks to David Seifert (@SoapGentoo), we (the maintainers) now use
+[meson](http://mesonbuild.com/) and [ninja](https://ninja-build.org/) to build
+for debugging, as well as for continuous integration (see
+[`./travis_scripts/meson_builder.sh`](./travis_scripts/meson_builder.sh) ). Other systems may work, but minor
+things like version strings might break.
 
 First, install both meson (which requires Python3) and ninja.
 If you wish to install to a directory other than /usr/local, set an environment variable called DESTDIR with the desired path:

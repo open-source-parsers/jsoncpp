@@ -70,8 +70,6 @@ set( JSONCPP_VERSION ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP
 message(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
 set( JSONCPP_SOVERSION 19 )
 
-enable_testing()
-
 option(JSONCPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executables" ON)
 option(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)
 option(JSONCPP_WITH_WARNING_AS_ERROR "Force compilation to fail if a warning occurs" OFF)
@@ -175,8 +173,14 @@ if(JSONCPP_WITH_CMAKE_PACKAGE)
                 FILE        jsoncppConfig.cmake)
 endif()
 
+if(JSONCPP_WITH_TESTS)
+  enable_testing()
+  include(CTest)
+endif()
+
 # Build the different applications
 add_subdirectory( src )
 
 #install the includes
 add_subdirectory( include )
+
