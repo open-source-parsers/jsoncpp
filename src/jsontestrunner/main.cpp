@@ -110,9 +110,7 @@ static void printValueTree(FILE* fout,
     Json::Value::Members members(value.getMemberNames());
     std::sort(members.begin(), members.end());
     JSONCPP_STRING suffix = *(path.end() - 1) == '.' ? "" : ".";
-    for (Json::Value::Members::iterator it = members.begin();
-         it != members.end(); ++it) {
-      const JSONCPP_STRING name = *it;
+    for (auto name : members) {
       printValueTree(fout, value[name], path + suffix + name);
     }
   } break;
