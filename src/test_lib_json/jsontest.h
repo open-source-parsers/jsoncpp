@@ -162,8 +162,8 @@ public:
   static void printUsage(const char* appName);
 
 private: // prevents copy construction and assignment
-  Runner(const Runner& other);
-  Runner& operator=(const Runner& other);
+  Runner(const Runner& other) = delete;
+  Runner& operator=(const Runner& other) = delete;
 
 private:
   void listTests() const;
