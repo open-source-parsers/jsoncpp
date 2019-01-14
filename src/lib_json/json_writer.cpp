@@ -147,7 +147,7 @@ JSONCPP_STRING valueToString(double value,
         (precisionType == PrecisionType::significantDigits) ? "%.*g" : "%.*f",
         precision, value);
     assert(len >= 0);
-    size_t wouldPrint = static_cast<size_t>(len);
+    auto wouldPrint = static_cast<size_t>(len);
     if (wouldPrint >= buffer.size()) {
       buffer.resize(wouldPrint + 1);
       continue;
@@ -409,7 +409,7 @@ void FastWriter::writeValue(const Value& value) {
   case objectValue: {
     Value::Members members(value.getMemberNames());
     document_ += '{';
-    for (Value::Members::iterator it = members.begin(); it != members.end();
+    for (auto it = members.begin(); it != members.end();
          ++it) {
       const JSONCPP_STRING& name = *it;
       if (it != members.begin())
@@ -479,7 +479,7 @@ void StyledWriter::writeValue(const Value& value) {
     else {
       writeWithIndent("{");
       indent();
-      Value::Members::iterator it = members.begin();
+      auto it = members.begin();
       for (;;) {
         const JSONCPP_STRING& name = *it;
         const Value& childValue = value[name];
@@ -699,7 +699,7 @@ void StyledStreamWriter::writeValue(const Value& value) {
     else {
       writeWithIndent("{");
       indent();
-      Value::Members::iterator it = members.begin();
+      auto it = members.begin();
       for (;;) {
         const JSONCPP_STRING& name = *it;
         const Value& childValue = value[name];
@@ -979,7 +979,7 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
     else {
       writeWithIndent("{");
       indent();
-      Value::Members::iterator it = members.begin();
+      auto it = members.begin();
       for (;;) {
         JSONCPP_STRING const& name = *it;
         Value const& childValue = value[name];

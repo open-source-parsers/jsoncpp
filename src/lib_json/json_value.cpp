@@ -990,7 +990,7 @@ Value& Value::operator[](ArrayIndex index) {
   if (type_ == nullValue)
     *this = Value(arrayValue);
   CZString key(index);
-  ObjectValues::iterator it = value_.map_->lower_bound(key);
+  auto it = value_.map_->lower_bound(key);
   if (it != value_.map_->end() && (*it).first == key)
     return (*it).second;
 
@@ -1113,7 +1113,7 @@ Value& Value::resolveReference(const char* key) {
     *this = Value(objectValue);
   CZString actualKey(key, static_cast<unsigned>(strlen(key)),
                      CZString::noDuplication); // NOTE!
-  ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
+  auto it = value_.map_->lower_bound(actualKey);
   if (it != value_.map_->end() && (*it).first == actualKey)
     return (*it).second;
 
@@ -1132,7 +1132,7 @@ Value& Value::resolveReference(char const* key, char const* end) {
     *this = Value(objectValue);
   CZString actualKey(key, static_cast<unsigned>(end - key),
                      CZString::duplicateOnCopy);
-  ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
+  auto it = value_.map_->lower_bound(actualKey);
   if (it != value_.map_->end() && (*it).first == actualKey)
     return (*it).second;
 
@@ -1226,7 +1226,7 @@ bool Value::removeMember(const char* begin, const char* end, Value* removed) {
   }
   CZString actualKey(begin, static_cast<unsigned>(end - begin),
                      CZString::noDuplication);
-  ObjectValues::iterator it = value_.map_->find(actualKey);
+  auto it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
     return false;
   if (removed)
@@ -1262,7 +1262,7 @@ bool Value::removeIndex(ArrayIndex index, Value* removed) {
     return false;
   }
   CZString key(index);
-  ObjectValues::iterator it = value_.map_->find(key);
+  auto it = value_.map_->find(key);
   if (it == value_.map_->end()) {
     return false;
   }
@@ -1276,7 +1276,7 @@ bool Value::removeIndex(ArrayIndex index, Value* removed) {
   }
   // erase the last one ("leftover")
   CZString keyLast(oldSize - 1);
-  ObjectValues::iterator itLast = value_.map_->find(keyLast);
+  auto itLast = value_.map_->find(keyLast);
   value_.map_->erase(itLast);
   return true;
 }
@@ -1608,7 +1608,7 @@ Path::Path(const JSONCPP_STRING& path,
 void Path::makePath(const JSONCPP_STRING& path, const InArgs& in) {
   const char* current = path.c_str();
   const char* end = current + path.length();
-  InArgs::const_iterator itInArg = in.begin();
+  auto itInArg = in.begin();
   while (current != end) {
     if (*current == '[') {
       ++current;
