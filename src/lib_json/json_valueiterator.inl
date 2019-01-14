@@ -123,7 +123,7 @@ char const* ValueIteratorBase::memberName(char const** end) const {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-ValueConstIterator::ValueConstIterator() {}
+ValueConstIterator::ValueConstIterator() = default;
 
 ValueConstIterator::ValueConstIterator(
     const Value::ObjectValues::iterator& current)
@@ -146,7 +146,7 @@ operator=(const ValueIteratorBase& other) {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-ValueIterator::ValueIterator() {}
+ValueIterator::ValueIterator() = default;
 
 ValueIterator::ValueIterator(const Value::ObjectValues::iterator& current)
     : ValueIteratorBase(current) {}
@@ -157,7 +157,7 @@ ValueIterator::ValueIterator(const ValueConstIterator& other)
 }
 
 ValueIterator::ValueIterator(const ValueIterator& other)
-    : ValueIteratorBase(other) {}
+     = default;
 
 ValueIterator& ValueIterator::operator=(const SelfType& other) {
   copy(other);

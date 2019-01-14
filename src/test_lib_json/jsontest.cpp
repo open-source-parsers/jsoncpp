@@ -205,9 +205,9 @@ TestResult& TestResult::operator<<(bool value) {
 // class TestCase
 // //////////////////////////////////////////////////////////////////
 
-TestCase::TestCase()  {}
+TestCase::TestCase()  = default;
 
-TestCase::~TestCase() {}
+TestCase::~TestCase() = default;
 
 void TestCase::run(TestResult& result) {
   result_ = &result;
@@ -217,7 +217,7 @@ void TestCase::run(TestResult& result) {
 // class Runner
 // //////////////////////////////////////////////////////////////////
 
-Runner::Runner() {}
+Runner::Runner() = default;
 
 Runner& Runner::add(TestCaseFactory factory) {
   tests_.push_back(factory);
