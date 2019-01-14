@@ -233,7 +233,7 @@ JSONCPP_NORETURN void throwLogicError(JSONCPP_STRING const& msg) {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-Value::CommentInfo::CommentInfo()  {}
+Value::CommentInfo::CommentInfo()  = default;
 
 Value::CommentInfo::~CommentInfo() {
   if (comment_)

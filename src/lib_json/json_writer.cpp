@@ -346,14 +346,14 @@ JSONCPP_STRING valueToQuotedString(const char* value) {
 
 // Class Writer
 // //////////////////////////////////////////////////////////////////
-Writer::~Writer() {}
+Writer::~Writer() = default;
 
 // Class FastWriter
 // //////////////////////////////////////////////////////////////////
 
 FastWriter::FastWriter()
     
-      {}
+      = default;
 
 void FastWriter::enableYAMLCompatibility() { yamlCompatibilityEnabled_ = true; }
 
@@ -428,7 +428,7 @@ void FastWriter::writeValue(const Value& value) {
 // //////////////////////////////////////////////////////////////////
 
 StyledWriter::StyledWriter()
-     {}
+     = default;
 
 JSONCPP_STRING StyledWriter::write(const Value& root) {
   document_.clear();
@@ -1156,10 +1156,10 @@ bool BuiltStyledStreamWriter::hasCommentForValue(const Value& value) {
 // StreamWriter
 
 StreamWriter::StreamWriter() : sout_(nullptr) {}
-StreamWriter::~StreamWriter() {}
-StreamWriter::Factory::~Factory() {}
+StreamWriter::~StreamWriter() = default;
+StreamWriter::Factory::~Factory() = default;
 StreamWriterBuilder::StreamWriterBuilder() { setDefaults(&settings_); }
-StreamWriterBuilder::~StreamWriterBuilder() {}
+StreamWriterBuilder::~StreamWriterBuilder() = default;
 StreamWriter* StreamWriterBuilder::newStreamWriter() const {
   JSONCPP_STRING indentation = settings_["indentation"].asString();
   JSONCPP_STRING cs_str = settings_["commentStyle"].asString();
