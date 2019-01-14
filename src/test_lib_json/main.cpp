@@ -2365,8 +2365,7 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
     { __LINE__, false, "{\"a\":.Infinity}" }, { __LINE__, false, "{\"a\":_Infinity}" },
     { __LINE__, false, "{\"a\":_nfinity}" },  { __LINE__, true, "{\"a\":-Infinity}" }
   };
-  for (size_t tdi = 0; tdi < sizeof(test_data) / sizeof(*test_data); ++tdi) {
-    const TestData& td = test_data[tdi];
+  for (const auto& td : test_data) {
     bool ok = reader->parse(&*td.in.begin(), &*td.in.begin() + td.in.size(),
                             &root, &errs);
     JSONTEST_ASSERT(td.ok == ok) << "line:" << td.line << "\n"

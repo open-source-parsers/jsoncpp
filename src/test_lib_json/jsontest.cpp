@@ -150,9 +150,7 @@ void TestResult::printFailure(bool printTestName) const {
   }
 
   // Print in reverse to display the callstack in the right order
-  Failures::const_iterator itEnd = failures_.end();
-  for (Failures::const_iterator it = failures_.begin(); it != itEnd; ++it) {
-    const Failure& failure = *it;
+  for (const auto & failure : failures_ ) {
     JSONCPP_STRING indent(failure.nestingLevel_ * 2, ' ');
     if (failure.file_) {
       printf("%s%s(%u): ", indent.c_str(), failure.file_, failure.line_);
@@ -275,8 +273,7 @@ bool Runner::runAllTest(bool printSummary) const {
     }
     return true;
   } else {
-    for (unsigned int index = 0; index < failures.size(); ++index) {
-      TestResult& result = failures[index];
+    for (auto & result : failures) {
       result.printFailure(count > 1);
     }
 
