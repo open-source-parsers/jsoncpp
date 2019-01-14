@@ -551,7 +551,7 @@ bool StyledWriter::isMultilineArray(const Value& value) {
   for (ArrayIndex index = 0; index < size && !isMultiLine; ++index) {
     const Value& childValue = value[index];
     isMultiLine = ((childValue.isArray() || childValue.isObject()) &&
-                   childValue.size() > 0);
+                   !childValue.empty());
   }
   if (!isMultiLine) // check if line length > max line length
   {
@@ -774,7 +774,7 @@ bool StyledStreamWriter::isMultilineArray(const Value& value) {
   for (ArrayIndex index = 0; index < size && !isMultiLine; ++index) {
     const Value& childValue = value[index];
     isMultiLine = ((childValue.isArray() || childValue.isObject()) &&
-                   childValue.size() > 0);
+                   !childValue.empty());
   }
   if (!isMultiLine) // check if line length > max line length
   {
@@ -1059,7 +1059,7 @@ bool BuiltStyledStreamWriter::isMultilineArray(Value const& value) {
   for (ArrayIndex index = 0; index < size && !isMultiLine; ++index) {
     Value const& childValue = value[index];
     isMultiLine = ((childValue.isArray() || childValue.isObject()) &&
-                   childValue.size() > 0);
+                   !childValue.empty());
   }
   if (!isMultiLine) // check if line length > max line length
   {
@@ -1226,7 +1226,7 @@ bool StreamWriterBuilder::validate(Json::Value* invalid) const {
       inv[key] = settings_[key];
     }
   }
-  return 0u == inv.size();
+  return inv.empty();
 }
 Value& StreamWriterBuilder::operator[](const JSONCPP_STRING& key) {
   return settings_[key];

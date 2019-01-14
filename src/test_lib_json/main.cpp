@@ -1818,7 +1818,7 @@ JSONTEST_FIXTURE(StreamWriterTest, dropNullPlaceholders) {
   b.settings_["dropNullPlaceholders"] = false;
   JSONTEST_ASSERT(Json::writeString(b, nullValue) == "null");
   b.settings_["dropNullPlaceholders"] = true;
-  JSONTEST_ASSERT(Json::writeString(b, nullValue) == "");
+  JSONTEST_ASSERT(Json::writeString(b, nullValue).empty());
 }
 
 JSONTEST_FIXTURE(StreamWriterTest, writeZeroes) {
@@ -1850,8 +1850,8 @@ JSONTEST_FIXTURE(ReaderTest, parseWithNoErrors) {
   Json::Value root;
   bool ok = reader.parse("{ \"property\" : \"value\" }", root);
   JSONTEST_ASSERT(ok);
-  JSONTEST_ASSERT(reader.getFormattedErrorMessages().size() == 0);
-  JSONTEST_ASSERT(reader.getStructuredErrors().size() == 0);
+  JSONTEST_ASSERT(reader.getFormattedErrorMessages().empty());
+  JSONTEST_ASSERT(reader.getStructuredErrors().empty());
 }
 
 JSONTEST_FIXTURE(ReaderTest, parseWithNoErrorsTestingOffsets) {
@@ -1862,8 +1862,8 @@ JSONTEST_FIXTURE(ReaderTest, parseWithNoErrorsTestingOffsets) {
                          "null, \"false\" : false }",
                          root);
   JSONTEST_ASSERT(ok);
-  JSONTEST_ASSERT(reader.getFormattedErrorMessages().size() == 0);
-  JSONTEST_ASSERT(reader.getStructuredErrors().size() == 0);
+  JSONTEST_ASSERT(reader.getFormattedErrorMessages().empty());
+  JSONTEST_ASSERT(reader.getStructuredErrors().empty());
   JSONTEST_ASSERT(root["property"].getOffsetStart() == 15);
   JSONTEST_ASSERT(root["property"].getOffsetLimit() == 34);
   JSONTEST_ASSERT(root["property"][0].getOffsetStart() == 16);
@@ -1944,7 +1944,7 @@ JSONTEST_FIXTURE(CharReaderTest, parseWithNoErrors) {
   char const doc[] = "{ \"property\" : \"value\" }";
   bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
   JSONTEST_ASSERT(ok);
-  JSONTEST_ASSERT(errs.size() == 0);
+  JSONTEST_ASSERT(errs.empty());
   delete reader;
 }
 
@@ -1958,7 +1958,7 @@ JSONTEST_FIXTURE(CharReaderTest, parseWithNoErrorsTestingOffsets) {
                      "null, \"false\" : false }";
   bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
   JSONTEST_ASSERT(ok);
-  JSONTEST_ASSERT(errs.size() == 0);
+  JSONTEST_ASSERT(errs.empty());
   delete reader;
 }
 
@@ -2014,7 +2014,7 @@ JSONTEST_FIXTURE(CharReaderTest, parseWithStackLimit) {
     JSONCPP_STRING errs;
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(errs == "");
+    JSONTEST_ASSERT(errs.empty());
     JSONTEST_ASSERT_EQUAL("value", root["property"]);
     delete reader;
   }
@@ -2061,7 +2061,7 @@ JSONTEST_FIXTURE(CharReaderFailIfExtraTest, issue164) {
     JSONCPP_STRING errs;
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(errs == "");
+    JSONTEST_ASSERT(errs.empty());
     JSONTEST_ASSERT_EQUAL("property", root);
     delete reader;
   }
@@ -2176,7 +2176,7 @@ JSONTEST_FIXTURE(CharReaderAllowDropNullTest, issue178) {
     char const doc[] = "[]";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(errs == "");
+    JSONTEST_ASSERT(errs.empty());
     JSONTEST_ASSERT_EQUAL(0u, root.size());
     JSONTEST_ASSERT_EQUAL(Json::arrayValue, root);
   }
@@ -2184,7 +2184,7 @@ JSONTEST_FIXTURE(CharReaderAllowDropNullTest, issue178) {
     char const doc[] = "[null]";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(errs == "");
+    JSONTEST_ASSERT(errs.empty());
     JSONTEST_ASSERT_EQUAL(1u, root.size());
   }
   {
@@ -2212,7 +2212,7 @@ JSONTEST_FIXTURE(CharReaderAllowDropNullTest, issue178) {
     char const doc[] = "[,null]";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(errs == "");
+    JSONTEST_ASSERT(errs.empty());
     JSONTEST_ASSERT_EQUAL(2u, root.size());
   }
   {
@@ -2240,7 +2240,7 @@ JSONTEST_FIXTURE(CharReaderAllowDropNullTest, issue178) {
     char const doc[] = "[,,null]";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(errs == "");
+    JSONTEST_ASSERT(errs.empty());
     JSONTEST_ASSERT_EQUAL(3u, root.size());
   }
   {
@@ -2263,7 +2263,7 @@ JSONTEST_FIXTURE(CharReaderAllowDropNullTest, issue178) {
     char const doc[] = "[,,,[]]";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(errs == "");
+    JSONTEST_ASSERT(errs.empty());
     JSONTEST_ASSERT_EQUAL(4u, root.size());
     JSONTEST_ASSERT_EQUAL(Json::arrayValue, root[3u]);
   }

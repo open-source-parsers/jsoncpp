@@ -880,7 +880,7 @@ bool Reader::pushError(const Value& value,
   return true;
 }
 
-bool Reader::good() const { return !errors_.size(); }
+bool Reader::good() const { return errors_.empty(); }
 
 // exact copy of Features
 class OurFeatures {
@@ -1895,7 +1895,7 @@ bool OurReader::pushError(const Value& value,
   return true;
 }
 
-bool OurReader::good() const { return !errors_.size(); }
+bool OurReader::good() const { return errors_.empty(); }
 
 class OurCharReader : public CharReader {
   bool const collectComments_;
@@ -1961,7 +1961,7 @@ bool CharReaderBuilder::validate(Json::Value* invalid) const {
       inv[key] = settings_[key];
     }
   }
-  return 0u == inv.size();
+  return inv.empty();
 }
 Value& CharReaderBuilder::operator[](const JSONCPP_STRING& key) {
   return settings_[key];
