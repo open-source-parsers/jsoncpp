@@ -300,8 +300,8 @@ public:
   /**
    * \param indentation Each level will be indented by this amount extra.
    */
-  StyledStreamWriter(const JSONCPP_STRING& indentation = "\t");
-  ~StyledStreamWriter() {}
+  StyledStreamWriter(JSONCPP_STRING indentation = "\t");
+  ~StyledStreamWriter() = default;
 
 public:
   /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.

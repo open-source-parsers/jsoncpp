@@ -54,7 +54,7 @@ namespace Json {
  */
 class JSON_API Exception : public std::exception {
 public:
-  Exception(JSONCPP_STRING const& msg);
+  Exception(JSONCPP_STRING msg);
   ~Exception() JSONCPP_NOEXCEPT override;
   char const* what() const JSONCPP_NOEXCEPT override;
 

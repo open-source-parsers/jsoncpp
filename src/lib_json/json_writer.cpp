@@ -642,8 +642,8 @@ bool StyledWriter::hasCommentForValue(const Value& value) {
 // Class StyledStreamWriter
 // //////////////////////////////////////////////////////////////////
 
-StyledStreamWriter::StyledStreamWriter(const JSONCPP_STRING& indentation)
-    : document_(nullptr), rightMargin_(74), indentation_(indentation),
+StyledStreamWriter::StyledStreamWriter(JSONCPP_STRING indentation)
+    : document_(nullptr), indentation_(std::move(indentation)),
       addChildValues_(), indented_(false) {}
 
 void StyledStreamWriter::write(JSONCPP_OSTREAM& out, const Value& root) {
@@ -872,11 +872,11 @@ struct CommentStyle {
 };
 
 struct BuiltStyledStreamWriter : public StreamWriter {
-  BuiltStyledStreamWriter(JSONCPP_STRING const& indentation,
+  BuiltStyledStreamWriter(JSONCPP_STRING indentation,
                           CommentStyle::Enum cs,
-                          JSONCPP_STRING const& colonSymbol,
-                          JSONCPP_STRING const& nullSymbol,
-                          JSONCPP_STRING const& endingLineFeedSymbol,
+                          JSONCPP_STRING colonSymbol,
+                          JSONCPP_STRING nullSymbol,
+                          JSONCPP_STRING endingLineFeedSymbol,
                           bool useSpecialFloats,
                           unsigned int precision,
                           PrecisionType precisionType);
@@ -912,17 +912,17 @@ private:
   PrecisionType precisionType_;
 };
 BuiltStyledStreamWriter::BuiltStyledStreamWriter(
-    JSONCPP_STRING const& indentation,
+    JSONCPP_STRING indentation,
     CommentStyle::Enum cs,
-    JSONCPP_STRING const& colonSymbol,
-    JSONCPP_STRING const& nullSymbol,
-    JSONCPP_STRING const& endingLineFeedSymbol,
+    JSONCPP_STRING colonSymbol,
+    JSONCPP_STRING nullSymbol,
+    JSONCPP_STRING endingLineFeedSymbol,
     bool useSpecialFloats,
     unsigned int precision,
     PrecisionType precisionType)
-    : rightMargin_(74), indentation_(indentation), cs_(cs),
-      colonSymbol_(colonSymbol), nullSymbol_(nullSymbol),
-      endingLineFeedSymbol_(endingLineFeedSymbol), addChildValues_(false),
+    : rightMargin_(74), indentation_(std::move(indentation)), cs_(cs),
+      colonSymbol_(std::move(colonSymbol)), nullSymbol_(std::move(nullSymbol)),
+      endingLineFeedSymbol_(std::move(endingLineFeedSymbol)), addChildValues_(false),
       indented_(false), useSpecialFloats_(useSpecialFloats),
       precision_(precision), precisionType_(precisionType) {}
 int BuiltStyledStreamWriter::write(Value const& root, JSONCPP_OSTREAM* sout) {
