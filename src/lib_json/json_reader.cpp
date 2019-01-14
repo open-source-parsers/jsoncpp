@@ -60,8 +60,7 @@ typedef std::auto_ptr<CharReader> CharReaderPtr;
 // ////////////////////////////////
 
 Features::Features()
-    : allowComments_(true), strictRoot_(false),
-      allowDroppedNullPlaceholders_(false), allowNumericKeys_(false) {}
+     {}
 
 Features Features::all() { return {}; }
 

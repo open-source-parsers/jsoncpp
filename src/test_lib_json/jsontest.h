@@ -60,7 +60,7 @@ public:
   /// Not encapsulated to prevent step into when debugging failed assertions
   /// Incremented by one on assertion predicate entry, decreased by one
   /// by addPredicateContext().
-  PredicateContext::Id predicateId_;
+  PredicateContext::Id predicateId_{1};
 
   /// \internal Implementation detail for predicate macros
   PredicateContext* predicateStackTail_;
@@ -109,9 +109,9 @@ private:
   Failures failures_;
   JSONCPP_STRING name_;
   PredicateContext rootPredicateNode_;
-  PredicateContext::Id lastUsedPredicateId_;
+  PredicateContext::Id lastUsedPredicateId_{0};
   /// Failure which is the target of the messages added using operator <<
-  Failure* messageTarget_;
+  Failure* messageTarget_{nullptr};
 };
 
 class TestCase {
@@ -125,7 +125,7 @@ public:
   virtual const char* testName() const = 0;
 
 protected:
-  TestResult* result_;
+  TestResult* result_{nullptr};
 
 private:
   virtual void runTestCase() = 0;

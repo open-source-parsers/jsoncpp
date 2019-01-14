@@ -630,7 +630,7 @@ private:
 
     void setComment(const char* text, size_t len);
 
-    char* comment_;
+    char* comment_{nullptr};
   };
 
   // struct MemberNamesTransform
@@ -678,8 +678,8 @@ public:
 private:
   enum Kind { kindNone = 0, kindIndex, kindKey };
   JSONCPP_STRING key_;
-  ArrayIndex index_;
-  Kind kind_;
+  ArrayIndex index_{};
+  Kind kind_{kindNone};
 };
 
 /** \brief Experimental and untested: represents a "path" to access a node.
@@ -780,7 +780,7 @@ protected:
 private:
   Value::ObjectValues::iterator current_;
   // Indicates that iterator is for a null value.
-  bool isNull_;
+  bool isNull_{true};
 
 public:
   // For some reason, BORLAND needs these at the end, rather

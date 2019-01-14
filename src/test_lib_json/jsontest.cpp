@@ -74,7 +74,7 @@ namespace JsonTest {
 // //////////////////////////////////////////////////////////////////
 
 TestResult::TestResult()
-    : predicateId_(1), lastUsedPredicateId_(0), messageTarget_(nullptr) {
+     {
   // The root predicate has id 0
   rootPredicateNode_.id_ = 0;
   rootPredicateNode_.next_ = nullptr;
@@ -205,7 +205,7 @@ TestResult& TestResult::operator<<(bool value) {
 // class TestCase
 // //////////////////////////////////////////////////////////////////
 
-TestCase::TestCase() : result_(nullptr) {}
+TestCase::TestCase()  {}
 
 TestCase::~TestCase() {}
 

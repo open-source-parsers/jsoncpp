@@ -82,19 +82,19 @@ struct ValueTest : JsonTest::TestCase {
     /// Initialize all checks to \c false by default.
     IsCheck();
 
-    bool isObject_;
-    bool isArray_;
-    bool isBool_;
-    bool isString_;
-    bool isNull_;
+    bool isObject_{false};
+    bool isArray_{false};
+    bool isBool_{false};
+    bool isString_{false};
+    bool isNull_{false};
 
-    bool isInt_;
-    bool isInt64_;
-    bool isUInt_;
-    bool isUInt64_;
-    bool isIntegral_;
-    bool isDouble_;
-    bool isNumeric_;
+    bool isInt_{false};
+    bool isInt64_{false};
+    bool isUInt_{false};
+    bool isUInt64_{false};
+    bool isIntegral_{false};
+    bool isDouble_{false};
+    bool isNumeric_{false};
   };
 
   void checkConstMemberCount(const Json::Value& value,
@@ -1331,10 +1331,8 @@ void ValueTest::checkMemberCount(Json::Value& value,
 }
 
 ValueTest::IsCheck::IsCheck()
-    : isObject_(false), isArray_(false), isBool_(false), isString_(false),
-      isNull_(false), isInt_(false), isInt64_(false), isUInt_(false),
-      isUInt64_(false), isIntegral_(false), isDouble_(false),
-      isNumeric_(false) {}
+    
+      {}
 
 void ValueTest::checkIs(const Json::Value& value, const IsCheck& check) {
   JSONTEST_ASSERT_EQUAL(check.isObject_, value.isObject());
