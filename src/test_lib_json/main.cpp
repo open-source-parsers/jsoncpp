@@ -1036,7 +1036,7 @@ JSONTEST_FIXTURE(ValueTest, integers) {
       normalizeFloatingPointStr(JsonTest::ToJsonString(val.asString())));
 
   // 10^19
-  const Json::UInt64 ten_to_19 = static_cast<Json::UInt64>(1e19);
+  const auto ten_to_19 = static_cast<Json::UInt64>(1e19);
   val = Json::Value(Json::UInt64(ten_to_19));
 
   JSONTEST_ASSERT_EQUAL(Json::uintValue, val.type());

@@ -278,7 +278,7 @@ bool Runner::runAllTest(bool printSummary) const {
     }
 
     if (printSummary) {
-      unsigned int failedCount = static_cast<unsigned int>(failures.size());
+      auto failedCount = static_cast<unsigned int>(failures.size());
       unsigned int passedCount = count - failedCount;
       printf("%u/%u tests passed (%u failure(s))\n", passedCount, count,
              failedCount);
