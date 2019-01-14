@@ -233,7 +233,7 @@ JSONCPP_NORETURN void throwLogicError(JSONCPP_STRING const& msg) {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-Value::CommentInfo::CommentInfo() : comment_(nullptr) {}
+Value::CommentInfo::CommentInfo()  {}
 
 Value::CommentInfo::~CommentInfo() {
   if (comment_)
@@ -1575,7 +1575,7 @@ Value::iterator Value::end() {
 // class PathArgument
 // //////////////////////////////////////////////////////////////////
 
-PathArgument::PathArgument() : key_(), index_(), kind_(kindNone) {}
+PathArgument::PathArgument() : key_() {}
 
 PathArgument::PathArgument(ArrayIndex index)
     : key_(), index_(index), kind_(kindIndex) {}

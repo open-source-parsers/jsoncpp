@@ -16,7 +16,7 @@ namespace Json {
 // //////////////////////////////////////////////////////////////////
 
 ValueIteratorBase::ValueIteratorBase()
-    : current_(), isNull_(true) {
+    : current_() {
 }
 
 ValueIteratorBase::ValueIteratorBase(
