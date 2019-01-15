@@ -224,18 +224,18 @@ Runner& Runner::add(TestCaseFactory factory) {
   return *this;
 }
 
-unsigned int Runner::testCount() const {
-  return static_cast<unsigned int>(tests_.size());
+size_t Runner::testCount() const {
+  return tests_.size();
 }
 
-JSONCPP_STRING Runner::testNameAt(unsigned int index) const {
+JSONCPP_STRING Runner::testNameAt(size_t index) const {
   TestCase* test = tests_[index]();
   JSONCPP_STRING name = test->testName();
   delete test;
   return name;
 }
 
-void Runner::runTestAt(unsigned int index, TestResult& result) const {
+void Runner::runTestAt(size_t index, TestResult& result) const {
   TestCase* test = tests_[index]();
   result.setTestName(test->testName());
   printf("Testing %s: ", test->testName());
@@ -257,9 +257,9 @@ void Runner::runTestAt(unsigned int index, TestResult& result) const {
 }
 
 bool Runner::runAllTest(bool printSummary) const {
-  unsigned int count = testCount();
+  size_t const count = testCount();
   std::deque<TestResult> failures;
-  for (unsigned int index = 0; index < count; ++index) {
+  for (size_t index = 0; index < count; ++index) {
     TestResult result;
     runTestAt(index, result);
     if (result.failed()) {
@@ -269,7 +269,7 @@ bool Runner::runAllTest(bool printSummary) const {
 
   if (failures.empty()) {
     if (printSummary) {
-      printf("All %u tests passed\n", count);
+      printf("All %zu tests passed\n", count);
     }
     return true;
   } else {
@@ -278,19 +278,19 @@ bool Runner::runAllTest(bool printSummary) const {
     }
 
     if (printSummary) {
-      auto failedCount = static_cast<unsigned int>(failures.size());
-      unsigned int passedCount = count - failedCount;
-      printf("%u/%u tests passed (%u failure(s))\n", passedCount, count,
-             failedCount);
+      size_t const failedCount = failures.size();
+      size_t const passedCount = count - failedCount;
+      printf("%zu/%zu tests passed (%zu failure(s))\n",
+             passedCount, count, failedCount);
     }
     return false;
   }
 }
 
 bool Runner::testIndex(const JSONCPP_STRING& testName,
-                       unsigned int& indexOut) const {
-  unsigned int count = testCount();
-  for (unsigned int index = 0; index < count; ++index) {
+                       size_t& indexOut) const {
+  const size_t count = testCount();
+  for (size_t index = 0; index < count; ++index) {
     if (testNameAt(index) == testName) {
       indexOut = index;
       return true;
@@ -300,8 +300,8 @@ bool Runner::testIndex(const JSONCPP_STRING& testName,
 }
 
 void Runner::listTests() const {
-  unsigned int count = testCount();
-  for (unsigned int index = 0; index < count; ++index) {
+  const size_t count = testCount();
+  for (size_t index = 0; index < count; ++index) {
     printf("%s\n", testNameAt(index).c_str());
   }
 }
@@ -319,7 +319,7 @@ int Runner::runCommandLine(int argc, const char* argv[]) const {
     } else if (opt == "--test") {
       ++index;
       if (index < argc) {
-        unsigned int testNameIndex;
+        size_t testNameIndex;
         if (testIndex(argv[index], testNameIndex)) {
           subrunner.add(tests_[testNameIndex]);
         } else {
