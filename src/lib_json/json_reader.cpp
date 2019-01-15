@@ -888,7 +888,7 @@ public:
   bool failIfExtra_;
   bool rejectDupKeys_;
   bool allowSpecialFloats_;
-  int stackLimit_;
+  size_t stackLimit_;
 }; // OurFeatures
 
 // exact copy of Implementation of class Features
@@ -1087,7 +1087,7 @@ bool OurReader::parse(const char* beginDoc,
 
 bool OurReader::readValue() {
   //  To preserve the old behaviour we cast size_t to int.
-  if (static_cast<int>(nodes_.size()) > features_.stackLimit_)
+  if (nodes_.size() > features_.stackLimit_)
     throwRuntimeError("Exceeded stackLimit in readValue().");
   Token token;
   skipCommentTokens(token);
@@ -1917,7 +1917,11 @@ CharReader* CharReaderBuilder::newCharReader() const {
       settings_["allowDroppedNullPlaceholders"].asBool();
   features.allowNumericKeys_ = settings_["allowNumericKeys"].asBool();
   features.allowSingleQuotes_ = settings_["allowSingleQuotes"].asBool();
-  features.stackLimit_ = settings_["stackLimit"].asInt();
+#if defined(JSON_HAS_INT64)
+  features.stackLimit_ = settings_["stackLimit"].asUInt64();
+#else
+  features.stackLimit_ = settings_["stackLimit"].asUInt();
+#endif
   features.failIfExtra_ = settings_["failIfExtra"].asBool();
   features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();

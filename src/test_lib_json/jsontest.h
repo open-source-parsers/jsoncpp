@@ -151,13 +151,13 @@ public:
   bool runAllTest(bool printSummary) const;
 
   /// Returns the number of test case in the suite
-  unsigned int testCount() const;
+  size_t testCount() const;
 
   /// Returns the name of the test case at the specified index
-  JSONCPP_STRING testNameAt(unsigned int index) const;
+  JSONCPP_STRING testNameAt(size_t index) const;
 
   /// Runs the test case at the specified index using the specified TestResult
-  void runTestAt(unsigned int index, TestResult& result) const;
+  void runTestAt(size_t index, TestResult& result) const;
 
   static void printUsage(const char* appName);
 
@@ -167,7 +167,7 @@ private: // prevents copy construction and assignment
 
 private:
   void listTests() const;
-  bool testIndex(const JSONCPP_STRING& testName, unsigned int& indexOut) const;
+  bool testIndex(const JSONCPP_STRING& testName, size_t& indexOut) const;
   static void preventDialogOnCrash();
 
 private:
