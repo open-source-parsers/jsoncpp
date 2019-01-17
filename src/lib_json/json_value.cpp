@@ -9,8 +9,8 @@
 #include <json/writer.h>
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <cassert>
-#include <cstring>
 #include <cmath>
+#include <cstring>
 #include <sstream>
 #include <utility>
 #ifdef JSON_USE_CPPTL
@@ -21,24 +21,28 @@
 
 // Provide implementation equivalent of std::snprintf for older _MSC compilers
 #if defined(_MSC_VER) && _MSC_VER < 1900
-#include <stdarg.h>  
-static int msvc_pre1900_c99_vsnprintf(char *outBuf, size_t size, const char *format, va_list ap)
-{
-    int count = -1;
-    if (size != 0)
-        count = _vsnprintf_s(outBuf, size, _TRUNCATE, format, ap);
-    if (count == -1)
-        count = _vscprintf(format, ap);
-    return count;
+#include <stdarg.h>
+static int msvc_pre1900_c99_vsnprintf(char* outBuf,
+                                      size_t size,
+                                      const char* format,
+                                      va_list ap) {
+  int count = -1;
+  if (size != 0)
+    count = _vsnprintf_s(outBuf, size, _TRUNCATE, format, ap);
+  if (count == -1)
+    count = _vscprintf(format, ap);
+  return count;
 }
 
-int JSON_API msvc_pre1900_c99_snprintf(char *outBuf, size_t size, const char *format, ...)
-{
-    va_list ap;
-    va_start(ap, format);
-    const int count = msvc_pre1900_c99_vsnprintf(outBuf, size, format, ap);
-    va_end(ap);
-    return count;
+int JSON_API msvc_pre1900_c99_snprintf(char* outBuf,
+                                       size_t size,
+                                       const char* format,
+                                       ...) {
+  va_list ap;
+  va_start(ap, format);
+  const int count = msvc_pre1900_c99_vsnprintf(outBuf, size, format, ap);
+  va_end(ap);
+  return count;
 }
 #endif
 
@@ -213,7 +217,7 @@ static inline void releaseStringValue(char* value, unsigned) { free(value); }
 
 namespace Json {
 
-Exception::Exception(JSONCPP_STRING  msg) : msg_(std::move(msg)) {}
+Exception::Exception(JSONCPP_STRING msg) : msg_(std::move(msg)) {}
 Exception::~Exception() JSONCPP_NOEXCEPT {}
 char const* Exception::what() const JSONCPP_NOEXCEPT { return msg_.c_str(); }
 RuntimeError::RuntimeError(JSONCPP_STRING const& msg) : Exception(msg) {}
@@ -233,7 +237,7 @@ JSONCPP_NORETURN void throwLogicError(JSONCPP_STRING const& msg) {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-Value::CommentInfo::CommentInfo()  = default;
+Value::CommentInfo::CommentInfo() = default;
 
 Value::CommentInfo::~CommentInfo() {
   if (comment_)
@@ -436,7 +440,8 @@ Value::Value(double value) {
 
 Value::Value(const char* value) {
   initBasic(stringValue, true);
-  JSON_ASSERT_MESSAGE(value != nullptr, "Null Value Passed to Value Constructor");
+  JSON_ASSERT_MESSAGE(value != nullptr,
+                      "Null Value Passed to Value Constructor");
   value_.string_ = duplicateAndPrefixStringValue(
       value, static_cast<unsigned>(strlen(value)));
 }
@@ -890,8 +895,7 @@ bool Value::isConvertibleTo(ValueType other) const {
            (type_ == booleanValue && value_.bool_ == false) ||
            (type_ == stringValue && asString().empty()) ||
            (type_ == arrayValue && value_.map_->empty()) ||
-           (type_ == objectValue && value_.map_->empty()) ||
-           type_ == nullValue;
+           (type_ == objectValue && value_.map_->empty()) || type_ == nullValue;
   case intValue:
     return isInt() ||
            (type_ == realValue && InRange(value_.real_, minInt, maxInt)) ||
@@ -1655,7 +1659,7 @@ void Path::invalidPath(const JSONCPP_STRING& /*path*/, int /*location*/) {
 
 const Value& Path::resolve(const Value& root) const {
   const Value* node = &root;
-  for (const auto & arg : args_) {
+  for (const auto& arg : args_) {
     if (arg.kind_ == PathArgument::kindIndex) {
       if (!node->isArray() || !node->isValidIndex(arg.index_)) {
         // Error: unable to resolve path (array value expected at position...
@@ -1680,7 +1684,7 @@ const Value& Path::resolve(const Value& root) const {
 
 Value Path::resolve(const Value& root, const Value& defaultValue) const {
   const Value* node = &root;
-  for (const auto & arg : args_) {
+  for (const auto& arg : args_) {
     if (arg.kind_ == PathArgument::kindIndex) {
       if (!node->isArray() || !node->isValidIndex(arg.index_))
         return defaultValue;
@@ -1698,7 +1702,7 @@ Value Path::resolve(const Value& root, const Value& defaultValue) const {
 
 Value& Path::make(Value& root) const {
   Value* node = &root;
-  for (const auto & arg : args_) {
+  for (const auto& arg : args_) {
     if (arg.kind_ == PathArgument::kindIndex) {
       if (!node->isArray()) {
         // Error: node is not an array at position ...

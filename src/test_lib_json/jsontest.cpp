@@ -73,8 +73,7 @@ namespace JsonTest {
 // class TestResult
 // //////////////////////////////////////////////////////////////////
 
-TestResult::TestResult()
-     {
+TestResult::TestResult() {
   // The root predicate has id 0
   rootPredicateNode_.id_ = 0;
   rootPredicateNode_.next_ = nullptr;
@@ -150,7 +149,7 @@ void TestResult::printFailure(bool printTestName) const {
   }
 
   // Print in reverse to display the callstack in the right order
-  for (const auto & failure : failures_ ) {
+  for (const auto& failure : failures_) {
     JSONCPP_STRING indent(failure.nestingLevel_ * 2, ' ');
     if (failure.file_) {
       printf("%s%s(%u): ", indent.c_str(), failure.file_, failure.line_);
@@ -205,7 +204,7 @@ TestResult& TestResult::operator<<(bool value) {
 // class TestCase
 // //////////////////////////////////////////////////////////////////
 
-TestCase::TestCase()  = default;
+TestCase::TestCase() = default;
 
 TestCase::~TestCase() = default;
 
@@ -224,9 +223,7 @@ Runner& Runner::add(TestCaseFactory factory) {
   return *this;
 }
 
-size_t Runner::testCount() const {
-  return tests_.size();
-}
+size_t Runner::testCount() const { return tests_.size(); }
 
 JSONCPP_STRING Runner::testNameAt(size_t index) const {
   TestCase* test = tests_[index]();
@@ -273,22 +270,21 @@ bool Runner::runAllTest(bool printSummary) const {
     }
     return true;
   } else {
-    for (auto & result : failures) {
+    for (auto& result : failures) {
       result.printFailure(count > 1);
     }
 
     if (printSummary) {
       size_t const failedCount = failures.size();
       size_t const passedCount = count - failedCount;
-      printf("%zu/%zu tests passed (%zu failure(s))\n",
-             passedCount, count, failedCount);
+      printf("%zu/%zu tests passed (%zu failure(s))\n", passedCount, count,
+             failedCount);
     }
     return false;
   }
 }
 
-bool Runner::testIndex(const JSONCPP_STRING& testName,
-                       size_t& indexOut) const {
+bool Runner::testIndex(const JSONCPP_STRING& testName, size_t& indexOut) const {
   const size_t count = testCount();
   for (size_t index = 0; index < count; ++index) {
     if (testNameAt(index) == testName) {

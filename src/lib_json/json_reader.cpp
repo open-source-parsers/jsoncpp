@@ -31,8 +31,8 @@
 #if defined(_MSC_VER)
 #if !defined(_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
-#endif  //_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
-#endif  //_MSC_VER
+#endif //_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
+#endif //_MSC_VER
 
 #if defined(_MSC_VER)
 // Disable warning about strdup being deprecated.
@@ -59,8 +59,7 @@ typedef std::auto_ptr<CharReader> CharReaderPtr;
 // Implementation of class Features
 // ////////////////////////////////
 
-Features::Features()
-     = default;
+Features::Features() = default;
 
 Features Features::all() { return {}; }
 
@@ -87,8 +86,7 @@ bool Reader::containsNewLine(Reader::Location begin, Reader::Location end) {
 // //////////////////////////////////////////////////////////////////
 
 Reader::Reader()
-    : errors_(), document_(), commentsBefore_(), features_(Features::all())
-      {}
+    : errors_(), document_(), commentsBefore_(), features_(Features::all()) {}
 
 Reader::Reader(const Features& features)
     : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
@@ -816,7 +814,7 @@ JSONCPP_STRING Reader::getFormatedErrorMessages() const {
 
 JSONCPP_STRING Reader::getFormattedErrorMessages() const {
   JSONCPP_STRING formattedMessage;
-  for (const auto & error : errors_) {
+  for (const auto& error : errors_) {
     formattedMessage +=
         "* " + getLocationLineAndColumn(error.token_.start_) + "\n";
     formattedMessage += "  " + error.message_ + "\n";
@@ -829,7 +827,7 @@ JSONCPP_STRING Reader::getFormattedErrorMessages() const {
 
 std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
   std::vector<Reader::StructuredError> allErrors;
-  for (const auto & error : errors_) {
+  for (const auto& error : errors_) {
     Reader::StructuredError structured;
     structured.offset_start = error.token_.start_ - begin_;
     structured.offset_limit = error.token_.end_ - begin_;
@@ -989,8 +987,9 @@ private:
                                    Location& current,
                                    Location end,
                                    unsigned int& unicode);
-  bool
-  addError(const JSONCPP_STRING& message, Token& token, Location extra = nullptr);
+  bool addError(const JSONCPP_STRING& message,
+                Token& token,
+                Location extra = nullptr);
   bool recoverFromError(TokenType skipUntilToken);
   bool addErrorAndRecover(const JSONCPP_STRING& message,
                           Token& token,
@@ -1827,7 +1826,7 @@ JSONCPP_STRING OurReader::getLocationLineAndColumn(Location location) const {
 
 JSONCPP_STRING OurReader::getFormattedErrorMessages() const {
   JSONCPP_STRING formattedMessage;
-  for (const auto & error : errors_) {
+  for (const auto& error : errors_) {
     formattedMessage +=
         "* " + getLocationLineAndColumn(error.token_.start_) + "\n";
     formattedMessage += "  " + error.message_ + "\n";
@@ -1840,7 +1839,7 @@ JSONCPP_STRING OurReader::getFormattedErrorMessages() const {
 
 std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
   std::vector<OurReader::StructuredError> allErrors;
-  for (const auto & error : errors_) {
+  for (const auto& error : errors_) {
     OurReader::StructuredError structured;
     structured.offset_start = error.token_.start_ - begin_;
     structured.offset_limit = error.token_.end_ - begin_;

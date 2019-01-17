@@ -15,25 +15,17 @@ namespace Json {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-ValueIteratorBase::ValueIteratorBase()
-    : current_() {
-}
+ValueIteratorBase::ValueIteratorBase() : current_() {}
 
 ValueIteratorBase::ValueIteratorBase(
     const Value::ObjectValues::iterator& current)
     : current_(current), isNull_(false) {}
 
-Value& ValueIteratorBase::deref() const {
-  return current_->second;
-}
+Value& ValueIteratorBase::deref() const { return current_->second; }
 
-void ValueIteratorBase::increment() {
-  ++current_;
-}
+void ValueIteratorBase::increment() { ++current_; }
 
-void ValueIteratorBase::decrement() {
-  --current_;
-}
+void ValueIteratorBase::decrement() { --current_; }
 
 ValueIteratorBase::difference_type
 ValueIteratorBase::computeDistance(const SelfType& other) const {
@@ -96,7 +88,8 @@ JSONCPP_STRING ValueIteratorBase::name() const {
   char const* keey;
   char const* end;
   keey = memberName(&end);
-  if (!keey) return JSONCPP_STRING();
+  if (!keey)
+    return JSONCPP_STRING();
   return JSONCPP_STRING(keey, end);
 }
 
@@ -156,8 +149,7 @@ ValueIterator::ValueIterator(const ValueConstIterator& other)
   throwRuntimeError("ConstIterator to Iterator should never be allowed.");
 }
 
-ValueIterator::ValueIterator(const ValueIterator& other)
-     = default;
+ValueIterator::ValueIterator(const ValueIterator& other) = default;
 
 ValueIterator& ValueIterator::operator=(const SelfType& other) {
   copy(other);

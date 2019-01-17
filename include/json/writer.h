@@ -189,9 +189,9 @@ private:
   void writeValue(const Value& value);
 
   JSONCPP_STRING document_;
-  bool yamlCompatibilityEnabled_{false};
-  bool dropNullPlaceholders_{false};
-  bool omitEndingLineFeed_{false};
+  bool yamlCompatibilityEnabled_{ false };
+  bool dropNullPlaceholders_{ false };
+  bool omitEndingLineFeed_{ false };
 };
 #if defined(_MSC_VER)
 #pragma warning(pop)
@@ -257,9 +257,9 @@ private:
   ChildValues childValues_;
   JSONCPP_STRING document_;
   JSONCPP_STRING indentString_;
-  unsigned int rightMargin_{74};
-  unsigned int indentSize_{3};
-  bool addChildValues_{false};
+  unsigned int rightMargin_{ 74 };
+  unsigned int indentSize_{ 3 };
+  bool addChildValues_{ false };
 };
 #if defined(_MSC_VER)
 #pragma warning(pop)
@@ -331,7 +331,7 @@ private:
   ChildValues childValues_;
   JSONCPP_OSTREAM* document_;
   JSONCPP_STRING indentString_;
-  unsigned int rightMargin_{74};
+  unsigned int rightMargin_{ 74 };
   JSONCPP_STRING indentation_;
   bool addChildValues_ : 1;
   bool indented_ : 1;

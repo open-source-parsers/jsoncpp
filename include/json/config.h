@@ -7,7 +7,7 @@
 #define JSON_CONFIG_H_INCLUDED
 #include <cstddef>
 #include <cstdint> //typedef int64_t, uint64_t
-#include <string>   //typedef String
+#include <string>  //typedef String
 
 /// If defined, indicates that json library is embedded in CppTL library.
 //# define JSON_IN_CPPTL 1
@@ -55,15 +55,18 @@
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER < 1800
-  #error "ERROR:  Visual Studio 12 (2013) with _MSC_VER=1800 is the oldest supported compiler with sufficient C++11 capabilities"
+#error                                                                         \
+    "ERROR:  Visual Studio 12 (2013) with _MSC_VER=1800 is the oldest supported compiler with sufficient C++11 capabilities"
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER < 1900
-// As recommended at https://stackoverflow.com/questions/2915672/snprintf-and-visual-studio-2010
-   extern JSON_API int msvc_pre1900_c99_snprintf(char *outBuf, size_t size, const char *format, ...);
-#  define jsoncpp_snprintf msvc_pre1900_c99_snprintf
+// As recommended at
+// https://stackoverflow.com/questions/2915672/snprintf-and-visual-studio-2010
+extern JSON_API int
+msvc_pre1900_c99_snprintf(char* outBuf, size_t size, const char* format, ...);
+#define jsoncpp_snprintf msvc_pre1900_c99_snprintf
 #else
-#  define jsoncpp_snprintf std::snprintf
+#define jsoncpp_snprintf std::snprintf
 #endif
 
 // If JSON_NO_INT64 is defined, then Json only support C++ "int" type for
@@ -75,10 +78,10 @@
 #define JSONCPP_DEPRECATED(message) __declspec(deprecated(message))
 #endif // defined(_MSC_VER)
 
-// In c++11 the override keyword allows you to explicitly define that a function
-// is intended to override the base-class version.  This makes the code more
-// manageable and fixes a set of common hard-to-find bugs.
-#define JSONCPP_OVERRIDE override    // Define maintained for backwards compatibility of external tools.  C++11 should be used directly in JSONCPP
+// JSONCPP_OVERRIDE is maintained for backwards compatibility of external tools.
+// C++11 should be used directly in JSONCPP.
+#define JSONCPP_OVERRIDE override
+
 #if __cplusplus >= 201103L
 #define JSONCPP_NOEXCEPT noexcept
 #define JSONCPP_OP_EXPLICIT explicit
