@@ -44,7 +44,7 @@
 
 #if !defined(_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
-#endif  //_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
+#endif //_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
 
 #endif //_MSC_VER
 
@@ -352,8 +352,8 @@ Writer::~Writer() = default;
 // //////////////////////////////////////////////////////////////////
 
 FastWriter::FastWriter()
-    
-      = default;
+
+    = default;
 
 void FastWriter::enableYAMLCompatibility() { yamlCompatibilityEnabled_ = true; }
 
@@ -409,8 +409,7 @@ void FastWriter::writeValue(const Value& value) {
   case objectValue: {
     Value::Members members(value.getMemberNames());
     document_ += '{';
-    for (auto it = members.begin(); it != members.end();
-         ++it) {
+    for (auto it = members.begin(); it != members.end(); ++it) {
       const JSONCPP_STRING& name = *it;
       if (it != members.begin())
         document_ += ',';
@@ -427,8 +426,7 @@ void FastWriter::writeValue(const Value& value) {
 // Class StyledWriter
 // //////////////////////////////////////////////////////////////////
 
-StyledWriter::StyledWriter()
-     = default;
+StyledWriter::StyledWriter() = default;
 
 JSONCPP_STRING StyledWriter::write(const Value& root) {
   document_.clear();
@@ -922,9 +920,10 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
     PrecisionType precisionType)
     : rightMargin_(74), indentation_(std::move(indentation)), cs_(cs),
       colonSymbol_(std::move(colonSymbol)), nullSymbol_(std::move(nullSymbol)),
-      endingLineFeedSymbol_(std::move(endingLineFeedSymbol)), addChildValues_(false),
-      indented_(false), useSpecialFloats_(useSpecialFloats),
-      precision_(precision), precisionType_(precisionType) {}
+      endingLineFeedSymbol_(std::move(endingLineFeedSymbol)),
+      addChildValues_(false), indented_(false),
+      useSpecialFloats_(useSpecialFloats), precision_(precision),
+      precisionType_(precisionType) {}
 int BuiltStyledStreamWriter::write(Value const& root, JSONCPP_OSTREAM* sout) {
   sout_ = sout;
   addChildValues_ = false;
