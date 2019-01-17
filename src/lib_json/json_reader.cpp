@@ -108,9 +108,9 @@ bool Reader::parse(std::istream& is, Value& root, bool collectComments) {
   // Those would allow streamed input from a file, if parse() were a
   // template function.
 
-  // Since JSONCPP_STRING is reference-counted, this at least does not
+  // Since String is reference-counted, this at least does not
   // create an extra copy.
-  JSONCPP_STRING doc;
+  String doc;
   std::getline(is, doc, (char)EOF);
   return parse(doc.data(), doc.data() + doc.size(), root, collectComments);
 }
@@ -358,9 +358,8 @@ bool Reader::readComment() {
   return true;
 }
 
-JSONCPP_STRING Reader::normalizeEOL(Reader::Location begin,
-                                    Reader::Location end) {
-  JSONCPP_STRING normalized;
+String Reader::normalizeEOL(Reader::Location begin, Reader::Location end) {
+  String normalized;
   normalized.reserve(static_cast<size_t>(end - begin));
   Reader::Location current = begin;
   while (current != end) {
@@ -382,7 +381,7 @@ void Reader::addComment(Location begin,
                         Location end,
                         CommentPlacement placement) {
   assert(collectComments_);
-  const JSONCPP_STRING& normalized = normalizeEOL(begin, end);
+  const String& normalized = normalizeEOL(begin, end);
   if (placement == commentAfterOnSameLine) {
     assert(lastValue_ != nullptr);
     lastValue_->setComment(normalized, placement);
@@ -452,7 +451,7 @@ bool Reader::readString() {
 
 bool Reader::readObject(Token& token) {
   Token tokenName;
-  JSONCPP_STRING name;
+  String name;
   Value init(objectValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(token.start_ - begin_);
@@ -472,7 +471,7 @@ bool Reader::readObject(Token& token) {
       Value numberName;
       if (!decodeNumber(tokenName, numberName))
         return recoverFromError(tokenObjectEnd);
-      name = JSONCPP_STRING(numberName.asCString());
+      name = String(numberName.asCString());
     } else {
       break;
     }
@@ -609,18 +608,17 @@ bool Reader::decodeDouble(Token& token) {
 
 bool Reader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
-  JSONCPP_STRING buffer(token.start_, token.end_);
-  JSONCPP_ISTRINGSTREAM is(buffer);
+  String buffer(token.start_, token.end_);
+  IStringStream is(buffer);
   if (!(is >> value))
-    return addError("'" + JSONCPP_STRING(token.start_, token.end_) +
-                        "' is not a number.",
-                    token);
+    return addError(
+        "'" + String(token.start_, token.end_) + "' is not a number.", token);
   decoded = value;
   return true;
 }
 
 bool Reader::decodeString(Token& token) {
-  JSONCPP_STRING decoded_string;
+  String decoded_string;
   if (!decodeString(token, decoded_string))
     return false;
   Value decoded(decoded_string);
@@ -630,7 +628,7 @@ bool Reader::decodeString(Token& token) {
   return true;
 }
 
-bool Reader::decodeString(Token& token, JSONCPP_STRING& decoded) {
+bool Reader::decodeString(Token& token, String& decoded) {
   decoded.reserve(static_cast<size_t>(token.end_ - token.start_ - 2));
   Location current = token.start_ + 1; // skip '"'
   Location end = token.end_ - 1;       // do not include '"'
@@ -737,9 +735,7 @@ bool Reader::decodeUnicodeEscapeSequence(Token& token,
   return true;
 }
 
-bool Reader::addError(const JSONCPP_STRING& message,
-                      Token& token,
-                      Location extra) {
+bool Reader::addError(const String& message, Token& token, Location extra) {
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
@@ -761,7 +757,7 @@ bool Reader::recoverFromError(TokenType skipUntilToken) {
   return false;
 }
 
-bool Reader::addErrorAndRecover(const JSONCPP_STRING& message,
+bool Reader::addErrorAndRecover(const String& message,
                                 Token& token,
                                 TokenType skipUntilToken) {
   addError(message, token);
@@ -799,7 +795,7 @@ void Reader::getLocationLineAndColumn(Location location,
   ++line;
 }
 
-JSONCPP_STRING Reader::getLocationLineAndColumn(Location location) const {
+String Reader::getLocationLineAndColumn(Location location) const {
   int line, column;
   getLocationLineAndColumn(location, line, column);
   char buffer[18 + 16 + 16 + 1];
@@ -808,12 +804,12 @@ JSONCPP_STRING Reader::getLocationLineAndColumn(Location location) const {
 }
 
 // Deprecated. Preserved for backward compatibility
-JSONCPP_STRING Reader::getFormatedErrorMessages() const {
+String Reader::getFormatedErrorMessages() const {
   return getFormattedErrorMessages();
 }
 
-JSONCPP_STRING Reader::getFormattedErrorMessages() const {
-  JSONCPP_STRING formattedMessage;
+String Reader::getFormattedErrorMessages() const {
+  String formattedMessage;
   for (const auto& error : errors_) {
     formattedMessage +=
         "* " + getLocationLineAndColumn(error.token_.start_) + "\n";
@@ -837,7 +833,7 @@ std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
   return allErrors;
 }
 
-bool Reader::pushError(const Value& value, const JSONCPP_STRING& message) {
+bool Reader::pushError(const Value& value, const String& message) {
   ptrdiff_t const length = end_ - begin_;
   if (value.getOffsetStart() > length || value.getOffsetLimit() > length)
     return false;
@@ -854,7 +850,7 @@ bool Reader::pushError(const Value& value, const JSONCPP_STRING& message) {
 }
 
 bool Reader::pushError(const Value& value,
-                       const JSONCPP_STRING& message,
+                       const String& message,
                        const Value& extra) {
   ptrdiff_t const length = end_ - begin_;
   if (value.getOffsetStart() > length || value.getOffsetLimit() > length ||
@@ -905,7 +901,7 @@ public:
   struct StructuredError {
     ptrdiff_t offset_start;
     ptrdiff_t offset_limit;
-    JSONCPP_STRING message;
+    String message;
   };
 
   OurReader(OurFeatures const& features);
@@ -913,12 +909,10 @@ public:
              const char* endDoc,
              Value& root,
              bool collectComments = true);
-  JSONCPP_STRING getFormattedErrorMessages() const;
+  String getFormattedErrorMessages() const;
   std::vector<StructuredError> getStructuredErrors() const;
-  bool pushError(const Value& value, const JSONCPP_STRING& message);
-  bool pushError(const Value& value,
-                 const JSONCPP_STRING& message,
-                 const Value& extra);
+  bool pushError(const Value& value, const String& message);
+  bool pushError(const Value& value, const String& message, const Value& extra);
   bool good() const;
 
 private:
@@ -955,7 +949,7 @@ private:
   class ErrorInfo {
   public:
     Token token_;
-    JSONCPP_STRING message_;
+    String message_;
     Location extra_;
   };
 
@@ -976,7 +970,7 @@ private:
   bool decodeNumber(Token& token);
   bool decodeNumber(Token& token, Value& decoded);
   bool decodeString(Token& token);
-  bool decodeString(Token& token, JSONCPP_STRING& decoded);
+  bool decodeString(Token& token, String& decoded);
   bool decodeDouble(Token& token);
   bool decodeDouble(Token& token, Value& decoded);
   bool decodeUnicodeCodePoint(Token& token,
@@ -987,11 +981,9 @@ private:
                                    Location& current,
                                    Location end,
                                    unsigned int& unicode);
-  bool addError(const JSONCPP_STRING& message,
-                Token& token,
-                Location extra = nullptr);
+  bool addError(const String& message, Token& token, Location extra = nullptr);
   bool recoverFromError(TokenType skipUntilToken);
-  bool addErrorAndRecover(const JSONCPP_STRING& message,
+  bool addErrorAndRecover(const String& message,
                           Token& token,
                           TokenType skipUntilToken);
   void skipUntilSpace();
@@ -999,23 +991,23 @@ private:
   Char getNextChar();
   void
   getLocationLineAndColumn(Location location, int& line, int& column) const;
-  JSONCPP_STRING getLocationLineAndColumn(Location location) const;
+  String getLocationLineAndColumn(Location location) const;
   void addComment(Location begin, Location end, CommentPlacement placement);
   void skipCommentTokens(Token& token);
 
-  static JSONCPP_STRING normalizeEOL(Location begin, Location end);
+  static String normalizeEOL(Location begin, Location end);
   static bool containsNewLine(Location begin, Location end);
 
   typedef std::stack<Value*> Nodes;
   Nodes nodes_;
   Errors errors_;
-  JSONCPP_STRING document_;
+  String document_;
   Location begin_;
   Location end_;
   Location current_;
   Location lastValueEnd_;
   Value* lastValue_;
-  JSONCPP_STRING commentsBefore_;
+  String commentsBefore_;
 
   OurFeatures const features_;
   bool collectComments_;
@@ -1329,9 +1321,9 @@ bool OurReader::readComment() {
   return true;
 }
 
-JSONCPP_STRING OurReader::normalizeEOL(OurReader::Location begin,
-                                       OurReader::Location end) {
-  JSONCPP_STRING normalized;
+String OurReader::normalizeEOL(OurReader::Location begin,
+                               OurReader::Location end) {
+  String normalized;
   normalized.reserve(static_cast<size_t>(end - begin));
   OurReader::Location current = begin;
   while (current != end) {
@@ -1353,7 +1345,7 @@ void OurReader::addComment(Location begin,
                            Location end,
                            CommentPlacement placement) {
   assert(collectComments_);
-  const JSONCPP_STRING& normalized = normalizeEOL(begin, end);
+  const String& normalized = normalizeEOL(begin, end);
   if (placement == commentAfterOnSameLine) {
     assert(lastValue_ != nullptr);
     lastValue_->setComment(normalized, placement);
@@ -1439,7 +1431,7 @@ bool OurReader::readStringSingleQuote() {
 
 bool OurReader::readObject(Token& token) {
   Token tokenName;
-  JSONCPP_STRING name;
+  String name;
   Value init(objectValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(token.start_ - begin_);
@@ -1472,7 +1464,7 @@ bool OurReader::readObject(Token& token) {
     if (name.length() >= (1U << 30))
       throwRuntimeError("keylength >= 2^30");
     if (features_.rejectDupKeys_ && currentValue().isMember(name)) {
-      JSONCPP_STRING msg = "Duplicate key: '" + name + "'";
+      String msg = "Duplicate key: '" + name + "'";
       return addErrorAndRecover(msg, tokenName, tokenObjectEnd);
     }
     Value& value = currentValue()[name];
@@ -1624,20 +1616,19 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
     fixNumericLocaleInput(buffer, buffer + length);
     count = sscanf(buffer, format, &value);
   } else {
-    JSONCPP_STRING buffer(token.start_, token.end_);
+    String buffer(token.start_, token.end_);
     count = sscanf(buffer.c_str(), format, &value);
   }
 
   if (count != 1)
-    return addError("'" + JSONCPP_STRING(token.start_, token.end_) +
-                        "' is not a number.",
-                    token);
+    return addError(
+        "'" + String(token.start_, token.end_) + "' is not a number.", token);
   decoded = value;
   return true;
 }
 
 bool OurReader::decodeString(Token& token) {
-  JSONCPP_STRING decoded_string;
+  String decoded_string;
   if (!decodeString(token, decoded_string))
     return false;
   Value decoded(decoded_string);
@@ -1647,7 +1638,7 @@ bool OurReader::decodeString(Token& token) {
   return true;
 }
 
-bool OurReader::decodeString(Token& token, JSONCPP_STRING& decoded) {
+bool OurReader::decodeString(Token& token, String& decoded) {
   decoded.reserve(static_cast<size_t>(token.end_ - token.start_ - 2));
   Location current = token.start_ + 1; // skip '"'
   Location end = token.end_ - 1;       // do not include '"'
@@ -1754,9 +1745,7 @@ bool OurReader::decodeUnicodeEscapeSequence(Token& token,
   return true;
 }
 
-bool OurReader::addError(const JSONCPP_STRING& message,
-                         Token& token,
-                         Location extra) {
+bool OurReader::addError(const String& message, Token& token, Location extra) {
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
@@ -1778,7 +1767,7 @@ bool OurReader::recoverFromError(TokenType skipUntilToken) {
   return false;
 }
 
-bool OurReader::addErrorAndRecover(const JSONCPP_STRING& message,
+bool OurReader::addErrorAndRecover(const String& message,
                                    Token& token,
                                    TokenType skipUntilToken) {
   addError(message, token);
@@ -1816,7 +1805,7 @@ void OurReader::getLocationLineAndColumn(Location location,
   ++line;
 }
 
-JSONCPP_STRING OurReader::getLocationLineAndColumn(Location location) const {
+String OurReader::getLocationLineAndColumn(Location location) const {
   int line, column;
   getLocationLineAndColumn(location, line, column);
   char buffer[18 + 16 + 16 + 1];
@@ -1824,8 +1813,8 @@ JSONCPP_STRING OurReader::getLocationLineAndColumn(Location location) const {
   return buffer;
 }
 
-JSONCPP_STRING OurReader::getFormattedErrorMessages() const {
-  JSONCPP_STRING formattedMessage;
+String OurReader::getFormattedErrorMessages() const {
+  String formattedMessage;
   for (const auto& error : errors_) {
     formattedMessage +=
         "* " + getLocationLineAndColumn(error.token_.start_) + "\n";
@@ -1849,7 +1838,7 @@ std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
   return allErrors;
 }
 
-bool OurReader::pushError(const Value& value, const JSONCPP_STRING& message) {
+bool OurReader::pushError(const Value& value, const String& message) {
   ptrdiff_t length = end_ - begin_;
   if (value.getOffsetStart() > length || value.getOffsetLimit() > length)
     return false;
@@ -1866,7 +1855,7 @@ bool OurReader::pushError(const Value& value, const JSONCPP_STRING& message) {
 }
 
 bool OurReader::pushError(const Value& value,
-                          const JSONCPP_STRING& message,
+                          const String& message,
                           const Value& extra) {
   ptrdiff_t length = end_ - begin_;
   if (value.getOffsetStart() > length || value.getOffsetLimit() > length ||
@@ -1896,7 +1885,7 @@ public:
   bool parse(char const* beginDoc,
              char const* endDoc,
              Value* root,
-             JSONCPP_STRING* errs) override {
+             String* errs) override {
     bool ok = reader_.parse(beginDoc, endDoc, *root, collectComments_);
     if (errs) {
       *errs = reader_.getFormattedErrorMessages();
@@ -1926,7 +1915,7 @@ CharReader* CharReaderBuilder::newCharReader() const {
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
   return new OurCharReader(collectComments, features);
 }
-static void getValidReaderKeys(std::set<JSONCPP_STRING>* valid_keys) {
+static void getValidReaderKeys(std::set<String>* valid_keys) {
   valid_keys->clear();
   valid_keys->insert("collectComments");
   valid_keys->insert("allowComments");
@@ -1944,19 +1933,19 @@ bool CharReaderBuilder::validate(Json::Value* invalid) const {
   if (!invalid)
     invalid = &my_invalid; // so we do not need to test for NULL
   Json::Value& inv = *invalid;
-  std::set<JSONCPP_STRING> valid_keys;
+  std::set<String> valid_keys;
   getValidReaderKeys(&valid_keys);
   Value::Members keys = settings_.getMemberNames();
   size_t n = keys.size();
   for (size_t i = 0; i < n; ++i) {
-    JSONCPP_STRING const& key = keys[i];
+    String const& key = keys[i];
     if (valid_keys.find(key) == valid_keys.end()) {
       inv[key] = settings_[key];
     }
   }
   return inv.empty();
 }
-Value& CharReaderBuilder::operator[](const JSONCPP_STRING& key) {
+Value& CharReaderBuilder::operator[](const String& key) {
   return settings_[key];
 }
 // static
@@ -1993,12 +1982,12 @@ void CharReaderBuilder::setDefaults(Json::Value* settings) {
 // global functions
 
 bool parseFromStream(CharReader::Factory const& fact,
-                     JSONCPP_ISTREAM& sin,
+                     IStream& sin,
                      Value* root,
-                     JSONCPP_STRING* errs) {
-  JSONCPP_OSTRINGSTREAM ssin;
+                     String* errs) {
+  OStringStream ssin;
   ssin << sin.rdbuf();
-  JSONCPP_STRING doc = ssin.str();
+  String doc = ssin.str();
   char const* begin = doc.data();
   char const* end = begin + doc.size();
   // Note that we do not actually need a null-terminator.
@@ -2006,9 +1995,9 @@ bool parseFromStream(CharReader::Factory const& fact,
   return reader->parse(begin, end, root, errs);
 }
 
-JSONCPP_ISTREAM& operator>>(JSONCPP_ISTREAM& sin, Value& root) {
+IStream& operator>>(IStream& sin, Value& root) {
   CharReaderBuilder b;
-  JSONCPP_STRING errs;
+  String errs;
   bool ok = parseFromStream(b, sin, &root, &errs);
   if (!ok) {
     throwRuntimeError(errs);

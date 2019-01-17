@@ -41,7 +41,7 @@ Usage:
 */
 class JSON_API StreamWriter {
 protected:
-  JSONCPP_OSTREAM* sout_; // not owned; will not delete
+  OStream* sout_; // not owned; will not delete
 public:
   StreamWriter();
   virtual ~StreamWriter();
@@ -51,7 +51,7 @@ public:
       \return zero on success (For now, we always return zero, so check the
      stream instead.) \throw std::exception possibly, depending on configuration
    */
-  virtual int write(Value const& root, JSONCPP_OSTREAM* sout) = 0;
+  virtual int write(Value const& root, OStream* sout) = 0;
 
   /** \brief A simple abstract factory.
    */
@@ -68,8 +68,8 @@ public:
 /** \brief Write into stringstream, then return string, for convenience.
  * A StreamWriter will be created from the factory, used, and then deleted.
  */
-JSONCPP_STRING JSON_API writeString(StreamWriter::Factory const& factory,
-                                    Value const& root);
+String JSON_API writeString(StreamWriter::Factory const& factory,
+                            Value const& root);
 
 /** \brief Build a StreamWriter implementation.
 
@@ -132,7 +132,7 @@ public:
   bool validate(Json::Value* invalid) const;
   /** A simple way to update a specific setting.
    */
-  Value& operator[](const JSONCPP_STRING& key);
+  Value& operator[](const String& key);
 
   /** Called by ctor, but you can use this to reset settings_.
    * \pre 'settings' != NULL (but Json::null is fine)
@@ -149,7 +149,7 @@ class JSONCPP_DEPRECATED("Use StreamWriter instead") JSON_API Writer {
 public:
   virtual ~Writer();
 
-  virtual JSONCPP_STRING write(const Value& root) = 0;
+  virtual String write(const Value& root) = 0;
 };
 
 /** \brief Outputs a Value in <a HREF="http://www.json.org">JSON</a> format
@@ -183,12 +183,12 @@ public:
   void omitEndingLineFeed();
 
 public: // overridden from Writer
-  JSONCPP_STRING write(const Value& root) override;
+  String write(const Value& root) override;
 
 private:
   void writeValue(const Value& value);
 
-  JSONCPP_STRING document_;
+  String document_;
   bool yamlCompatibilityEnabled_{ false };
   bool dropNullPlaceholders_{ false };
   bool omitEndingLineFeed_{ false };
@@ -236,27 +236,27 @@ public: // overridden from Writer
    * \param root Value to serialize.
    * \return String containing the JSON document that represents the root value.
    */
-  JSONCPP_STRING write(const Value& root) override;
+  String write(const Value& root) override;
 
 private:
   void writeValue(const Value& value);
   void writeArrayValue(const Value& value);
   bool isMultilineArray(const Value& value);
-  void pushValue(const JSONCPP_STRING& value);
+  void pushValue(const String& value);
   void writeIndent();
-  void writeWithIndent(const JSONCPP_STRING& value);
+  void writeWithIndent(const String& value);
   void indent();
   void unindent();
   void writeCommentBeforeValue(const Value& root);
   void writeCommentAfterValueOnSameLine(const Value& root);
   static bool hasCommentForValue(const Value& value);
-  static JSONCPP_STRING normalizeEOL(const JSONCPP_STRING& text);
+  static String normalizeEOL(const String& text);
 
-  typedef std::vector<JSONCPP_STRING> ChildValues;
+  typedef std::vector<String> ChildValues;
 
   ChildValues childValues_;
-  JSONCPP_STRING document_;
-  JSONCPP_STRING indentString_;
+  String document_;
+  String indentString_;
   unsigned int rightMargin_{ 74 };
   unsigned int indentSize_{ 3 };
   bool addChildValues_{ false };
@@ -300,7 +300,7 @@ public:
   /**
    * \param indentation Each level will be indented by this amount extra.
    */
-  StyledStreamWriter(JSONCPP_STRING indentation = "\t");
+  StyledStreamWriter(String indentation = "\t");
   ~StyledStreamWriter() = default;
 
 public:
@@ -310,29 +310,29 @@ public:
    * \note There is no point in deriving from Writer, since write() should not
    * return a value.
    */
-  void write(JSONCPP_OSTREAM& out, const Value& root);
+  void write(OStream& out, const Value& root);
 
 private:
   void writeValue(const Value& value);
   void writeArrayValue(const Value& value);
   bool isMultilineArray(const Value& value);
-  void pushValue(const JSONCPP_STRING& value);
+  void pushValue(const String& value);
   void writeIndent();
-  void writeWithIndent(const JSONCPP_STRING& value);
+  void writeWithIndent(const String& value);
   void indent();
   void unindent();
   void writeCommentBeforeValue(const Value& root);
   void writeCommentAfterValueOnSameLine(const Value& root);
   static bool hasCommentForValue(const Value& value);
-  static JSONCPP_STRING normalizeEOL(const JSONCPP_STRING& text);
+  static String normalizeEOL(const String& text);
 
-  typedef std::vector<JSONCPP_STRING> ChildValues;
+  typedef std::vector<String> ChildValues;
 
   ChildValues childValues_;
-  JSONCPP_OSTREAM* document_;
-  JSONCPP_STRING indentString_;
+  OStream* document_;
+  String indentString_;
   unsigned int rightMargin_{ 74 };
-  JSONCPP_STRING indentation_;
+  String indentation_;
   bool addChildValues_ : 1;
   bool indented_ : 1;
 };
@@ -341,21 +341,21 @@ private:
 #endif
 
 #if defined(JSON_HAS_INT64)
-JSONCPP_STRING JSON_API valueToString(Int value);
-JSONCPP_STRING JSON_API valueToString(UInt value);
+String JSON_API valueToString(Int value);
+String JSON_API valueToString(UInt value);
 #endif // if defined(JSON_HAS_INT64)
-JSONCPP_STRING JSON_API valueToString(LargestInt value);
-JSONCPP_STRING JSON_API valueToString(LargestUInt value);
-JSONCPP_STRING JSON_API
+String JSON_API valueToString(LargestInt value);
+String JSON_API valueToString(LargestUInt value);
+String JSON_API
 valueToString(double value,
               unsigned int precision = Value::defaultRealPrecision,
               PrecisionType precisionType = PrecisionType::significantDigits);
-JSONCPP_STRING JSON_API valueToString(bool value);
-JSONCPP_STRING JSON_API valueToQuotedString(const char* value);
+String JSON_API valueToString(bool value);
+String JSON_API valueToQuotedString(const char* value);
 
 /// \brief Output using the StyledStreamWriter.
 /// \see Json::operator>>()
-JSON_API JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM&, const Value& root);
+JSON_API OStream& operator<<(OStream&, const Value& root);
 
 } // namespace Json
 

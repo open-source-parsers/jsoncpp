@@ -80,7 +80,7 @@ TestResult::TestResult() {
   predicateStackTail_ = &rootPredicateNode_;
 }
 
-void TestResult::setTestName(const JSONCPP_STRING& name) { name_ = name; }
+void TestResult::setTestName(const Json::String& name) { name_ = name; }
 
 TestResult&
 TestResult::addFailure(const char* file, unsigned int line, const char* expr) {
@@ -150,7 +150,7 @@ void TestResult::printFailure(bool printTestName) const {
 
   // Print in reverse to display the callstack in the right order
   for (const auto& failure : failures_) {
-    JSONCPP_STRING indent(failure.nestingLevel_ * 2, ' ');
+    Json::String indent(failure.nestingLevel_ * 2, ' ');
     if (failure.file_) {
       printf("%s%s(%u): ", indent.c_str(), failure.file_, failure.line_);
     }
@@ -160,19 +160,18 @@ void TestResult::printFailure(bool printTestName) const {
       printf("\n");
     }
     if (!failure.message_.empty()) {
-      JSONCPP_STRING reindented = indentText(failure.message_, indent + "  ");
+      Json::String reindented = indentText(failure.message_, indent + "  ");
       printf("%s\n", reindented.c_str());
     }
   }
 }
 
-JSONCPP_STRING TestResult::indentText(const JSONCPP_STRING& text,
-                                      const JSONCPP_STRING& indent) {
-  JSONCPP_STRING reindented;
-  JSONCPP_STRING::size_type lastIndex = 0;
+Json::String TestResult::indentText(const Json::String& text, const Json::String& indent) {
+  Json::String reindented;
+  Json::String::size_type lastIndex = 0;
   while (lastIndex < text.size()) {
-    JSONCPP_STRING::size_type nextIndex = text.find('\n', lastIndex);
-    if (nextIndex == JSONCPP_STRING::npos) {
+    Json::String::size_type nextIndex = text.find('\n', lastIndex);
+    if (nextIndex == Json::String::npos) {
       nextIndex = text.size() - 1;
     }
     reindented += indent;
@@ -182,7 +181,7 @@ JSONCPP_STRING TestResult::indentText(const JSONCPP_STRING& text,
   return reindented;
 }
 
-TestResult& TestResult::addToLastFailure(const JSONCPP_STRING& message) {
+TestResult& TestResult::addToLastFailure(const Json::String& message) {
   if (messageTarget_ != nullptr) {
     messageTarget_->message_ += message;
   }
@@ -225,9 +224,9 @@ Runner& Runner::add(TestCaseFactory factory) {
 
 size_t Runner::testCount() const { return tests_.size(); }
 
-JSONCPP_STRING Runner::testNameAt(size_t index) const {
+Json::String Runner::testNameAt(size_t index) const {
   TestCase* test = tests_[index]();
-  JSONCPP_STRING name = test->testName();
+  Json::String name = test->testName();
   delete test;
   return name;
 }
@@ -284,7 +283,7 @@ bool Runner::runAllTest(bool printSummary) const {
   }
 }
 
-bool Runner::testIndex(const JSONCPP_STRING& testName, size_t& indexOut) const {
+bool Runner::testIndex(const Json::String& testName, size_t& indexOut) const {
   const size_t count = testCount();
   for (size_t index = 0; index < count; ++index) {
     if (testNameAt(index) == testName) {
@@ -303,10 +302,10 @@ void Runner::listTests() const {
 }
 
 int Runner::runCommandLine(int argc, const char* argv[]) const {
-  // typedef std::deque<JSONCPP_STRING> TestNames;
+  // typedef std::deque<String> TestNames;
   Runner subrunner;
   for (int index = 1; index < argc; ++index) {
-    JSONCPP_STRING opt = argv[index];
+    Json::String opt = argv[index];
     if (opt == "--list-tests") {
       listTests();
       return 0;
@@ -406,21 +405,19 @@ void Runner::printUsage(const char* appName) {
 // Assertion functions
 // //////////////////////////////////////////////////////////////////
 
-JSONCPP_STRING ToJsonString(const char* toConvert) {
-  return JSONCPP_STRING(toConvert);
-}
+Json::String ToJsonString(const char* toConvert) { return Json::String(toConvert); }
 
-JSONCPP_STRING ToJsonString(JSONCPP_STRING in) { return in; }
+Json::String ToJsonString(Json::String in) { return in; }
 
 #if JSONCPP_USING_SECURE_MEMORY
-JSONCPP_STRING ToJsonString(std::string in) {
-  return JSONCPP_STRING(in.data(), in.data() + in.length());
+Json::String ToJsonString(std::string in) {
+  return Json::String(in.data(), in.data() + in.length());
 }
 #endif
 
 TestResult& checkStringEqual(TestResult& result,
-                             const JSONCPP_STRING& expected,
-                             const JSONCPP_STRING& actual,
+                             const Json::String& expected,
+                             const Json::String& actual,
                              const char* file,
                              unsigned int line,
                              const char* expr) {

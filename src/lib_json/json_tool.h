@@ -36,8 +36,8 @@ static inline char getDecimalPoint() {
 }
 
 /// Converts a unicode code-point to UTF-8.
-static inline JSONCPP_STRING codePointToUTF8(unsigned int cp) {
-  JSONCPP_STRING result;
+static inline String codePointToUTF8(unsigned int cp) {
+  String result;
 
   // based on description from http://en.wikipedia.org/wiki/UTF-8
 
