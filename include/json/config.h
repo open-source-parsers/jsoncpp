@@ -6,8 +6,11 @@
 #ifndef JSON_CONFIG_H_INCLUDED
 #define JSON_CONFIG_H_INCLUDED
 #include <cstddef>
-#include <cstdint> //typedef int64_t, uint64_t
-#include <string>  //typedef String
+#include <cstdint>
+#include <istream>
+#include <ostream>
+#include <string>
+#include <type_traits>
 
 /// If defined, indicates that json library is embedded in CppTL library.
 //# define JSON_IN_CPPTL 1
@@ -142,11 +145,8 @@ msvc_pre1900_c99_snprintf(char* outBuf, size_t size, const char* format, ...);
 
 #if !defined(JSON_IS_AMALGAMATION)
 
+#include "allocator.h"
 #include "version.h"
-
-#if JSONCPP_USING_SECURE_MEMORY
-#include "allocator.h" //typedef Allocator
-#endif
 
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
@@ -170,24 +170,28 @@ typedef Int64 LargestInt;
 typedef UInt64 LargestUInt;
 #define JSON_HAS_INT64
 #endif // if defined(JSON_NO_INT64)
-#if JSONCPP_USING_SECURE_MEMORY
-#define JSONCPP_STRING                                                         \
-  std::basic_string<char, std::char_traits<char>, Json::SecureAllocator<char> >
-#define JSONCPP_OSTRINGSTREAM                                                  \
-  std::basic_ostringstream<char, std::char_traits<char>,                       \
-                           Json::SecureAllocator<char> >
-#define JSONCPP_OSTREAM std::basic_ostream<char, std::char_traits<char> >
-#define JSONCPP_ISTRINGSTREAM                                                  \
-  std::basic_istringstream<char, std::char_traits<char>,                       \
-                           Json::SecureAllocator<char> >
-#define JSONCPP_ISTREAM std::istream
-#else
-#define JSONCPP_STRING std::string
-#define JSONCPP_OSTRINGSTREAM std::ostringstream
-#define JSONCPP_OSTREAM std::ostream
-#define JSONCPP_ISTRINGSTREAM std::istringstream
-#define JSONCPP_ISTREAM std::istream
-#endif // if JSONCPP_USING_SECURE_MEMORY
-} // end namespace Json
+
+template <typename T>
+using Allocator = typename std::conditional<JSONCPP_USING_SECURE_MEMORY,
+                                            SecureAllocator<T>,
+                                            std::allocator<T> >::type;
+using String =
+    std::basic_string<char, std::char_traits<char>, Allocator<char> >;
+using IStringStream = std::basic_istringstream<String::value_type,
+                                               String::traits_type,
+                                               String::allocator_type>;
+using OStringStream = std::basic_ostringstream<String::value_type,
+                                               String::traits_type,
+                                               String::allocator_type>;
+using IStream = std::istream;
+using OStream = std::ostream;
+} // namespace Json
+
+// Legacy names (formerly macros).
+using JSONCPP_STRING = Json::String;
+using JSONCPP_ISTRINGSTREAM = Json::IStringStream;
+using JSONCPP_OSTRINGSTREAM = Json::OStringStream;
+using JSONCPP_ISTREAM = Json::IStream;
+using JSONCPP_OSTREAM = Json::OStream;
 
 #endif // JSON_CONFIG_H_INCLUDED
