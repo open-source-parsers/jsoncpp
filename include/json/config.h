@@ -189,11 +189,13 @@ using IStream = std::istream;
 using OStream = std::ostream;
 } // namespace Json
 
+#if 0  // easily test without these names in place
 // Legacy names (formerly macros).
 using JSONCPP_STRING = Json::String;
 using JSONCPP_ISTRINGSTREAM = Json::IStringStream;
 using JSONCPP_OSTRINGSTREAM = Json::OStringStream;
 using JSONCPP_ISTREAM = Json::IStream;
 using JSONCPP_OSTREAM = Json::OStream;
+#endif
 
 #endif // JSON_CONFIG_H_INCLUDED

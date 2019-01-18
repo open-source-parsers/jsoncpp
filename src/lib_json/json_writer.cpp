@@ -89,7 +89,7 @@ typedef std::unique_ptr<StreamWriter> StreamWriterPtr;
 typedef std::auto_ptr<StreamWriter> StreamWriterPtr;
 #endif
 
-JSONCPP_STRING valueToString(LargestInt value) {
+String valueToString(LargestInt value) {
   UIntToStringBuffer buffer;
   char* current = buffer + sizeof(buffer);
   if (value == Value::minLargestInt) {
@@ -105,7 +105,7 @@ JSONCPP_STRING valueToString(LargestInt value) {
   return current;
 }
 
-JSONCPP_STRING valueToString(LargestUInt value) {
+String valueToString(LargestUInt value) {
   UIntToStringBuffer buffer;
   char* current = buffer + sizeof(buffer);
   uintToString(value, current);
@@ -115,21 +115,17 @@ JSONCPP_STRING valueToString(LargestUInt value) {
 
 #if defined(JSON_HAS_INT64)
 
-JSONCPP_STRING valueToString(Int value) {
-  return valueToString(LargestInt(value));
-}
+String valueToString(Int value) { return valueToString(LargestInt(value)); }
 
-JSONCPP_STRING valueToString(UInt value) {
-  return valueToString(LargestUInt(value));
-}
+String valueToString(UInt value) { return valueToString(LargestUInt(value)); }
 
 #endif // # if defined(JSON_HAS_INT64)
 
 namespace {
-JSONCPP_STRING valueToString(double value,
-                             bool useSpecialFloats,
-                             unsigned int precision,
-                             PrecisionType precisionType) {
+String valueToString(double value,
+                     bool useSpecialFloats,
+                     unsigned int precision,
+                     PrecisionType precisionType) {
   // Print into the buffer. We need not request the alternative representation
   // that always has a decimal point because JSON doesn't distinguish the
   // concepts of reals and integers.
@@ -140,7 +136,7 @@ JSONCPP_STRING valueToString(double value,
                [isnan(value) ? 0 : (value < 0) ? 1 : 2];
   }
 
-  JSONCPP_STRING buffer(size_t(36), '\0');
+  String buffer(size_t(36), '\0');
   while (true) {
     int len = jsoncpp_snprintf(
         &*buffer.begin(), buffer.size(),
@@ -172,13 +168,13 @@ JSONCPP_STRING valueToString(double value,
 }
 } // namespace
 
-JSONCPP_STRING valueToString(double value,
-                             unsigned int precision,
-                             PrecisionType precisionType) {
+String valueToString(double value,
+                     unsigned int precision,
+                     PrecisionType precisionType) {
   return valueToString(value, false, precision, precisionType);
 }
 
-JSONCPP_STRING valueToString(bool value) { return value ? "true" : "false"; }
+String valueToString(bool value) { return value ? "true" : "false"; }
 
 static bool isAnyCharRequiredQuoting(char const* s, size_t n) {
   assert(s || !n);
@@ -260,10 +256,10 @@ static const char hex2[] = "000102030405060708090a0b0c0d0e0f"
                            "e0e1e2e3e4e5e6e7e8e9eaebecedeeef"
                            "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff";
 
-static JSONCPP_STRING toHex16Bit(unsigned int x) {
+static String toHex16Bit(unsigned int x) {
   const unsigned int hi = (x >> 8) & 0xff;
   const unsigned int lo = x & 0xff;
-  JSONCPP_STRING result(4, ' ');
+  String result(4, ' ');
   result[0] = hex2[2 * hi];
   result[1] = hex2[2 * hi + 1];
   result[2] = hex2[2 * lo];
@@ -271,17 +267,17 @@ static JSONCPP_STRING toHex16Bit(unsigned int x) {
   return result;
 }
 
-static JSONCPP_STRING valueToQuotedStringN(const char* value, unsigned length) {
+static String valueToQuotedStringN(const char* value, unsigned length) {
   if (value == nullptr)
     return "";
 
   if (!isAnyCharRequiredQuoting(value, length))
-    return JSONCPP_STRING("\"") + value + "\"";
+    return String("\"") + value + "\"";
   // We have to walk value and escape any special characters.
-  // Appending to JSONCPP_STRING is not efficient, but this should be rare.
+  // Appending to String is not efficient, but this should be rare.
   // (Note: forward slashes are *not* rare, but I am not escaping them.)
-  JSONCPP_STRING::size_type maxsize = length * 2 + 3; // allescaped+quotes+NULL
-  JSONCPP_STRING result;
+  String::size_type maxsize = length * 2 + 3; // allescaped+quotes+NULL
+  String result;
   result.reserve(maxsize); // to avoid lots of mallocs
   result += "\"";
   char const* end = value + length;
@@ -340,7 +336,7 @@ static JSONCPP_STRING valueToQuotedStringN(const char* value, unsigned length) {
   return result;
 }
 
-JSONCPP_STRING valueToQuotedString(const char* value) {
+String valueToQuotedString(const char* value) {
   return valueToQuotedStringN(value, static_cast<unsigned int>(strlen(value)));
 }
 
@@ -361,7 +357,7 @@ void FastWriter::dropNullPlaceholders() { dropNullPlaceholders_ = true; }
 
 void FastWriter::omitEndingLineFeed() { omitEndingLineFeed_ = true; }
 
-JSONCPP_STRING FastWriter::write(const Value& root) {
+String FastWriter::write(const Value& root) {
   document_.clear();
   writeValue(root);
   if (!omitEndingLineFeed_)
@@ -410,7 +406,7 @@ void FastWriter::writeValue(const Value& value) {
     Value::Members members(value.getMemberNames());
     document_ += '{';
     for (auto it = members.begin(); it != members.end(); ++it) {
-      const JSONCPP_STRING& name = *it;
+      const String& name = *it;
       if (it != members.begin())
         document_ += ',';
       document_ += valueToQuotedStringN(name.data(),
@@ -428,7 +424,7 @@ void FastWriter::writeValue(const Value& value) {
 
 StyledWriter::StyledWriter() = default;
 
-JSONCPP_STRING StyledWriter::write(const Value& root) {
+String StyledWriter::write(const Value& root) {
   document_.clear();
   addChildValues_ = false;
   indentString_.clear();
@@ -479,7 +475,7 @@ void StyledWriter::writeValue(const Value& value) {
       indent();
       auto it = members.begin();
       for (;;) {
-        const JSONCPP_STRING& name = *it;
+        const String& name = *it;
         const Value& childValue = value[name];
         writeCommentBeforeValue(childValue);
         writeWithIndent(valueToQuotedString(name.c_str()));
@@ -569,7 +565,7 @@ bool StyledWriter::isMultilineArray(const Value& value) {
   return isMultiLine;
 }
 
-void StyledWriter::pushValue(const JSONCPP_STRING& value) {
+void StyledWriter::pushValue(const String& value) {
   if (addChildValues_)
     childValues_.push_back(value);
   else
@@ -587,14 +583,12 @@ void StyledWriter::writeIndent() {
   document_ += indentString_;
 }
 
-void StyledWriter::writeWithIndent(const JSONCPP_STRING& value) {
+void StyledWriter::writeWithIndent(const String& value) {
   writeIndent();
   document_ += value;
 }
 
-void StyledWriter::indent() {
-  indentString_ += JSONCPP_STRING(indentSize_, ' ');
-}
+void StyledWriter::indent() { indentString_ += String(indentSize_, ' '); }
 
 void StyledWriter::unindent() {
   assert(indentString_.size() >= indentSize_);
@@ -607,8 +601,8 @@ void StyledWriter::writeCommentBeforeValue(const Value& root) {
 
   document_ += '\n';
   writeIndent();
-  const JSONCPP_STRING& comment = root.getComment(commentBefore);
-  JSONCPP_STRING::const_iterator iter = comment.begin();
+  const String& comment = root.getComment(commentBefore);
+  String::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
     document_ += *iter;
     if (*iter == '\n' && ((iter + 1) != comment.end() && *(iter + 1) == '/'))
@@ -640,11 +634,11 @@ bool StyledWriter::hasCommentForValue(const Value& value) {
 // Class StyledStreamWriter
 // //////////////////////////////////////////////////////////////////
 
-StyledStreamWriter::StyledStreamWriter(JSONCPP_STRING indentation)
+StyledStreamWriter::StyledStreamWriter(String indentation)
     : document_(nullptr), indentation_(std::move(indentation)),
       addChildValues_(), indented_(false) {}
 
-void StyledStreamWriter::write(JSONCPP_OSTREAM& out, const Value& root) {
+void StyledStreamWriter::write(OStream& out, const Value& root) {
   document_ = &out;
   addChildValues_ = false;
   indentString_.clear();
@@ -699,7 +693,7 @@ void StyledStreamWriter::writeValue(const Value& value) {
       indent();
       auto it = members.begin();
       for (;;) {
-        const JSONCPP_STRING& name = *it;
+        const String& name = *it;
         const Value& childValue = value[name];
         writeCommentBeforeValue(childValue);
         writeWithIndent(valueToQuotedString(name.c_str()));
@@ -792,7 +786,7 @@ bool StyledStreamWriter::isMultilineArray(const Value& value) {
   return isMultiLine;
 }
 
-void StyledStreamWriter::pushValue(const JSONCPP_STRING& value) {
+void StyledStreamWriter::pushValue(const String& value) {
   if (addChildValues_)
     childValues_.push_back(value);
   else
@@ -807,7 +801,7 @@ void StyledStreamWriter::writeIndent() {
   *document_ << '\n' << indentString_;
 }
 
-void StyledStreamWriter::writeWithIndent(const JSONCPP_STRING& value) {
+void StyledStreamWriter::writeWithIndent(const String& value) {
   if (!indented_)
     writeIndent();
   *document_ << value;
@@ -827,8 +821,8 @@ void StyledStreamWriter::writeCommentBeforeValue(const Value& root) {
 
   if (!indented_)
     writeIndent();
-  const JSONCPP_STRING& comment = root.getComment(commentBefore);
-  JSONCPP_STRING::const_iterator iter = comment.begin();
+  const String& comment = root.getComment(commentBefore);
+  String::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
     *document_ << *iter;
     if (*iter == '\n' && ((iter + 1) != comment.end() && *(iter + 1) == '/'))
@@ -870,61 +864,60 @@ struct CommentStyle {
 };
 
 struct BuiltStyledStreamWriter : public StreamWriter {
-  BuiltStyledStreamWriter(JSONCPP_STRING indentation,
+  BuiltStyledStreamWriter(String indentation,
                           CommentStyle::Enum cs,
-                          JSONCPP_STRING colonSymbol,
-                          JSONCPP_STRING nullSymbol,
-                          JSONCPP_STRING endingLineFeedSymbol,
+                          String colonSymbol,
+                          String nullSymbol,
+                          String endingLineFeedSymbol,
                           bool useSpecialFloats,
                           unsigned int precision,
                           PrecisionType precisionType);
-  int write(Value const& root, JSONCPP_OSTREAM* sout) override;
+  int write(Value const& root, OStream* sout) override;
 
 private:
   void writeValue(Value const& value);
   void writeArrayValue(Value const& value);
   bool isMultilineArray(Value const& value);
-  void pushValue(JSONCPP_STRING const& value);
+  void pushValue(String const& value);
   void writeIndent();
-  void writeWithIndent(JSONCPP_STRING const& value);
+  void writeWithIndent(String const& value);
   void indent();
   void unindent();
   void writeCommentBeforeValue(Value const& root);
   void writeCommentAfterValueOnSameLine(Value const& root);
   static bool hasCommentForValue(const Value& value);
 
-  typedef std::vector<JSONCPP_STRING> ChildValues;
+  typedef std::vector<String> ChildValues;
 
   ChildValues childValues_;
-  JSONCPP_STRING indentString_;
+  String indentString_;
   unsigned int rightMargin_;
-  JSONCPP_STRING indentation_;
+  String indentation_;
   CommentStyle::Enum cs_;
-  JSONCPP_STRING colonSymbol_;
-  JSONCPP_STRING nullSymbol_;
-  JSONCPP_STRING endingLineFeedSymbol_;
+  String colonSymbol_;
+  String nullSymbol_;
+  String endingLineFeedSymbol_;
   bool addChildValues_ : 1;
   bool indented_ : 1;
   bool useSpecialFloats_ : 1;
   unsigned int precision_;
   PrecisionType precisionType_;
 };
-BuiltStyledStreamWriter::BuiltStyledStreamWriter(
-    JSONCPP_STRING indentation,
-    CommentStyle::Enum cs,
-    JSONCPP_STRING colonSymbol,
-    JSONCPP_STRING nullSymbol,
-    JSONCPP_STRING endingLineFeedSymbol,
-    bool useSpecialFloats,
-    unsigned int precision,
-    PrecisionType precisionType)
+BuiltStyledStreamWriter::BuiltStyledStreamWriter(String indentation,
+                                                 CommentStyle::Enum cs,
+                                                 String colonSymbol,
+                                                 String nullSymbol,
+                                                 String endingLineFeedSymbol,
+                                                 bool useSpecialFloats,
+                                                 unsigned int precision,
+                                                 PrecisionType precisionType)
     : rightMargin_(74), indentation_(std::move(indentation)), cs_(cs),
       colonSymbol_(std::move(colonSymbol)), nullSymbol_(std::move(nullSymbol)),
       endingLineFeedSymbol_(std::move(endingLineFeedSymbol)),
       addChildValues_(false), indented_(false),
       useSpecialFloats_(useSpecialFloats), precision_(precision),
       precisionType_(precisionType) {}
-int BuiltStyledStreamWriter::write(Value const& root, JSONCPP_OSTREAM* sout) {
+int BuiltStyledStreamWriter::write(Value const& root, OStream* sout) {
   sout_ = sout;
   addChildValues_ = false;
   indented_ = true;
@@ -980,7 +973,7 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
       indent();
       auto it = members.begin();
       for (;;) {
-        JSONCPP_STRING const& name = *it;
+        String const& name = *it;
         Value const& childValue = value[name];
         writeCommentBeforeValue(childValue);
         writeWithIndent(valueToQuotedStringN(
@@ -1078,7 +1071,7 @@ bool BuiltStyledStreamWriter::isMultilineArray(Value const& value) {
   return isMultiLine;
 }
 
-void BuiltStyledStreamWriter::pushValue(JSONCPP_STRING const& value) {
+void BuiltStyledStreamWriter::pushValue(String const& value) {
   if (addChildValues_)
     childValues_.push_back(value);
   else
@@ -1097,7 +1090,7 @@ void BuiltStyledStreamWriter::writeIndent() {
   }
 }
 
-void BuiltStyledStreamWriter::writeWithIndent(JSONCPP_STRING const& value) {
+void BuiltStyledStreamWriter::writeWithIndent(String const& value) {
   if (!indented_)
     writeIndent();
   *sout_ << value;
@@ -1119,8 +1112,8 @@ void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
 
   if (!indented_)
     writeIndent();
-  const JSONCPP_STRING& comment = root.getComment(commentBefore);
-  JSONCPP_STRING::const_iterator iter = comment.begin();
+  const String& comment = root.getComment(commentBefore);
+  String::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
     *sout_ << *iter;
     if (*iter == '\n' && ((iter + 1) != comment.end() && *(iter + 1) == '/'))
@@ -1160,9 +1153,9 @@ StreamWriter::Factory::~Factory() = default;
 StreamWriterBuilder::StreamWriterBuilder() { setDefaults(&settings_); }
 StreamWriterBuilder::~StreamWriterBuilder() = default;
 StreamWriter* StreamWriterBuilder::newStreamWriter() const {
-  JSONCPP_STRING indentation = settings_["indentation"].asString();
-  JSONCPP_STRING cs_str = settings_["commentStyle"].asString();
-  JSONCPP_STRING pt_str = settings_["precisionType"].asString();
+  String indentation = settings_["indentation"].asString();
+  String cs_str = settings_["commentStyle"].asString();
+  String pt_str = settings_["precisionType"].asString();
   bool eyc = settings_["enableYAMLCompatibility"].asBool();
   bool dnp = settings_["dropNullPlaceholders"].asBool();
   bool usf = settings_["useSpecialFloats"].asBool();
@@ -1183,24 +1176,24 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const {
   } else {
     throwRuntimeError("precisionType must be 'significant' or 'decimal'");
   }
-  JSONCPP_STRING colonSymbol = " : ";
+  String colonSymbol = " : ";
   if (eyc) {
     colonSymbol = ": ";
   } else if (indentation.empty()) {
     colonSymbol = ":";
   }
-  JSONCPP_STRING nullSymbol = "null";
+  String nullSymbol = "null";
   if (dnp) {
     nullSymbol.clear();
   }
   if (pre > 17)
     pre = 17;
-  JSONCPP_STRING endingLineFeedSymbol;
+  String endingLineFeedSymbol;
   return new BuiltStyledStreamWriter(indentation, cs, colonSymbol, nullSymbol,
                                      endingLineFeedSymbol, usf, pre,
                                      precisionType);
 }
-static void getValidWriterKeys(std::set<JSONCPP_STRING>* valid_keys) {
+static void getValidWriterKeys(std::set<String>* valid_keys) {
   valid_keys->clear();
   valid_keys->insert("indentation");
   valid_keys->insert("commentStyle");
@@ -1215,19 +1208,19 @@ bool StreamWriterBuilder::validate(Json::Value* invalid) const {
   if (!invalid)
     invalid = &my_invalid; // so we do not need to test for NULL
   Json::Value& inv = *invalid;
-  std::set<JSONCPP_STRING> valid_keys;
+  std::set<String> valid_keys;
   getValidWriterKeys(&valid_keys);
   Value::Members keys = settings_.getMemberNames();
   size_t n = keys.size();
   for (size_t i = 0; i < n; ++i) {
-    JSONCPP_STRING const& key = keys[i];
+    String const& key = keys[i];
     if (valid_keys.find(key) == valid_keys.end()) {
       inv[key] = settings_[key];
     }
   }
   return inv.empty();
 }
-Value& StreamWriterBuilder::operator[](const JSONCPP_STRING& key) {
+Value& StreamWriterBuilder::operator[](const String& key) {
   return settings_[key];
 }
 // static
@@ -1243,15 +1236,14 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings) {
   //! [StreamWriterBuilderDefaults]
 }
 
-JSONCPP_STRING writeString(StreamWriter::Factory const& factory,
-                           Value const& root) {
-  JSONCPP_OSTRINGSTREAM sout;
+String writeString(StreamWriter::Factory const& factory, Value const& root) {
+  OStringStream sout;
   StreamWriterPtr const writer(factory.newStreamWriter());
   writer->write(root, &sout);
   return sout.str();
 }
 
-JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM& sout, Value const& root) {
+OStream& operator<<(OStream& sout, Value const& root) {
   StreamWriterBuilder builder;
   StreamWriterPtr const writer(builder.newStreamWriter());
   writer->write(root, &sout);

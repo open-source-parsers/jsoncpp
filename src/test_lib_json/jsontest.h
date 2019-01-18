@@ -32,8 +32,8 @@ class Failure {
 public:
   const char* file_;
   unsigned int line_;
-  JSONCPP_STRING expr_;
-  JSONCPP_STRING message_;
+  Json::String expr_;
+  Json::String message_;
   unsigned int nestingLevel_;
 };
 
@@ -65,7 +65,7 @@ public:
   /// \internal Implementation detail for predicate macros
   PredicateContext* predicateStackTail_;
 
-  void setTestName(const JSONCPP_STRING& name);
+  void setTestName(const Json::String& name);
 
   /// Adds an assertion failure.
   TestResult&
@@ -82,7 +82,7 @@ public:
 
   // Generic operator that will work with anything ostream can deal with.
   template <typename T> TestResult& operator<<(const T& value) {
-    JSONCPP_OSTRINGSTREAM oss;
+    Json::OStringStream oss;
     oss.precision(16);
     oss.setf(std::ios_base::floatfield);
     oss << value;
@@ -96,18 +96,17 @@ public:
   TestResult& operator<<(Json::UInt64 value);
 
 private:
-  TestResult& addToLastFailure(const JSONCPP_STRING& message);
+  TestResult& addToLastFailure(const Json::String& message);
   /// Adds a failure or a predicate context
   void addFailureInfo(const char* file,
                       unsigned int line,
                       const char* expr,
                       unsigned int nestingLevel);
-  static JSONCPP_STRING indentText(const JSONCPP_STRING& text,
-                                   const JSONCPP_STRING& indent);
+  static Json::String indentText(const Json::String& text, const Json::String& indent);
 
   typedef std::deque<Failure> Failures;
   Failures failures_;
-  JSONCPP_STRING name_;
+  Json::String name_;
   PredicateContext rootPredicateNode_;
   PredicateContext::Id lastUsedPredicateId_{ 0 };
   /// Failure which is the target of the messages added using operator <<
@@ -154,7 +153,7 @@ public:
   size_t testCount() const;
 
   /// Returns the name of the test case at the specified index
-  JSONCPP_STRING testNameAt(size_t index) const;
+  Json::String testNameAt(size_t index) const;
 
   /// Runs the test case at the specified index using the specified TestResult
   void runTestAt(size_t index, TestResult& result) const;
@@ -167,7 +166,7 @@ private: // prevents copy construction and assignment
 
 private:
   void listTests() const;
-  bool testIndex(const JSONCPP_STRING& testName, size_t& indexOut) const;
+  bool testIndex(const Json::String& testName, size_t& indexOut) const;
   static void preventDialogOnCrash();
 
 private:
@@ -190,15 +189,15 @@ TestResult& checkEqual(TestResult& result,
   return result;
 }
 
-JSONCPP_STRING ToJsonString(const char* toConvert);
-JSONCPP_STRING ToJsonString(JSONCPP_STRING in);
+Json::String ToJsonString(const char* toConvert);
+Json::String ToJsonString(Json::String in);
 #if JSONCPP_USING_SECURE_MEMORY
-JSONCPP_STRING ToJsonString(std::string in);
+Json::String ToJsonString(std::string in);
 #endif
 
 TestResult& checkStringEqual(TestResult& result,
-                             const JSONCPP_STRING& expected,
-                             const JSONCPP_STRING& actual,
+                             const Json::String& expected,
+                             const Json::String& actual,
                              const char* file,
                              unsigned int line,
                              const char* expr);
