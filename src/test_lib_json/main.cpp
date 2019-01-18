@@ -82,19 +82,19 @@ struct ValueTest : JsonTest::TestCase {
     /// Initialize all checks to \c false by default.
     IsCheck();
 
-    bool isObject_{ false };
-    bool isArray_{ false };
-    bool isBool_{ false };
-    bool isString_{ false };
-    bool isNull_{ false };
+    bool isObject_{false};
+    bool isArray_{false};
+    bool isBool_{false};
+    bool isString_{false};
+    bool isNull_{false};
 
-    bool isInt_{ false };
-    bool isInt64_{ false };
-    bool isUInt_{ false };
-    bool isUInt64_{ false };
-    bool isIntegral_{ false };
-    bool isDouble_{ false };
-    bool isNumeric_{ false };
+    bool isInt_{false};
+    bool isInt64_{false};
+    bool isUInt_{false};
+    bool isUInt64_{false};
+    bool isIntegral_{false};
+    bool isDouble_{false};
+    bool isNumeric_{false};
   };
 
   void checkConstMemberCount(const Json::Value& value,
@@ -120,10 +120,11 @@ Json::String ValueTest::normalizeFloatingPointStr(const Json::String& s) {
         (s[index + 1] == '+' || s[index + 1] == '-') ? 1 : 0;
     Json::String::size_type exponentStartIndex = index + 1 + hasSign;
     Json::String normalized = s.substr(0, exponentStartIndex);
-    Json::String::size_type indexDigit = s.find_first_not_of('0', exponentStartIndex);
+    Json::String::size_type indexDigit =
+        s.find_first_not_of('0', exponentStartIndex);
     Json::String exponent = "0";
     if (indexDigit != Json::String::npos) // There is an exponent different
-                                    // from 0
+                                          // from 0
     {
       exponent = s.substr(indexDigit);
     }
@@ -2353,22 +2354,22 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
     Json::String in;
   };
   const TestData test_data[] = {
-    { __LINE__, true, "{\"a\":9}" },          //
-    { __LINE__, false, "{\"a\":0Infinity}" }, //
-    { __LINE__, false, "{\"a\":1Infinity}" }, //
-    { __LINE__, false, "{\"a\":9Infinity}" }, //
-    { __LINE__, false, "{\"a\":0nfinity}" },  //
-    { __LINE__, false, "{\"a\":1nfinity}" },  //
-    { __LINE__, false, "{\"a\":9nfinity}" },  //
-    { __LINE__, false, "{\"a\":nfinity}" },   //
-    { __LINE__, false, "{\"a\":.nfinity}" },  //
-    { __LINE__, false, "{\"a\":9nfinity}" },  //
-    { __LINE__, false, "{\"a\":-nfinity}" },  //
-    { __LINE__, true, "{\"a\":Infinity}" },   //
-    { __LINE__, false, "{\"a\":.Infinity}" }, //
-    { __LINE__, false, "{\"a\":_Infinity}" }, //
-    { __LINE__, false, "{\"a\":_nfinity}" },  //
-    { __LINE__, true, "{\"a\":-Infinity}" }   //
+      {__LINE__, true, "{\"a\":9}"},          //
+      {__LINE__, false, "{\"a\":0Infinity}"}, //
+      {__LINE__, false, "{\"a\":1Infinity}"}, //
+      {__LINE__, false, "{\"a\":9Infinity}"}, //
+      {__LINE__, false, "{\"a\":0nfinity}"},  //
+      {__LINE__, false, "{\"a\":1nfinity}"},  //
+      {__LINE__, false, "{\"a\":9nfinity}"},  //
+      {__LINE__, false, "{\"a\":nfinity}"},   //
+      {__LINE__, false, "{\"a\":.nfinity}"},  //
+      {__LINE__, false, "{\"a\":9nfinity}"},  //
+      {__LINE__, false, "{\"a\":-nfinity}"},  //
+      {__LINE__, true, "{\"a\":Infinity}"},   //
+      {__LINE__, false, "{\"a\":.Infinity}"}, //
+      {__LINE__, false, "{\"a\":_Infinity}"}, //
+      {__LINE__, false, "{\"a\":_nfinity}"},  //
+      {__LINE__, true, "{\"a\":-Infinity}"}   //
   };
   for (const auto& td : test_data) {
     bool ok = reader->parse(&*td.in.begin(), &*td.in.begin() + td.in.size(),

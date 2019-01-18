@@ -176,9 +176,8 @@ typedef UInt64 LargestUInt;
 template <typename T>
 using Allocator = typename std::conditional<JSONCPP_USING_SECURE_MEMORY,
                                             SecureAllocator<T>,
-                                            std::allocator<T> >::type;
-using String =
-    std::basic_string<char, std::char_traits<char>, Allocator<char> >;
+                                            std::allocator<T>>::type;
+using String = std::basic_string<char, std::char_traits<char>, Allocator<char>>;
 using IStringStream = std::basic_istringstream<String::value_type,
                                                String::traits_type,
                                                String::allocator_type>;

@@ -166,7 +166,8 @@ void TestResult::printFailure(bool printTestName) const {
   }
 }
 
-Json::String TestResult::indentText(const Json::String& text, const Json::String& indent) {
+Json::String TestResult::indentText(const Json::String& text,
+                                    const Json::String& indent) {
   Json::String reindented;
   Json::String::size_type lastIndex = 0;
   while (lastIndex < text.size()) {
@@ -405,7 +406,9 @@ void Runner::printUsage(const char* appName) {
 // Assertion functions
 // //////////////////////////////////////////////////////////////////
 
-Json::String ToJsonString(const char* toConvert) { return Json::String(toConvert); }
+Json::String ToJsonString(const char* toConvert) {
+  return Json::String(toConvert);
+}
 
 Json::String ToJsonString(Json::String in) { return in; }
 

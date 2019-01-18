@@ -60,7 +60,7 @@ public:
   /// Not encapsulated to prevent step into when debugging failed assertions
   /// Incremented by one on assertion predicate entry, decreased by one
   /// by addPredicateContext().
-  PredicateContext::Id predicateId_{ 1 };
+  PredicateContext::Id predicateId_{1};
 
   /// \internal Implementation detail for predicate macros
   PredicateContext* predicateStackTail_;
@@ -102,15 +102,16 @@ private:
                       unsigned int line,
                       const char* expr,
                       unsigned int nestingLevel);
-  static Json::String indentText(const Json::String& text, const Json::String& indent);
+  static Json::String indentText(const Json::String& text,
+                                 const Json::String& indent);
 
   typedef std::deque<Failure> Failures;
   Failures failures_;
   Json::String name_;
   PredicateContext rootPredicateNode_;
-  PredicateContext::Id lastUsedPredicateId_{ 0 };
+  PredicateContext::Id lastUsedPredicateId_{0};
   /// Failure which is the target of the messages added using operator <<
-  Failure* messageTarget_{ nullptr };
+  Failure* messageTarget_{nullptr};
 };
 
 class TestCase {
@@ -124,7 +125,7 @@ public:
   virtual const char* testName() const = 0;
 
 protected:
-  TestResult* result_{ nullptr };
+  TestResult* result_{nullptr};
 
 private:
   virtual void runTestCase() = 0;
@@ -218,8 +219,7 @@ TestResult& checkStringEqual(TestResult& result,
 #define JSONTEST_ASSERT_PRED(expr)                                             \
   {                                                                            \
     JsonTest::PredicateContext _minitest_Context = {                           \
-      result_->predicateId_, __FILE__, __LINE__, #expr, NULL, NULL             \
-    };                                                                         \
+        result_->predicateId_, __FILE__, __LINE__, #expr, NULL, NULL};         \
     result_->predicateStackTail_->next_ = &_minitest_Context;                  \
     result_->predicateId_ += 1;                                                \
     result_->predicateStackTail_ = &_minitest_Context;                         \
