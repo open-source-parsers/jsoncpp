@@ -8,7 +8,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <istream>
+#include <memory>
+#include <istream>
 #include <ostream>
+#include <sstream>
 #include <string>
 #include <type_traits>
 
