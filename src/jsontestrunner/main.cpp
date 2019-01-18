@@ -22,7 +22,7 @@ struct Options {
   Json::String path;
   Json::Features features;
   bool parseOnly;
-  using writeFuncType = Json::String(*)(Json::Value const&);
+  using writeFuncType = Json::String (*)(Json::Value const&);
   writeFuncType write;
 };
 
@@ -37,10 +37,11 @@ static Json::String normalizeFloatingPointStr(double value) {
         (s[index + 1] == '+' || s[index + 1] == '-') ? 1 : 0;
     Json::String::size_type exponentStartIndex = index + 1 + hasSign;
     Json::String normalized = s.substr(0, exponentStartIndex);
-    Json::String::size_type indexDigit = s.find_first_not_of('0', exponentStartIndex);
+    Json::String::size_type indexDigit =
+        s.find_first_not_of('0', exponentStartIndex);
     Json::String exponent = "0";
     if (indexDigit != Json::String::npos) // There is an exponent different
-                                    // from 0
+                                          // from 0
     {
       exponent = s.substr(indexDigit);
     }
@@ -180,7 +181,8 @@ static int rewriteValueTree(const Json::String& rewritePath,
   return 0;
 }
 
-static Json::String removeSuffix(const Json::String& path, const Json::String& extension) {
+static Json::String removeSuffix(const Json::String& path,
+                                 const Json::String& extension) {
   if (extension.length() >= path.length())
     return Json::String("");
   Json::String suffix = path.substr(path.length() - extension.length());

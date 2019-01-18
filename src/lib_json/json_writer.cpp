@@ -130,8 +130,8 @@ String valueToString(double value,
   // that always has a decimal point because JSON doesn't distinguish the
   // concepts of reals and integers.
   if (!isfinite(value)) {
-    static const char* const reps[2][3] = { { "NaN", "-Infinity", "Infinity" },
-                                            { "null", "-1e+9999", "1e+9999" } };
+    static const char* const reps[2][3] = {{"NaN", "-Infinity", "Infinity"},
+                                           {"null", "-1e+9999", "1e+9999"}};
     return reps[useSpecialFloats ? 0 : 1]
                [isnan(value) ? 0 : (value < 0) ? 1 : 2];
   }
