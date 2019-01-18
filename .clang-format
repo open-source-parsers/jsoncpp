@@ -29,8 +29,8 @@ PenaltyExcessCharacter: 1000000
 PenaltyReturnTypeOnItsOwnLine: 60
 PointerBindsToType: true
 SpacesBeforeTrailingComments: 1
-Cpp11BracedListStyle: false
-Standard:        Cpp03
+Cpp11BracedListStyle: true
+Standard:        Cpp11
 IndentWidth:     2
 TabWidth:        8
 UseTab:          Never
