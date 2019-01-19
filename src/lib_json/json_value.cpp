@@ -497,10 +497,18 @@ Value::~Value() {
   value_.uint_ = 0;
 }
 
-Value& Value::operator=(Value other) {
+Value& Value::operator=(const Value& other) {
+  Value tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+#if JSON_HAS_RVALUE_REFERENCES
+Value& Value::operator=(Value&& other) {
   swap(other);
   return *this;
 }
+#endif
 
 void Value::swapPayload(Value& other) {
   ValueType temp = type_;
