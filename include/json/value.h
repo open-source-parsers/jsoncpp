@@ -338,18 +338,14 @@ Json::Value obj_value(Json::objectValue); // {}
   Value(const CppTL::ConstString& value);
 #endif
   Value(bool value);
-  /// Deep copy.
   Value(const Value& other);
-#if JSON_HAS_RVALUE_REFERENCES
-  /// Move constructor
   Value(Value&& other);
-#endif
   ~Value();
 
-  /// Deep copy, then swap(other).
-  /// \note Over-write existing comments. To preserve comments, use
+  /// \note Overwrite existing comments. To preserve comments, use
   /// #swapPayload().
-  Value& operator=(Value other);
+  Value& operator=(const Value& other);
+  Value& operator=(Value&& other);
 
   /// Swap everything.
   void swap(Value& other);
@@ -616,6 +612,10 @@ Json::Value obj_value(Json::objectValue); // {}
   ptrdiff_t getOffsetLimit() const;
 
 private:
+  void setType(ValueType v) { bits_.value_type_ = v; }
+  bool isAllocated() const { return bits_.allocated_; }
+  void setIsAllocated(bool v) { bits_.allocated_ = v; }
+
   void initBasic(ValueType type, bool allocated = false);
   void dupPayload(const Value& other);
   void releasePayload();
@@ -647,14 +647,17 @@ private:
     LargestUInt uint_;
     double real_;
     bool bool_;
-    char* string_; // actually ptr to unsigned, followed by str, unless
-                   // !allocated_
+    char* string_; // if allocated_, ptr to { unsigned, char[] }.
     ObjectValues* map_;
   } value_;
-  ValueType type_ : 8;
-  unsigned int allocated_ : 1; // Notes: if declared as bool, bitfield is
-                               // useless. If not allocated_, string_ must be
-                               // null-terminated.
+
+  struct {
+    // Really a ValueType, but types should agree for bitfield packing.
+    unsigned int value_type_ : 8;
+    // Unless allocated_, string_ must be null-terminated.
+    unsigned int allocated_ : 1;
+  } bits_;
+
   CommentInfo* comments_;
 
   // [start, limit) byte offsets in the source JSON text from which this Value
