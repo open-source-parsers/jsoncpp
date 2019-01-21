@@ -1440,8 +1440,16 @@ bool Value::isObject() const { return type() == objectValue; }
 Value::Comments::Comments(const Comments& that)
     : ptr_{cloneUnique(that.ptr_)} {}
 
+Value::Comments::Comments(Comments&& that)
+    : ptr_{std::move(that.ptr_)} {}
+
 Value::Comments& Value::Comments::operator=(const Comments& that) {
   ptr_ = cloneUnique(that.ptr_);
+  return *this;
+}
+
+Value::Comments& Value::Comments::operator=(Comments&& that) {
+  ptr_ = std::move(that.ptr_);
   return *this;
 }
 

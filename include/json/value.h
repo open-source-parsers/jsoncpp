@@ -659,9 +659,9 @@ private:
   public:
     Comments() = default;
     Comments(const Comments& that);
-    Comments(Comments&&) = default;
+    Comments(Comments&& that);
     Comments& operator=(const Comments& that);
-    Comments& operator=(Comments&&) = default;
+    Comments& operator=(Comments&& that);
     bool has(CommentPlacement slot) const;
     String get(CommentPlacement slot) const;
     void set(CommentPlacement slot, String s);
