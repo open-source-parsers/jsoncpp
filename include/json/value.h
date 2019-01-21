@@ -249,15 +249,10 @@ private:
     CZString(ArrayIndex index);
     CZString(char const* str, unsigned length, DuplicationPolicy allocate);
     CZString(CZString const& other);
-#if JSON_HAS_RVALUE_REFERENCES
     CZString(CZString&& other);
-#endif
     ~CZString();
     CZString& operator=(const CZString& other);
-
-#if JSON_HAS_RVALUE_REFERENCES
     CZString& operator=(CZString&& other);
-#endif
 
     bool operator<(CZString const& other) const;
     bool operator==(CZString const& other) const;
@@ -466,10 +461,7 @@ Json::Value obj_value(Json::objectValue); // {}
   ///
   /// Equivalent to jsonvalue[jsonvalue.size()] = value;
   Value& append(const Value& value);
-
-#if JSON_HAS_RVALUE_REFERENCES
   Value& append(Value&& value);
-#endif
 
   /// Access an object value by name, create a null member if it does not exist.
   /// \note Because of our implementation, keys are limited to 2^30 -1 chars.

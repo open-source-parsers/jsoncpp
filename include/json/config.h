@@ -101,30 +101,6 @@ msvc_pre1900_c99_snprintf(char* outBuf, size_t size, const char* format, ...);
 #define JSONCPP_OP_EXPLICIT
 #endif
 
-#ifndef JSON_HAS_RVALUE_REFERENCES
-
-#if defined(_MSC_VER)
-#define JSON_HAS_RVALUE_REFERENCES 1
-#endif // MSVC >= 2013
-
-#ifdef __clang__
-#if __has_feature(cxx_rvalue_references)
-#define JSON_HAS_RVALUE_REFERENCES 1
-#endif // has_feature
-
-#elif defined __GNUC__ // not clang (gcc comes later since clang emulates gcc)
-#if defined(__GXX_EXPERIMENTAL_CXX0X__) || (__cplusplus >= 201103L)
-#define JSON_HAS_RVALUE_REFERENCES 1
-#endif // GXX_EXPERIMENTAL
-
-#endif // __clang__ || __GNUC__
-
-#endif // not defined JSON_HAS_RVALUE_REFERENCES
-
-#ifndef JSON_HAS_RVALUE_REFERENCES
-#define JSON_HAS_RVALUE_REFERENCES 0
-#endif
-
 #ifdef __clang__
 #if __has_extension(attribute_deprecated_with_message)
 #define JSONCPP_DEPRECATED(message) __attribute__((deprecated(message)))
