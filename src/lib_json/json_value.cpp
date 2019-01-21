@@ -55,6 +55,15 @@ int JSON_API msvc_pre1900_c99_snprintf(char* outBuf,
 
 namespace Json {
 
+template <typename T>
+static std::unique_ptr<T> cloneUnique(const std::unique_ptr<T>& p) {
+  std::unique_ptr<T> r;
+  if (p) {
+    r = std::unique_ptr<T>(new T(*p));
+  }
+  return r;
+}
+
 // This is a walkaround to avoid the static initialization of Value::null.
 // kNull must be word-aligned to avoid crashing on ARM.  We use an alignment of
 // 8 (instead of 4) as a bit of future-proofing.
@@ -227,34 +236,6 @@ JSONCPP_NORETURN void throwRuntimeError(String const& msg) {
 }
 JSONCPP_NORETURN void throwLogicError(String const& msg) {
   throw LogicError(msg);
-}
-
-// //////////////////////////////////////////////////////////////////
-// //////////////////////////////////////////////////////////////////
-// //////////////////////////////////////////////////////////////////
-// class Value::CommentInfo
-// //////////////////////////////////////////////////////////////////
-// //////////////////////////////////////////////////////////////////
-// //////////////////////////////////////////////////////////////////
-
-Value::CommentInfo::CommentInfo() = default;
-
-Value::CommentInfo::~CommentInfo() {
-  if (comment_)
-    releaseStringValue(comment_, 0u);
-}
-
-void Value::CommentInfo::setComment(const char* text, size_t len) {
-  if (comment_) {
-    releaseStringValue(comment_, 0u);
-    comment_ = nullptr;
-  }
-  JSON_ASSERT(text != nullptr);
-  JSON_ASSERT_MESSAGE(
-      text[0] == '\0' || text[0] == '/',
-      "in Json::Value::setComment(): Comments must start with /");
-  // It seems that /**/ style comments are acceptable as well.
-  comment_ = duplicateStringValue(text, len);
 }
 
 // //////////////////////////////////////////////////////////////////
@@ -488,7 +469,6 @@ Value::Value(Value&& other) {
 
 Value::~Value() {
   releasePayload();
-  delete[] comments_;
   value_.uint_ = 0;
 }
 
@@ -521,7 +501,6 @@ void Value::swap(Value& other) {
 
 void Value::copy(const Value& other) {
   copyPayload(other);
-  delete[] comments_;
   dupMeta(other);
 }
 
@@ -1027,7 +1006,7 @@ const Value& Value::operator[](int index) const {
 void Value::initBasic(ValueType type, bool allocated) {
   setType(type);
   setIsAllocated(allocated);
-  comments_ = nullptr;
+  comments_ = Comments{};
   start_ = 0;
   limit_ = 0;
 }
@@ -1086,17 +1065,7 @@ void Value::releasePayload() {
 }
 
 void Value::dupMeta(const Value& other) {
-  if (other.comments_) {
-    comments_ = new CommentInfo[numberOfCommentPlacement];
-    for (int comment = 0; comment < numberOfCommentPlacement; ++comment) {
-      const CommentInfo& otherComment = other.comments_[comment];
-      if (otherComment.comment_)
-        comments_[comment].setComment(otherComment.comment_,
-                                      strlen(otherComment.comment_));
-    }
-  } else {
-    comments_ = nullptr;
-  }
+  comments_ = other.comments_;
   start_ = other.start_;
   limit_ = other.limit_;
 }
@@ -1468,34 +1437,49 @@ bool Value::isArray() const { return type() == arrayValue; }
 
 bool Value::isObject() const { return type() == objectValue; }
 
-void Value::setComment(const char* comment,
-                       size_t len,
-                       CommentPlacement placement) {
-  if (!comments_)
-    comments_ = new CommentInfo[numberOfCommentPlacement];
-  if ((len > 0) && (comment[len - 1] == '\n')) {
-    // Always discard trailing newline, to aid indentation.
-    len -= 1;
+Value::Comments::Comments(const Comments& that)
+    : ptr_{cloneUnique(that.ptr_)} {}
+
+Value::Comments& Value::Comments::operator=(const Comments& that) {
+  ptr_ = cloneUnique(that.ptr_);
+  return *this;
+}
+
+bool Value::Comments::has(CommentPlacement slot) const {
+  return ptr_ && !(*ptr_)[slot].empty();
+}
+
+String Value::Comments::get(CommentPlacement slot) const {
+  if (!ptr_)
+    return {};
+  return (*ptr_)[slot];
+}
+
+void Value::Comments::set(CommentPlacement slot, String comment) {
+  if (!ptr_) {
+    ptr_ = std::unique_ptr<Array>(new Array());
   }
-  comments_[placement].setComment(comment, len);
+  (*ptr_)[slot] = std::move(comment);
 }
 
-void Value::setComment(const char* comment, CommentPlacement placement) {
-  setComment(comment, strlen(comment), placement);
-}
-
-void Value::setComment(const String& comment, CommentPlacement placement) {
-  setComment(comment.c_str(), comment.length(), placement);
+void Value::setComment(String comment, CommentPlacement placement) {
+  if (!comment.empty() && (comment.back() == '\n')) {
+    // Always discard trailing newline, to aid indentation.
+    comment.pop_back();
+  }
+  JSON_ASSERT(!comment.empty());
+  JSON_ASSERT_MESSAGE(
+      comment[0] == '\0' || comment[0] == '/',
+      "in Json::Value::setComment(): Comments must start with /");
+  comments_.set(placement, std::move(comment));
 }
 
 bool Value::hasComment(CommentPlacement placement) const {
-  return comments_ != nullptr && comments_[placement].comment_ != nullptr;
+  return comments_.has(placement);
 }
 
 String Value::getComment(CommentPlacement placement) const {
-  if (hasComment(placement))
-    return comments_[placement].comment_;
-  return "";
+  return comments_.get(placement);
 }
 
 void Value::setOffsetStart(ptrdiff_t start) { start_ = start; }

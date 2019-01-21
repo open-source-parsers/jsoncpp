@@ -9,7 +9,9 @@
 #if !defined(JSON_IS_AMALGAMATION)
 #include "forwards.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
+#include <array>
 #include <exception>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -587,11 +589,15 @@ Json::Value obj_value(Json::objectValue); // {}
 
   /// \deprecated Always pass len.
   JSONCPP_DEPRECATED("Use setComment(String const&) instead.")
-  void setComment(const char* comment, CommentPlacement placement);
+  void setComment(const char* comment, CommentPlacement placement) {
+    setComment(String(comment, strlen(comment)), placement);
+  }
   /// Comments must be //... or /* ... */
-  void setComment(const char* comment, size_t len, CommentPlacement placement);
+  void setComment(const char* comment, size_t len, CommentPlacement placement) {
+    setComment(String(comment, len), placement);
+  }
   /// Comments must be //... or /* ... */
-  void setComment(const String& comment, CommentPlacement placement);
+  void setComment(String comment, CommentPlacement placement);
   bool hasComment(CommentPlacement placement) const;
   /// Include delimiters and embedded newlines.
   String getComment(CommentPlacement placement) const;
@@ -624,15 +630,6 @@ private:
   Value& resolveReference(const char* key);
   Value& resolveReference(const char* key, const char* end);
 
-  struct CommentInfo {
-    CommentInfo();
-    ~CommentInfo();
-
-    void setComment(const char* text, size_t len);
-
-    char* comment_{nullptr};
-  };
-
   // struct MemberNamesTransform
   //{
   //   typedef const char *result_type;
@@ -658,7 +655,22 @@ private:
     unsigned int allocated_ : 1;
   } bits_;
 
-  CommentInfo* comments_;
+  class Comments {
+  public:
+    Comments() = default;
+    Comments(const Comments& that);
+    Comments(Comments&&) = default;
+    Comments& operator=(const Comments& that);
+    Comments& operator=(Comments&&) = default;
+    bool has(CommentPlacement slot) const;
+    String get(CommentPlacement slot) const;
+    void set(CommentPlacement slot, String s);
+
+  private:
+    using Array = std::array<String, numberOfCommentPlacement>;
+    std::unique_ptr<Array> ptr_;
+  };
+  Comments comments_;
 
   // [start, limit) byte offsets in the source JSON text from which this Value
   // was extracted.
