@@ -276,12 +276,10 @@ Value::CZString::CZString(const CZString& other) {
   storage_.length_ = other.storage_.length_;
 }
 
-#if JSON_HAS_RVALUE_REFERENCES
 Value::CZString::CZString(CZString&& other)
     : cstr_(other.cstr_), index_(other.index_) {
   other.cstr_ = nullptr;
 }
-#endif
 
 Value::CZString::~CZString() {
   if (cstr_ && storage_.policy_ == duplicate) {
@@ -304,14 +302,12 @@ Value::CZString& Value::CZString::operator=(const CZString& other) {
   return *this;
 }
 
-#if JSON_HAS_RVALUE_REFERENCES
 Value::CZString& Value::CZString::operator=(CZString&& other) {
   cstr_ = other.cstr_;
   index_ = other.index_;
   other.cstr_ = nullptr;
   return *this;
 }
-#endif
 
 bool Value::CZString::operator<(const CZString& other) const {
   if (!cstr_)
@@ -1169,11 +1165,9 @@ Value const& Value::operator[](CppTL::ConstString const& key) const {
 
 Value& Value::append(const Value& value) { return (*this)[size()] = value; }
 
-#if JSON_HAS_RVALUE_REFERENCES
 Value& Value::append(Value&& value) {
   return (*this)[size()] = std::move(value);
 }
-#endif
 
 Value Value::get(char const* begin,
                  char const* end,
@@ -1198,11 +1192,7 @@ bool Value::removeMember(const char* begin, const char* end, Value* removed) {
   if (it == value_.map_->end())
     return false;
   if (removed)
-#if JSON_HAS_RVALUE_REFERENCES
     *removed = std::move(it->second);
-#else
-    *removed = it->second;
-#endif
   value_.map_->erase(it);
   return true;
 }

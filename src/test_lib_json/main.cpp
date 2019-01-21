@@ -2499,7 +2499,6 @@ JSONTEST_FIXTURE(IteratorTest, const) {
 struct RValueTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(RValueTest, moveConstruction) {
-#if JSON_HAS_RVALUE_REFERENCES
   Json::Value json;
   json["key"] = "value";
   Json::Value moved = std::move(json);
@@ -2507,7 +2506,6 @@ JSONTEST_FIXTURE(RValueTest, moveConstruction) {
                                   // equal.
   JSONTEST_ASSERT_EQUAL(Json::objectValue, moved.type());
   JSONTEST_ASSERT_EQUAL(Json::stringValue, moved["key"].type());
-#endif
 }
 
 int main(int argc, const char* argv[]) {
