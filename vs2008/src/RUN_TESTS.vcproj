@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding = "UTF-8"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="9.00"
+	Name="RUN_TESTS"
+	ProjectGUID="{BED18044-EE78-35BB-BC97-CC32083EAC63}"
+	Keyword="Win32Proj">
+	<Platforms>
+		<Platform
+			Name="x64"/>
+	</Platforms>
+	<Configurations>
+		<Configuration
+			Name="Debug|x64"
+			IntermediateDirectory="RUN_TESTS.dir\Debug"
+			ConfigurationType="10"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				AssemblerListingLocation="Debug/"
+				ExceptionHandling="0"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;Debug\&quot;"
+				ObjectFile="$(IntDir)\"
+/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;Debug\&quot;"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				MkTypLibCompatible="false"
+				TargetEnvironment="3"
+				GenerateStublessProxies="true"
+				TypeLibraryName="$(InputName).tlb"
+				OutputDirectory="$(IntDir)"
+				HeaderFileName="$(InputName).h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="$(InputName)_i.c"
+				ProxyFileName="$(InputName)_p.c"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+CommandLine="&quot;C:\Program Files\CMake\bin\ctest.exe&quot; --force-new-ctest-process -C $(ConfigurationName)&#x0D;&#x0A;if errorlevel 1 goto :VCReportError"/>
+		</Configuration>
+		<Configuration
+			Name="Release|x64"
+			IntermediateDirectory="RUN_TESTS.dir\Release"
+			ConfigurationType="10"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				AssemblerListingLocation="Release/"
+				ExceptionHandling="0"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;Release\&quot;"
+				ObjectFile="$(IntDir)\"
+/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;Release\&quot;"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				MkTypLibCompatible="false"
+				TargetEnvironment="3"
+				GenerateStublessProxies="true"
+				TypeLibraryName="$(InputName).tlb"
+				OutputDirectory="$(IntDir)"
+				HeaderFileName="$(InputName).h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="$(InputName)_i.c"
+				ProxyFileName="$(InputName)_p.c"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+CommandLine="&quot;C:\Program Files\CMake\bin\ctest.exe&quot; --force-new-ctest-process -C $(ConfigurationName)&#x0D;&#x0A;if errorlevel 1 goto :VCReportError"/>
+		</Configuration>
+		<Configuration
+			Name="MinSizeRel|x64"
+			IntermediateDirectory="RUN_TESTS.dir\MinSizeRel"
+			ConfigurationType="10"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				AssemblerListingLocation="MinSizeRel/"
+				ExceptionHandling="0"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;MinSizeRel\&quot;"
+				ObjectFile="$(IntDir)\"
+/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;MinSizeRel\&quot;"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				MkTypLibCompatible="false"
+				TargetEnvironment="3"
+				GenerateStublessProxies="true"
+				TypeLibraryName="$(InputName).tlb"
+				OutputDirectory="$(IntDir)"
+				HeaderFileName="$(InputName).h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="$(InputName)_i.c"
+				ProxyFileName="$(InputName)_p.c"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+CommandLine="&quot;C:\Program Files\CMake\bin\ctest.exe&quot; --force-new-ctest-process -C $(ConfigurationName)&#x0D;&#x0A;if errorlevel 1 goto :VCReportError"/>
+		</Configuration>
+		<Configuration
+			Name="RelWithDebInfo|x64"
+			IntermediateDirectory="RUN_TESTS.dir\RelWithDebInfo"
+			ConfigurationType="10"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				AssemblerListingLocation="RelWithDebInfo/"
+				ExceptionHandling="0"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;"
+				ObjectFile="$(IntDir)\"
+/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="CMAKE_INTDIR=\&quot;RelWithDebInfo\&quot;"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				MkTypLibCompatible="false"
+				TargetEnvironment="3"
+				GenerateStublessProxies="true"
+				TypeLibraryName="$(InputName).tlb"
+				OutputDirectory="$(IntDir)"
+				HeaderFileName="$(InputName).h"
+				DLLDataFileName=""
+				InterfaceIdentifierFileName="$(InputName)_i.c"
+				ProxyFileName="$(InputName)_p.c"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+CommandLine="&quot;C:\Program Files\CMake\bin\ctest.exe&quot; --force-new-ctest-process -C $(ConfigurationName)&#x0D;&#x0A;if errorlevel 1 goto :VCReportError"/>
+		</Configuration>
+	</Configurations>
+	<Files>
+		<Filter
+			Name="CMake Rules"
+			Filter="">
+			<File
+				RelativePath="D:\project\jsoncpp\vs2008\src\CMakeFiles\RUN_TESTS_force.rule">
+				<FileConfiguration
+					Name="Debug|x64">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description=" "
+					CommandLine="cd .&#x0D;&#x0A;if errorlevel 1 goto :VCReportError"
+					AdditionalDependencies="D:\project\jsoncpp\vs2008\src\CMakeFiles\RUN_TESTS_force.rule"
+					Outputs="D:\project\jsoncpp\vs2008\src\CMakeFiles\RUN_TESTS_force"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description=" "
+					CommandLine="cd .&#x0D;&#x0A;if errorlevel 1 goto :VCReportError"
+					AdditionalDependencies="D:\project\jsoncpp\vs2008\src\CMakeFiles\RUN_TESTS_force.rule"
+					Outputs="D:\project\jsoncpp\vs2008\src\CMakeFiles\RUN_TESTS_force"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="MinSizeRel|x64">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description=" "
+					CommandLine="cd .&#x0D;&#x0A;if errorlevel 1 goto :VCReportError"
+					AdditionalDependencies="D:\project\jsoncpp\vs2008\src\CMakeFiles\RUN_TESTS_force.rule"
+					Outputs="D:\project\jsoncpp\vs2008\src\CMakeFiles\RUN_TESTS_force"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="RelWithDebInfo|x64">
+					<Tool
+					Name="VCCustomBuildTool"
+					Description=" "
+					CommandLine="cd .&#x0D;&#x0A;if errorlevel 1 goto :VCReportError"
+					AdditionalDependencies="D:\project\jsoncpp\vs2008\src\CMakeFiles\RUN_TESTS_force.rule"
+					Outputs="D:\project\jsoncpp\vs2008\src\CMakeFiles\RUN_TESTS_force"/>
+				</FileConfiguration>
+			</File>
+		</Filter>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>
