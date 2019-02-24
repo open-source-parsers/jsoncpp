@@ -160,7 +160,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalOptions="/machine:x64"
-				OutputFile="D:\project\jsoncpp\vs2008\src\lib_json\Release\jsoncpp.lib"
+				OutputFile="D:\project\jsoncpp\vs2008\src\lib_json\Release\jsoncpp_vs2008_x86.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
