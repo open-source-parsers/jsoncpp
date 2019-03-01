@@ -30,6 +30,13 @@ format to store user input files.
 
 ## Contributing to JsonCpp
 
+### Building
+
+Both CMake and Meson tools are capable of generating a variety of build environments for you preferred development environment.
+Using cmake or meson you can generate an XCode, Visual Studio, Unix Makefile, Ninja, or other environment that fits your needs.
+
+An example of a common Meson/Ninja environment is described next.
+
 ### Building and testing with Meson/Ninja
 Thanks to David Seifert (@SoapGentoo), we (the maintainers) now use
 [meson](http://mesonbuild.com/) and [ninja](https://ninja-build.org/) to build
