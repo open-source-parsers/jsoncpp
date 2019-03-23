@@ -214,6 +214,7 @@ JSONTEST_FIXTURE(ValueTest, objects) {
   const Json::Value* foundUnknownId = object1_.find(unknownIdKey, unknownIdKey + strlen(unknownIdKey));
   JSONTEST_ASSERT_EQUAL(nullptr, foundUnknownId);
 
+  // Access through demand()
   const char yetAnotherIdKey[] = "yet another id";
   const Json::Value* foundYetAnotherId = object1_.find(yetAnotherIdKey, yetAnotherIdKey + strlen(yetAnotherIdKey));
   JSONTEST_ASSERT_EQUAL(nullptr, foundYetAnotherId);
