@@ -610,7 +610,7 @@ Json::Value obj_value(Json::objectValue); // {}
   ptrdiff_t getOffsetLimit() const;
 
 private:
-  void setType(ValueType v) { bits_.value_type_ = v; }
+  void setType(ValueType v) { bits_.value_type_ = static_cast<unsigned char> (v); }
   bool isAllocated() const { return bits_.allocated_; }
   void setIsAllocated(bool v) { bits_.allocated_ = v; }
 
