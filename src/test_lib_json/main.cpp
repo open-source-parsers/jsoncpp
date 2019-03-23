@@ -204,6 +204,16 @@ JSONTEST_FIXTURE(ValueTest, objects) {
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), constObject["id"]);
   JSONTEST_ASSERT_EQUAL(Json::Value(), constObject["unknown id"]);
 
+  // Access through find()
+  const char idKey[] = "id";
+  const Json::Value* foundId = object1_.find(idKey, idKey + strlen(idKey));
+  JSONTEST_ASSERT(foundId != nullptr);
+  JSONTEST_ASSERT_EQUAL(Json::Value(1234), *foundId);
+
+  const char unknownIdKey[] = "unknown id";
+  const Json::Value* foundUnknownId = object1_.find(unknownIdKey, unknownIdKey + strlen(unknownIdKey));
+  JSONTEST_ASSERT_EQUAL(nullptr, foundUnknownId);
+
   // Access through non-const reference
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), object1_["id"]);
   JSONTEST_ASSERT_EQUAL(Json::Value(), object1_["unknown id"]);
