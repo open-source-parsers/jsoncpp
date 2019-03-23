@@ -524,7 +524,7 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Most general and efficient version of object-mutators.
   /// \note As stated elsewhere, behavior is undefined if (end-begin) >= 2^30
   /// \return non-zero, but JSON_ASSERT if this is neither object nor nullValue.
-  Value const* demand(char const* begin, char const* end);
+  Value* demand(char const* begin, char const* end);
   /// \brief Remove and return the named member.
   ///
   /// Do nothing if it did not exist.
