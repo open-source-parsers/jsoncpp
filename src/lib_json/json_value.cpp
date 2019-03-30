@@ -1115,7 +1115,7 @@ bool Value::isValidIndex(ArrayIndex index) const { return index < size(); }
 
 Value const* Value::find(char const* begin, char const* end) const {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == objectValue,
-                      "in Json::Value::find(key, end, found): requires "
+                      "in Json::Value::find(begin, end): requires "
                       "objectValue or nullValue");
   if (type() == nullValue)
     return nullptr;
@@ -1125,6 +1125,12 @@ Value const* Value::find(char const* begin, char const* end) const {
   if (it == value_.map_->end())
     return nullptr;
   return &(*it).second;
+}
+Value* Value::demand(char const* begin, char const* end) {
+  JSON_ASSERT_MESSAGE(type() == nullValue || type() == objectValue,
+                      "in Json::Value::demand(begin, end): requires "
+                      "objectValue or nullValue");
+  return &resolveReference(begin, end);
 }
 const Value& Value::operator[](const char* key) const {
   Value const* found = find(key, key + strlen(key));

@@ -63,12 +63,12 @@ if(NOT DEFINED CMAKE_BUILD_TYPE)
 endif()
 
 project(JSONCPP
-        VERSION 1.8.4 # <major>[.<minor>[.<patch>[.<tweak>]]]
+        VERSION 1.9.0 # <major>[.<minor>[.<patch>[.<tweak>]]]
         LANGUAGES CXX)
 
 set( JSONCPP_VERSION ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH} )
 message(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
-set( JSONCPP_SOVERSION 19 )
+set( JSONCPP_SOVERSION 21 )
 
 option(JSONCPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executables" ON)
 option(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)
