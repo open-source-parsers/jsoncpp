@@ -524,7 +524,7 @@ Json::Value obj_value(Json::objectValue); // {}
   /// Most general and efficient version of object-mutators.
   /// \note As stated elsewhere, behavior is undefined if (end-begin) >= 2^30
   /// \return non-zero, but JSON_ASSERT if this is neither object nor nullValue.
-  Value const* demand(char const* begin, char const* end);
+  Value* demand(char const* begin, char const* end);
   /// \brief Remove and return the named member.
   ///
   /// Do nothing if it did not exist.
@@ -610,7 +610,7 @@ Json::Value obj_value(Json::objectValue); // {}
   ptrdiff_t getOffsetLimit() const;
 
 private:
-  void setType(ValueType v) { bits_.value_type_ = v; }
+  void setType(ValueType v) { bits_.value_type_ = static_cast<unsigned char> (v); }
   bool isAllocated() const { return bits_.allocated_; }
   void setIsAllocated(bool v) { bits_.allocated_ = v; }
 
