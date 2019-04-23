@@ -1,6 +1,6 @@
 # This is only for jsoncpp developers/contributors.
 # We use this to sign releases, generate documentation, etc.
-VER?=$(shell cat version)
+VER?=$(shell cat version.md)
 
 default:
 	@echo "VER=${VER}"
