@@ -772,7 +772,14 @@ public:
   char const* memberName(char const** end) const;
 
 protected:
-  Value& deref() const;
+  /*! Internal utility functions to assist with implementing
+  *   other iterator functions. The const and non-const versions
+  *   of the "deref" protected methods expose the protected
+  *   current_ member variable in a way that can often be
+  *   optimized away by the compiler.
+  */
+  const Value& deref() const;
+  Value& deref();
 
   void increment();
 
@@ -895,9 +902,13 @@ public:
     return *this;
   }
 
-  reference operator*() const { return deref(); }
-
-  pointer operator->() const { return &deref(); }
+  /*! The return value of non-const iterators can be
+   *  changed, so the these functions are not const
+   *  because the returned references/pointers can be used
+   *  to change state of the base class.
+   */
+  reference operator*() { return deref(); }
+  pointer operator->() { return &deref(); }
 };
 
 inline void swap(Value& a, Value& b) { a.swap(b); }

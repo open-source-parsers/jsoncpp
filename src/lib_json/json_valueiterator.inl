@@ -21,7 +21,8 @@ ValueIteratorBase::ValueIteratorBase(
     const Value::ObjectValues::iterator& current)
     : current_(current), isNull_(false) {}
 
-Value& ValueIteratorBase::deref() const { return current_->second; }
+Value& ValueIteratorBase::deref() { return current_->second; }
+const Value& ValueIteratorBase::deref() const { return current_->second; }
 
 void ValueIteratorBase::increment() { ++current_; }
 
