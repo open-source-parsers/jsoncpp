@@ -44,7 +44,13 @@ protected:
   OStream* sout_; // not owned; will not delete
 public:
   StreamWriter();
+
+  /* Disabled for Weffc++ */
+  StreamWriter(const StreamWriter&) = delete;
+  StreamWriter& operator=(const StreamWriter&) = delete;
+
   virtual ~StreamWriter();
+
   /** Write Value into document as configured in sub-class.
       Do not take ownership of sout, but maintain a reference during function.
       \pre sout != NULL
@@ -301,6 +307,11 @@ public:
    * \param indentation Each level will be indented by this amount extra.
    */
   StyledStreamWriter(String indentation = "\t");
+
+  /* Disabled for Weffc++ */
+  StyledStreamWriter(const StyledStreamWriter&) = delete;
+  StyledStreamWriter& operator=(const StyledStreamWriter&) = delete;
+
   ~StyledStreamWriter() = default;
 
 public:

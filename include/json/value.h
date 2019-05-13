@@ -649,7 +649,7 @@ private:
 
   class Comments {
   public:
-    Comments() = default;
+    Comments();
     Comments(const Comments& that);
     Comments(Comments&& that);
     Comments& operator=(const Comments& that);

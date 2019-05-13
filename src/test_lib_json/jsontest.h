@@ -30,6 +30,10 @@ namespace JsonTest {
 
 class Failure {
 public:
+  Failure() : file_(), line_(), expr_(), message_(), nestingLevel_() {}
+  Failure(const Failure&) = default;
+  Failure& operator=(const Failure&) = delete;
+
   const char* file_;
   unsigned int line_;
   Json::String expr_;
@@ -55,6 +59,10 @@ struct PredicateContext {
 class TestResult {
 public:
   TestResult();
+
+  /* Disabled for Weffc++ */
+  TestResult(const JsonTest::TestResult&) = default;
+  TestResult& operator=(const JsonTest::TestResult&) = delete;
 
   /// \internal Implementation detail for assertion macros
   /// Not encapsulated to prevent step into when debugging failed assertions
@@ -117,6 +125,10 @@ private:
 class TestCase {
 public:
   TestCase();
+
+  /* Disable for Weffc++ */
+  TestCase(const TestCase&) = delete;
+  TestCase& operator=(const TestCase&) = delete;
 
   virtual ~TestCase();
 

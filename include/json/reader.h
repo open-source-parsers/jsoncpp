@@ -44,6 +44,7 @@ public:
    *
    */
   struct StructuredError {
+    StructuredError() : offset_start(), offset_limit(), message() {}
     ptrdiff_t offset_start;
     ptrdiff_t offset_limit;
     String message;
@@ -60,6 +61,9 @@ public:
    */
   JSONCPP_DEPRECATED("Use CharReader and CharReaderBuilder instead")
   Reader(const Features& features);
+
+  Reader(const Reader&) = delete; /* disabled for Weffc++ */
+  Reader& operator=(const Reader&) = delete; /* disabled for Weffc++ */
 
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
    * document.
@@ -186,6 +190,10 @@ private:
 
   class ErrorInfo {
   public:
+    ErrorInfo() : token_(), message_(), extra_() {}
+    ErrorInfo(const ErrorInfo&) = default;
+    ErrorInfo& operator=(const ErrorInfo&) = delete;
+
     Token token_;
     String message_;
     Location extra_;
