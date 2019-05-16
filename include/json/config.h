@@ -135,12 +135,12 @@ typedef unsigned int UInt;
 typedef int LargestInt;
 typedef unsigned int LargestUInt;
 #undef JSON_HAS_INT64
-#else                 // if defined(JSON_NO_INT64)
+#else                 // if !defined(JSON_NO_INT64)
 // For Microsoft Visual use specific types as long long is not supported
 #if defined(_MSC_VER) // Microsoft Visual Studio
 typedef __int64 Int64;
 typedef unsigned __int64 UInt64;
-#else                 // if defined(_MSC_VER) // Other platforms, use long long
+#else                 // if !defined(_MSC_VER) // Other platforms, use long long
 typedef int64_t Int64;
 typedef uint64_t UInt64;
 #endif                // if defined(_MSC_VER)
