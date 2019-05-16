@@ -840,7 +840,7 @@ bool Reader::pushError(const Value& value, const String& message) {
   Token token;
   token.type_ = tokenError;
   token.start_ = begin_ + value.getOffsetStart();
-  token.end_ = end_ + value.getOffsetLimit();
+  token.end_ = begin_ + value.getOffsetLimit();
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
@@ -1845,7 +1845,7 @@ bool OurReader::pushError(const Value& value, const String& message) {
   Token token;
   token.type_ = tokenError;
   token.start_ = begin_ + value.getOffsetStart();
-  token.end_ = end_ + value.getOffsetLimit();
+  token.end_ = begin_ + value.getOffsetLimit();
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
