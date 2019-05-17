@@ -895,9 +895,9 @@ public:
     return *this;
   }
 
-  reference operator*() const { return deref(); }
+  reference operator*()  { return deref(); }
 
-  pointer operator->() const { return &deref(); }
+  pointer operator->()  { return &deref(); }
 };
 
 inline void swap(Value& a, Value& b) { a.swap(b); }
