@@ -49,6 +49,7 @@ public:
   StreamWriter& operator=(const StreamWriter&) = default;
 
   virtual ~StreamWriter();
+
   /** Write Value into document as configured in sub-class.
       Do not take ownership of sout, but maintain a reference during function.
       \pre sout != NULL
@@ -309,6 +310,11 @@ public:
    * \param indentation Each level will be indented by this amount extra.
    */
   StyledStreamWriter(String indentation = "\t");
+
+  /* Disabled for Weffc++ */
+  StyledStreamWriter(const StyledStreamWriter&) = delete;
+  StyledStreamWriter& operator=(const StyledStreamWriter&) = delete;
+
   ~StyledStreamWriter() = default;
 
   StyledStreamWriter(const StyledStreamWriter&) = default;

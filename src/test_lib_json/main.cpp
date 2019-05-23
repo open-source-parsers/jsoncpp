@@ -69,11 +69,12 @@ struct ValueTest : JsonTest::TestCase {
   Json::Value false_;
 
   ValueTest()
-      : emptyArray_(Json::arrayValue), emptyObject_(Json::objectValue),
+      : null_(), emptyArray_(Json::arrayValue), emptyObject_(Json::objectValue),
         integer_(123456789), unsignedInteger_(34567890u),
         smallUnsignedInteger_(Json::Value::UInt(Json::Value::maxInt)),
-        real_(1234.56789), float_(0.00390625f), emptyString_(""), string1_("a"),
-        string_("sometext with space"), true_(true), false_(false) {
+        real_(1234.56789), float_(0.00390625f), array1_(), object1_(),
+	emptyString_(""), string1_("a"), string_("sometext with space"),
+	true_(true), false_(false) {
     array1_.append(1234);
     object1_["id"] = 1234;
   }

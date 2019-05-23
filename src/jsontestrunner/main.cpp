@@ -19,6 +19,7 @@
 #include <sstream>
 
 struct Options {
+  Options() : path(), features(), parseOnly(), write() {}
   Json::String path;
   Json::Features features;
   bool parseOnly;

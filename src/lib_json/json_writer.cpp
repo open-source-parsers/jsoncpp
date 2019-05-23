@@ -347,9 +347,7 @@ Writer::~Writer() = default;
 // Class FastWriter
 // //////////////////////////////////////////////////////////////////
 
-FastWriter::FastWriter()
-
-    = default;
+FastWriter::FastWriter() : document_() {}
 
 void FastWriter::enableYAMLCompatibility() { yamlCompatibilityEnabled_ = true; }
 
@@ -422,7 +420,7 @@ void FastWriter::writeValue(const Value& value) {
 // Class StyledWriter
 // //////////////////////////////////////////////////////////////////
 
-StyledWriter::StyledWriter() = default;
+StyledWriter::StyledWriter() : childValues_(), document_(), indentString_() {}
 
 String StyledWriter::write(const Value& root) {
   document_.clear();
@@ -635,8 +633,9 @@ bool StyledWriter::hasCommentForValue(const Value& value) {
 // //////////////////////////////////////////////////////////////////
 
 StyledStreamWriter::StyledStreamWriter(String indentation)
-    : document_(nullptr), indentation_(std::move(indentation)),
-      addChildValues_(), indented_(false) {}
+    : childValues_(), document_(nullptr), indentString_(),
+      indentation_(std::move(indentation)), addChildValues_(true),
+      indented_(false) {}
 
 void StyledStreamWriter::write(OStream& out, const Value& root) {
   document_ = &out;
@@ -911,7 +910,8 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(String indentation,
                                                  bool useSpecialFloats,
                                                  unsigned int precision,
                                                  PrecisionType precisionType)
-    : rightMargin_(74), indentation_(std::move(indentation)), cs_(cs),
+    : childValues_(), indentString_(), rightMargin_(74),
+      indentation_(std::move(indentation)), cs_(cs),
       colonSymbol_(std::move(colonSymbol)), nullSymbol_(std::move(nullSymbol)),
       endingLineFeedSymbol_(std::move(endingLineFeedSymbol)),
       addChildValues_(false), indented_(false),
@@ -1150,7 +1150,7 @@ bool BuiltStyledStreamWriter::hasCommentForValue(const Value& value) {
 StreamWriter::StreamWriter() : sout_(nullptr) {}
 StreamWriter::~StreamWriter() = default;
 StreamWriter::Factory::~Factory() = default;
-StreamWriterBuilder::StreamWriterBuilder() { setDefaults(&settings_); }
+StreamWriterBuilder::StreamWriterBuilder() : settings_() { setDefaults(&settings_); }
 StreamWriterBuilder::~StreamWriterBuilder() = default;
 StreamWriter* StreamWriterBuilder::newStreamWriter() const {
   String indentation = settings_["indentation"].asString();

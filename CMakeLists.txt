@@ -130,7 +130,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wconversion -Wshadow -Werror=conversion -Werror=sign-compare")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # using GCC
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wconversion -Wshadow -Wextra")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wconversion -Wshadow -Wextra -Weffc++")
     # not yet ready for -Wsign-conversion
 
     if(JSONCPP_WITH_STRICT_ISO)

@@ -260,7 +260,7 @@ Value::CZString::CZString(char const* str,
   storage_.length_ = length & 0x3FFFFFFF;
 }
 
-Value::CZString::CZString(const CZString& other) {
+Value::CZString::CZString(const CZString& other) : cstr_() {
   cstr_ = (other.storage_.policy_ != noDuplication && other.cstr_ != nullptr
                ? duplicateStringValue(other.cstr_, other.storage_.length_)
                : other.cstr_);
@@ -361,7 +361,8 @@ bool Value::CZString::isStaticString() const {
  * memset( this, 0, sizeof(Value) )
  * This optimization is used in ValueInternalMap fast allocator.
  */
-Value::Value(ValueType type) {
+Value::Value(ValueType type) : value_(), bits_(), comments_(), start_(),
+			       limit_() {
   static char const emptyString[] = "";
   initBasic(type);
   switch (type) {
@@ -390,32 +391,35 @@ Value::Value(ValueType type) {
   }
 }
 
-Value::Value(Int value) {
+Value::Value(Int value) : value_(), bits_(), comments_(), start_(), limit_() {
   initBasic(intValue);
   value_.int_ = value;
 }
 
-Value::Value(UInt value) {
+Value::Value(UInt value) : value_(), bits_(), comments_(), start_(), limit_() {
   initBasic(uintValue);
   value_.uint_ = value;
 }
 #if defined(JSON_HAS_INT64)
-Value::Value(Int64 value) {
+Value::Value(Int64 value) : value_(), bits_(), comments_(), start_(), limit_() {
   initBasic(intValue);
   value_.int_ = value;
 }
-Value::Value(UInt64 value) {
+Value::Value(UInt64 value) : value_(), bits_(), comments_(), start_(),
+			     limit_() {
   initBasic(uintValue);
   value_.uint_ = value;
 }
 #endif // defined(JSON_HAS_INT64)
 
-Value::Value(double value) {
+Value::Value(double value) : value_(), bits_(), comments_(), start_(),
+			     limit_() {
   initBasic(realValue);
   value_.real_ = value;
 }
 
-Value::Value(const char* value) {
+Value::Value(const char* value) : value_(), bits_(), comments_(), start_(),
+				  limit_() {
   initBasic(stringValue, true);
   JSON_ASSERT_MESSAGE(value != nullptr,
                       "Null Value Passed to Value Constructor");
@@ -423,42 +427,47 @@ Value::Value(const char* value) {
       value, static_cast<unsigned>(strlen(value)));
 }
 
-Value::Value(const char* begin, const char* end) {
+Value::Value(const char* begin, const char* end) : value_(), bits_(),
+						   comments_(), start_(),
+						   limit_() {
   initBasic(stringValue, true);
   value_.string_ =
       duplicateAndPrefixStringValue(begin, static_cast<unsigned>(end - begin));
 }
 
-Value::Value(const String& value) {
+Value::Value(const String& value) : value_(), bits_(), comments_(),
+				    start_(), limit_() {
   initBasic(stringValue, true);
   value_.string_ = duplicateAndPrefixStringValue(
       value.data(), static_cast<unsigned>(value.length()));
 }
 
-Value::Value(const StaticString& value) {
+Value::Value(const StaticString& value) : value_(), bits_(), comments_(),						  start_(), limit_() {
   initBasic(stringValue);
   value_.string_ = const_cast<char*>(value.c_str());
 }
 
 #ifdef JSON_USE_CPPTL
-Value::Value(const CppTL::ConstString& value) {
+Value::Value(const CppTL::ConstString& value) : value_(), bits_(), comments_(),       						start_(), limit_() {
   initBasic(stringValue, true);
   value_.string_ = duplicateAndPrefixStringValue(
       value, static_cast<unsigned>(value.length()));
 }
 #endif
 
-Value::Value(bool value) {
+Value::Value(bool value) : value_(), bits_(), comments_(), start_(), limit_() {
   initBasic(booleanValue);
   value_.bool_ = value;
 }
 
-Value::Value(const Value& other) {
+Value::Value(const Value& other) : value_(), bits_(), comments_(), start_(),
+				   limit_() {
   dupPayload(other);
   dupMeta(other);
 }
 
-Value::Value(Value&& other) {
+Value::Value(Value&& other) : value_(), bits_(), comments_(), start_(),
+			      limit_() {
   initBasic(nullValue);
   swap(other);
 }
@@ -1433,6 +1442,8 @@ bool Value::isArray() const { return type() == arrayValue; }
 
 bool Value::isObject() const { return type() == objectValue; }
 
+Value::Comments::Comments()
+    : ptr_() {}
 Value::Comments::Comments(const Comments& that)
     : ptr_{cloneUnique(that.ptr_)} {}
 
@@ -1578,7 +1589,7 @@ Path::Path(const String& path,
            const PathArgument& a2,
            const PathArgument& a3,
            const PathArgument& a4,
-           const PathArgument& a5) {
+           const PathArgument& a5) : args_() {
   InArgs in;
   in.reserve(5);
   in.push_back(&a1);
