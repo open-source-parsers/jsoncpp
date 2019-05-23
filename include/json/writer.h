@@ -311,10 +311,6 @@ public:
    */
   StyledStreamWriter(String indentation = "\t");
 
-  /* Disabled for Weffc++ */
-  StyledStreamWriter(const StyledStreamWriter&) = delete;
-  StyledStreamWriter& operator=(const StyledStreamWriter&) = delete;
-
   ~StyledStreamWriter() = default;
 
   StyledStreamWriter(const StyledStreamWriter&) = default;

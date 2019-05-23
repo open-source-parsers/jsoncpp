@@ -86,10 +86,10 @@ bool Reader::containsNewLine(Reader::Location begin, Reader::Location end) {
 // //////////////////////////////////////////////////////////////////
 
 Reader::Reader()
-    : nodes_(), errors_(), document_(), commentsBefore_(), features_(Features::all()) {}
+    : errors_(), document_(), commentsBefore_(), features_(Features::all()) {}
 
 Reader::Reader(const Features& features)
-    : nodes_(), errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
+    : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
       lastValue_(), commentsBefore_(), features_(features), collectComments_() {
 }
 
@@ -899,7 +899,6 @@ public:
   typedef char Char;
   typedef const Char* Location;
   struct StructuredError {
-    StructuredError() : offset_start(), offset_limit(), message() {}
     ptrdiff_t offset_start;
     ptrdiff_t offset_limit;
     String message;
@@ -949,10 +948,6 @@ private:
 
   class ErrorInfo {
   public:
-    ErrorInfo() : token_(), message_(), extra_() {}
-    ErrorInfo(const ErrorInfo&) = default;
-    ErrorInfo& operator=(const ErrorInfo&) = delete;
-
     Token token_;
     String message_;
     Location extra_;
@@ -1029,7 +1024,7 @@ bool OurReader::containsNewLine(OurReader::Location begin,
 }
 
 OurReader::OurReader(OurFeatures const& features)
-    : nodes_(), errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
+    : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
       lastValue_(), commentsBefore_(), features_(features), collectComments_() {
 }
 
@@ -1899,7 +1894,7 @@ public:
   }
 };
 
-CharReaderBuilder::CharReaderBuilder() : settings_() { setDefaults(&settings_); }
+CharReaderBuilder::CharReaderBuilder() { setDefaults(&settings_); }
 CharReaderBuilder::~CharReaderBuilder() = default;
 CharReader* CharReaderBuilder::newCharReader() const {
   bool collectComments = settings_["collectComments"].asBool();

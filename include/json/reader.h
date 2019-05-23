@@ -64,13 +64,8 @@ public:
   JSONCPP_DEPRECATED("Use CharReader and CharReaderBuilder instead")
   Reader(const Features& features);
 
-<<<<<<< HEAD
   Reader(const Reader&) = default;
   Reader& operator=(const Reader&) = default;
-=======
-  Reader(const Reader&) = delete; /* disabled for Weffc++ */
-  Reader& operator=(const Reader&) = delete; /* disabled for Weffc++ */
->>>>>>> d4f7d51576a9522e68324b439a06daa1be0b31a1
 
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
    * document.
@@ -197,16 +192,9 @@ private:
 
   class ErrorInfo {
   public:
-<<<<<<< HEAD
     ErrorInfo() : token_(), message_(""), extra_("") {};
     ErrorInfo(const ErrorInfo&) = default;
     ErrorInfo& operator=(const ErrorInfo&) = default;
-=======
-    ErrorInfo() : token_(), message_(), extra_() {}
-    ErrorInfo(const ErrorInfo&) = default;
-    ErrorInfo& operator=(const ErrorInfo&) = delete;
-
->>>>>>> d4f7d51576a9522e68324b439a06daa1be0b31a1
     Token token_;
     String message_;
     Location extra_;

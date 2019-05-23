@@ -73,8 +73,7 @@ namespace JsonTest {
 // class TestResult
 // //////////////////////////////////////////////////////////////////
 
-TestResult::TestResult() : predicateStackTail_(), failures_(), name_(),
-			   rootPredicateNode_()	{
+TestResult::TestResult() {
   // The root predicate has id 0
   rootPredicateNode_.id_ = 0;
   rootPredicateNode_.next_ = nullptr;
@@ -217,7 +216,7 @@ void TestCase::run(TestResult& result) {
 // class Runner
 // //////////////////////////////////////////////////////////////////
 
-Runner::Runner() : tests_() {}
+Runner::Runner() {}
 
 Runner& Runner::add(TestCaseFactory factory) {
   tests_.push_back(factory);
