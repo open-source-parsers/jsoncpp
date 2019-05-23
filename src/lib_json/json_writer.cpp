@@ -349,7 +349,7 @@ Writer::~Writer() = default;
 
 FastWriter::FastWriter()
 
-    = default; 
+    = default;
 
 void FastWriter::enableYAMLCompatibility() { yamlCompatibilityEnabled_ = true; }
 
