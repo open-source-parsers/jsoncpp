@@ -347,7 +347,9 @@ Writer::~Writer() = default;
 // Class FastWriter
 // //////////////////////////////////////////////////////////////////
 
-FastWriter::FastWriter() : document_() {}
+FastWriter::FastWriter()
+
+    = default; 
 
 void FastWriter::enableYAMLCompatibility() { yamlCompatibilityEnabled_ = true; }
 
@@ -633,8 +635,8 @@ bool StyledWriter::hasCommentForValue(const Value& value) {
 // //////////////////////////////////////////////////////////////////
 
 StyledStreamWriter::StyledStreamWriter(String indentation)
-    : document_(nullptr), indentation_(std::move(indentation)), 
-      addChildValues_(true), indented_(false) {}
+    : document_(nullptr), indentation_(std::move(indentation)),
+      addChildValues_(), indented_(false) {}
 
 void StyledStreamWriter::write(OStream& out, const Value& root) {
   document_ = &out;

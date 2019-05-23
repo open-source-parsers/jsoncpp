@@ -30,7 +30,6 @@ namespace JsonTest {
 
 class Failure {
 public:
-
   const char* file_;
   unsigned int line_;
   Json::String expr_;

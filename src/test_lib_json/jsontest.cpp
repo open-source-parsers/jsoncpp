@@ -216,7 +216,7 @@ void TestCase::run(TestResult& result) {
 // class Runner
 // //////////////////////////////////////////////////////////////////
 
-Runner::Runner() {}
+Runner::Runner() = default;
 
 Runner& Runner::add(TestCaseFactory factory) {
   tests_.push_back(factory);
