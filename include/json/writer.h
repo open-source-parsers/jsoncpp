@@ -44,6 +44,10 @@ protected:
   OStream* sout_; // not owned; will not delete
 public:
   StreamWriter();
+
+  StreamWriter(const StreamWriter&) = default;
+  StreamWriter& operator=(const StreamWriter&) = default;
+
   virtual ~StreamWriter();
   /** Write Value into document as configured in sub-class.
       Do not take ownership of sout, but maintain a reference during function.
@@ -169,6 +173,8 @@ class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API FastWriter
     : public Writer {
 public:
   FastWriter();
+  FastWriter(const FastWriter&) = default;
+  FastWriter& operator=(const FastWriter&) = default;
   ~FastWriter() override = default;
 
   void enableYAMLCompatibility();
@@ -229,6 +235,8 @@ class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API
     StyledWriter : public Writer {
 public:
   StyledWriter();
+  StyledWriter(const StyledWriter&) = default;
+  StyledWriter& operator=(const StyledWriter&) = default;
   ~StyledWriter() override = default;
 
 public: // overridden from Writer
@@ -302,6 +310,9 @@ public:
    */
   StyledStreamWriter(String indentation = "\t");
   ~StyledStreamWriter() = default;
+
+  StyledStreamWriter(const StyledStreamWriter&) = default;
+  StyledStreamWriter& operator=(const StyledStreamWriter&) = default;
 
 public:
   /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
