@@ -181,6 +181,9 @@ endif()
 # Build the different applications
 add_subdirectory( src )
 
+# add example 
+add_subdirectory( example )
+
 #install the includes
 add_subdirectory( include )
 
