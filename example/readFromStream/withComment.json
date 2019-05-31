@@ -1,0 +1,7 @@
+// comment head
+{
+    // comment before
+    "key" : "value"
+    // comment after
+}
+// comment tail
