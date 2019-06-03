@@ -47,7 +47,7 @@ set( PUBLIC_HEADERS
     ${JSONCPP_INCLUDE_DIR}/json/reader.h
     ${JSONCPP_INCLUDE_DIR}/json/writer.h
     ${JSONCPP_INCLUDE_DIR}/json/assertions.h
-    ${JSONCPP_INCLUDE_DIR}/json/version.h
+    ${PROJECT_BINARY_DIR}/include/json/version.h
     )
 
 source_group( "Public API" FILES ${PUBLIC_HEADERS} )
@@ -141,5 +141,6 @@ install( TARGETS jsoncpp_lib ${INSTALL_EXPORT}
 if(NOT CMAKE_VERSION VERSION_LESS 2.8.11)
     target_include_directories( jsoncpp_lib PUBLIC
                                 $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-                                $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>)
+                                $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>
+                                $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/json>)
 endif()
