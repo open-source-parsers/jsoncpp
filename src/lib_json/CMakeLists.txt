@@ -34,7 +34,7 @@ endif()
 
 if(NOT (HAVE_CLOCALE AND HAVE_LCONV_SIZE AND HAVE_DECIMAL_POINT AND HAVE_LOCALECONV))
     message(WARNING "Locale functionality is not supported")
-    add_definitions(-DJSONCPP_NO_LOCALE_SUPPORT)
+    add_compile_definitions(-DJSONCPP_NO_LOCALE_SUPPORT)
 endif()
 
 set( JSONCPP_INCLUDE_DIR ../../include )
@@ -68,7 +68,7 @@ else(JSONCPP_WITH_CMAKE_PACKAGE)
 endif()
 
 if(BUILD_SHARED_LIBS)
-    add_definitions( -DJSON_DLL_BUILD )
+    add_compile_definitions( -DJSON_DLL_BUILD )
 endif()
 
 
