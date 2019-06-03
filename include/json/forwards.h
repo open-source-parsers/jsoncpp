@@ -13,11 +13,17 @@
 namespace Json {
 
 // writer.h
+class StreamWriter;
+class StreamWriterBuilder;
+class Writer;
 class FastWriter;
 class StyledWriter;
+class StyledStreamWriter;
 
 // reader.h
 class Reader;
+class CharReader;
+class CharReaderBuilder;
 
 // features.h
 class Features;
