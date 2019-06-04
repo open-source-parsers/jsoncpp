@@ -893,7 +893,8 @@ OurFeatures OurFeatures::all() { return {}; }
 // Implementation of class Reader
 // ////////////////////////////////
 
-// exact copy of Reader, renamed to OurReader
+// not exact copy of Reader, renamed to OurReader
+// add case tokenNan tokenPosInf tokenNegInf  in readValue()
 class OurReader {
 public:
   typedef char Char;
