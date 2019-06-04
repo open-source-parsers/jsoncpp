@@ -415,7 +415,7 @@ bool Reader::readCppStyleComment() {
   return true;
 }
 
-void Reader::readNumber() {
+bool Reader::readNumber() {
   const char* p = current_;
   char c = '0'; // stopgap for already consumed character
   // integral part
@@ -435,6 +435,7 @@ void Reader::readNumber() {
     while (c >= '0' && c <= '9')
       c = (current_ = p) < end_ ? *p++ : '\0';
   }
+  return true;
 }
 
 bool Reader::readString() {

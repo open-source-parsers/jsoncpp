@@ -171,6 +171,9 @@ private:
     tokenTrue,
     tokenFalse,
     tokenNull,
+    tokenNaN,
+    tokenPosInf,
+    tokenNegInf,    
     tokenArraySeparator,
     tokenMemberSeparator,
     tokenComment,
@@ -200,7 +203,7 @@ private:
   bool readCStyleComment();
   bool readCppStyleComment();
   bool readString();
-  void readNumber();
+  bool readNumber();
   bool readValue();
   bool readObject(Token& token);
   bool readArray(Token& token);
