@@ -279,10 +279,17 @@ bool Reader::readToken(Token& token) {
   case '7':
   case '8':
   case '9':
-  case '-':
     token.type_ = tokenNumber;
-    readNumber();
+    readNumber(false);
     break;
+  case '-':
+    if (readNumber(true)) {
+      token.type_ = tokenNumber;
+    } else {
+      token.type_ = tokenNegInf;
+      ok = features_.allowSpecialFloats_ && match("nfinity", 7);
+    }
+    break;  
   case 't':
     token.type_ = tokenTrue;
     ok = match("rue", 3);
@@ -415,9 +422,13 @@ bool Reader::readCppStyleComment() {
   return true;
 }
 
-bool Reader::readNumber() {
+bool Reader::readNumber(bool checkInf) {
   const char* p = current_;
-  char c = '0'; // stopgap for already consumed character
+  if (checkInf && p != end_ && *p == 'I') {
+    current_ = ++p;
+    return false;
+  }  
+  char c = '0'; // stopgap for already consumed character  
   // integral part
   while (c >= '0' && c <= '9')
     c = (current_ = p) < end_ ? *p++ : '\0';
