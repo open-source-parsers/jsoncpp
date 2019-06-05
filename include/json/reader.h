@@ -203,7 +203,7 @@ private:
   bool readCStyleComment();
   bool readCppStyleComment();
   bool readString();
-  bool readNumber(checkInf);
+  bool readNumber(bool checkInf);
   bool readValue();
   bool readObject(Token& token);
   bool readArray(Token& token);

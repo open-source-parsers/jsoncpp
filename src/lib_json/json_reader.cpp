@@ -193,19 +193,43 @@ bool Reader::readValue() {
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
-  } break;
+  } 
+  break;
   case tokenFalse: {
     Value v(false);
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
-  } break;
+  } 
+  break;
   case tokenNull: {
     Value v;
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
-  } break;
+  } 
+  break;
+  case tokenNaN: {
+    Value v(std::numeric_limits<double>::quiet_NaN());
+    currentValue().swapPayload(v);
+    currentValue().setOffsetStart(token.start_ - begin_);
+    currentValue().setOffsetLimit(token.end_ - begin_);
+  } 
+  break;
+  case tokenPosInf: {
+    Value v(std::numeric_limits<double>::infinity());
+    currentValue().swapPayload(v);
+    currentValue().setOffsetStart(token.start_ - begin_);
+    currentValue().setOffsetLimit(token.end_ - begin_);
+  } 
+  break;
+  case tokenNegInf: {
+    Value v(-std::numeric_limits<double>::infinity());
+    currentValue().swapPayload(v);
+    currentValue().setOffsetStart(token.start_ - begin_);
+    currentValue().setOffsetLimit(token.end_ - begin_);
+   } 
+   break; 
   case tokenArraySeparator:
   case tokenObjectEnd:
   case tokenArrayEnd:
