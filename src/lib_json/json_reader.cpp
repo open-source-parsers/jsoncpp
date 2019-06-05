@@ -302,6 +302,22 @@ bool Reader::readToken(Token& token) {
     token.type_ = tokenNull;
     ok = match("ull", 3);
     break;
+  case 'N':
+    if (features_.allowSpecialFloats_) {
+      token.type_ = tokenNaN;
+      ok = match("aN", 2);
+    } else {
+      ok = false;
+    }
+    break;
+  case 'I':
+    if (features_.allowSpecialFloats_) {
+      token.type_ = tokenPosInf;
+      ok = match("nfinity", 7);
+    } else {
+      ok = false;
+    }
+    break;
   case ',':
     token.type_ = tokenArraySeparator;
     break;
@@ -905,8 +921,8 @@ OurFeatures OurFeatures::all() { return {}; }
 // Implementation of class Reader
 // ////////////////////////////////
 
-// not exact copy of Reader, renamed to OurReader
-// add case tokenNan tokenPosInf tokenNegInf  in readValue()
+// exact copy of Reader, renamed to OurReader
+// used by CharReader CharReaderBuilder
 class OurReader {
 public:
   typedef char Char;

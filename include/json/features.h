@@ -52,6 +52,8 @@ public:
 
   /// \c true if numeric object key are allowed. Default: \c false.
   bool allowNumericKeys_{false};
+ ///  \c true if special float number allowed. Default: \c true.
+  bool allowSpecialFloats_{true};
 };
 
 } // namespace Json
