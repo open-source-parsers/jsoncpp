@@ -963,7 +963,7 @@ private:
   bool readCppStyleComment();
   bool readString();
   bool readStringSingleQuote();
-  bool readNumber(bool checkInf);
+  bool readNumber(bool checkNeg);
   bool readValue();
   bool readObject(Token& token);
   bool readArray(Token& token);
@@ -1378,30 +1378,39 @@ bool OurReader::readCppStyleComment() {
   }
   return true;
 }
-
-bool OurReader::readNumber(bool checkInf) {
+// if checkNeg is true, read negative number
+bool OurReader::readNumber(bool checkNeg) {
   const char* p = current_;
-  if (checkInf && p != end_ && *p == 'I') {
-    current_ = ++p;
-    return false;
+  char c = '0'; // stopgap for already consumed character  
+  if(checkNeg){
+    if (checkNeg && p != end_ && *p == 'I') {
+      current_ = ++p;
+      return false;
+    }
+    else
+    {
+      current_ = ++p;                // skip '-'
+      OurReader::readNumber(false);  // read the back part of the '-'
+    }
   }
-  char c = '0'; // stopgap for already consumed character
-  // integral part
-  while (c >= '0' && c <= '9')
-    c = (current_ = p) < end_ ? *p++ : '\0';
-  // fractional part
-  if (c == '.') {
-    c = (current_ = p) < end_ ? *p++ : '\0';
+  else{
+    // integral part
     while (c >= '0' && c <= '9')
       c = (current_ = p) < end_ ? *p++ : '\0';
-  }
-  // exponential part
-  if (c == 'e' || c == 'E') {
-    c = (current_ = p) < end_ ? *p++ : '\0';
-    if (c == '+' || c == '-')
+    // fractional part
+    if (c == '.') {
       c = (current_ = p) < end_ ? *p++ : '\0';
-    while (c >= '0' && c <= '9')
+      while (c >= '0' && c <= '9')
+        c = (current_ = p) < end_ ? *p++ : '\0';
+    }
+    // exponential part
+    if (c == 'e' || c == 'E') {
       c = (current_ = p) < end_ ? *p++ : '\0';
+      if (c == '+' || c == '-')
+        c = (current_ = p) < end_ ? *p++ : '\0';
+      while (c >= '0' && c <= '9')
+        c = (current_ = p) < end_ ? *p++ : '\0';
+    }
   }
   return true;
 }
