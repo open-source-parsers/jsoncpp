@@ -3,6 +3,8 @@
 add_executable( jsoncpp_test
                 jsontest.cpp
                 jsontest.h
+                fuzz.cpp
+                fuzz.h
                 main.cpp
                 )
 

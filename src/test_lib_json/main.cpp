@@ -10,6 +10,7 @@
 #pragma warning(disable : 4996)
 #endif
 
+#include "fuzz.h"
 #include "jsontest.h"
 #include <cmath>
 #include <cstring>
@@ -2555,6 +2556,18 @@ JSONTEST_FIXTURE(RValueTest, moveConstruction) {
   JSONTEST_ASSERT_EQUAL(Json::stringValue, moved["key"].type());
 }
 
+struct FuzzTest : JsonTest::TestCase {};
+
+// Build and run the fuzz test without any fuzzer, so that it's guaranteed not
+// go out of date, even if it's never run as an actual fuzz test.
+JSONTEST_FIXTURE(FuzzTest, fuzzDoesntCrash) {
+  const std::string example = "{}";
+  JSONTEST_ASSERT_EQUAL(
+      0,
+      LLVMFuzzerTestOneInput(reinterpret_cast<const uint8_t*>(example.c_str()),
+                             example.size()));
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -2634,6 +2647,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, const);
 
   JSONTEST_REGISTER_FIXTURE(runner, RValueTest, moveConstruction);
+
+  JSONTEST_REGISTER_FIXTURE(runner, FuzzTest, fuzzDoesntCrash);
 
   return runner.runCommandLine(argc, argv);
 }
