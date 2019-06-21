@@ -539,9 +539,9 @@ Json::Value obj_value(Json::objectValue); // {}
   bool removeMember(const char* key, Value* removed);
   /** \brief Remove the named map member.
 
-      Update 'removed' iff removed.
+      Update 'removed' if removed.
       \param key may contain embedded nulls.
-      \return true iff removed (no exceptions)
+      \return true if removed (no exceptions)
   */
   bool removeMember(String const& key, Value* removed);
   /// Same as removeMember(String const& key, Value* removed)
@@ -549,7 +549,7 @@ Json::Value obj_value(Json::objectValue); // {}
   /** \brief Remove the indexed array element.
 
       O(n) expensive operations.
-      Update 'removed' iff removed.
+      Update 'removed' if removed.
       \return true if removed (no exceptions)
   */
   bool removeIndex(ArrayIndex index, Value* removed);

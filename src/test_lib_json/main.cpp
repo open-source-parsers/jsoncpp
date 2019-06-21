@@ -334,7 +334,7 @@ JSONTEST_FIXTURE(ValueTest, null) {
 
   JSONTEST_ASSERT_EQUAL(Json::Value::null, null_);
 
-  // Test using a Value in a boolean context (false iff null)
+  // Test using a Value in a boolean context (false if null)
   JSONTEST_ASSERT_EQUAL(null_, false);
   JSONTEST_ASSERT_EQUAL(object1_, true);
   JSONTEST_ASSERT_EQUAL(!null_, true);
