@@ -1170,7 +1170,26 @@ Value const& Value::operator[](CppTL::ConstString const& key) const {
 #endif
 
 Value& Value::append(const Value& value) { return (*this)[size()] = value; }
-
+/// \brief Insert value in array at specific index
+bool Value::insert(ArrayIndex index, const Value& newValue){
+  if(type() != arrayValue){
+    return false;
+  }
+  if(!isValidIndex()){
+    return false;
+  }
+  ArrayIndex oldsize = size();
+  resize(oldsize+1);
+  ArrayIndex length = size();
+  if(length != oldsize +1){
+    return false;
+  }
+  for(ArrayIndex i = length ; i> index ; i--){
+    (*this)[i] = (*this)[i-1];
+  }
+  (*this)[index]= newValue;
+  return true;
+}
 Value& Value::append(Value&& value) {
   return (*this)[size()] = std::move(value);
 }
