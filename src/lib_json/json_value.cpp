@@ -848,8 +848,8 @@ bool Value::asBool() const {
   case uintValue:
     return value_.uint_ ? true : false;
   case realValue:
-    // This is kind of strange. Not recommended.
-    return (value_.real_ != 0.0) ? true : false;
+    // According to JavaScript language zero or NaN is regarded as false
+    return std::fpclassify(value_.real_) != FP_ZERO && std::fpclassify(value_.real_) != FP_NAN
   default:
     break;
   }
