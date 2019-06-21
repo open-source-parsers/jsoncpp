@@ -1187,7 +1187,26 @@ Value Value::get(char const* key, Value const& defaultValue) const {
 Value Value::get(String const& key, Value const& defaultValue) const {
   return get(key.data(), key.data() + key.length(), defaultValue);
 }
-
+/// \brief Insert value in array at specific index
+bool Value::insert(ArrayIndex index, const Value& newValue){
+  if(type() != arrayValue){
+    return false;
+  }
+  if(!isValidIndex()){
+    return false;
+  }
+  ArrayIndex oldsize = size();
+  resize(oldsize+1);
+  ArrayIndex length = size();
+  if(length != oldsize +1){
+    return false;
+  }
+  for(ArrayIndex i = length ; i> index ; i--){
+    (*this)[i] = (*this)[i-1];
+  }
+  (*this)[index]= newValue;
+  return true;
+}
 bool Value::removeMember(const char* begin, const char* end, Value* removed) {
   if (type() != objectValue) {
     return false;
