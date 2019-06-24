@@ -2564,7 +2564,7 @@ JSONTEST_FIXTURE(FuzzTest, fuzzDoesntCrash) {
   const std::string example = "{}";
   JSONTEST_ASSERT_EQUAL(
       0,
-      LLVMFuzzerTestOneInput(reinterpret_cast<const uint8_t*>(example.c_str()),
+      fuzz::LLVMFuzzerTestOneInput(reinterpret_cast<const uint8_t*>(example.c_str()),
                              example.size()));
 }
 
