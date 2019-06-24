@@ -7,7 +7,7 @@ project(
     'cpp_std=c++11',
     'warning_level=1'],
   license : 'Public Domain',
-  meson_version : '>= 0.41.1')
+  meson_version : '>= 0.50.0')
 
 jsoncpp_ver_arr = meson.project_version().split('.')
 jsoncpp_major_version = jsoncpp_ver_arr[0]
