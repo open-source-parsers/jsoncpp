@@ -111,3 +111,35 @@ Consumers of this library require a strict approach to incrementing versioning o
 * Any new public symbols require a minor version bump.
 * Any alteration or removal of public symbols requires a major version bump, including changing the size of a class. This is necessary for
 consumers to do dependency injection properly.
+
+## Preparing code for submission
+
+Generally, JsonCpp's style guide has been pretty relaxed, with the following common themes:
+
+* Variables and function names use lower camel case (E.g. parseValue or collectComments).
+* Class use camel case (e.g. OurReader)
+* Member variables have a trailing underscore
+* Prefer `nullptr` over `NULL`.
+* Passing by non-const reference is allowed.
+* Single statement if blocks may omit brackets.
+* Generally prefer less space over more space.
+
+For an example:
+
+```c++
+bool Reader::decodeNumber(Token& token) {
+  Value decoded;
+  if (!decodeNumber(token, decoded))
+    return false;
+  currentValue().swapPayload(decoded);
+  currentValue().setOffsetStart(token.start_ - begin_);
+  currentValue().setOffsetLimit(token.end_ - begin_);
+  return true;
+}
+```
+
+Before submitting your code, ensure that you meet the versioning requirements above, follow the style guide of the file you are modifying (or the above rules for new files), and run clang format. Meson exposes clang format with the following command:
+
+```
+ninja -v -C build-${LIB_TYPE}/ clang-format
+```
