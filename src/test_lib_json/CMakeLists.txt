@@ -12,7 +12,7 @@ add_executable( jsoncpp_test
 if(BUILD_SHARED_LIBS)
     add_definitions( -DJSON_DLL )
 endif()
-target_link_libraries(jsoncpp_test jsoncpp_lib fuzz)
+target_link_libraries(jsoncpp_test jsoncpp_lib)
 
 # another way to solve issue #90
 #set_target_properties(jsoncpp_test PROPERTIES COMPILE_FLAGS -ffloat-store)
