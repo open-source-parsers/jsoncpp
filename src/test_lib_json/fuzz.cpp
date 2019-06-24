@@ -16,7 +16,7 @@ namespace Json {
 class Exception;
 }
 
-int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   Json::CharReaderBuilder builder;
 
   if (size < sizeof(uint32_t)) {
