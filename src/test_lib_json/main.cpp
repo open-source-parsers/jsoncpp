@@ -2533,13 +2533,13 @@ struct FuzzTest : JsonTest::TestCase {};
 
 // Build and run the fuzz test without any fuzzer, so that it's guaranteed not
 // go out of date, even if it's never run as an actual fuzz test.
-//JSONTEST_FIXTURE(FuzzTest, fuzzDoesntCrash) {
-//  const std::string example = "{}";
-//  JSONTEST_ASSERT_EQUAL(
-//      0,
-//      LLVMFuzzerTestOneInput(reinterpret_cast<const uint8_t*>(example.c_str()),
-//                             example.size()));
-//}
+JSONTEST_FIXTURE(FuzzTest, fuzzDoesntCrash) {
+  const std::string example = "{}";
+  JSONTEST_ASSERT_EQUAL(
+      0,
+      LLVMFuzzerTestOneInput(reinterpret_cast<const uint8_t*>(example.c_str()),
+                             example.size()));
+}
 
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
