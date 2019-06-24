@@ -1905,11 +1905,10 @@ CharReader* CharReaderBuilder::newCharReader() const {
       settings_["allowDroppedNullPlaceholders"].asBool();
   features.allowNumericKeys_ = settings_["allowNumericKeys"].asBool();
   features.allowSingleQuotes_ = settings_["allowSingleQuotes"].asBool();
-#if defined(JSON_HAS_INT64)
-  features.stackLimit_ = settings_["stackLimit"].asUInt64();
-#else
-  features.stackLimit_ = settings_["stackLimit"].asUInt();
-#endif
+
+  // Stack limit is always a size_t, so we get this as an unsigned int
+  // regardless of it we have 64-bit integer support enabled.
+  features.stackLimit_ = static_cast<size_t>(settings_["stackLimit"].asUInt());
   features.failIfExtra_ = settings_["failIfExtra"].asBool();
   features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
