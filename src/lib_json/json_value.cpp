@@ -238,13 +238,9 @@ JSONCPP_NORETURN void throwRuntimeError(String const& msg) {
 JSONCPP_NORETURN void throwLogicError(String const& msg) {
   throw LogicError(msg);
 }
-# else // !JSON_USE_EXCEPTION
-JSONCPP_NORETURN void throwRuntimeError(String const& msg) {
-  abort();
-}
-JSONCPP_NORETURN void throwLogicError(String const& msg) {
-  abort();
-}
+#else // !JSON_USE_EXCEPTION
+JSONCPP_NORETURN void throwRuntimeError(String const& msg) { abort(); }
+JSONCPP_NORETURN void throwLogicError(String const& msg) { abort(); }
 #endif
 
 // //////////////////////////////////////////////////////////////////
@@ -1445,8 +1441,7 @@ bool Value::isObject() const { return type() == objectValue; }
 Value::Comments::Comments(const Comments& that)
     : ptr_{cloneUnique(that.ptr_)} {}
 
-Value::Comments::Comments(Comments&& that)
-    : ptr_{std::move(that.ptr_)} {}
+Value::Comments::Comments(Comments&& that) : ptr_{std::move(that.ptr_)} {}
 
 Value::Comments& Value::Comments::operator=(const Comments& that) {
   ptr_ = cloneUnique(that.ptr_);
