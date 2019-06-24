@@ -11,7 +11,6 @@
 #endif
 
 #include "fuzz.h"
-#include "fuzz.cpp"
 #include "jsontest.h"
 #include <cmath>
 #include <cstring>
