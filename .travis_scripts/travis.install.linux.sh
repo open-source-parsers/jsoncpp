@@ -1,6 +1,6 @@
 set -vex
 
-wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip
+wget https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-linux.zip
 unzip -q ninja-linux.zip -d build
 
 pip3 install meson
