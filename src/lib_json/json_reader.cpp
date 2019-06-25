@@ -1382,18 +1382,15 @@ bool OurReader::readCppStyleComment() {
 bool OurReader::readNumber(bool checkNeg) {
   const char* p = current_;
   char c = '0'; // stopgap for already consumed character  
-  if(checkNeg){
-    if (checkNeg && p != end_ && *p == 'I') {
+  if (checkNeg) {
+    if (p != end_ && *p == 'I') {   // negative Infinity
       current_ = ++p;
       return false;
-    }
-    else
-    {
+    } else {                         // just negative number.
       current_ = ++p;                // skip '-'
-      OurReader::readNumber(false);  // read the back part of the '-'
+      OurReader::readNumber(false);  // jump to the part after the '-'
     }
-  }
-  else{
+  } else {   // handling the part after '-' or just a positive number.
     // integral part
     while (c >= '0' && c <= '9')
       c = (current_ = p) < end_ ? *p++ : '\0';

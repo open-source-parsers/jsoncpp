@@ -2045,7 +2045,18 @@ JSONTEST_FIXTURE(CharReaderTest, parseWithStackLimit) {
     delete reader;
   }
 }
-
+JSONTEST_FIXTURE(CharReaderTest, issue774) {
+  Json::CharReaderBuilder b;
+  Json::CharReader* reader(b.newCharReader());
+  Json::String errs;
+  Json::Value root;
+  char const doc[] = "-i";
+  bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
+  JSONTEST_ASSERT(!ok);
+  JSONTEST_ASSERT(!root.isNumeric());
+  JSONTEST_ASSERT(errs == "* Line 1, Column 1\n  '-i' is not a number.\n");
+  delete reader;
+}
 struct CharReaderStrictModeTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(CharReaderStrictModeTest, dupKeys) {
@@ -2578,7 +2589,7 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseChineseWithOneError);
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseWithDetailError);
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, parseWithStackLimit);
-
+  JSONTEST_REGISTER_FIXTURE(runner, CharReaderTest, issue774);
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderStrictModeTest, dupKeys);
 
   JSONTEST_REGISTER_FIXTURE(runner, CharReaderFailIfExtraTest, issue164);
