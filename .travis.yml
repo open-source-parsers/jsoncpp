@@ -33,7 +33,7 @@ matrix:
          LIB_TYPE=static
          BUILD_TYPE=release
       script: ./.travis_scripts/meson_builder.sh
-    - name: xenial clang meson static release testing
+    - name: Linux xenial clang meson static release testing
       os: linux
       dist: xenial
       compiler: clang
@@ -48,7 +48,7 @@ matrix:
       install:
            - source ./.travis_scripts/travis.install.${TRAVIS_OS_NAME}.sh
       script: ./.travis_scripts/meson_builder.sh
-    - name: xenial gcc cmake coverage
+    - name: Linux xenial gcc cmake coverage
       os: linux
       dist: xenial
       compiler: gcc
