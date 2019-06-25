@@ -193,43 +193,37 @@ bool Reader::readValue() {
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
-  } 
-  break;
+  } break;
   case tokenFalse: {
     Value v(false);
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
-  } 
-  break;
+  } break;
   case tokenNull: {
     Value v;
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
-  } 
-  break;
+  } break;
   case tokenNaN: {
     Value v(std::numeric_limits<double>::quiet_NaN());
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
-  } 
-  break;
+  } break;
   case tokenPosInf: {
     Value v(std::numeric_limits<double>::infinity());
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
-  } 
-  break;
+  } break;
   case tokenNegInf: {
     Value v(-std::numeric_limits<double>::infinity());
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
-   } 
-   break; 
+   } break; 
   case tokenArraySeparator:
   case tokenObjectEnd:
   case tokenArrayEnd:
@@ -464,11 +458,11 @@ bool Reader::readCppStyleComment() {
 
 bool Reader::readNumber(bool checkInf) {
   const char* p = current_;
+  char c = '0'; // stopgap for already consumed character
   if (checkInf && p != end_ && *p == 'I') {
     current_ = ++p;
     return false;
-  }  
-  char c = '0'; // stopgap for already consumed character  
+  }    
   // integral part
   while (c >= '0' && c <= '9')
     c = (current_ = p) < end_ ? *p++ : '\0';
@@ -946,7 +940,7 @@ OurFeatures OurFeatures::all() { return {}; }
 // ////////////////////////////////
 
 // exact copy of Reader, renamed to OurReader
-// used by CharReader CharReaderBuilder
+// used by CharReader and CharReaderBuilder
 class OurReader {
 public:
   typedef char Char;
