@@ -1,10 +1,9 @@
 # Build matrix / environment variables are explained on:
 # http://about.travis-ci.org/docs/user/build-configuration/
-# This file can be validated on:
-# http://lint.travis-ci.org/
-# See also
-# http://stackoverflow.com/questions/22111549/travis-ci-with-clang-3-4-and-c11/30925448#30925448
-# to allow C++11, though we are not yet building with -std=c++11
+# This file can be validated on: http://www.yamllint.com/
+# Or using the Ruby based travel command line tool:
+# gem install travis --no-rdoc --no-ri
+# travis lint .travis.yml
 language: cpp
 sudo: false
 addons:
@@ -15,12 +14,10 @@ addons:
     update: false # do not update homebrew by default
   apt:
     sources:
-    #- ubuntu-toolchain-r-test
-    - llvm-toolchain-precise-3.5
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-xenial-8
     packages:
-    #- gcc-4.9
-    #- g++-4.9
-    - clang-3.5
+    - clang-8
     - valgrind
 matrix:
   allow_failures:
@@ -28,21 +25,21 @@ matrix:
   include:
     - name: Mac clang meson static release testing
       os: osx
-      osx_image: xcode9.4
+      osx_image: xcode10.2
       compiler: clang
-      env: 
-         CXX="clang++-3.5" 
-         CC="clang-3.5"
+      env:
+         CXX="clang++"
+         CC="clang"
          LIB_TYPE=static
          BUILD_TYPE=release
       script: ./.travis_scripts/meson_builder.sh
-    - name: trusty clang meson static release testing
+    - name: xenial clang meson static release testing
       os: linux
-      dist: trusty
+      dist: xenial
       compiler: clang
-      env: 
-         CXX="clang++-3.5" 
-         CC="clang-3.5"
+      env:
+         CXX="clang++"
+         CC="clang"
          LIB_TYPE=static
          BUILD_TYPE=release
       # before_install and install steps only needed for linux meson builds
@@ -55,23 +52,14 @@ matrix:
       os: linux
       dist: xenial
       compiler: gcc
-      env: 
+      env:
         CXX=g++
         CC=gcc
         DO_Coverage=ON
         BUILD_TOOL="Unix Makefiles"
-        BUILD_TYPE=Debug 
-        LIB_TYPE=shared 
+        BUILD_TYPE=Debug
+        LIB_TYPE=shared
         DESTDIR=/tmp/cmake_json_cpp
       script: ./.travis_scripts/cmake_builder.sh
-#   Valgrind has too many false positives from the python wrapping.  Need a good suppression file
-#    - name: xenial gcc cmake coverage
-#      os: linux
-#      dist: xenial
-#      compiler: gcc
-#      env: DO_MemCheck=ON CXX=/usr/bin/g++  BUILD_TOOL="Unix Makefiles" BUILD_TYPE=Debug LIB_TYPE=shared DESTDIR=/tmp/cmake_json_cpp
-#      script: ./.travis_scripts/cmake_builder.sh
 notifications:
   email: false
-
-
