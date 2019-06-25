@@ -308,16 +308,19 @@ JSONTEST_FIXTURE(ValueTest, arrayIssue252) {
   // JSONTEST_ASSERT_EQUAL(5, root["array"].size());
 }
 JSONTEST_FIXTURE(ValueTest, arrayIssue691) {
-  Json::Value array2_;
-  array2_.append(1);
-  array2_.append(2);
-  array2_.append(3);
-  array2_.append(5);
-  ////use insert method
-  array2_.insert(3,4);
-  JSONTEST_ASSERT_EQUAL(Json::Value(3),array2_[2]);
-  JSONTEST_ASSERT_EQUAL(Json::Value(4),array2_[3]);
-  JSONTEST_ASSERT_EQUAL(Json::Value(5),array2_[4]);    
+  Json::Value array2;
+  array2.append(10);  // index 0
+  array2.append(20);  // index 1
+  array2.append(30);  // index 2
+  array2.append(50);  // index 3
+
+  JSONTEST_ASSERT_EQUAL(Json::Value(50),array2[3]);
+
+  array2.insert(3,40); // index 3
+  // After updating, index 3 should be changed from 50 to 40, and 50 moved to 
+  // index 4.
+  JSONTEST_ASSERT_EQUAL(Json::Value(40),array2[3]);
+  JSONTEST_ASSERT_EQUAL(Json::Value(50),array2[4]);    
 }
 JSONTEST_FIXTURE(ValueTest, null) {
   JSONTEST_ASSERT_EQUAL(Json::nullValue, null_.type());
