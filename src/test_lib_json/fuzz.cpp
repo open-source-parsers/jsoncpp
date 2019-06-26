@@ -1,11 +1,11 @@
-// Copyright 2007-2010 The JsonCpp Authors
+// Copyright 2007-2019 The JsonCpp Authors
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
 #include "fuzz.h"
 
-#include <bits/stdint-uintn.h>
+#include <cstdint>
 #include <json/config.h>
 #include <json/json.h>
 #include <memory>
