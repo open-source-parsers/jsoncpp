@@ -853,9 +853,9 @@ bool Value::asBool() const {
   case uintValue:
     return value_.uint_ ? true : false;
   case realValue: {
-      // According to JavaScript language zero or NaN is regarded as false
-      const auto value_classification = std::fpclassify(value_.real_);
-      return value_classification != FP_ZERO && value_classification != FP_NAN;
+    // According to JavaScript language zero or NaN is regarded as false
+    const auto value_classification = std::fpclassify(value_.real_);
+    return value_classification != FP_ZERO && value_classification != FP_NAN;
   }
   default:
     break;
