@@ -16,7 +16,6 @@
 #include <cstring>
 #include <iomanip>
 #include <iostream>
-#include <sstream>
 #include <json/config.h>
 #include <json/json.h>
 #include <limits>
@@ -1649,7 +1648,7 @@ JSONTEST_FIXTURE(ValueTest, StaticString) {
 
 JSONTEST_FIXTURE(ValueTest, WideString) {
   // https://github.com/open-source-parsers/jsoncpp/issues/756
-  const std::string uni = u8"式，进";  // "\u5f0f\uff0c\u8fdb"
+  const std::string uni = u8"式，进"; // "\u5f0f\uff0c\u8fdb"
   std::string styled;
   {
     Json::Value v;
