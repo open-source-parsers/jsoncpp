@@ -1547,36 +1547,46 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   bool isNegative = *current == '-';
   if (isNegative)
     ++current;
-  // TODO: Help the compiler do the div and mod at compile time or get rid of
-  // them.
-  Value::LargestUInt maxIntegerValue =
-      isNegative ? Value::LargestUInt(Value::minLargestInt)
-                 : Value::maxLargestUInt;
-  Value::LargestUInt threshold = maxIntegerValue / 10;
+
+  // TODO(issue #960): Change to constexpr
+  static const auto positive_threshold = Value::maxLargestUInt / 10;
+  static const auto positive_last_digit = Value::maxLargestUInt % 10;
+  static const auto negative_threshold =
+      Value::LargestUInt(Value::minLargestInt) / 10;
+  static const auto negative_last_digit =
+      Value::LargestUInt(Value::minLargestInt) % 10;
+
+  const auto threshold = isNegative ? negative_threshold : positive_threshold;
+  const auto last_digit =
+      isNegative ? negative_last_digit : positive_last_digit;
+
   Value::LargestUInt value = 0;
   while (current < token.end_) {
     Char c = *current++;
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
-    auto digit(static_cast<Value::UInt>(c - '0'));
+
+    const auto digit(static_cast<Value::UInt>(c - '0'));
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
-      // a) we've only just touched the limit, b) this is the last digit, and
+      // a) we've only just touched the limit, meaing value == threshold,
+      // b) this is the last digit, or
       // c) it's small enough to fit in that rounding delta, we're okay.
       // Otherwise treat this number as a double to avoid overflow.
-      if (value > threshold || current != token.end_ ||
-          digit > maxIntegerValue % 10) {
+      if (value > threshold || current != token.end_ || digit > last_digit) {
         return decodeDouble(token, decoded);
       }
     }
     value = value * 10 + digit;
   }
+
   if (isNegative)
     decoded = -Value::LargestInt(value);
-  else if (value <= Value::LargestUInt(Value::maxInt))
+  else if (value <= Value::LargestUInt(Value::maxLargestInt))
     decoded = Value::LargestInt(value);
   else
     decoded = value;
+
   return true;
 }
 
