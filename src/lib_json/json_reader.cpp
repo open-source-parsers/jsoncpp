@@ -870,7 +870,8 @@ bool Reader::pushError(const Value& value,
 
 bool Reader::good() const { return errors_.empty(); }
 
-// exact copy of Features
+// Originally copied from the Features class (now deprecated), used internally
+// for features implementation.
 class OurFeatures {
 public:
   static OurFeatures all();
@@ -885,15 +886,13 @@ public:
   size_t stackLimit_;
 }; // OurFeatures
 
-// exact copy of Implementation of class Features
-// ////////////////////////////////
-
 OurFeatures OurFeatures::all() { return {}; }
 
 // Implementation of class Reader
 // ////////////////////////////////
 
-// exact copy of Reader, renamed to OurReader
+// Originally copied from the Reader class (now deprecated), used internally
+// for implementing JSON reading.
 class OurReader {
 public:
   typedef char Char;
