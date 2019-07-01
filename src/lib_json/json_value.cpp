@@ -1182,8 +1182,13 @@ bool Value::insert(ArrayIndex index, const Value& newValue) {
   resize(oldsize + 1);
   ArrayIndex length = size();
 
+<<<<<<< HEAD
   for (ArrayIndex i = length; i > index; i--) {
     (*this)[i] = (*this)[i - 1];
+=======
+  for(ArrayIndex i = length ; i> index ; i--) {
+    (*this)[i] = (*this)[i-1];
+>>>>>>> 8a1d8693034ed44271db707c55e14fc517a8c5b9
   }
   (*this)[index] = newValue;
   return true;
@@ -1203,8 +1208,13 @@ bool Value::insert(ArrayIndex index, const Value&& newValue) {
   resize(oldsize + 1);
   ArrayIndex length = size();
 
+<<<<<<< HEAD
   for (ArrayIndex i = length; i > index; i--) {
     (*this)[i] = (*this)[i - 1];
+=======
+  for(ArrayIndex i = length ; i> index ; i--) {
+    (*this)[i] = (*this)[i-1];
+>>>>>>> 8a1d8693034ed44271db707c55e14fc517a8c5b9
   }
   (*this)[index] = std::move(newValue);
   return true;
