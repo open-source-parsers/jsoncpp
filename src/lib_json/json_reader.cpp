@@ -1381,16 +1381,16 @@ bool OurReader::readCppStyleComment() {
 // if checkNeg is true, read negative number
 bool OurReader::readNumber(bool checkNeg) {
   const char* p = current_;
-  char c = '0'; // stopgap for already consumed character  
+  char c = '0'; // stopgap for already consumed character
   if (checkNeg) {
-    if (p != end_ && *p == 'I') {   // negative Infinity
+    if (p != end_ && *p == 'I') { // negative Infinity
       current_ = ++p;
       return false;
-    } else {                         // just negative number.
-      current_ = ++p;                // skip '-'
-      OurReader::readNumber(false);  // jump to the part after the '-'
+    } else {                        // just negative number.
+      current_ = ++p;               // skip '-'
+      OurReader::readNumber(false); // jump to the part after the '-'
     }
-  } else {   // handling the part after '-' or just a positive number.
+  } else { // handling the part after '-' or just a positive number.
     // integral part
     while (c >= '0' && c <= '9')
       c = (current_ = p) < end_ ? *p++ : '\0';

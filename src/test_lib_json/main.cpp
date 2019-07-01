@@ -211,14 +211,17 @@ JSONTEST_FIXTURE(ValueTest, objects) {
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), *foundId);
 
   const char unknownIdKey[] = "unknown id";
-  const Json::Value* foundUnknownId = object1_.find(unknownIdKey, unknownIdKey + strlen(unknownIdKey));
+  const Json::Value* foundUnknownId =
+      object1_.find(unknownIdKey, unknownIdKey + strlen(unknownIdKey));
   JSONTEST_ASSERT_EQUAL(nullptr, foundUnknownId);
 
   // Access through demand()
   const char yetAnotherIdKey[] = "yet another id";
-  const Json::Value* foundYetAnotherId = object1_.find(yetAnotherIdKey, yetAnotherIdKey + strlen(yetAnotherIdKey));
+  const Json::Value* foundYetAnotherId =
+      object1_.find(yetAnotherIdKey, yetAnotherIdKey + strlen(yetAnotherIdKey));
   JSONTEST_ASSERT_EQUAL(nullptr, foundYetAnotherId);
-  Json::Value* demandedYetAnotherId = object1_.demand(yetAnotherIdKey, yetAnotherIdKey + strlen(yetAnotherIdKey));
+  Json::Value* demandedYetAnotherId = object1_.demand(
+      yetAnotherIdKey, yetAnotherIdKey + strlen(yetAnotherIdKey));
   JSONTEST_ASSERT(demandedYetAnotherId != nullptr);
   *demandedYetAnotherId = "baz";
 
@@ -2506,7 +2509,7 @@ JSONTEST_FIXTURE(IteratorTest, const) {
   Json::Value const v;
   JSONTEST_ASSERT_THROWS(
       Json::Value::iterator it(v.begin()) // Compile, but throw.
-  );
+      );
 
   Json::Value value;
 
