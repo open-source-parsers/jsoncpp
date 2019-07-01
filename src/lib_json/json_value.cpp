@@ -1172,43 +1172,41 @@ Value const& Value::operator[](CppTL::ConstString const& key) const {
 Value& Value::append(const Value& value) { return (*this)[size()] = value; }
 /// \brief Insert value in array at specific index
 bool Value::insert(ArrayIndex index, const Value& newValue) {
-  if(type() != arrayValue) {
+  if (type() != arrayValue) {
     return false;
   }
-  if(!isValidIndex(index)) {
+  if (!isValidIndex(index)) {
     return false;
   }
   ArrayIndex oldsize = size();
-  resize(oldsize+1);
+  resize(oldsize + 1);
   ArrayIndex length = size();
-  if(length != oldsize +1) {
-    return false;
+
+  for (ArrayIndex i = length; i > index; i--) {
+    (*this)[i] = (*this)[i - 1];
   }
-  for(ArrayIndex i = length ; i> index ; i--) {
-    (*this)[i] = (*this)[i-1];
-  }
-  (*this)[index]= newValue;
+  (*this)[index] = newValue;
   return true;
 }
 #if JSON_HAS_RVALUE_REFERENCES
-Value& Value::append(Value&& value) { return (*this)[size()] = std::move(value); }
+Value& Value::append(Value&& value) {
+  return (*this)[size()] = std::move(value);
+}
 bool Value::insert(ArrayIndex index, const Value&& newValue) {
-  if(type() != arrayValue) {
+  if (type() != arrayValue) {
     return false;
   }
-  if(!isValidIndex(index)) {
+  if (!isValidIndex(index)) {
     return false;
   }
   ArrayIndex oldsize = size();
-  resize(oldsize+1);
+  resize(oldsize + 1);
   ArrayIndex length = size();
-  if(length != oldsize +1) {
-    return false;
+
+  for (ArrayIndex i = length; i > index; i--) {
+    (*this)[i] = (*this)[i - 1];
   }
-  for(ArrayIndex i = length ; i> index ; i--) {
-    (*this)[i] = (*this)[i-1];
-  }
-  (*this)[index]= std::move(newValue);
+  (*this)[index] = std::move(newValue);
   return true;
 }
 #endif
@@ -1473,8 +1471,7 @@ bool Value::isObject() const { return type() == objectValue; }
 Value::Comments::Comments(const Comments& that)
     : ptr_{cloneUnique(that.ptr_)} {}
 
-Value::Comments::Comments(Comments&& that)
-    : ptr_{std::move(that.ptr_)} {}
+Value::Comments::Comments(Comments&& that) : ptr_{std::move(that.ptr_)} {}
 
 Value::Comments& Value::Comments::operator=(const Comments& that) {
   ptr_ = cloneUnique(that.ptr_);

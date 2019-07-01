@@ -211,14 +211,17 @@ JSONTEST_FIXTURE(ValueTest, objects) {
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), *foundId);
 
   const char unknownIdKey[] = "unknown id";
-  const Json::Value* foundUnknownId = object1_.find(unknownIdKey, unknownIdKey + strlen(unknownIdKey));
+  const Json::Value* foundUnknownId =
+      object1_.find(unknownIdKey, unknownIdKey + strlen(unknownIdKey));
   JSONTEST_ASSERT_EQUAL(nullptr, foundUnknownId);
 
   // Access through demand()
   const char yetAnotherIdKey[] = "yet another id";
-  const Json::Value* foundYetAnotherId = object1_.find(yetAnotherIdKey, yetAnotherIdKey + strlen(yetAnotherIdKey));
+  const Json::Value* foundYetAnotherId =
+      object1_.find(yetAnotherIdKey, yetAnotherIdKey + strlen(yetAnotherIdKey));
   JSONTEST_ASSERT_EQUAL(nullptr, foundYetAnotherId);
-  Json::Value* demandedYetAnotherId = object1_.demand(yetAnotherIdKey, yetAnotherIdKey + strlen(yetAnotherIdKey));
+  Json::Value* demandedYetAnotherId = object1_.demand(
+      yetAnotherIdKey, yetAnotherIdKey + strlen(yetAnotherIdKey));
   JSONTEST_ASSERT(demandedYetAnotherId != nullptr);
   *demandedYetAnotherId = "baz";
 
@@ -307,20 +310,33 @@ JSONTEST_FIXTURE(ValueTest, arrayIssue252) {
   }
   // JSONTEST_ASSERT_EQUAL(5, root["array"].size());
 }
-JSONTEST_FIXTURE(ValueTest, arrayIssue691) {
-  Json::Value array2;
-  array2.append(10);  // index 0
-  array2.append(20);  // index 1
-  array2.append(30);  // index 2
-  array2.append(50);  // index 3
+JSONTEST_FIXTURE(ValueTest, arrayInsertAtRandomIndex) {
+  Json::Value array;
+  JSONCPP_STRING str = "index5";
+  array.append("index0");
+  array.append("index1");
+  array.append("index2");
+  array.append("index3");
 
-  JSONTEST_ASSERT_EQUAL(Json::Value(50),array2[3]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[1]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[2]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[3]);
 
-  array2.insert(3,40); // index 3
-  // After updating, index 3 should be changed from 50 to 40, and 50 moved to 
-  // index 4.
-  JSONTEST_ASSERT_EQUAL(Json::Value(40),array2[3]);
-  JSONTEST_ASSERT_EQUAL(Json::Value(50),array2[4]);    
+  array.insert(3, "index4"); // rvalue
+  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[1]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[2]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[3]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[4]);
+
+  array.insert(4, str); // lvalue
+  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[1]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[2]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[3]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index5"), array[4]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[5]);
 }
 JSONTEST_FIXTURE(ValueTest, null) {
   JSONTEST_ASSERT_EQUAL(Json::nullValue, null_.type());
@@ -2509,7 +2525,7 @@ JSONTEST_FIXTURE(IteratorTest, const) {
   Json::Value const v;
   JSONTEST_ASSERT_THROWS(
       Json::Value::iterator it(v.begin()) // Compile, but throw.
-  );
+      );
 
   Json::Value value;
 
@@ -2549,7 +2565,7 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, objects);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, arrays);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, arrayIssue252);
-  JSONTEST_REGISTER_FIXTURE(runner, ValueTest, arrayIssue691);
+  JSONTEST_REGISTER_FIXTURE(runner, ValueTest, arrayInsertAtRandomIndex);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, null);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, strings);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, bools);
