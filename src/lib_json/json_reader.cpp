@@ -223,7 +223,7 @@ bool Reader::readValue() {
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
-   } break; 
+  } break;
   case tokenArraySeparator:
   case tokenObjectEnd:
   case tokenArrayEnd:
@@ -307,7 +307,7 @@ bool Reader::readToken(Token& token) {
       token.type_ = tokenNegInf;
       ok = features_.allowSpecialFloats_ && match("nfinity", 7);
     }
-    break;  
+    break;
   case 't':
     token.type_ = tokenTrue;
     ok = match("rue", 3);
@@ -462,7 +462,7 @@ bool Reader::readNumber(bool checkInf) {
   if (checkInf && p != end_ && *p == 'I') {
     current_ = ++p;
     return false;
-  }    
+  }
   // integral part
   while (c >= '0' && c <= '9')
     c = (current_ = p) < end_ ? *p++ : '\0';
