@@ -108,8 +108,9 @@ msvc_pre1900_c99_snprintf(char* outBuf, size_t size, const char* format, ...);
 #define JSONCPP_DEPRECATED(message) __attribute__((deprecated(message)))
 #elif (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
 #define JSONCPP_DEPRECATED(message) __attribute__((__deprecated__))
-#endif // GNUC version
-#elif defined(_MSC_VER) // MSVC (after clang because clang on Windows emulates MSVC)
+#endif                  // GNUC version
+#elif defined(_MSC_VER) // MSVC (after clang because clang on Windows emulates
+                        // MSVC)
 #define JSONCPP_DEPRECATED(message) __declspec(deprecated(message))
 #endif // __clang__ || __GNUC__ || _MSC_VER
 

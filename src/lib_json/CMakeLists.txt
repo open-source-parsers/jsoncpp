@@ -34,7 +34,7 @@ endif()
 
 if(NOT (HAVE_CLOCALE AND HAVE_LCONV_SIZE AND HAVE_DECIMAL_POINT AND HAVE_LOCALECONV))
     message(WARNING "Locale functionality is not supported")
-    add_definitions(-DJSONCPP_NO_LOCALE_SUPPORT)
+    add_compile_definitions(JSONCPP_NO_LOCALE_SUPPORT)
 endif()
 
 set( JSONCPP_INCLUDE_DIR ../../include )
@@ -47,7 +47,7 @@ set( PUBLIC_HEADERS
     ${JSONCPP_INCLUDE_DIR}/json/reader.h
     ${JSONCPP_INCLUDE_DIR}/json/writer.h
     ${JSONCPP_INCLUDE_DIR}/json/assertions.h
-    ${JSONCPP_INCLUDE_DIR}/json/version.h
+    ${PROJECT_BINARY_DIR}/include/json/version.h
     )
 
 source_group( "Public API" FILES ${PUBLIC_HEADERS} )
@@ -68,7 +68,7 @@ else(JSONCPP_WITH_CMAKE_PACKAGE)
 endif()
 
 if(BUILD_SHARED_LIBS)
-    add_definitions( -DJSON_DLL_BUILD )
+    add_compile_definitions( JSON_DLL_BUILD )
 endif()
 
 
@@ -141,5 +141,6 @@ install( TARGETS jsoncpp_lib ${INSTALL_EXPORT}
 if(NOT CMAKE_VERSION VERSION_LESS 2.8.11)
     target_include_directories( jsoncpp_lib PUBLIC
                                 $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-                                $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>)
+                                $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>
+                                $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/json>)
 endif()

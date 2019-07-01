@@ -50,6 +50,7 @@
  */
 namespace Json {
 
+#if JSON_USE_EXCEPTION
 /** Base class for all exceptions we throw.
  *
  * We use nothing but these internally. Of course, STL can throw others.
@@ -85,6 +86,7 @@ class JSON_API LogicError : public Exception {
 public:
   LogicError(String const& msg);
 };
+#endif
 
 /// used internally
 JSONCPP_NORETURN void throwRuntimeError(String const& msg);
@@ -610,7 +612,9 @@ Json::Value obj_value(Json::objectValue); // {}
   ptrdiff_t getOffsetLimit() const;
 
 private:
-  void setType(ValueType v) { bits_.value_type_ = static_cast<unsigned char> (v); }
+  void setType(ValueType v) {
+    bits_.value_type_ = static_cast<unsigned char>(v);
+  }
   bool isAllocated() const { return bits_.allocated_; }
   void setIsAllocated(bool v) { bits_.allocated_ = v; }
 

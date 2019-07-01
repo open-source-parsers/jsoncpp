@@ -7,7 +7,7 @@ project(
     'cpp_std=c++11',
     'warning_level=1'],
   license : 'Public Domain',
-  meson_version : '>= 0.41.1')
+  meson_version : '>= 0.50.0')
 
 jsoncpp_ver_arr = meson.project_version().split('.')
 jsoncpp_major_version = jsoncpp_ver_arr[0]
@@ -88,7 +88,8 @@ jsoncpp_test = executable(
   'jsoncpp_test',
   [ 'src/test_lib_json/jsontest.cpp',
     'src/test_lib_json/jsontest.h',
-    'src/test_lib_json/main.cpp'],
+    'src/test_lib_json/main.cpp',
+    'src/test_lib_json/fuzz.cpp'],
   include_directories : jsoncpp_include_directories,
   link_with : jsoncpp_lib,
   install : false,

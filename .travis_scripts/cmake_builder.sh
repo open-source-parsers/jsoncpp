@@ -12,10 +12,10 @@
 # Optional environmental variables
 #   - DESTDIR <- used for setting the install prefix
 #   - BUILD_TOOL=["Unix Makefile"|"Ninja"]
-#   - BUILDNAME <-- how to identify this build on the dashboard
+#   - BUILDNAME <- how to identify this build on the dashboard
 #   - DO_MemCheck <- if set, try to use valgrind
-#   - DO_Coverage    <- if set, try to do dashboard coverage testing
-#   
+#   - DO_Coverage <- if set, try to do dashboard coverage testing
+#
 
 env_set=1
 if ${BUILD_TYPE+false}; then
@@ -78,7 +78,7 @@ if ! ${DO_MemCheck+false}; then
    valgrind --version
    CTEST_TESTING_OPTION="-D ExperimentalMemCheck"
 else
-#   - DO_Coverage    <- if set, try to do dashboard coverage testing
+#   - DO_Coverage <- if set, try to do dashboard coverage testing
   if ! ${DO_Coverage+false}; then
      export CXXFLAGS="-fprofile-arcs -ftest-coverage"
      export LDFLAGS="-fprofile-arcs -ftest-coverage"
@@ -117,14 +117,14 @@ cd "${_BUILD_DIR_NAME}"
   ctest -C ${BUILD_TYPE} -D ExperimentalStart -D ExperimentalConfigure -D ExperimentalBuild ${CTEST_TESTING_OPTION} -D ExperimentalSubmit
   # Final step is to verify that installation succeeds
   cmake --build . --config ${BUILD_TYPE} --target install
-  
+
   if [ "${DESTDIR}" != "/usr/local" ]; then
      ${_BUILD_EXE} install
   fi
 cd -
 
 if ${CLEANUP+false}; then
-  echo "Skipping cleanup:  build directory will persist."
+  echo "Skipping cleanup: build directory will persist."
 else
   rm -r "${_BUILD_DIR_NAME}"
 fi
