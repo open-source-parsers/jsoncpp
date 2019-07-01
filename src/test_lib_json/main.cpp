@@ -1844,6 +1844,37 @@ JSONTEST_FIXTURE(ValueTest, precision) {
   JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 }
 
+JSONTEST_FIXTURE(ValueTest, convertToEnum) {
+  enum class Foo : Json::Int64 {
+    A = -10,
+    B = 20,
+  };
+
+  enum class Bar : Json::UInt64 {
+    C = 30,
+    D = 40,
+  };
+
+  enum Baz {
+    E = -500,
+    F = 600,
+  };
+
+  Json::Value a = -10;
+  Json::Value b = 20;
+  Json::Value c = 30;
+  Json::Value d = 40;
+  Json::Value e = -500;
+  Json::Value f = 600;
+
+  JSONTEST_ASSERT(a.asEnum<Foo>() == Foo::A);
+  JSONTEST_ASSERT(b.asEnum<Foo>() == Foo::B);
+  JSONTEST_ASSERT(c.asEnum<Bar>() == Bar::C);
+  JSONTEST_ASSERT(d.asEnum<Bar>() == Bar::D);
+  JSONTEST_ASSERT(e.asEnum<Baz>() == Baz::E);
+  JSONTEST_ASSERT(f.asEnum<Baz>() == Baz::F);
+}
+
 struct WriterTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(WriterTest, dropNullPlaceholders) {
@@ -2594,11 +2625,11 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, StaticString);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, WideString);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, CommentBefore);
-  // JSONTEST_REGISTER_FIXTURE(runner, ValueTest, nulls);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, zeroes);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, zeroesInKeys);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, specialFloats);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, precision);
+  JSONTEST_REGISTER_FIXTURE(runner, ValueTest, convertToEnum);
 
   JSONTEST_REGISTER_FIXTURE(runner, WriterTest, dropNullPlaceholders);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, dropNullPlaceholders);

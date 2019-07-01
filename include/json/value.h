@@ -296,14 +296,14 @@ public:
     To create an empty array, pass arrayValue.
     To create an empty object, pass objectValue.
     Another Value can then be set to this one by assignment.
-This is useful since clear() and resize() will not alter types.
+    This is useful since clear() and resize() will not alter types.
 
     Examples:
-\code
-Json::Value null_value; // null
-Json::Value arr_value(Json::arrayValue); // []
-Json::Value obj_value(Json::objectValue); // {}
-\endcode
+        \code
+        Json::Value null_value; // null
+        Json::Value arr_value(Json::arrayValue); // []
+        Json::Value obj_value(Json::objectValue); // {}
+        \endcode
   */
   Value(ValueType type = nullValue);
   Value(Int value);
@@ -391,6 +391,19 @@ Json::Value obj_value(Json::objectValue); // {}
   float asFloat() const;
   double asDouble() const;
   bool asBool() const;
+
+  template <typename T,
+            typename std::enable_if<std::is_enum<T>::value>::type* = nullptr>
+  T asEnum() {
+    switch (type()) {
+    case intValue:
+      return static_cast<T>(asLargestInt());
+    case uintValue:
+      return static_cast<T>(asLargestUInt());
+    default:
+      throwRuntimeError("Invalid cast to enum value");
+    }
+  }
 
   bool isNull() const;
   bool isBool() const;
