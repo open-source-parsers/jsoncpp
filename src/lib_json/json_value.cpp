@@ -1181,9 +1181,7 @@ bool Value::insert(ArrayIndex index, const Value& newValue) {
   ArrayIndex oldsize = size();
   resize(oldsize+1);
   ArrayIndex length = size();
-  if(length != oldsize +1) {
-    return false;
-  }
+
   for(ArrayIndex i = length ; i> index ; i--) {
     (*this)[i] = (*this)[i-1];
   }
@@ -1202,9 +1200,7 @@ bool Value::insert(ArrayIndex index, const Value&& newValue) {
   ArrayIndex oldsize = size();
   resize(oldsize+1);
   ArrayIndex length = size();
-  if(length != oldsize +1) {
-    return false;
-  }
+
   for(ArrayIndex i = length ; i> index ; i--) {
     (*this)[i] = (*this)[i-1];
   }
