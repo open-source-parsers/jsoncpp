@@ -184,3 +184,5 @@ add_subdirectory( src )
 #install the includes
 add_subdirectory( include )
 
+#install the example
+add_subdirectory( example)
