@@ -1049,6 +1049,7 @@ bool OurReader::parse(const char* beginDoc,
   nodes_.push(&root);
 
   bool successful = readValue();
+  nodes_.pop();
   Token token;
   skipCommentTokens(token);
   if (features_.failIfExtra_) {
