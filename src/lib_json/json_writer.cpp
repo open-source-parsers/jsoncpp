@@ -1166,16 +1166,18 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const {
   } else if (cs_str == "None") {
     cs = CommentStyle::None;
   } else {
-    throwRuntimeError("commentStyle must be 'All' or 'None'");
+    THROW_RUNTIME_ERROR("commentStyle must be 'All' or 'None'");
   }
+
   PrecisionType precisionType(significantDigits);
   if (pt_str == "significant") {
     precisionType = PrecisionType::significantDigits;
   } else if (pt_str == "decimal") {
     precisionType = PrecisionType::decimalPlaces;
   } else {
-    throwRuntimeError("precisionType must be 'significant' or 'decimal'");
+    THROW_RUNTIME_ERROR("precisionType must be 'significant' or 'decimal'");
   }
+
   String colonSymbol = " : ";
   if (eyc) {
     colonSymbol = ": ";

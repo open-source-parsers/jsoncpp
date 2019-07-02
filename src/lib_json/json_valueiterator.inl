@@ -146,7 +146,7 @@ ValueIterator::ValueIterator(const Value::ObjectValues::iterator& current)
 
 ValueIterator::ValueIterator(const ValueConstIterator& other)
     : ValueIteratorBase(other) {
-  throwRuntimeError("ConstIterator to Iterator should never be allowed.");
+  THROW_RUNTIME_ERROR("ConstIterator to Iterator should never be allowed.");
 }
 
 ValueIterator::ValueIterator(const ValueIterator& other) = default;

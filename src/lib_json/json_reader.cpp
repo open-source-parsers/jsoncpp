@@ -161,8 +161,9 @@ bool Reader::readValue() {
   // These methods execute nodes_.push() just before and nodes_.pop)() just
   // after calling readValue(). parse() executes one nodes_.push(), so > instead
   // of >=.
-  if (nodes_.size() > stackLimit_g)
-    throwRuntimeError("Exceeded stackLimit in readValue().");
+  if (nodes_.size() > stackLimit_g) {
+    THROW_RUNTIME_ERROR("Exceeded stackLimit in readValue().");
+  }
 
   Token token;
   skipCommentTokens(token);
@@ -1077,8 +1078,10 @@ bool OurReader::parse(const char* beginDoc,
 
 bool OurReader::readValue() {
   //  To preserve the old behaviour we cast size_t to int.
-  if (nodes_.size() > features_.stackLimit_)
-    throwRuntimeError("Exceeded stackLimit in readValue().");
+  if (nodes_.size() > features_.stackLimit_) {
+    THROW_RUNTIME_ERROR("Exceeded stackLimit in readValue().");
+  }
+
   Token token;
   skipCommentTokens(token);
   bool successful = true;
@@ -1454,8 +1457,11 @@ bool OurReader::readObject(Token& token) {
     } else {
       break;
     }
-    if (name.length() >= (1U << 30))
-      throwRuntimeError("keylength >= 2^30");
+
+    if (name.length() >= (1U << 30)) {
+      THROW_RUNTIME_ERROR("keylength >= 2^30");
+    }
+
     if (features_.rejectDupKeys_ && currentValue().isMember(name)) {
       String msg = "Duplicate key: '" + name + "'";
       return addErrorAndRecover(msg, tokenName, tokenObjectEnd);
@@ -2006,10 +2012,11 @@ bool parseFromStream(CharReader::Factory const& fact,
 IStream& operator>>(IStream& sin, Value& root) {
   CharReaderBuilder b;
   String errs;
-  bool ok = parseFromStream(b, sin, &root, &errs);
+  const bool ok = parseFromStream(b, sin, &root, &errs);
   if (!ok) {
-    throwRuntimeError(errs);
+    THROW_RUNTIME_ERROR(errs);
   }
+
   return sin;
 }
 

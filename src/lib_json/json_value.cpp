@@ -145,9 +145,10 @@ static inline char* duplicateStringValue(const char* value, size_t length) {
 
   char* newString = static_cast<char*>(malloc(length + 1));
   if (newString == nullptr) {
-    throwRuntimeError("in Json::Value::duplicateStringValue(): "
-                      "Failed to allocate string value buffer");
+    THROW_RUNTIME_ERROR("in Json::Value::duplicateStringValue(): "
+                        "Failed to allocate string value buffer");
   }
+
   memcpy(newString, value, length);
   newString[length] = 0;
   return newString;
@@ -166,9 +167,10 @@ static inline char* duplicateAndPrefixStringValue(const char* value,
   unsigned actualLength = length + static_cast<unsigned>(sizeof(unsigned)) + 1U;
   char* newString = static_cast<char*>(malloc(actualLength));
   if (newString == nullptr) {
-    throwRuntimeError("in Json::Value::duplicateAndPrefixStringValue(): "
-                      "Failed to allocate string value buffer");
+    THROW_RUNTIME_ERROR("in Json::Value::duplicateAndPrefixStringValue(): "
+                        "Failed to allocate string value buffer");
   }
+
   *reinterpret_cast<unsigned*>(newString) = length;
   memcpy(newString + sizeof(unsigned), value, length);
   newString[actualLength - 1U] =
@@ -232,15 +234,6 @@ Exception::~Exception() JSONCPP_NOEXCEPT {}
 char const* Exception::what() const JSONCPP_NOEXCEPT { return msg_.c_str(); }
 RuntimeError::RuntimeError(String const& msg) : Exception(msg) {}
 LogicError::LogicError(String const& msg) : Exception(msg) {}
-JSONCPP_NORETURN void throwRuntimeError(String const& msg) {
-  throw RuntimeError(msg);
-}
-JSONCPP_NORETURN void throwLogicError(String const& msg) {
-  throw LogicError(msg);
-}
-#else // !JSON_USE_EXCEPTION
-JSONCPP_NORETURN void throwRuntimeError(String const& msg) { abort(); }
-JSONCPP_NORETURN void throwLogicError(String const& msg) { abort(); }
 #endif
 
 // //////////////////////////////////////////////////////////////////
