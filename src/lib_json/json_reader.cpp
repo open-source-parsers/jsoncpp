@@ -1455,17 +1455,17 @@ bool OurReader::readObject(Token& token) {
     } else {
       break;
     }
-
-    Token colon;
-    if (!readToken(colon) || colon.type_ != tokenMemberSeparator) {
-      return addErrorAndRecover("Missing ':' after object member name", colon,
-                                tokenObjectEnd);
-    }
     if (name.length() >= (1U << 30))
       throwRuntimeError("keylength >= 2^30");
     if (features_.rejectDupKeys_ && currentValue().isMember(name)) {
       String msg = "Duplicate key: '" + name + "'";
       return addErrorAndRecover(msg, tokenName, tokenObjectEnd);
+    }
+
+    Token colon;
+    if (!readToken(colon) || colon.type_ != tokenMemberSeparator) {
+      return addErrorAndRecover("Missing ':' after object member name", colon,
+                                tokenObjectEnd);
     }
     Value& value = currentValue()[name];
     nodes_.push(&value);
