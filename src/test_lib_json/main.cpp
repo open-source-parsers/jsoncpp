@@ -313,30 +313,30 @@ JSONTEST_FIXTURE(ValueTest, arrayIssue252) {
 JSONTEST_FIXTURE(ValueTest, arrayInsertAtRandomIndex) {
   Json::Value array;
   JSONCPP_STRING str = "index5";
-  array.append("index0");  
-  array.append("index1");  
-  array.append("index2");  
-  array.append("index3");  
+  array.append("index0");
+  array.append("index1");
+  array.append("index2");
+  array.append("index3");
 
-  JSONTEST_ASSERT_EQUAL(Json::Value("index0"),array[0]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index1"),array[1]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index2"),array[2]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index3"),array[3]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[1]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[2]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[3]);
 
-  array.insert(3,"index4"); //rvalue
-  JSONTEST_ASSERT_EQUAL(Json::Value("index0"),array[0]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index1"),array[1]);    
-  JSONTEST_ASSERT_EQUAL(Json::Value("index2"),array[2]);    
-  JSONTEST_ASSERT_EQUAL(Json::Value("index4"),array[3]);    
-  JSONTEST_ASSERT_EQUAL(Json::Value("index3"),array[4]);    
+  array.insert(3, "index4"); // rvalue
+  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[1]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[2]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[3]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[4]);
 
-  array.insert(4,str); //lvalue
-  JSONTEST_ASSERT_EQUAL(Json::Value("index0"),array[0]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index1"),array[1]);    
-  JSONTEST_ASSERT_EQUAL(Json::Value("index2"),array[2]);    
-  JSONTEST_ASSERT_EQUAL(Json::Value("index4"),array[3]);    
-  JSONTEST_ASSERT_EQUAL(Json::Value("index5"),array[4]);    
-  JSONTEST_ASSERT_EQUAL(Json::Value("index3"),array[5]);    
+  array.insert(4, str); // lvalue
+  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[1]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[2]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[3]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index5"), array[4]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[5]);
 }
 JSONTEST_FIXTURE(ValueTest, null) {
   JSONTEST_ASSERT_EQUAL(Json::nullValue, null_.type());

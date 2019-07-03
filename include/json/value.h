@@ -467,7 +467,7 @@ Json::Value obj_value(Json::objectValue); // {}
   bool insert(ArrayIndex index, const Value& newValue);
 #if JSON_HAS_RVALUE_REFERENCES
   Value& append(Value&& value);
-  bool insert(ArrayIndex index, const Value&& newValue);
+  bool insert(ArrayIndex index, Value&& newValue);
 #endif
 
   /// Access an object value by name, create a null member if it does not exist.

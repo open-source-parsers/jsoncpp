@@ -1182,8 +1182,9 @@ bool Value::insert(ArrayIndex index, const Value& newValue) {
   resize(oldsize + 1);
   ArrayIndex length = size();
 
-  for(ArrayIndex i = length ; i> index ; i--) {
-    (*this)[i] = (*this)[i-1];
+  for (ArrayIndex i = length; i > index; i--) {
+    CZString key(i);
+    (*value_.map_)[key] = (*this)[i - 1];
   }
   (*this)[index] = newValue;
   return true;
@@ -1192,7 +1193,7 @@ bool Value::insert(ArrayIndex index, const Value& newValue) {
 Value& Value::append(Value&& value) {
   return (*this)[size()] = std::move(value);
 }
-bool Value::insert(ArrayIndex index, const Value&& newValue) {
+bool Value::insert(ArrayIndex index, Value&& newValue) {
   if (type() != arrayValue) {
     return false;
   }
@@ -1203,8 +1204,9 @@ bool Value::insert(ArrayIndex index, const Value&& newValue) {
   resize(oldsize + 1);
   ArrayIndex length = size();
 
-  for(ArrayIndex i = length ; i> index ; i--) {
-    (*this)[i] = (*this)[i-1];
+  for (ArrayIndex i = length; i > index; i--) {
+    CZString key(i);
+    (*value_.map_)[key] = std::move((*this)[i - 1]);
   }
   (*this)[index] = std::move(newValue);
   return true;
