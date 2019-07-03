@@ -1,4 +1,4 @@
-#include <json/json.h>
+#include "json/json.h"
 /*
 parse a string to Value object with CharReaderBuilder class or Reader class
 >g++ readFromString.cpp -ljsoncpp -std=c++11 -o readFromString
