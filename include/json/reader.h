@@ -25,6 +25,14 @@
 
 #pragma pack(push, 8)
 
+#define CheckAndGetMember(value, key)\
+        if (value.isMember(#key)){\
+            Json::Value key = value[#key];
+
+#define CheckIfFalse }else{\
+
+#define CheckEnd }
+
 namespace Json {
 
 /** \brief Unserialize a <a HREF="http://www.json.org">JSON</a> document into a
