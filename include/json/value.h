@@ -24,19 +24,6 @@
 #include <cpptl/forwards.h>
 #endif
 
-// Conditional NORETURN attribute on the throw functions would:
-// a) suppress false positives from static code analysis
-// b) possibly improve optimization opportunities.
-#if !defined(JSONCPP_NORETURN)
-#if defined(_MSC_VER)
-#define JSONCPP_NORETURN __declspec(noreturn)
-#elif defined(__GNUC__)
-#define JSONCPP_NORETURN __attribute__((__noreturn__))
-#else
-#define JSONCPP_NORETURN
-#endif
-#endif
-
 // Disable warning C4251: <data member>: <type> needs to have dll-interface to
 // be used by...
 #if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
@@ -89,9 +76,9 @@ public:
 #endif
 
 /// used internally
-JSONCPP_NORETURN void throwRuntimeError(String const& msg);
+[[noreturn]] void throwRuntimeError(String const& msg);
 /// used internally
-JSONCPP_NORETURN void throwLogicError(String const& msg);
+[[noreturn]] void throwLogicError(String const& msg);
 
 /** \brief Type of the value held by a Value object.
  */
