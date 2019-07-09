@@ -1168,48 +1168,47 @@ Value const& Value::operator[](CppTL::ConstString const& key) const {
   return *found;
 }
 #endif
-
 Value& Value::append(const Value& value) { return (*this)[size()] = value; }
 /// \brief Insert value in array at specific index
 bool Value::insert(ArrayIndex index, const Value& newValue) {
   if (type() != arrayValue) {
     return false;
   }
-  if (!isValidIndex(index)) {
-    return false;
-  }
   ArrayIndex oldsize = size();
-  resize(oldsize + 1);
-  ArrayIndex length = size();
-
-  for (ArrayIndex i = length; i > index; i--) {
-    CZString key(i);
-    (*value_.map_)[key] = (*this)[i - 1];
+  if (index > oldsize) {
+    (*this)[oldsize] = newValue;
+    return true;
+  } else {
+    (*this)[oldsize] = null;
+    ArrayIndex length = size();
+    for (ArrayIndex i = length - 1; i > index; i--) {
+      (*this)[i] = (*this)[i - 1];
+    }
+    (*this)[index] = newValue;
+    return true;
   }
-  (*this)[index] = newValue;
-  return true;
 }
 #if JSON_HAS_RVALUE_REFERENCES
 Value& Value::append(Value&& value) {
   return (*this)[size()] = std::move(value);
 }
-bool Value::insert(ArrayIndex index, Value&& newValue) {
+bool Value::insert(ArrayIndex index, const Value&& newValue) {
   if (type() != arrayValue) {
     return false;
   }
-  if (!isValidIndex(index)) {
-    return false;
-  }
   ArrayIndex oldsize = size();
-  resize(oldsize + 1);
-  ArrayIndex length = size();
-
-  for (ArrayIndex i = length; i > index; i--) {
-    CZString key(i);
-    (*value_.map_)[key] = std::move((*this)[i - 1]);
+  if (index > oldsize) {
+    append(newValue);
+    return true;
+  } else {
+    (*this)[oldsize] = null;
+    ArrayIndex length = size();
+    for (ArrayIndex i = length - 1; i > index; i--) {
+      (*this)[i] = std::move((*this)[i - 1]);
+    }
+    (*this)[index] = std::move(newValue);
+    return true;
   }
-  (*this)[index] = std::move(newValue);
-  return true;
 }
 #endif
 Value Value::get(char const* begin,
