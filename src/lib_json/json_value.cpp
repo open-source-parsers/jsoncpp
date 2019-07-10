@@ -226,6 +226,7 @@ static inline void releaseStringValue(char* value, unsigned) { free(value); }
 
 namespace Json {
 
+#if JSON_USE_EXCEPTION
 Exception::Exception(String msg) : msg_(std::move(msg)) {}
 Exception::~Exception() JSONCPP_NOEXCEPT {}
 char const* Exception::what() const JSONCPP_NOEXCEPT { return msg_.c_str(); }
@@ -237,6 +238,10 @@ JSONCPP_NORETURN void throwRuntimeError(String const& msg) {
 JSONCPP_NORETURN void throwLogicError(String const& msg) {
   throw LogicError(msg);
 }
+#else // !JSON_USE_EXCEPTION
+JSONCPP_NORETURN void throwRuntimeError(String const& msg) { abort(); }
+JSONCPP_NORETURN void throwLogicError(String const& msg) { abort(); }
+#endif
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
@@ -847,9 +852,11 @@ bool Value::asBool() const {
     return value_.int_ ? true : false;
   case uintValue:
     return value_.uint_ ? true : false;
-  case realValue:
-    // This is kind of strange. Not recommended.
-    return (value_.real_ != 0.0) ? true : false;
+  case realValue: {
+    // According to JavaScript language zero or NaN is regarded as false
+    const auto value_classification = std::fpclassify(value_.real_);
+    return value_classification != FP_ZERO && value_classification != FP_NAN;
+  }
   default:
     break;
   }

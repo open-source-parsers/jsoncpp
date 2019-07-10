@@ -10,10 +10,12 @@
 #pragma warning(disable : 4996)
 #endif
 
+#include "fuzz.h"
 #include "jsontest.h"
 #include <cmath>
 #include <cstring>
 #include <iomanip>
+#include <iostream>
 #include <json/config.h>
 #include <json/json.h>
 #include <limits>
@@ -1644,6 +1646,28 @@ JSONTEST_FIXTURE(ValueTest, StaticString) {
   }
 }
 
+JSONTEST_FIXTURE(ValueTest, WideString) {
+  // https://github.com/open-source-parsers/jsoncpp/issues/756
+  const std::string uni = u8"式，进"; // "\u5f0f\uff0c\u8fdb"
+  std::string styled;
+  {
+    Json::Value v;
+    v["abc"] = uni;
+    styled = v.toStyledString();
+  }
+  Json::Value root;
+  {
+    JSONCPP_STRING errs;
+    std::istringstream iss(styled);
+    bool ok = parseFromStream(Json::CharReaderBuilder(), iss, &root, &errs);
+    JSONTEST_ASSERT(ok);
+    if (!ok) {
+      std::cerr << "errs: " << errs << std::endl;
+    }
+  }
+  JSONTEST_ASSERT_STRING_EQUAL(root["abc"].asString(), uni);
+}
+
 JSONTEST_FIXTURE(ValueTest, CommentBefore) {
   Json::Value val; // fill val
   val.setComment(Json::String("// this comment should appear before"),
@@ -2531,6 +2555,18 @@ JSONTEST_FIXTURE(RValueTest, moveConstruction) {
   JSONTEST_ASSERT_EQUAL(Json::stringValue, moved["key"].type());
 }
 
+struct FuzzTest : JsonTest::TestCase {};
+
+// Build and run the fuzz test without any fuzzer, so that it's guaranteed not
+// go out of date, even if it's never run as an actual fuzz test.
+JSONTEST_FIXTURE(FuzzTest, fuzzDoesntCrash) {
+  const std::string example = "{}";
+  JSONTEST_ASSERT_EQUAL(
+      0,
+      LLVMFuzzerTestOneInput(reinterpret_cast<const uint8_t*>(example.c_str()),
+                             example.size()));
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, checkNormalizeFloatingPointStr);
@@ -2556,6 +2592,7 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, offsetAccessors);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, typeChecksThrowExceptions);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, StaticString);
+  JSONTEST_REGISTER_FIXTURE(runner, ValueTest, WideString);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, CommentBefore);
   // JSONTEST_REGISTER_FIXTURE(runner, ValueTest, nulls);
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, zeroes);
@@ -2609,6 +2646,8 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, IteratorTest, const);
 
   JSONTEST_REGISTER_FIXTURE(runner, RValueTest, moveConstruction);
+
+  JSONTEST_REGISTER_FIXTURE(runner, FuzzTest, fuzzDoesntCrash);
 
   return runner.runCommandLine(argc, argv);
 }

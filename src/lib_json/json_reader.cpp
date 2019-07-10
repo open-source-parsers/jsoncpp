@@ -840,7 +840,7 @@ bool Reader::pushError(const Value& value, const String& message) {
   Token token;
   token.type_ = tokenError;
   token.start_ = begin_ + value.getOffsetStart();
-  token.end_ = end_ + value.getOffsetLimit();
+  token.end_ = begin_ + value.getOffsetLimit();
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
@@ -870,7 +870,8 @@ bool Reader::pushError(const Value& value,
 
 bool Reader::good() const { return errors_.empty(); }
 
-// exact copy of Features
+// Originally copied from the Features class (now deprecated), used internally
+// for features implementation.
 class OurFeatures {
 public:
   static OurFeatures all();
@@ -885,15 +886,13 @@ public:
   size_t stackLimit_;
 }; // OurFeatures
 
-// exact copy of Implementation of class Features
-// ////////////////////////////////
-
 OurFeatures OurFeatures::all() { return {}; }
 
 // Implementation of class Reader
 // ////////////////////////////////
 
-// exact copy of Reader, renamed to OurReader
+// Originally copied from the Reader class (now deprecated), used internally
+// for implementing JSON reading.
 class OurReader {
 public:
   typedef char Char;
@@ -1049,6 +1048,7 @@ bool OurReader::parse(const char* beginDoc,
   nodes_.push(&root);
 
   bool successful = readValue();
+  nodes_.pop();
   Token token;
   skipCommentTokens(token);
   if (features_.failIfExtra_) {
@@ -1455,17 +1455,17 @@ bool OurReader::readObject(Token& token) {
     } else {
       break;
     }
-
-    Token colon;
-    if (!readToken(colon) || colon.type_ != tokenMemberSeparator) {
-      return addErrorAndRecover("Missing ':' after object member name", colon,
-                                tokenObjectEnd);
-    }
     if (name.length() >= (1U << 30))
       throwRuntimeError("keylength >= 2^30");
     if (features_.rejectDupKeys_ && currentValue().isMember(name)) {
       String msg = "Duplicate key: '" + name + "'";
       return addErrorAndRecover(msg, tokenName, tokenObjectEnd);
+    }
+
+    Token colon;
+    if (!readToken(colon) || colon.type_ != tokenMemberSeparator) {
+      return addErrorAndRecover("Missing ':' after object member name", colon,
+                                tokenObjectEnd);
     }
     Value& value = currentValue()[name];
     nodes_.push(&value);
@@ -1547,36 +1547,46 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   bool isNegative = *current == '-';
   if (isNegative)
     ++current;
-  // TODO: Help the compiler do the div and mod at compile time or get rid of
-  // them.
-  Value::LargestUInt maxIntegerValue =
-      isNegative ? Value::LargestUInt(Value::minLargestInt)
-                 : Value::maxLargestUInt;
-  Value::LargestUInt threshold = maxIntegerValue / 10;
+
+  // TODO(issue #960): Change to constexpr
+  static const auto positive_threshold = Value::maxLargestUInt / 10;
+  static const auto positive_last_digit = Value::maxLargestUInt % 10;
+  static const auto negative_threshold =
+      Value::LargestUInt(Value::minLargestInt) / 10;
+  static const auto negative_last_digit =
+      Value::LargestUInt(Value::minLargestInt) % 10;
+
+  const auto threshold = isNegative ? negative_threshold : positive_threshold;
+  const auto last_digit =
+      isNegative ? negative_last_digit : positive_last_digit;
+
   Value::LargestUInt value = 0;
   while (current < token.end_) {
     Char c = *current++;
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
-    auto digit(static_cast<Value::UInt>(c - '0'));
+
+    const auto digit(static_cast<Value::UInt>(c - '0'));
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
-      // a) we've only just touched the limit, b) this is the last digit, and
+      // a) we've only just touched the limit, meaing value == threshold,
+      // b) this is the last digit, or
       // c) it's small enough to fit in that rounding delta, we're okay.
       // Otherwise treat this number as a double to avoid overflow.
-      if (value > threshold || current != token.end_ ||
-          digit > maxIntegerValue % 10) {
+      if (value > threshold || current != token.end_ || digit > last_digit) {
         return decodeDouble(token, decoded);
       }
     }
     value = value * 10 + digit;
   }
+
   if (isNegative)
     decoded = -Value::LargestInt(value);
-  else if (value <= Value::LargestUInt(Value::maxInt))
+  else if (value <= Value::LargestUInt(Value::maxLargestInt))
     decoded = Value::LargestInt(value);
   else
     decoded = value;
+
   return true;
 }
 
@@ -1845,7 +1855,7 @@ bool OurReader::pushError(const Value& value, const String& message) {
   Token token;
   token.type_ = tokenError;
   token.start_ = begin_ + value.getOffsetStart();
-  token.end_ = end_ + value.getOffsetLimit();
+  token.end_ = begin_ + value.getOffsetLimit();
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
@@ -1905,11 +1915,10 @@ CharReader* CharReaderBuilder::newCharReader() const {
       settings_["allowDroppedNullPlaceholders"].asBool();
   features.allowNumericKeys_ = settings_["allowNumericKeys"].asBool();
   features.allowSingleQuotes_ = settings_["allowSingleQuotes"].asBool();
-#if defined(JSON_HAS_INT64)
-  features.stackLimit_ = settings_["stackLimit"].asUInt64();
-#else
-  features.stackLimit_ = settings_["stackLimit"].asUInt();
-#endif
+
+  // Stack limit is always a size_t, so we get this as an unsigned int
+  // regardless of it we have 64-bit integer support enabled.
+  features.stackLimit_ = static_cast<size_t>(settings_["stackLimit"].asUInt());
   features.failIfExtra_ = settings_["failIfExtra"].asBool();
   features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
