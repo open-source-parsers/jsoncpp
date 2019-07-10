@@ -52,13 +52,13 @@ public:
   /** \brief Constructs a Reader allowing all features
    * for parsing.
    */
-  JSONCPP_DEPRECATED("Use CharReader and CharReaderBuilder instead")
+  [[deprecated("Use CharReader and CharReaderBuilder instead")]]
   Reader();
 
   /** \brief Constructs a Reader allowing the specified feature set
    * for parsing.
    */
-  JSONCPP_DEPRECATED("Use CharReader and CharReaderBuilder instead")
+  [[deprecated("Use CharReader and CharReaderBuilder instead")]]
   Reader(const Features& features);
 
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
@@ -114,7 +114,7 @@ public:
    *         during parsing.
    * \deprecated Use getFormattedErrorMessages() instead (typo fix).
    */
-  JSONCPP_DEPRECATED("Use getFormattedErrorMessages() instead.")
+  [[deprecated("Use getFormattedErrorMessages() instead.")]]
   String getFormatedErrorMessages() const;
 
   /** \brief Returns a user friendly string that list errors in the parsed

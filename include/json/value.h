@@ -580,7 +580,7 @@ Json::Value obj_value(Json::objectValue); // {}
   //# endif
 
   /// \deprecated Always pass len.
-  JSONCPP_DEPRECATED("Use setComment(String const&) instead.")
+  [[deprecated("Use setComment(String const&) instead.")]]
   void setComment(const char* comment, CommentPlacement placement) {
     setComment(String(comment, strlen(comment)), placement);
   }
@@ -764,7 +764,7 @@ public:
   /// objectValue.
   /// \deprecated This cannot be used for UTF-8 strings, since there can be
   /// embedded nulls.
-  JSONCPP_DEPRECATED("Use `key = name();` instead.")
+  [[deprecated("Use `key = name();` instead.")]]
   char const* memberName() const;
   /// Return the member name of the referenced Value, or NULL if it is not an
   /// objectValue.
