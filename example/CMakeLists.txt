@@ -7,7 +7,7 @@ set(EXAMPLES
 	stringWrite
 	streamWrite
    )
-
+include_directories("../include/")
 add_definitions(-D_GLIBCXX_USE_CXX11_ABI)
 set_property(DIRECTORY PROPERTY COMPILE_OPTIONS ${EXTRA_CXX_FLAGS})
 
@@ -16,7 +16,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 else()	
 	add_definitions(
 	-D_SCL_SECURE_NO_WARNINGS
-	#D_CRT_SECURE_NO_WARNINGS
+	-D_CRT_SECURE_NO_WARNINGS
 	-D_WIN32_WINNT=0x601
 	-D_WINSOCK_DEPRECATED_NO_WARNINGS)
 endif()
