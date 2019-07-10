@@ -99,7 +99,6 @@ msvc_pre1900_c99_snprintf(char* outBuf, size_t size, const char* format, ...);
 #define JSONCPP_OP_EXPLICIT
 #endif
 
-
 #if __GNUC__ >= 6
 #define JSON_USE_INT64_DOUBLE_CONVERSION 1
 #endif
