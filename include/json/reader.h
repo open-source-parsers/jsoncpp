@@ -25,6 +25,10 @@
 
 #pragma pack(push, 8)
 
+#if defined(_MSC_VER)
+#pragma warning(disable : 4996)
+#endif
+
 namespace Json {
 
 /** \brief Unserialize a <a HREF="http://www.json.org">JSON</a> document into a
