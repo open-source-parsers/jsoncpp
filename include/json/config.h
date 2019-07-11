@@ -30,6 +30,11 @@
 #define JSON_USE_EXCEPTION 1
 #endif
 
+// Temporary, tracked for removal with issue #982.
+#ifndef JSON_USE_NULLREF
+#define JSON_USE_NULLREF 1
+#endif
+
 /// If defined, indicates that the source file is amalgamated
 /// to prevent private header inclusion.
 /// Remarks: it is automatically defined in the generated amalgamated header.

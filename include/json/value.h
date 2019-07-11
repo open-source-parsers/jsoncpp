@@ -193,11 +193,14 @@ public:
   // Required for boost integration, e. g. BOOST_TEST
   typedef std::string value_type;
 
-  static const Value& null; ///< We regret this reference to a global instance;
-                            ///< prefer the simpler Value().
-  static const Value& nullRef; ///< just a kludge for binary-compatibility; same
-                               ///< as null
-  static Value const& nullSingleton(); ///< Prefer this to null or nullRef.
+#if JSON_USE_NULLREF
+  // Binary compatibility kludges, do not use.
+  static const Value& null;
+  static const Value& nullRef;
+#endif
+
+  // null and nullRef are deprecated, use this instead.
+  static Value const& nullSingleton();
 
   /// Minimum signed integer value that can be stored in a Json::Value.
   static const LargestInt minLargestInt;
