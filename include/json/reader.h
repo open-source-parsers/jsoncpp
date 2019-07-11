@@ -378,7 +378,7 @@ public:
 bool JSON_API parseFromStream(CharReader::Factory const&,
                               IStream&,
                               Value* root,
-                              std::string* errs);
+                              String* errs);
 
 /** \brief Read from 'sin' into 'root'.
 
