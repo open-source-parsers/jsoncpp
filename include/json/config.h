@@ -108,7 +108,7 @@ msvc_pre1900_c99_snprintf(char* outBuf, size_t size, const char* format, ...);
 #if __has_extension(attribute_deprecated_with_message)
 #define JSONCPP_DEPRECATED(message) __attribute__((deprecated(message)))
 #endif
-#elif defined __GNUC__ // not clang (gcc comes later since clang emulates gcc)
+#elif defined(__GNUC__) // not clang (gcc comes later since clang emulates gcc)
 #if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
 #define JSONCPP_DEPRECATED(message) __attribute__((deprecated(message)))
 #elif (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
@@ -123,7 +123,7 @@ msvc_pre1900_c99_snprintf(char* outBuf, size_t size, const char* format, ...);
 #define JSONCPP_DEPRECATED(message)
 #endif // if !defined(JSONCPP_DEPRECATED)
 
-#if __GNUC__ >= 6
+#if defined(__GNUC__) && (__GNUC__ >= 6)
 #define JSON_USE_INT64_DOUBLE_CONVERSION 1
 #endif
 
