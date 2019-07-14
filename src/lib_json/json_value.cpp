@@ -235,9 +235,7 @@ LogicError::LogicError(String const& msg) : Exception(msg) {}
 [[noreturn]] void throwRuntimeError(String const& msg) {
   throw RuntimeError(msg);
 }
-[[noreturn]] void throwLogicError(String const& msg) {
-  throw LogicError(msg);
-}
+[[noreturn]] void throwLogicError(String const& msg) { throw LogicError(msg); }
 #else // !JSON_USE_EXCEPTION
 [[noreturn]] void throwRuntimeError(String const& msg) { abort(); }
 [[noreturn]] void throwLogicError(String const& msg) { abort(); }

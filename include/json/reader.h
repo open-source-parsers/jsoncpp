@@ -28,7 +28,7 @@
 namespace Json {
 
 /** \brief Unserialize a <a HREF="http://www.json.org">JSON</a> document into a
- *Value.
+ * Value.
  *
  * \deprecated Use CharReader and CharReaderBuilder.
  */
@@ -41,7 +41,6 @@ public:
    *
    * The offsets give the [start, limit) range of bytes within the text. Note
    * that this is bytes, not codepoints.
-   *
    */
   struct StructuredError {
     ptrdiff_t offset_start;
@@ -49,29 +48,27 @@ public:
     String message;
   };
 
-  /** \brief Constructs a Reader allowing all features
-   * for parsing.
+  /** \brief Constructs a Reader allowing all features for parsing.
    */
   JSONCPP_DEPRECATED("Use CharReader and CharReaderBuilder instead")
   Reader();
 
-  /** \brief Constructs a Reader allowing the specified feature set
-   * for parsing.
+  /** \brief Constructs a Reader allowing the specified feature set for parsing.
    */
   JSONCPP_DEPRECATED("Use CharReader and CharReaderBuilder instead")
   Reader(const Features& features);
 
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
    * document.
-   * \param document UTF-8 encoded string containing the document to read.
-   * \param root [out] Contains the root value of the document if it was
-   *             successfully parsed.
-   * \param collectComments \c true to collect comment and allow writing them
-   * back during
-   *                        serialization, \c false to discard comments.
-   *                        This parameter is ignored if
-   * Features::allowComments_
-   *                        is \c false.
+   *
+   * \param      document        UTF-8 encoded string containing the document
+   *                             to read.
+   * \param[out] root            Contains the root value of the document if it
+   *                             was successfully parsed.
+   * \param      collectComments \c true to collect comment and allow writing
+   *                             them back during serialization, \c false to
+   *                             discard comments.  This parameter is ignored
+   *                             if Features::allowComments_ is \c false.
    * \return \c true if the document was successfully parsed, \c false if an
    * error occurred.
    */
@@ -79,22 +76,20 @@ public:
   parse(const std::string& document, Value& root, bool collectComments = true);
 
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
-   document.
-   * \param beginDoc Pointer on the beginning of the UTF-8 encoded string of the
-   document to read.
-   * \param endDoc Pointer on the end of the UTF-8 encoded string of the
-   document to read.
-   *               Must be >= beginDoc.
-   * \param root [out] Contains the root value of the document if it was
-   *             successfully parsed.
-   * \param collectComments \c true to collect comment and allow writing them
-   back during
-   *                        serialization, \c false to discard comments.
-   *                        This parameter is ignored if
-   Features::allowComments_
-   *                        is \c false.
+   * document.
+   *
+   * \param      beginDoc        Pointer on the beginning of the UTF-8 encoded
+   *                             string of the document to read.
+   * \param      endDoc          Pointer on the end of the UTF-8 encoded string
+   *                             of the document to read.  Must be >= beginDoc.
+   * \param[out] root            Contains the root value of the document if it
+   *                             was successfully parsed.
+   * \param      collectComments \c true to collect comment and allow writing
+   *                             them back during serialization, \c false to
+   *                             discard comments.  This parameter is ignored
+   *                             if Features::allowComments_ is \c false.
    * \return \c true if the document was successfully parsed, \c false if an
-   error occurred.
+   * error occurred.
    */
   bool parse(const char* beginDoc,
              const char* endDoc,
@@ -107,11 +102,10 @@ public:
 
   /** \brief Returns a user friendly string that list errors in the parsed
    * document.
-   * \return Formatted error message with the list of errors with their location
-   * in
-   *         the parsed document. An empty string is returned if no error
-   * occurred
-   *         during parsing.
+   *
+   * \return Formatted error message with the list of errors with their
+   * location in the parsed document. An empty string is returned if no error
+   * occurred during parsing.
    * \deprecated Use getFormattedErrorMessages() instead (typo fix).
    */
   JSONCPP_DEPRECATED("Use getFormattedErrorMessages() instead.")
@@ -119,43 +113,45 @@ public:
 
   /** \brief Returns a user friendly string that list errors in the parsed
    * document.
-   * \return Formatted error message with the list of errors with their location
-   * in
-   *         the parsed document. An empty string is returned if no error
-   * occurred
-   *         during parsing.
+   *
+   * \return Formatted error message with the list of errors with their
+   * location in the parsed document. An empty string is returned if no error
+   * occurred during parsing.
    */
   String getFormattedErrorMessages() const;
 
   /** \brief Returns a vector of structured erros encounted while parsing.
+   *
    * \return A (possibly empty) vector of StructuredError objects. Currently
-   *         only one error can be returned, but the caller should tolerate
-   * multiple
-   *         errors.  This can occur if the parser recovers from a non-fatal
-   *         parse error and then encounters additional errors.
+   * only one error can be returned, but the caller should tolerate multiple
+   * errors.  This can occur if the parser recovers from a non-fatal parse
+   * error and then encounters additional errors.
    */
   std::vector<StructuredError> getStructuredErrors() const;
 
   /** \brief Add a semantic error message.
-   * \param value JSON Value location associated with the error
+   *
+   * \param value   JSON Value location associated with the error
    * \param message The error message.
-   * \return \c true if the error was successfully added, \c false if the
-   * Value offset exceeds the document size.
+   * \return \c true if the error was successfully added, \c false if the Value
+   * offset exceeds the document size.
    */
   bool pushError(const Value& value, const String& message);
 
   /** \brief Add a semantic error message with extra context.
-   * \param value JSON Value location associated with the error
+   *
+   * \param value   JSON Value location associated with the error
    * \param message The error message.
-   * \param extra Additional JSON Value location to contextualize the error
+   * \param extra   Additional JSON Value location to contextualize the error
    * \return \c true if the error was successfully added, \c false if either
    * Value offset exceeds the document size.
    */
   bool pushError(const Value& value, const String& message, const Value& extra);
 
   /** \brief Return whether there are any errors.
-   * \return \c true if there are no errors to report \c false if
-   * errors have occurred.
+   *
+   * \return \c true if there are no errors to report \c false if errors have
+   * occurred.
    */
   bool good() const;
 
@@ -255,22 +251,20 @@ class JSON_API CharReader {
 public:
   virtual ~CharReader() = default;
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
-   document.
-   * The document must be a UTF-8 encoded string containing the document to
-   read.
+   * document. The document must be a UTF-8 encoded string containing the
+   * document to read.
    *
-   * \param beginDoc Pointer on the beginning of the UTF-8 encoded string of the
-   document to read.
-   * \param endDoc Pointer on the end of the UTF-8 encoded string of the
-   document to read.
-   *        Must be >= beginDoc.
-   * \param root [out] Contains the root value of the document if it was
-   *             successfully parsed.
-   * \param errs [out] Formatted error messages (if not NULL)
-   *        a user friendly string that lists errors in the parsed
-   * document.
+   * \param      beginDoc Pointer on the beginning of the UTF-8 encoded string
+   *                      of the document to read.
+   * \param      endDoc   Pointer on the end of the UTF-8 encoded string of the
+   *                      document to read. Must be >= beginDoc.
+   * \param[out] root     Contains the root value of the document if it was
+   *                      successfully parsed.
+   * \param[out] errs     Formatted error messages (if not NULL) a user
+   *                      friendly string that lists errors in the parsed
+   *                      document.
    * \return \c true if the document was successfully parsed, \c false if an
-   error occurred.
+   * error occurred.
    */
   virtual bool parse(char const* beginDoc,
                      char const* endDoc,
@@ -288,59 +282,58 @@ public:
 };   // CharReader
 
 /** \brief Build a CharReader implementation.
-
-Usage:
-\code
-  using namespace Json;
-  CharReaderBuilder builder;
-  builder["collectComments"] = false;
-  Value value;
-  String errs;
-  bool ok = parseFromStream(builder, std::cin, &value, &errs);
-\endcode
-*/
+ *
+ * Usage:
+ *   \code
+ *   using namespace Json;
+ *   CharReaderBuilder builder;
+ *   builder["collectComments"] = false;
+ *   Value value;
+ *   String errs;
+ *   bool ok = parseFromStream(builder, std::cin, &value, &errs);
+ *   \endcode
+ */
 class JSON_API CharReaderBuilder : public CharReader::Factory {
 public:
   // Note: We use a Json::Value so that we can add data-members to this class
   // without a major version bump.
   /** Configuration of this builder.
-    These are case-sensitive.
-    Available settings (case-sensitive):
-    - `"collectComments": false or true`
-      - true to collect comment and allow writing them
-        back during serialization, false to discard comments.
-        This parameter is ignored if allowComments is false.
-    - `"allowComments": false or true`
-      - true if comments are allowed.
-    - `"strictRoot": false or true`
-      - true if root must be either an array or an object value
-    - `"allowDroppedNullPlaceholders": false or true`
-      - true if dropped null placeholders are allowed. (See
-    StreamWriterBuilder.)
-    - `"allowNumericKeys": false or true`
-      - true if numeric object keys are allowed.
-    - `"allowSingleQuotes": false or true`
-      - true if '' are allowed for strings (both keys and values)
-    - `"stackLimit": integer`
-      - Exceeding stackLimit (recursive depth of `readValue()`) will
-        cause an exception.
-      - This is a security issue (seg-faults caused by deeply nested JSON),
-        so the default is low.
-    - `"failIfExtra": false or true`
-      - If true, `parse()` returns false when extra non-whitespace trails
-        the JSON value in the input string.
-    - `"rejectDupKeys": false or true`
-      - If true, `parse()` returns false when a key is duplicated within an
-    object.
-    - `"allowSpecialFloats": false or true`
-      - If true, special float values (NaNs and infinities) are allowed
-        and their values are lossfree restorable.
-
-    You can examine 'settings_` yourself
-    to see the defaults. You can also write and read them just like any
-    JSON Value.
-    \sa setDefaults()
-    */
+   * These are case-sensitive.
+   * Available settings (case-sensitive):
+   * - `"collectComments": false or true`
+   *   - true to collect comment and allow writing them back during
+   *     serialization, false to discard comments.  This parameter is ignored
+   *     if allowComments is false.
+   * - `"allowComments": false or true`
+   *   - true if comments are allowed.
+   * - `"strictRoot": false or true`
+   *   - true if root must be either an array or an object value
+   * - `"allowDroppedNullPlaceholders": false or true`
+   *   - true if dropped null placeholders are allowed. (See
+   *     StreamWriterBuilder.)
+   * - `"allowNumericKeys": false or true`
+   *   - true if numeric object keys are allowed.
+   * - `"allowSingleQuotes": false or true`
+   *   - true if '' are allowed for strings (both keys and values)
+   * - `"stackLimit": integer`
+   *   - Exceeding stackLimit (recursive depth of `readValue()`) will cause an
+   *     exception.
+   *   - This is a security issue (seg-faults caused by deeply nested JSON), so
+   *     the default is low.
+   * - `"failIfExtra": false or true`
+   *   - If true, `parse()` returns false when extra non-whitespace trails the
+   *     JSON value in the input string.
+   * - `"rejectDupKeys": false or true`
+   *   - If true, `parse()` returns false when a key is duplicated within an
+   *     object.
+   * - `"allowSpecialFloats": false or true`
+   *   - If true, special float values (NaNs and infinities) are allowed and
+   *     their values are lossfree restorable.
+   *
+   * You can examine 'settings_` yourself to see the defaults. You can also
+   * write and read them just like any JSON Value.
+   * \sa setDefaults()
+   */
   Json::Value settings_;
 
   CharReaderBuilder();
@@ -381,29 +374,29 @@ bool JSON_API parseFromStream(CharReader::Factory const&,
                               String* errs);
 
 /** \brief Read from 'sin' into 'root'.
-
- Always keep comments from the input JSON.
-
- This can be used to read a file into a particular sub-object.
- For example:
- \code
- Json::Value root;
- cin >> root["dir"]["file"];
- cout << root;
- \endcode
- Result:
- \verbatim
- {
- "dir": {
-     "file": {
-     // The input stream JSON would be nested here.
-     }
- }
- }
- \endverbatim
- \throw std::exception on parse error.
- \see Json::operator<<()
-*/
+ *
+ * Always keep comments from the input JSON.
+ * 
+ * This can be used to read a file into a particular sub-object.
+ * For example:
+ *   \code
+ *   Json::Value root;
+ *   cin >> root["dir"]["file"];
+ *   cout << root;
+ *   \endcode
+ * Result:
+ * \verbatim
+ * {
+ * "dir": {
+ *    "file": {
+ *    // The input stream JSON would be nested here.
+ *    }
+ * }
+ * }
+ * \endverbatim
+ * \throw std::exception on parse error.
+ * \see Json::operator<<()
+ */
 JSON_API IStream& operator>>(IStream&, Value&);
 
 } // namespace Json
