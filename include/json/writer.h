@@ -27,12 +27,12 @@ namespace Json {
 class Value;
 
 /**
-
+*
 * Usage:
 *  \code
 *  using namespace Json;
 *  void writeToStdout(StreamWriter::Factory const& factory, Value const& value) {
-*    std::unique_ptr<Json::StreamWriter> const writer(
+*    std::unique_ptr<StreamWriter> const writer(
 *      factory.newStreamWriter());
 *    writer->write(value, &std::cout);
 *    std::cout << std::endl;  // add lf and flush
@@ -45,11 +45,11 @@ protected:
 public:
   StreamWriter();
   virtual ~StreamWriter();
-/**    Write Value into document as configured in sub-class.
-*      Do not take ownership of sout, but maintain a reference during function.
-*      \pre sout != NULL
-*      \return zero on success (For now, we always return zero, so check the
-*     stream instead.) \throw std::exception possibly, depending on configuration
+/** Write Value into document as configured in sub-class.
+*   Do not take ownership of sout, but maintain a reference during function.
+*   \pre sout != NULL
+*   \return zero on success (For now, we always return zero, so check the
+*   stream instead.) \throw std::exception possibly, depending on configuration
 */
   virtual int write(Value const& root, OStream* sout) = 0;
 
@@ -74,17 +74,17 @@ String JSON_API writeString(StreamWriter::Factory const& factory,
 /** \brief Build a StreamWriter implementation.
 
 * Usage:
-*  \code
-*  using namespace Json;
-*  Value value = ...;
-*  StreamWriterBuilder builder;
-*  builder["commentStyle"] = "None";
-*  builder["indentation"] = "   ";  // or whatever you like
-*  std::unique_ptr<Json::StreamWriter> writer(
+*   \code
+*   using namespace Json;
+*   Value value = ...;
+*   StreamWriterBuilder builder;
+*   builder["commentStyle"] = "None";
+*   builder["indentation"] = "   ";  // or whatever you like
+*   std::unique_ptr<Json::StreamWriter> writer(
 *      builder.newStreamWriter());
-*  writer->write(value, &std::cout);
-*  std::cout << std::endl;  // add lf and flush
-*  \endcode
+*   writer->write(value, &std::cout);
+*   std::cout << std::endl;  // add lf and flush
+*   \endcode
 */
 class JSON_API StreamWriterBuilder : public StreamWriter::Factory {
 public:
