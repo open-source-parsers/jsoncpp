@@ -1,4 +1,5 @@
 #include "json/json.h"
+#include <iostream>
 /*
 write a Value object to a string
 >g++ stringWrite.cpp -ljsoncpp -std=c++11 -o stringWrite
@@ -7,7 +8,7 @@ write a Value object to a string
     "action" : "run",
     "data" :
     {
-        "number" : 11
+        "number" : 1
     }
 }
 */
@@ -21,12 +22,12 @@ int main() {
   root["data"] = t_data;
 
 #if 0 // old way
-	Json::FastWriter writer;
+    Json::FastWriter writer;
     std::string json_file = writer.write(root);
 #else // new way
   Json::StreamWriterBuilder builder;
   std::string json_file = Json::writeString(builder, root);
 #endif
-  // std::cout<< json_file << std::endl;
-  return 0;
+  std::cout << json_file << std::endl;
+  return EXIT_SUCCESS;
 }
