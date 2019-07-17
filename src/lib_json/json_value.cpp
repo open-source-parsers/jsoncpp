@@ -54,7 +54,6 @@ int JSON_API msvc_pre1900_c99_snprintf(char* outBuf,
 #define JSON_ASSERT_UNREACHABLE assert(false)
 
 namespace Json {
-
 template <typename T>
 static std::unique_ptr<T> cloneUnique(const std::unique_ptr<T>& p) {
   std::unique_ptr<T> r;
@@ -72,10 +71,6 @@ static std::unique_ptr<T> cloneUnique(const std::unique_ptr<T>& p) {
 #else
 #define ALIGNAS(byte_alignment)
 #endif
-// static const unsigned char ALIGNAS(8) kNull[sizeof(Value)] = { 0 };
-// const unsigned char& kNullRef = kNull[0];
-// const Value& Value::null = reinterpret_cast<const Value&>(kNullRef);
-// const Value& Value::nullRef = null;
 
 // static
 Value const& Value::nullSingleton() {
@@ -83,10 +78,15 @@ Value const& Value::nullSingleton() {
   return nullStatic;
 }
 
+#if JSON_USE_NULLREF
 // for backwards compatibility, we'll leave these global references around, but
 // DO NOT use them in JSONCPP library code any more!
+// static
 Value const& Value::null = Value::nullSingleton();
+
+// static
 Value const& Value::nullRef = Value::nullSingleton();
+#endif
 
 const Int Value::minInt = Int(~(UInt(-1) / 2));
 const Int Value::maxInt = Int(UInt(-1) / 2);
@@ -232,15 +232,13 @@ Exception::~Exception() JSONCPP_NOEXCEPT {}
 char const* Exception::what() const JSONCPP_NOEXCEPT { return msg_.c_str(); }
 RuntimeError::RuntimeError(String const& msg) : Exception(msg) {}
 LogicError::LogicError(String const& msg) : Exception(msg) {}
-JSONCPP_NORETURN void throwRuntimeError(String const& msg) {
+[[noreturn]] void throwRuntimeError(String const& msg) {
   throw RuntimeError(msg);
 }
-JSONCPP_NORETURN void throwLogicError(String const& msg) {
-  throw LogicError(msg);
-}
+[[noreturn]] void throwLogicError(String const& msg) { throw LogicError(msg); }
 #else // !JSON_USE_EXCEPTION
-JSONCPP_NORETURN void throwRuntimeError(String const& msg) { abort(); }
-JSONCPP_NORETURN void throwLogicError(String const& msg) { abort(); }
+[[noreturn]] void throwRuntimeError(String const& msg) { abort(); }
+[[noreturn]] void throwLogicError(String const& msg) { abort(); }
 #endif
 
 // //////////////////////////////////////////////////////////////////
@@ -1648,20 +1646,20 @@ const Value& Path::resolve(const Value& root) const {
   for (const auto& arg : args_) {
     if (arg.kind_ == PathArgument::kindIndex) {
       if (!node->isArray() || !node->isValidIndex(arg.index_)) {
-        // Error: unable to resolve path (array value expected at position...
-        return Value::null;
+        // Error: unable to resolve path (array value expected at position... )
+        return Value::nullSingleton();
       }
       node = &((*node)[arg.index_]);
     } else if (arg.kind_ == PathArgument::kindKey) {
       if (!node->isObject()) {
         // Error: unable to resolve path (object value expected at position...)
-        return Value::null;
+        return Value::nullSingleton();
       }
       node = &((*node)[arg.key_]);
       if (node == &Value::nullSingleton()) {
         // Error: unable to resolve path (object has no member named '' at
         // position...)
-        return Value::null;
+        return Value::nullSingleton();
       }
     }
   }

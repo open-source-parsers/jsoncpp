@@ -24,19 +24,6 @@
 #include <cpptl/forwards.h>
 #endif
 
-// Conditional NORETURN attribute on the throw functions would:
-// a) suppress false positives from static code analysis
-// b) possibly improve optimization opportunities.
-#if !defined(JSONCPP_NORETURN)
-#if defined(_MSC_VER)
-#define JSONCPP_NORETURN __declspec(noreturn)
-#elif defined(__GNUC__)
-#define JSONCPP_NORETURN __attribute__((__noreturn__))
-#else
-#define JSONCPP_NORETURN
-#endif
-#endif
-
 // Disable warning C4251: <data member>: <type> needs to have dll-interface to
 // be used by...
 #if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
@@ -89,9 +76,9 @@ public:
 #endif
 
 /// used internally
-JSONCPP_NORETURN void throwRuntimeError(String const& msg);
+[[noreturn]] void throwRuntimeError(String const& msg);
 /// used internally
-JSONCPP_NORETURN void throwLogicError(String const& msg);
+[[noreturn]] void throwLogicError(String const& msg);
 
 /** \brief Type of the value held by a Value object.
  */
@@ -206,11 +193,14 @@ public:
   // Required for boost integration, e. g. BOOST_TEST
   typedef std::string value_type;
 
-  static const Value& null; ///< We regret this reference to a global instance;
-                            ///< prefer the simpler Value().
-  static const Value& nullRef; ///< just a kludge for binary-compatibility; same
-                               ///< as null
-  static Value const& nullSingleton(); ///< Prefer this to null or nullRef.
+#if JSON_USE_NULLREF
+  // Binary compatibility kludges, do not use.
+  static const Value& null;
+  static const Value& nullRef;
+#endif
+
+  // null and nullRef are deprecated, use this instead.
+  static Value const& nullSingleton();
 
   /// Minimum signed integer value that can be stored in a Json::Value.
   static const LargestInt minLargestInt;
@@ -290,21 +280,22 @@ public:
 #endif // ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
 
 public:
-  /** \brief Create a default Value of the given type.
-
-    This is a very useful constructor.
-    To create an empty array, pass arrayValue.
-    To create an empty object, pass objectValue.
-    Another Value can then be set to this one by assignment.
-This is useful since clear() and resize() will not alter types.
-
-    Examples:
-\code
-Json::Value null_value; // null
-Json::Value arr_value(Json::arrayValue); // []
-Json::Value obj_value(Json::objectValue); // {}
-\endcode
-  */
+  /**
+   * \brief Create a default Value of the given type.
+   *
+   * This is a very useful constructor.
+   * To create an empty array, pass arrayValue.
+   * To create an empty object, pass objectValue.
+   * Another Value can then be set to this one by assignment.
+   * This is useful since clear() and resize() will not alter types.
+   *
+   * Examples:
+   *   \code
+   *   Json::Value null_value; // null
+   *   Json::Value arr_value(Json::arrayValue); // []
+   *   Json::Value obj_value(Json::objectValue); // {}
+   *   \endcode
+   */
   Value(ValueType type = nullValue);
   Value(Int value);
   Value(UInt value);
@@ -315,24 +306,25 @@ Json::Value obj_value(Json::objectValue); // {}
   Value(double value);
   Value(const char* value); ///< Copy til first 0. (NULL causes to seg-fault.)
   Value(const char* begin, const char* end); ///< Copy all, incl zeroes.
-  /** \brief Constructs a value from a static string.
-
+  /**
+   * \brief Constructs a value from a static string.
+   *
    * Like other value string constructor but do not duplicate the string for
-   * internal storage. The given string must remain alive after the call to this
-   * constructor.
+   * internal storage. The given string must remain alive after the call to
+   * this constructor.
+   *
    * \note This works only for null-terminated strings. (We cannot change the
-   *   size of this class, so we have nowhere to store the length,
-   *   which might be computed later for various operations.)
+   * size of this class, so we have nowhere to store the length, which might be
+   * computed later for various operations.)
    *
    * Example of usage:
-   * \code
-   * static StaticString foo("some text");
-   * Json::Value aValue(foo);
-   * \endcode
+   *   \code
+   *   static StaticString foo("some text");
+   *   Json::Value aValue(foo);
+   *   \endcode
    */
   Value(const StaticString& value);
-  Value(const String& value); ///< Copy data() til size(). Embedded
-                              ///< zeroes too.
+  Value(const String& value);
 #ifdef JSON_USE_CPPTL
   Value(const CppTL::ConstString& value);
 #endif
@@ -429,35 +421,26 @@ Json::Value obj_value(Json::objectValue); // {}
   /// \post type() is arrayValue
   void resize(ArrayIndex newSize);
 
-  /// Access an array element (zero based index ).
-  /// If the array contains less than index element, then null value are
-  /// inserted
-  /// in the array so that its size is index+1.
+  //@{
+  /// Access an array element (zero based index). If the array contains less
+  /// than index element, then null value are inserted in the array so that
+  /// its size is index+1.
   /// (You may need to say 'value[0u]' to get your compiler to distinguish
-  ///  this from the operator[] which takes a string.)
+  /// this from the operator[] which takes a string.)
   Value& operator[](ArrayIndex index);
-
-  /// Access an array element (zero based index ).
-  /// If the array contains less than index element, then null value are
-  /// inserted
-  /// in the array so that its size is index+1.
-  /// (You may need to say 'value[0u]' to get your compiler to distinguish
-  ///  this from the operator[] which takes a string.)
   Value& operator[](int index);
+  //@}
 
-  /// Access an array element (zero based index )
+  //@{
+  /// Access an array element (zero based index).
   /// (You may need to say 'value[0u]' to get your compiler to distinguish
-  ///  this from the operator[] which takes a string.)
+  /// this from the operator[] which takes a string.)
   const Value& operator[](ArrayIndex index) const;
-
-  /// Access an array element (zero based index )
-  /// (You may need to say 'value[0u]' to get your compiler to distinguish
-  ///  this from the operator[] which takes a string.)
   const Value& operator[](int index) const;
+  //@}
 
   /// If the array contains at least index+1 elements, returns the element
-  /// value,
-  /// otherwise returns defaultValue.
+  /// value, otherwise returns defaultValue.
   Value get(ArrayIndex index, const Value& defaultValue) const;
   /// Return true if index < size().
   bool isValidIndex(ArrayIndex index) const;
@@ -469,7 +452,7 @@ Json::Value obj_value(Json::objectValue); // {}
 
   /// Access an object value by name, create a null member if it does not exist.
   /// \note Because of our implementation, keys are limited to 2^30 -1 chars.
-  ///  Exceeding that will cause an exception.
+  /// Exceeding that will cause an exception.
   Value& operator[](const char* key);
   /// Access an object value by name, returns null if there is no member with
   /// that name.
@@ -482,17 +465,16 @@ Json::Value obj_value(Json::objectValue); // {}
   /// \param key may contain embedded nulls.
   const Value& operator[](const String& key) const;
   /** \brief Access an object value by name, create a null member if it does not
-   exist.
-
+   * exist.
+   *
    * If the object has no entry for that name, then the member name used to
-   store
-   * the new entry is not duplicated.
+   * store the new entry is not duplicated.
    * Example of use:
-   * \code
-   * Json::Value object;
-   * static const StaticString code("code");
-   * object[code] = 1234;
-   * \endcode
+   *   \code
+   *   Json::Value object;
+   *   static const StaticString code("code");
+   *   object[code] = 1234;
+   *   \endcode
    */
   Value& operator[](const StaticString& key);
 #ifdef JSON_USE_CPPTL
@@ -540,20 +522,20 @@ Json::Value obj_value(Json::objectValue); // {}
   /// but 'key' is null-terminated.
   bool removeMember(const char* key, Value* removed);
   /** \brief Remove the named map member.
-
-      Update 'removed' iff removed.
-      \param key may contain embedded nulls.
-      \return true iff removed (no exceptions)
-  */
+   *
+   *  Update 'removed' iff removed.
+   *  \param key may contain embedded nulls.
+   *  \return true iff removed (no exceptions)
+   */
   bool removeMember(String const& key, Value* removed);
   /// Same as removeMember(String const& key, Value* removed)
   bool removeMember(const char* begin, const char* end, Value* removed);
   /** \brief Remove the indexed array element.
-
-      O(n) expensive operations.
-      Update 'removed' iff removed.
-      \return true if removed (no exceptions)
-  */
+   *
+   *  O(n) expensive operations.
+   *  Update 'removed' iff removed.
+   *  \return true if removed (no exceptions)
+   */
   bool removeIndex(ArrayIndex index, Value* removed);
 
   /// Return true if the object has a member named key.

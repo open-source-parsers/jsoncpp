@@ -30,6 +30,11 @@
 #define JSON_USE_EXCEPTION 1
 #endif
 
+// Temporary, tracked for removal with issue #982.
+#ifndef JSON_USE_NULLREF
+#define JSON_USE_NULLREF 1
+#endif
+
 /// If defined, indicates that the source file is amalgamated
 /// to prevent private header inclusion.
 /// Remarks: it is automatically defined in the generated amalgamated header.
@@ -99,7 +104,7 @@ msvc_pre1900_c99_snprintf(char* outBuf, size_t size, const char* format, ...);
 #define JSONCPP_OP_EXPLICIT
 #endif
 
-#if __GNUC__ >= 6
+#if defined(__GNUC__) && (__GNUC__ >= 6)
 #define JSON_USE_INT64_DOUBLE_CONVERSION 1
 #endif
 
