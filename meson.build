@@ -8,7 +8,7 @@ project(
   # 1. /meson.build
   # 2. /include/json/version.h
   # 3. /CMakeLists.txt
-
+  # IMPORTANT: also update the SOVERSION!!
   version : '1.9.2',
   default_options : [
     'buildtype=release',
@@ -51,7 +51,7 @@ jsoncpp_lib = library(
     'src/lib_json/json_reader.cpp',
     'src/lib_json/json_value.cpp',
     'src/lib_json/json_writer.cpp'],
-  soversion : 21,
+  soversion : 22,
   install : true,
   include_directories : jsoncpp_include_directories,
   cpp_args: dll_export_flag)
