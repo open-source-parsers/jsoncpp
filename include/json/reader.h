@@ -25,6 +25,10 @@
 
 #pragma pack(push, 8)
 
+#if defined(_MSC_VER)
+#pragma warning(disable : 4996)
+#endif
+
 namespace Json {
 
 /** \brief Unserialize a <a HREF="http://www.json.org">JSON</a> document into a
@@ -32,7 +36,7 @@ namespace Json {
  *
  * \deprecated Use CharReader and CharReaderBuilder.
  */
-class JSON_API Reader {
+class [[deprecated("deprecated Use CharReader and CharReaderBuilder.")]] JSON_API Reader {
 public:
   typedef char Char;
   typedef const Char* Location;
@@ -50,12 +54,10 @@ public:
 
   /** \brief Constructs a Reader allowing all features for parsing.
    */
-  JSONCPP_DEPRECATED("Use CharReader and CharReaderBuilder instead")
   Reader();
 
   /** \brief Constructs a Reader allowing the specified feature set for parsing.
    */
-  JSONCPP_DEPRECATED("Use CharReader and CharReaderBuilder instead")
   Reader(const Features& features);
 
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
@@ -108,7 +110,7 @@ public:
    * occurred during parsing.
    * \deprecated Use getFormattedErrorMessages() instead (typo fix).
    */
-  JSONCPP_DEPRECATED("Use getFormattedErrorMessages() instead.")
+  [[deprecated("Use getFormattedErrorMessages() instead.")]]
   String getFormatedErrorMessages() const;
 
   /** \brief Returns a user friendly string that list errors in the parsed
