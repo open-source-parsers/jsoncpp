@@ -13,9 +13,9 @@
 #define JSONCPP_VERSION_MINOR 9
 #define JSONCPP_VERSION_PATCH 2
 #define JSONCPP_VERSION_QUALIFIER
-#define JSONCPP_VERSION_HEXA ((JSONCPP_VERSION_MAJOR << 24) \
-                            | (JSONCPP_VERSION_MINOR << 16) \
-                            | (JSONCPP_VERSION_PATCH << 8))
+#define JSONCPP_VERSION_HEXA                                                   \
+  ((JSONCPP_VERSION_MAJOR << 24) | (JSONCPP_VERSION_MINOR << 16) |             \
+   (JSONCPP_VERSION_PATCH << 8))
 
 #ifdef JSONCPP_USING_SECURE_MEMORY
 #undef JSONCPP_USING_SECURE_MEMORY

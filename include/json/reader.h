@@ -376,7 +376,7 @@ bool JSON_API parseFromStream(CharReader::Factory const&,
 /** \brief Read from 'sin' into 'root'.
  *
  * Always keep comments from the input JSON.
- * 
+ *
  * This can be used to read a file into a particular sub-object.
  * For example:
  *   \code
