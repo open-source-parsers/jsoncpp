@@ -1,7 +1,15 @@
 project(
   'jsoncpp',
   'cpp',
-  version : '1.9.0',
+
+  # Note: version must be updated in three places when doing a release. This
+  # annoying process ensures that amalgamate, CMake, and meson all report the
+  # correct version.
+  # 1. /meson.build
+  # 2. /include/json/version.h
+  # 3. /CMakeLists.txt
+  # IMPORTANT: also update the SOVERSION!!
+  version : '1.9.2',
   default_options : [
     'buildtype=release',
     'cpp_std=c++11',
@@ -9,25 +17,6 @@ project(
   license : 'Public Domain',
   meson_version : '>= 0.50.0')
 
-jsoncpp_ver_arr = meson.project_version().split('.')
-jsoncpp_major_version = jsoncpp_ver_arr[0]
-jsoncpp_minor_version = jsoncpp_ver_arr[1]
-jsoncpp_patch_version = jsoncpp_ver_arr[2]
-
-jsoncpp_cdata = configuration_data()
-jsoncpp_cdata.set('JSONCPP_VERSION', meson.project_version())
-jsoncpp_cdata.set('JSONCPP_VERSION_MAJOR', jsoncpp_major_version)
-jsoncpp_cdata.set('JSONCPP_VERSION_MINOR', jsoncpp_minor_version)
-jsoncpp_cdata.set('JSONCPP_VERSION_PATCH', jsoncpp_patch_version)
-jsoncpp_cdata.set('JSONCPP_USE_SECURE_MEMORY',0)
-
-jsoncpp_gen_sources = configure_file(
-  input : 'src/lib_json/version.h.in',
-  output : 'version.h',
-  configuration : jsoncpp_cdata,
-  install : true,
-  install_dir : join_paths(get_option('prefix'), get_option('includedir'), 'json')
-)
 
 jsoncpp_headers = [
   'include/json/allocator.h',
@@ -39,6 +28,7 @@ jsoncpp_headers = [
   'include/json/json.h',
   'include/json/reader.h',
   'include/json/value.h',
+  'include/json/version.h',
   'include/json/writer.h']
 jsoncpp_include_directories = include_directories('include')
 
@@ -56,13 +46,12 @@ endif
 
 jsoncpp_lib = library(
   'jsoncpp',
-  [ jsoncpp_gen_sources,
-    jsoncpp_headers,
+  [ jsoncpp_headers,
     'src/lib_json/json_tool.h',
     'src/lib_json/json_reader.cpp',
     'src/lib_json/json_value.cpp',
     'src/lib_json/json_writer.cpp'],
-  soversion : 21,
+  soversion : 22,
   install : true,
   include_directories : jsoncpp_include_directories,
   cpp_args: dll_export_flag)
@@ -79,7 +68,7 @@ jsoncpp_dep = declare_dependency(
   include_directories : jsoncpp_include_directories,
   link_with : jsoncpp_lib,
   version : meson.project_version(),
-  sources : jsoncpp_gen_sources)
+  )
 
 # tests
 python = import('python3').find_python()

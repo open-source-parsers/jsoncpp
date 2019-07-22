@@ -63,11 +63,18 @@ if(NOT DEFINED CMAKE_BUILD_TYPE)
 endif()
 
 project(JSONCPP
-        VERSION 1.9.0 # <major>[.<minor>[.<patch>[.<tweak>]]]
+        # Note: version must be updated in three places when doing a release. This
+        # annoying process ensures that amalgamate, CMake, and meson all report the
+        # correct version.
+        # 1. /meson.build
+        # 2. /include/json/version.h
+        # 3. /CMakeLists.txt
+        # IMPORTANT: also update the SOVERSION!!
+        VERSION 1.9.2 # <major>[.<minor>[.<patch>[.<tweak>]]]
         LANGUAGES CXX)
 
 message(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
-set( JSONCPP_SOVERSION 21 )
+set( JSONCPP_SOVERSION 22 )
 
 option(JSONCPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executables" ON)
 option(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)
@@ -89,10 +96,6 @@ set(DEBUG_LIBNAME_SUFFIX "" CACHE STRING "Optional suffix to append to the libra
 
 set(JSONCPP_USE_SECURE_MEMORY "0" CACHE STRING "-D...=1 to use memory-wiping allocator for STL" )
 
-# File version.h is only regenerated on CMake configure step
-configure_file( "${PROJECT_SOURCE_DIR}/src/lib_json/version.h.in"
-                "${PROJECT_BINARY_DIR}/include/json/version.h"
-                NEWLINE_STYLE UNIX )
 configure_file( "${PROJECT_SOURCE_DIR}/version.in"
                 "${PROJECT_BINARY_DIR}/version"
                 NEWLINE_STYLE UNIX )
