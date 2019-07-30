@@ -23,7 +23,7 @@
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   std::string json_string(reinterpret_cast<const char *>(data), size);
-  Json::CharReader reader(Json::Features::strictMode());
+  Json::Reader reader(Json::Features::strictMode());
   Json::Value value;
   const bool success = reader.parse(json_string, value, false);
   if (!success) {
@@ -31,11 +31,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   }
 
   // Write with StyledWriter
-  Json::StreamWriterBuilder styled_writer;
+  Json::StyledWriter styled_writer;
   styled_writer.write(value);
 
   // Write with StyledStreamWriter
-  Json::StreamWriterBuilder styled_stream_writer;
+  Json::StyledStreamWriter styled_stream_writer;
   JSONCPP_OSTRINGSTREAM sstream;
   styled_stream_writer.write(sstream, value);
   return 0;
