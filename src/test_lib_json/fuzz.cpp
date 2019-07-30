@@ -8,11 +8,11 @@
 #include <sstream>
 #include <string>
 
-#include "jsoncpp/config.h"
-#include "jsoncpp/features.h"
-#include "jsoncpp/reader.h"
-#include "jsoncpp/value.h"
-#include "jsoncpp/writer.h"
+#include "json/config.h"
+#include "json/features.h"
+#include "json/reader.h"
+#include "json/value.h"
+#include "json/writer.h"
 
 // #include <cstdint>
 // #include <json/config.h>
