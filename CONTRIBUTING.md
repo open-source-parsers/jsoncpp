@@ -26,6 +26,7 @@ Then,
     LIB_TYPE=shared
     #LIB_TYPE=static
     meson --buildtype ${BUILD_TYPE} --default-library ${LIB_TYPE} . build-${LIB_TYPE}
+    #ninja -v -C build-${LIB_TYPE} test # This stopped working on my Mac.
     ninja -v -C build-${LIB_TYPE}
     cd build-${LIB_TYPE}
     meson test --no-rebuild --print-errorlogs
