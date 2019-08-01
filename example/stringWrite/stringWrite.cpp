@@ -2,8 +2,8 @@
 #include <iostream>
 /*
 write a Value object to a string
->g++ stringWrite.cpp -ljsoncpp -std=c++11 -o stringWrite
->./stringWrite
+$g++ stringWrite.cpp -ljsoncpp -std=c++11 -o stringWrite
+$./stringWrite
 {
     "action" : "run",
     "data" :

@@ -2,8 +2,8 @@
 #include <iostream>
 /*
 write the Value object to stream
->g++ streamWrite.cpp -ljsoncpp -std=c++11 -o streamWrite
->./streamWrite
+$g++ streamWrite.cpp -ljsoncpp -std=c++11 -o streamWrite
+$./streamWrite
 {
     "Age" : 20,
     "Name" : "robin"

@@ -4,8 +4,8 @@
 /*
 parse from stream,collect comments and capture error info.
 
->g++ readFromStream.cpp -ljsoncpp -std=c++11 -o readFromStream
->./readFromStream
+$g++ readFromStream.cpp -ljsoncpp -std=c++11 -o readFromStream
+$./readFromStream
 // comment head
 {
     // comment before
