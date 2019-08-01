@@ -3,11 +3,9 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#include "fuzz.h"
-
 #include <sstream>
 #include <string>
-
+#include "fuzz.h"
 #include "json/config.h"
 #include "json/features.h"
 #include "json/reader.h"
