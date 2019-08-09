@@ -438,6 +438,12 @@ Value::Value(const String& value) {
       value.data(), static_cast<unsigned>(value.length()));
 }
 
+Value::Value(const StringView value) {
+    initBasic(stringValue, true);
+    value_.string_ = duplicateAndPrefixStringValue(
+            value.data(), static_cast<unsigned>(value.length()));
+}
+
 Value::Value(const StaticString& value) {
   initBasic(stringValue);
   value_.string_ = const_cast<char*>(value.c_str());

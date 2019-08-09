@@ -325,6 +325,7 @@ public:
    */
   Value(const StaticString& value);
   Value(const String& value);
+  Value(const StringView value);
 #ifdef JSON_USE_CPPTL
   Value(const CppTL::ConstString& value);
 #endif
