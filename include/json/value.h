@@ -464,6 +464,8 @@ public:
   /// that name.
   /// \param key may contain embedded nulls.
   const Value& operator[](const String& key) const;
+  Value& operator[](const StringView key);
+  const Value& operator[](const StringView key) const;
   /** \brief Access an object value by name, create a null member if it does not
    * exist.
    *

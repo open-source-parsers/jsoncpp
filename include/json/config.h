@@ -12,6 +12,7 @@
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <type_traits>
 
 /// If defined, indicates that json library is embedded in CppTL library.
@@ -141,6 +142,7 @@ using Allocator = typename std::conditional<JSONCPP_USING_SECURE_MEMORY,
                                             SecureAllocator<T>,
                                             std::allocator<T>>::type;
 using String = std::basic_string<char, std::char_traits<char>, Allocator<char>>;
+using StringView = std::basic_string_view<char, std::char_traits<char>>;
 using IStringStream = std::basic_istringstream<String::value_type,
                                                String::traits_type,
                                                String::allocator_type>;

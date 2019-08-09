@@ -1149,6 +1149,12 @@ Value const& Value::operator[](const String& key) const {
     return nullSingleton();
   return *found;
 }
+Value const& Value::operator[](const StringView key) const {
+    Value const* found = find(sv.data(), sv.data() + sv.length());
+    if (!found)
+        return nullSingleton();
+    return *found;
+}
 
 Value& Value::operator[](const char* key) {
   return resolveReference(key, key + strlen(key));
@@ -1156,6 +1162,10 @@ Value& Value::operator[](const char* key) {
 
 Value& Value::operator[](const String& key) {
   return resolveReference(key.data(), key.data() + key.length());
+}
+
+Value& Value::operator[](const StringView key) {
+    return resolveReference(key.data(), key.data() + key.length());
 }
 
 Value& Value::operator[](const StaticString& key) {
