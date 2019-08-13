@@ -325,7 +325,9 @@ public:
    */
   Value(const StaticString& value);
   Value(const String& value);
+#ifdef JSON_USE_STRING_VIEW
   Value(const StringView value);
+#endif
 #ifdef JSON_USE_CPPTL
   Value(const CppTL::ConstString& value);
 #endif
@@ -465,8 +467,12 @@ public:
   /// that name.
   /// \param key may contain embedded nulls.
   const Value& operator[](const String& key) const;
+
+#ifdef JSON_USE_STRING_VIEW
   Value& operator[](const StringView key);
   const Value& operator[](const StringView key) const;
+#endif
+
   /** \brief Access an object value by name, create a null member if it does not
    * exist.
    *

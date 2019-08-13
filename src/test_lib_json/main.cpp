@@ -300,6 +300,18 @@ JSONTEST_FIXTURE(ValueTest, arrays) {
   JSONTEST_ASSERT_EQUAL(Json::Value(17), got);
   JSONTEST_ASSERT_EQUAL(false, array1_.removeIndex(2, &got)); // gone now
 }
+
+#ifdef JSON_USE_STRING_VIEW
+JSONTEST_FIXTURE(ValueTest, stringView) {
+    Json::Value root;
+    Json::Value item("Test item");
+    std::string_view sv = "array";
+    std::string s = "array";
+    root[s] = item;
+    JSONTEST_ASSERT_EQUAL(item.asString(), root[sv].asString());
+}
+#endif
+
 JSONTEST_FIXTURE(ValueTest, arrayIssue252) {
   int count = 5;
   Json::Value root;
