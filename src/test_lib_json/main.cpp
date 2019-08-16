@@ -304,7 +304,7 @@ JSONTEST_FIXTURE(ValueTest, arrayIssue252) {
   int count = 5;
   Json::Value root;
   Json::Value item;
-  root["array"] = Json::Value::nullRef;
+  root["array"] = Json::Value::nullSingleton();
   for (int i = 0; i < count; i++) {
     item["a"] = i;
     item["b"] = i;
@@ -337,7 +337,7 @@ JSONTEST_FIXTURE(ValueTest, null) {
   JSONTEST_ASSERT_EQUAL(0.0, null_.asFloat());
   JSONTEST_ASSERT_STRING_EQUAL("", null_.asString());
 
-  JSONTEST_ASSERT_EQUAL(Json::Value::null, null_);
+  JSONTEST_ASSERT_EQUAL(Json::Value::nullSingleton(), null_);
 
   // Test using a Value in a boolean context (false iff null)
   JSONTEST_ASSERT_EQUAL(null_, false);
@@ -1749,7 +1749,7 @@ JSONTEST_FIXTURE(ValueTest, zeroesInKeys) {
     JSONTEST_ASSERT(!root.isMember("h"));
     JSONTEST_ASSERT(root.isMember(binary));
     JSONTEST_ASSERT_STRING_EQUAL(
-        "there", root.get(binary, Json::Value::nullRef).asString());
+        "there", root.get(binary, Json::Value::nullSingleton()).asString());
     Json::Value removed;
     bool did;
     did = root.removeMember(binary.data(), binary.data() + binary.length(),
@@ -1762,7 +1762,7 @@ JSONTEST_FIXTURE(ValueTest, zeroesInKeys) {
     JSONTEST_ASSERT_STRING_EQUAL("there", removed.asString()); // still
     JSONTEST_ASSERT(!root.isMember(binary));
     JSONTEST_ASSERT_STRING_EQUAL(
-        "", root.get(binary, Json::Value::nullRef).asString());
+        "", root.get(binary, Json::Value::nullSingleton()).asString());
   }
 }
 
@@ -2522,7 +2522,7 @@ JSONTEST_FIXTURE(IteratorTest, const) {
   Json::Value const v;
   JSONTEST_ASSERT_THROWS(
       Json::Value::iterator it(v.begin()) // Compile, but throw.
-  );
+      );
 
   Json::Value value;
 

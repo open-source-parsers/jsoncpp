@@ -3,7 +3,7 @@
 \section _intro Introduction
 
 <a HREF="http://www.json.org/">JSON (JavaScript Object Notation)</a>
- is a lightweight data-interchange format. 
+ is a lightweight data-interchange format.
 
 Here is an example of JSON data:
 \verbatim
@@ -23,14 +23,14 @@ Here is an example of JSON data:
 {
     // Default encoding for text
     "encoding" : "UTF-8",
-    
+
     // Plug-ins loaded at start-up
     "plug-ins" : [
         "python",
         "c++",  // trailing comment
         "ruby"
         ],
-        
+
     // Tab indent size
     // (multi-line comment)
     "indent" : { /*embedded comment*/ "length" : 3, "use_space": true }
@@ -67,7 +67,7 @@ const Json::Value plugins = root["plug-ins"];
 // Iterate over the sequence elements.
 for ( int index = 0; index < plugins.size(); ++index )
    loadPlugIn( plugins[index].asString() );
-   
+
 // Try other datatypes. Some are auto-convertible to others.
 foo::setIndentLength( root["indent"].get("length", 3).asInt() );
 foo::setIndentUseSpace( root["indent"].get("use_space", true).asBool() );
@@ -124,7 +124,7 @@ reader->parse(start, stop, &value2, &errs);
 \endcode
 
 \section _pbuild Build instructions
-The build instructions are located in the file 
+The build instructions are located in the file
 <a HREF="https://github.com/open-source-parsers/jsoncpp/blob/master/README.md">README.md</a> in the top-directory of the project.
 
 The latest version of the source is available in the project's GitHub repository:
@@ -132,7 +132,7 @@ The latest version of the source is available in the project's GitHub repository
 jsoncpp</a>
 
 \section _news What's New?
-The description of latest changes can be found in 
+The description of latest changes can be found in
 <a HREF="https://github.com/open-source-parsers/jsoncpp/wiki/NEWS">
   the NEWS wiki
 </a>.
@@ -152,7 +152,7 @@ The description of latest changes can be found in
 \section _license License
 See file <a href="https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE"><code>LICENSE</code></a> in the top-directory of the project.
 
-Basically JsonCpp is licensed under MIT license, or public domain if desired 
+Basically JsonCpp is licensed under MIT license, or public domain if desired
 and recognized in your jurisdiction.
 
 \author Baptiste Lepilleur <blep@users.sourceforge.net> (originator)
