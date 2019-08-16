@@ -324,7 +324,7 @@ void Reader::skipSpaces() {
   }
 }
 
-bool Reader::match(Location pattern, int patternLength) {
+bool Reader::match(const Char* pattern, int patternLength) {
   if (end_ - current_ < patternLength)
     return false;
   int index = patternLength;
@@ -416,7 +416,7 @@ bool Reader::readCppStyleComment() {
 }
 
 void Reader::readNumber() {
-  const char* p = current_;
+  Location p = current_;
   char c = '0'; // stopgap for already consumed character
   // integral part
   while (c >= '0' && c <= '9')
@@ -956,7 +956,7 @@ private:
 
   bool readToken(Token& token);
   void skipSpaces();
-  bool match(Location pattern, int patternLength);
+  bool match(const Char* pattern, int patternLength);
   bool readComment();
   bool readCStyleComment();
   bool readCppStyleComment();
@@ -1287,7 +1287,7 @@ void OurReader::skipSpaces() {
   }
 }
 
-bool OurReader::match(Location pattern, int patternLength) {
+bool OurReader::match(const Char* pattern, int patternLength) {
   if (end_ - current_ < patternLength)
     return false;
   int index = patternLength;
@@ -1380,7 +1380,7 @@ bool OurReader::readCppStyleComment() {
 }
 
 bool OurReader::readNumber(bool checkInf) {
-  const char* p = current_;
+  Location p = current_;
   if (checkInf && p != end_ && *p == 'I') {
     current_ = ++p;
     return false;
