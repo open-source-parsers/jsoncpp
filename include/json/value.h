@@ -203,31 +203,33 @@ public:
   static Value const& nullSingleton();
 
   /// Minimum signed integer value that can be stored in a Json::Value.
-  static const LargestInt minLargestInt;
+  static constexpr LargestInt minLargestInt = LargestInt(~(LargestUInt(-1) / 2));
   /// Maximum signed integer value that can be stored in a Json::Value.
-  static const LargestInt maxLargestInt;
+  static constexpr LargestInt maxLargestInt = LargestInt(LargestUInt(-1) / 2);
   /// Maximum unsigned integer value that can be stored in a Json::Value.
-  static const LargestUInt maxLargestUInt;
+  static constexpr LargestUInt maxLargestUInt = LargestUInt(-1);
 
   /// Minimum signed int value that can be stored in a Json::Value.
-  static const Int minInt;
+  static constexpr Int minInt = Int(~(UInt(-1) / 2));
   /// Maximum signed int value that can be stored in a Json::Value.
-  static const Int maxInt;
+  static constexpr Int maxInt = Int(UInt(-1) / 2);
   /// Maximum unsigned int value that can be stored in a Json::Value.
-  static const UInt maxUInt;
+  static constexpr UInt maxUInt = UInt(-1);
 
 #if defined(JSON_HAS_INT64)
   /// Minimum signed 64 bits int value that can be stored in a Json::Value.
-  static const Int64 minInt64;
+  static constexpr Int64 minInt64 = Int64(~(UInt64(-1) / 2));
   /// Maximum signed 64 bits int value that can be stored in a Json::Value.
-  static const Int64 maxInt64;
+  static constexpr Int64 maxInt64 = Int64(UInt64(-1) / 2);
   /// Maximum unsigned 64 bits int value that can be stored in a Json::Value.
-  static const UInt64 maxUInt64;
+  static constexpr UInt64 maxUInt64 = UInt64(-1);
 #endif // defined(JSON_HAS_INT64)
-
   /// Default precision for real value for string representation.
-  static const UInt defaultRealPrecision;
-
+  static constexpr UInt defaultRealPrecision = 17;
+  // The constant is hard-coded because some compiler have trouble
+  // converting Value::maxUInt64 to a double correctly (AIX/xlC).
+  // Assumes that UInt64 is a 64 bits integer.
+  static constexpr double maxUInt64AsDouble = 18446744073709551615.0;
 // Workaround for bug in the NVIDIAs CUDA 9.1 nvcc compiler
 // when using gcc and clang backend compilers.  CZString
 // cannot be defined as private.  See issue #486
