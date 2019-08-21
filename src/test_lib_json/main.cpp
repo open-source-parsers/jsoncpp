@@ -2116,22 +2116,34 @@ JSONTEST_FIXTURE(CharReaderFailIfExtraTest, issue164) {
     Json::String errs;
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT_STRING_EQUAL(errs,
-                                 "* Line 1, Column 13\n"
-                                 "  Extra non-whitespace after JSON value.\n");
+    JSONTEST_ASSERT_STRING_EQUAL("* Line 1, Column 13\n"
+                                 "  Extra non-whitespace after JSON value.\n",
+                                 errs);
     JSONTEST_ASSERT_EQUAL("property", root);
     delete reader;
   }
   {
-    b.settings_["failIfExtra"] = false;
     b.strictMode(&b.settings_);
     Json::CharReader* reader(b.newCharReader());
     Json::String errs;
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT_STRING_EQUAL(errs,
-                                 "* Line 1, Column 13\n"
-                                 "  Extra non-whitespace after JSON value.\n");
+    JSONTEST_ASSERT_STRING_EQUAL("* Line 1, Column 13\n"
+                                 "  Extra non-whitespace after JSON value.\n",
+                                 errs);
+    JSONTEST_ASSERT_EQUAL("property", root);
+    delete reader;
+  }
+  {
+    b.strictMode(&b.settings_);
+    b.settings_["failIfExtra"] = false;
+    Json::CharReader* reader(b.newCharReader());
+    Json::String errs;
+    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
+    JSONTEST_ASSERT(!ok);
+    JSONTEST_ASSERT_STRING_EQUAL("* Line 1, Column 1\n"
+                                 "  A valid JSON document must be either an array or an object value.\n",
+                                 errs);
     JSONTEST_ASSERT_EQUAL("property", root);
     delete reader;
   }
