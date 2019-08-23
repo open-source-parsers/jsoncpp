@@ -1230,6 +1230,14 @@ bool OurReader::readToken(Token& token) {
       ok = features_.allowSpecialFloats_ && match("nfinity", 7);
     }
     break;
+  case '+':
+    if (readNumber(true)) {
+      token.type_ = tokenNumber;
+    } else {
+      token.type_ = tokenPosInf;
+      ok = features_.allowSpecialFloats_ && match("nfinity", 7);
+    }
+    break;
   case 't':
     token.type_ = tokenTrue;
     ok = match("rue", 3);
