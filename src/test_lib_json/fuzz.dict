@@ -6,6 +6,8 @@
 #
 # Inspired by a dictionary by Jakub Wilk <jwilk@jwilk.net>
 #
+# https://github.com/rc0r/afl-fuzz/blob/master/dictionaries/json.dict
+#
 
 "0"
 ",0"
