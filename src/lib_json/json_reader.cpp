@@ -1548,7 +1548,6 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   if (isNegative)
     ++current;
 
-  // TODO(issue #960): Change to constexpr
   static constexpr auto positive_threshold = Value::maxLargestUInt / 10;
   static constexpr auto positive_last_digit = Value::maxLargestUInt % 10;
   static constexpr auto negative_threshold =
