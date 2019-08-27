@@ -13,7 +13,7 @@
 #include "json/writer.h"
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
-  std::string json_string(reinterpret_cast<const char *>(data), size);
+  const std::string json_string(reinterpret_cast<const char *>(data), size);
   Json::Reader reader(Json::Features::strictMode());
   Json::Value value;
   const bool success = reader.parse(json_string, value, false);
