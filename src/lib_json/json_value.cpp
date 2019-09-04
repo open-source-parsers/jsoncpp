@@ -1180,12 +1180,11 @@ bool Value::insert(ArrayIndex index, Value&& newValue) {
   if (type() != arrayValue) {
     return false;
   }
-  ArrayIndex oldsize = size();
-  if (index > oldsize) {
+  ArrayIndex length = size();
+  if (index > length) {
     append(std::move(newValue));
     return true;
   } else {
-    ArrayIndex length = size();
     for (ArrayIndex i = length; i > index; i--) {
       (*this)[i] = std::move((*this)[i - 1]);
     }
