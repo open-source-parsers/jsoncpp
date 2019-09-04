@@ -321,26 +321,26 @@ JSONTEST_FIXTURE(ValueTest, arrayInsertAtRandomIndex) {
   JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[1]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[2]);
 
-  array.insert(3, "index3"); // rvalue
-  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[0]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[1]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[2]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[3]);
+  array.insert(0, "index3"); // rvalue
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[1]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[2]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[3]);
 
   array.insert(3, str1); // lvalue
-  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[0]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[1]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[2]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[1]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[2]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[3]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[4]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[4]);
 
   array.insert(9, "index6");
   // beyond size(). it should be allowed to insert into its tail.
-  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[0]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[1]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[2]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[1]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[2]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[3]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[4]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[4]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index6"), array[5]);
 }
 JSONTEST_FIXTURE(ValueTest, null) {
