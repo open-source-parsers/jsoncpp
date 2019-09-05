@@ -310,38 +310,72 @@ JSONTEST_FIXTURE(ValueTest, arrayIssue252) {
   }
   // JSONTEST_ASSERT_EQUAL(5, root["array"].size());
 }
+
 JSONTEST_FIXTURE(ValueTest, arrayInsertAtRandomIndex) {
   Json::Value array;
-  JSONCPP_STRING str0 = "index2";
-  JSONCPP_STRING str1 = "index4";
-  array.append("index0");
+  Json::Value str0("index2");
+  Json::Value str1("index3");
+  array.append("index0"); // append rvalue
   array.append("index1");
-  array.append(str0);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[0]);
+  array.append(str0); // append lvalue
+
+  std::vector<Json::Value*> vec; // storage value address for checking
+  for (int i = 0; i < 3; i++) {
+    vec.push_back(&array[i]);
+  }
+  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[0]); // check append
   JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[1]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[2]);
 
-  array.insert(0, "index3"); // rvalue
+  // insert lvalue at the head
+  array.insert(0, str1);
   JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[0]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[1]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[2]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[3]);
-
-  array.insert(3, str1); // lvalue
+  // checking address
+  for (int i = 0; i < 3; i++) {
+    JSONTEST_ASSERT_EQUAL(vec[i], &array[i]);
+  }
+  vec.push_back(&array[3]);
+  // insert rvalue at middle
+  array.insert(2, "index4");
   JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[0]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[1]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[2]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[3]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[2]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[3]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[4]);
-
-  array.insert(9, "index6");
-  // beyond size(). it should be allowed to insert into its tail.
+  // checking address
+  for (int i = 0; i < 4; i++) {
+    JSONTEST_ASSERT_EQUAL(vec[i], &array[i]);
+  }
+  vec.push_back(&array[4]);
+  // insert rvalue at the tail
+  array.insert(5, "index5");
   JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[0]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[1]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[2]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[3]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[2]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[3]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[4]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index6"), array[5]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index5"), array[5]);
+  // checking address
+  for (int i = 0; i < 5; i++) {
+    JSONTEST_ASSERT_EQUAL(vec[i], &array[i]);
+  }
+  vec.push_back(&array[5]);
+  // beyond max array size, it should be allowed to insert into its tail
+  array.insert(10, "index10");
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[1]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[2]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[3]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[4]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index5"), array[5]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index10"), array[6]);
+  // checking address
+  for (int i = 0; i < 6; i++) {
+    JSONTEST_ASSERT_EQUAL(vec[i], &array[i]);
+  }
 }
 JSONTEST_FIXTURE(ValueTest, null) {
   JSONTEST_ASSERT_EQUAL(Json::nullValue, null_.type());

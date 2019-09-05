@@ -1169,17 +1169,22 @@ Value const& Value::operator[](CppTL::ConstString const& key) const {
 }
 #endif
 Value& Value::append(const Value& value) { return (*this)[size()] = value; }
+
 Value& Value::append(Value&& value) {
   return (*this)[size()] = std::move(value);
 }
+
 /// \brief Insert value in array at specific index
 bool Value::insert(ArrayIndex index, const Value& newValue) {
-    return insert(index,Value(newValue));
+  JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
+                      "in Json::Value::insert(ArrayIndex index, const Value& "
+                      "newValue): requires arrayValue");
+  return insert(index, Value(newValue));
 }
 bool Value::insert(ArrayIndex index, Value&& newValue) {
-  if (type() != arrayValue) {
-    return false;
-  }
+  JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
+                      "in Json::Value::insert(ArrayIndex index, Value&& "
+                      "newValue): requires arrayValue");
   ArrayIndex length = size();
   if (index > length) {
     append(std::move(newValue));
