@@ -1471,7 +1471,6 @@ void Value::Comments::set(CommentPlacement slot, String comment) {
   if (slot < CommentPlacement::numberOfCommentPlacement) {
     (*ptr_)[slot] = std::move(comment);
   }
-
 }
 
 void Value::setComment(String comment, CommentPlacement placement) {
