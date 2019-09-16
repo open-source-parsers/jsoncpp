@@ -2451,17 +2451,19 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
   Json::String errs;
   Json::CharReader* reader(b.newCharReader());
   {
-    char const doc[] = "{\"a\":NaN,\"b\":Infinity,\"c\":-Infinity}";
+    char const doc[] = "{\"a\":NaN,\"b\":Infinity,\"c\":-Infinity,\"d\":+Infinity}";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
     JSONTEST_ASSERT_STRING_EQUAL("", errs);
-    JSONTEST_ASSERT_EQUAL(3u, root.size());
+    JSONTEST_ASSERT_EQUAL(4u, root.size());
     double n = root["a"].asDouble();
     JSONTEST_ASSERT(std::isnan(n));
     JSONTEST_ASSERT_EQUAL(std::numeric_limits<double>::infinity(),
                           root.get("b", 0.0));
     JSONTEST_ASSERT_EQUAL(-std::numeric_limits<double>::infinity(),
                           root.get("c", 0.0));
+    JSONTEST_ASSERT_EQUAL(std::numeric_limits<double>::infinity(),
+                          root.get("d", 0.0));
   }
 
   struct TestData {
@@ -2485,7 +2487,8 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
       {__LINE__, false, "{\"a\":.Infinity}"}, //
       {__LINE__, false, "{\"a\":_Infinity}"}, //
       {__LINE__, false, "{\"a\":_nfinity}"},  //
-      {__LINE__, true, "{\"a\":-Infinity}"}   //
+      {__LINE__, true, "{\"a\":-Infinity}"},   //
+      {__LINE__, true, "{\"a\":+Infinity}"}   //
   };
   for (const auto& td : test_data) {
     bool ok = reader->parse(&*td.in.begin(), &*td.in.begin() + td.in.size(),
@@ -2499,7 +2502,7 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
   }
 
   {
-    char const doc[] = "{\"posInf\": Infinity, \"NegInf\": -Infinity}";
+    char const doc[] = "{\"posInf\": +Infinity, \"NegInf\": -Infinity}";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
     JSONTEST_ASSERT_STRING_EQUAL("", errs);
