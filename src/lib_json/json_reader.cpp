@@ -1051,12 +1051,9 @@ bool OurReader::parse(const char* beginDoc,
   nodes_.pop();
   Token token;
   skipCommentTokens(token);
-  if (features_.failIfExtra_) {
-    if ((features_.strictRoot_ || token.type_ != tokenError) &&
-        token.type_ != tokenEndOfStream) {
-      addError("Extra non-whitespace after JSON value.", token);
-      return false;
-    }
+  if (features_.failIfExtra_ && (token.type_ != tokenEndOfStream)) {
+    addError("Extra non-whitespace after JSON value.", token);
+    return false;
   }
   if (collectComments_ && !commentsBefore_.empty())
     root.setComment(commentsBefore_, commentAfter);
