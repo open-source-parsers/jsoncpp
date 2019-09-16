@@ -94,8 +94,7 @@ template <typename T, typename U>
 static inline bool InRange(double d, T min, U max) {
   // The casts can lose precision, but we are looking only for
   // an approximate range. Might fail on edge cases though. ~cdunn
-  // return d >= static_cast<double>(min) && d <= static_cast<double>(max);
-  return d >= min && d <= max;
+  return d >= static_cast<double>(min) && d <= static_cast<double>(max);
 }
 #else  // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 static inline double integerToDouble(Json::UInt64 value) {
