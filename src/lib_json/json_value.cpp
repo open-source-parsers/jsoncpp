@@ -88,7 +88,6 @@ Value const& Value::null = Value::nullSingleton();
 Value const& Value::nullRef = Value::nullSingleton();
 #endif
 
-
 #if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 template <typename T, typename U>
 static inline bool InRange(double d, T min, U max) {

@@ -27,30 +27,30 @@ namespace Json {
 class Value;
 
 /**
-*
-* Usage:
-*  \code
-*  using namespace Json;
-*  void writeToStdout(StreamWriter::Factory const& factory, Value const& value) {
-*    std::unique_ptr<StreamWriter> const writer(
-*      factory.newStreamWriter());
-*    writer->write(value, &std::cout);
-*    std::cout << std::endl;  // add lf and flush
-*  }
-*  \endcode
-*/
+ *
+ * Usage:
+ *  \code
+ *  using namespace Json;
+ *  void writeToStdout(StreamWriter::Factory const& factory, Value const& value)
+ * { std::unique_ptr<StreamWriter> const writer( factory.newStreamWriter());
+ *    writer->write(value, &std::cout);
+ *    std::cout << std::endl;  // add lf and flush
+ *  }
+ *  \endcode
+ */
 class JSON_API StreamWriter {
 protected:
   OStream* sout_; // not owned; will not delete
 public:
   StreamWriter();
   virtual ~StreamWriter();
-/** Write Value into document as configured in sub-class.
-*   Do not take ownership of sout, but maintain a reference during function.
-*   \pre sout != NULL
-*   \return zero on success (For now, we always return zero, so check the
-*   stream instead.) \throw std::exception possibly, depending on configuration
-*/
+  /** Write Value into document as configured in sub-class.
+   *   Do not take ownership of sout, but maintain a reference during function.
+   *   \pre sout != NULL
+   *   \return zero on success (For now, we always return zero, so check the
+   *   stream instead.) \throw std::exception possibly, depending on
+   * configuration
+   */
   virtual int write(Value const& root, OStream* sout) = 0;
 
   /** \brief A simple abstract factory.
@@ -225,8 +225,8 @@ private:
 #pragma warning(push)
 #pragma warning(disable : 4996) // Deriving from deprecated class
 #endif
-class [[deprecated("Use StreamWriterBuilder instead")]] JSON_API
-    StyledWriter : public Writer {
+class [[deprecated("Use StreamWriterBuilder instead")]] JSON_API StyledWriter
+    : public Writer {
 public:
   StyledWriter();
   ~StyledWriter() override = default;
@@ -294,8 +294,8 @@ private:
 #pragma warning(push)
 #pragma warning(disable : 4996) // Deriving from deprecated class
 #endif
-class [[deprecated("Use StreamWriterBuilder instead")]] JSON_API
-    StyledStreamWriter {
+class [[deprecated(
+    "Use StreamWriterBuilder instead")]] JSON_API StyledStreamWriter {
 public:
   /**
    * \param indentation Each level will be indented by this amount extra.
@@ -310,7 +310,7 @@ public:
    * \note There is no point in deriving from Writer, since write() should not
    * return a value.
    */
-  void write(OStream& out, const Value& root);
+  void write(OStream & out, const Value& root);
 
 private:
   void writeValue(const Value& value);
