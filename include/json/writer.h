@@ -27,17 +27,17 @@ namespace Json {
 class Value;
 
 /**
-
-Usage:
-\code
-  using namespace Json;
-  void writeToStdout(StreamWriter::Factory const& factory, Value const& value) {
-    std::unique_ptr<StreamWriter> const writer(
-      factory.newStreamWriter());
-    writer->write(value, &std::cout);
-    std::cout << std::endl;  // add lf and flush
-  }
-\endcode
+*
+* Usage:
+*  \code
+*  using namespace Json;
+*  void writeToStdout(StreamWriter::Factory const& factory, Value const& value) {
+*    std::unique_ptr<StreamWriter> const writer(
+*      factory.newStreamWriter());
+*    writer->write(value, &std::cout);
+*    std::cout << std::endl;  // add lf and flush
+*  }
+*  \endcode
 */
 class JSON_API StreamWriter {
 protected:
@@ -45,12 +45,12 @@ protected:
 public:
   StreamWriter();
   virtual ~StreamWriter();
-  /** Write Value into document as configured in sub-class.
-      Do not take ownership of sout, but maintain a reference during function.
-      \pre sout != NULL
-      \return zero on success (For now, we always return zero, so check the
-     stream instead.) \throw std::exception possibly, depending on configuration
-   */
+/** Write Value into document as configured in sub-class.
+*   Do not take ownership of sout, but maintain a reference during function.
+*   \pre sout != NULL
+*   \return zero on success (For now, we always return zero, so check the
+*   stream instead.) \throw std::exception possibly, depending on configuration
+*/
   virtual int write(Value const& root, OStream* sout) = 0;
 
   /** \brief A simple abstract factory.
@@ -73,49 +73,49 @@ String JSON_API writeString(StreamWriter::Factory const& factory,
 
 /** \brief Build a StreamWriter implementation.
 
-Usage:
-\code
-  using namespace Json;
-  Value value = ...;
-  StreamWriterBuilder builder;
-  builder["commentStyle"] = "None";
-  builder["indentation"] = "   ";  // or whatever you like
-  std::unique_ptr<Json::StreamWriter> writer(
-      builder.newStreamWriter());
-  writer->write(value, &std::cout);
-  std::cout << std::endl;  // add lf and flush
-\endcode
+* Usage:
+*   \code
+*   using namespace Json;
+*   Value value = ...;
+*   StreamWriterBuilder builder;
+*   builder["commentStyle"] = "None";
+*   builder["indentation"] = "   ";  // or whatever you like
+*   std::unique_ptr<Json::StreamWriter> writer(
+*      builder.newStreamWriter());
+*   writer->write(value, &std::cout);
+*   std::cout << std::endl;  // add lf and flush
+*   \endcode
 */
 class JSON_API StreamWriterBuilder : public StreamWriter::Factory {
 public:
   // Note: We use a Json::Value so that we can add data-members to this class
   // without a major version bump.
   /** Configuration of this builder.
-    Available settings (case-sensitive):
-    - "commentStyle": "None" or "All"
-    - "indentation":  "<anything>".
-      - Setting this to an empty string also omits newline characters.
-    - "enableYAMLCompatibility": false or true
-      - slightly change the whitespace around colons
-    - "dropNullPlaceholders": false or true
-      - Drop the "null" string from the writer's output for nullValues.
-        Strictly speaking, this is not valid JSON. But when the output is being
-        fed to a browser's JavaScript, it makes for smaller output and the
-        browser can handle the output just fine.
-    - "useSpecialFloats": false or true
-      - If true, outputs non-finite floating point values in the following way:
-        NaN values as "NaN", positive infinity as "Infinity", and negative
-    infinity as "-Infinity".
-    - "precision": int
-      - Number of precision digits for formatting of real values.
-    - "precisionType": "significant"(default) or "decimal"
-      - Type of precision for formatting of real values.
+   *  Available settings (case-sensitive):
+   *  - "commentStyle": "None" or "All"
+   *  - "indentation":  "<anything>".
+   *  - Setting this to an empty string also omits newline characters.
+   *  - "enableYAMLCompatibility": false or true
+   *  - slightly change the whitespace around colons
+   *  - "dropNullPlaceholders": false or true
+   *  - Drop the "null" string from the writer's output for nullValues.
+   *    Strictly speaking, this is not valid JSON. But when the output is being
+   *    fed to a browser's JavaScript, it makes for smaller output and the
+   *    browser can handle the output just fine.
+   *  - "useSpecialFloats": false or true
+   *  - If true, outputs non-finite floating point values in the following way:
+   *    NaN values as "NaN", positive infinity as "Infinity", and negative
+   *  infinity as "-Infinity".
+   *  - "precision": int
+   *  - Number of precision digits for formatting of real values.
+   *  - "precisionType": "significant"(default) or "decimal"
+   *  - Type of precision for formatting of real values.
 
-    You can examine 'settings_` yourself
-    to see the defaults. You can also write and read them just like any
-    JSON Value.
-    \sa setDefaults()
-    */
+   *  You can examine 'settings_` yourself
+   *  to see the defaults. You can also write and read them just like any
+   *  JSON Value.
+   *  \sa setDefaults()
+   */
   Json::Value settings_;
 
   StreamWriterBuilder();
