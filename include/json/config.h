@@ -104,7 +104,9 @@ msvc_pre1900_c99_snprintf(char* outBuf, size_t size, const char* format, ...);
 #define JSONCPP_OP_EXPLICIT
 #endif
 
-#if defined(__GNUC__) && (__GNUC__ >= 6)
+#if defined(__clang__)
+#define JSON_USE_INT64_DOUBLE_CONVERSION 1
+#elif defined(__GNUC__) && (__GNUC__ >= 6)
 #define JSON_USE_INT64_DOUBLE_CONVERSION 1
 #endif
 
