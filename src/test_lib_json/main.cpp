@@ -1864,6 +1864,27 @@ JSONTEST_FIXTURE(WriterTest, dropNullPlaceholders) {
   JSONTEST_ASSERT(writer.write(nullValue) == "\n");
 }
 
+JSONTEST_FIXTURE(WriterTest, enableYAMLCompatibility) {
+  Json::FastWriter writer;
+  Json::Value root;
+  root["hello"] = "world";
+
+  JSONTEST_ASSERT(writer.write(root) == "{\"hello\":\"world\"}\n");
+
+  writer.enableYAMLCompatibility();
+  JSONTEST_ASSERT(writer.write(root) == "{\"hello\": \"world\"}\n");
+}
+
+JSONTEST_FIXTURE(WriterTest, omitEndingLineFeed) {
+  Json::FastWriter writer;
+  Json::Value nullValue;
+
+  JSONTEST_ASSERT(writer.write(nullValue) == "null\n");
+
+  writer.omitEndingLineFeed();
+  JSONTEST_ASSERT(writer.write(nullValue) == "null");
+}
+
 struct StreamWriterTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(StreamWriterTest, dropNullPlaceholders) {
@@ -1873,6 +1894,33 @@ JSONTEST_FIXTURE(StreamWriterTest, dropNullPlaceholders) {
   JSONTEST_ASSERT(Json::writeString(b, nullValue) == "null");
   b.settings_["dropNullPlaceholders"] = true;
   JSONTEST_ASSERT(Json::writeString(b, nullValue).empty());
+}
+
+JSONTEST_FIXTURE(StreamWriterTest, enableYAMLCompatibility) {
+  Json::StreamWriterBuilder b;
+  Json::Value root;
+  root["hello"] = "world";
+
+  b.settings_["indentation"] = "";
+  JSONTEST_ASSERT(Json::writeString(b, root) == "{\"hello\":\"world\"}");
+
+  b.settings_["enableYAMLCompatibility"] = true;
+  JSONTEST_ASSERT(Json::writeString(b, root) == "{\"hello\": \"world\"}");
+
+  b.settings_["enableYAMLCompatibility"] = false;
+  JSONTEST_ASSERT(Json::writeString(b, root) == "{\"hello\":\"world\"}");
+}
+
+JSONTEST_FIXTURE(StreamWriterTest, indentation) {
+  Json::StreamWriterBuilder b;
+  Json::Value root;
+  root["hello"] = "world";
+
+  b.settings_["indentation"] = "";
+  JSONTEST_ASSERT(Json::writeString(b, root) == "{\"hello\":\"world\"}");
+
+  b.settings_["indentation"] = "\t";
+  JSONTEST_ASSERT(Json::writeString(b, root) == "{\n\t\"hello\" : \"world\"\n}");
 }
 
 JSONTEST_FIXTURE(StreamWriterTest, writeZeroes) {
@@ -2622,7 +2670,11 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, ValueTest, precision);
 
   JSONTEST_REGISTER_FIXTURE(runner, WriterTest, dropNullPlaceholders);
+  JSONTEST_REGISTER_FIXTURE(runner, WriterTest, enableYAMLCompatibility);
+  JSONTEST_REGISTER_FIXTURE(runner, WriterTest, omitEndingLineFeed);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, dropNullPlaceholders);
+  JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, enableYAMLCompatibility);
+  JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, indentation);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, writeZeroes);
 
   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseWithNoErrors);
