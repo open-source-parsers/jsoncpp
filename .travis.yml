@@ -15,9 +15,10 @@ addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
-    - llvm-toolchain-xenial-8
+    - llvm-toolchain-xenial-9
     packages:
-    - clang-8
+    - clang-format-9
+    - clang-9
     - valgrind
 matrix:
   allow_failures:
@@ -25,7 +26,7 @@ matrix:
   include:
     - name: Mac clang meson static release testing
       os: osx
-      osx_image: xcode10.2
+      osx_image: xcode11
       compiler: clang
       env:
          CXX="clang++"
