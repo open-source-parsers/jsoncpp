@@ -42,7 +42,7 @@ set( JSONCPP_INCLUDE_DIR ../../include )
 set( PUBLIC_HEADERS
     ${JSONCPP_INCLUDE_DIR}/json/config.h
     ${JSONCPP_INCLUDE_DIR}/json/forwards.h
-    ${JSONCPP_INCLUDE_DIR}/json/features.h
+    ${JSONCPP_INCLUDE_DIR}/json/json_features.h
     ${JSONCPP_INCLUDE_DIR}/json/value.h
     ${JSONCPP_INCLUDE_DIR}/json/reader.h
     ${JSONCPP_INCLUDE_DIR}/json/version.h

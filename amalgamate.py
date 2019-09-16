@@ -75,7 +75,7 @@ def amalgamate_source(source_top_dir=None,
     header.add_file(os.path.join(INCLUDE_PATH, "allocator.h"))
     header.add_file(os.path.join(INCLUDE_PATH, "config.h"))
     header.add_file(os.path.join(INCLUDE_PATH, "forwards.h"))
-    header.add_file(os.path.join(INCLUDE_PATH, "features.h"))
+    header.add_file(os.path.join(INCLUDE_PATH, "json_features.h"))
     header.add_file(os.path.join(INCLUDE_PATH, "value.h"))
     header.add_file(os.path.join(INCLUDE_PATH, "reader.h"))
     header.add_file(os.path.join(INCLUDE_PATH, "writer.h"))

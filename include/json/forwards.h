@@ -25,7 +25,7 @@ class Reader;
 class CharReader;
 class CharReaderBuilder;
 
-// features.h
+// json_features.h
 class Features;
 
 // value.h
