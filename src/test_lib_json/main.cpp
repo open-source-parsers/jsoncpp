@@ -1920,7 +1920,8 @@ JSONTEST_FIXTURE(StreamWriterTest, indentation) {
   JSONTEST_ASSERT(Json::writeString(b, root) == "{\"hello\":\"world\"}");
 
   b.settings_["indentation"] = "\t";
-  JSONTEST_ASSERT(Json::writeString(b, root) == "{\n\t\"hello\" : \"world\"\n}");
+  JSONTEST_ASSERT(Json::writeString(b, root) ==
+                  "{\n\t\"hello\" : \"world\"\n}");
 }
 
 JSONTEST_FIXTURE(StreamWriterTest, writeZeroes) {
@@ -2198,9 +2199,10 @@ JSONTEST_FIXTURE(CharReaderFailIfExtraTest, issue164) {
     Json::String errs;
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT_STRING_EQUAL("* Line 1, Column 1\n"
-                                 "  A valid JSON document must be either an array or an object value.\n",
-                                 errs);
+    JSONTEST_ASSERT_STRING_EQUAL(
+        "* Line 1, Column 1\n"
+        "  A valid JSON document must be either an array or an object value.\n",
+        errs);
     JSONTEST_ASSERT_EQUAL("property", root);
     delete reader;
   }
@@ -2451,7 +2453,8 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
   Json::String errs;
   Json::CharReader* reader(b.newCharReader());
   {
-    char const doc[] = "{\"a\":NaN,\"b\":Infinity,\"c\":-Infinity,\"d\":+Infinity}";
+    char const doc[] =
+        "{\"a\":NaN,\"b\":Infinity,\"c\":-Infinity,\"d\":+Infinity}";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
     JSONTEST_ASSERT_STRING_EQUAL("", errs);
@@ -2487,7 +2490,7 @@ JSONTEST_FIXTURE(CharReaderAllowSpecialFloatsTest, issue209) {
       {__LINE__, false, "{\"a\":.Infinity}"}, //
       {__LINE__, false, "{\"a\":_Infinity}"}, //
       {__LINE__, false, "{\"a\":_nfinity}"},  //
-      {__LINE__, true, "{\"a\":-Infinity}"},   //
+      {__LINE__, true, "{\"a\":-Infinity}"},  //
       {__LINE__, true, "{\"a\":+Infinity}"}   //
   };
   for (const auto& td : test_data) {
@@ -2594,7 +2597,7 @@ JSONTEST_FIXTURE(IteratorTest, const) {
   Json::Value const v;
   JSONTEST_ASSERT_THROWS(
       Json::Value::iterator it(v.begin()) // Compile, but throw.
-      );
+  );
 
   Json::Value value;
 
