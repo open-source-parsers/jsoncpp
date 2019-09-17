@@ -145,7 +145,7 @@ public:
 /** \brief Abstract class for writers.
  * \deprecated Use StreamWriter. (And really, this is an implementation detail.)
  */
-class [[deprecated("Use StreamWriter instead")]] JSON_API Writer {
+class JSONCPP_DEPRECATED("Use StreamWriter instead") JSON_API Writer {
 public:
   virtual ~Writer();
 
@@ -165,7 +165,7 @@ public:
 #pragma warning(push)
 #pragma warning(disable : 4996) // Deriving from deprecated class
 #endif
-class [[deprecated("Use StreamWriterBuilder instead")]] JSON_API FastWriter
+class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API FastWriter
     : public Writer {
 public:
   FastWriter();
@@ -225,8 +225,8 @@ private:
 #pragma warning(push)
 #pragma warning(disable : 4996) // Deriving from deprecated class
 #endif
-class [[deprecated("Use StreamWriterBuilder instead")]] JSON_API StyledWriter
-    : public Writer {
+class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API
+    StyledWriter : public Writer {
 public:
   StyledWriter();
   ~StyledWriter() override = default;
@@ -294,8 +294,8 @@ private:
 #pragma warning(push)
 #pragma warning(disable : 4996) // Deriving from deprecated class
 #endif
-class [[deprecated(
-    "Use StreamWriterBuilder instead")]] JSON_API StyledStreamWriter {
+class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API
+    StyledStreamWriter {
 public:
   /**
    * \param indentation Each level will be indented by this amount extra.
@@ -310,7 +310,7 @@ public:
    * \note There is no point in deriving from Writer, since write() should not
    * return a value.
    */
-  void write(OStream & out, const Value& root);
+  void write(OStream& out, const Value& root);
 
 private:
   void writeValue(const Value& value);

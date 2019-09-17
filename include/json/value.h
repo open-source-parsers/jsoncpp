@@ -567,8 +567,8 @@ public:
   //# endif
 
   /// \deprecated Always pass len.
-  [[deprecated("Use setComment(String const&) instead.")]] void
-  setComment(const char* comment, CommentPlacement placement) {
+  JSONCPP_DEPRECATED("Use setComment(String const&) instead.")
+  void setComment(const char* comment, CommentPlacement placement) {
     setComment(String(comment, strlen(comment)), placement);
   }
   /// Comments must be //... or /* ... */
@@ -750,7 +750,8 @@ public:
   /// objectValue.
   /// \deprecated This cannot be used for UTF-8 strings, since there can be
   /// embedded nulls.
-  [[deprecated("Use `key = name();` instead.")]] char const* memberName() const;
+  JSONCPP_DEPRECATED("Use `key = name();` instead.")
+  char const* memberName() const;
   /// Return the member name of the referenced Value, or NULL if it is not an
   /// objectValue.
   /// \note Better version than memberName(). Allows embedded nulls.

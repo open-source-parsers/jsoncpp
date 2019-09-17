@@ -25,10 +25,6 @@
 
 #pragma pack(push, 8)
 
-#if defined(_MSC_VER)
-#pragma warning(disable : 4996)
-#endif
-
 namespace Json {
 
 /** \brief Unserialize a <a HREF="http://www.json.org">JSON</a> document into a
@@ -36,8 +32,9 @@ namespace Json {
  *
  * \deprecated Use CharReader and CharReaderBuilder.
  */
-class [[deprecated(
-    "deprecated Use CharReader and CharReaderBuilder.")]] JSON_API Reader {
+
+class JSONCPP_DEPRECATED(
+    "Use CharReader and CharReaderBuilder instead.") JSON_API Reader {
 public:
   typedef char Char;
   typedef const Char* Location;
@@ -55,10 +52,12 @@ public:
 
   /** \brief Constructs a Reader allowing all features for parsing.
    */
+  JSONCPP_DEPRECATED("Use CharReader and CharReaderBuilder instead")
   Reader();
 
   /** \brief Constructs a Reader allowing the specified feature set for parsing.
    */
+  JSONCPP_DEPRECATED("Use CharReader and CharReaderBuilder instead")
   Reader(const Features& features);
 
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
@@ -99,7 +98,7 @@ public:
 
   /// \brief Parse from input stream.
   /// \see Json::operator>>(std::istream&, Json::Value&).
-  bool parse(IStream & is, Value & root, bool collectComments = true);
+  bool parse(IStream& is, Value& root, bool collectComments = true);
 
   /** \brief Returns a user friendly string that list errors in the parsed
    * document.
@@ -109,8 +108,8 @@ public:
    * occurred during parsing.
    * \deprecated Use getFormattedErrorMessages() instead (typo fix).
    */
-  [[deprecated("Use getFormattedErrorMessages() instead.")]] String
-  getFormatedErrorMessages() const;
+  JSONCPP_DEPRECATED("Use getFormattedErrorMessages() instead.")
+  String getFormatedErrorMessages() const;
 
   /** \brief Returns a user friendly string that list errors in the parsed
    * document.
@@ -190,7 +189,7 @@ private:
 
   typedef std::deque<ErrorInfo> Errors;
 
-  bool readToken(Token & token);
+  bool readToken(Token& token);
   void skipSpaces();
   bool match(const Char* pattern, int patternLength);
   bool readComment();
@@ -199,17 +198,17 @@ private:
   bool readString();
   void readNumber();
   bool readValue();
-  bool readObject(Token & token);
-  bool readArray(Token & token);
-  bool decodeNumber(Token & token);
-  bool decodeNumber(Token & token, Value & decoded);
-  bool decodeString(Token & token);
-  bool decodeString(Token & token, String & decoded);
-  bool decodeDouble(Token & token);
-  bool decodeDouble(Token & token, Value & decoded);
-  bool decodeUnicodeCodePoint(Token & token, Location & current, Location end,
+  bool readObject(Token& token);
+  bool readArray(Token& token);
+  bool decodeNumber(Token& token);
+  bool decodeNumber(Token& token, Value& decoded);
+  bool decodeString(Token& token);
+  bool decodeString(Token& token, String& decoded);
+  bool decodeDouble(Token& token);
+  bool decodeDouble(Token& token, Value& decoded);
+  bool decodeUnicodeCodePoint(Token& token, Location& current, Location end,
                               unsigned int& unicode);
-  bool decodeUnicodeEscapeSequence(Token & token, Location & current,
+  bool decodeUnicodeEscapeSequence(Token& token, Location& current,
                                    Location end, unsigned int& unicode);
   bool addError(const String& message, Token& token, Location extra = nullptr);
   bool recoverFromError(TokenType skipUntilToken);
@@ -218,11 +217,11 @@ private:
   void skipUntilSpace();
   Value& currentValue();
   Char getNextChar();
-  void getLocationLineAndColumn(Location location, int& line, int& column)
-      const;
+  void getLocationLineAndColumn(Location location, int& line,
+                                int& column) const;
   String getLocationLineAndColumn(Location location) const;
   void addComment(Location begin, Location end, CommentPlacement placement);
-  void skipCommentTokens(Token & token);
+  void skipCommentTokens(Token& token);
 
   static bool containsNewLine(Location begin, Location end);
   static String normalizeEOL(Location begin, Location end);
