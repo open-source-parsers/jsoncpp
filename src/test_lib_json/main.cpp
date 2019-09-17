@@ -1515,6 +1515,24 @@ JSONTEST_FIXTURE(ValueTest, CopyObject) {
   JSONTEST_ASSERT(copy1 == "string value");
   copy2.copy(arrayVal);
   JSONTEST_ASSERT(copy2.size() == 5);
+  {
+    Json::Value srcObject, objectCopy, otherObject;
+    srcObject["key0"] = 10;
+    objectCopy.copy(srcObject);
+    JSONTEST_ASSERT(srcObject["key0"] == 10);
+    JSONTEST_ASSERT(objectCopy["key0"] == 10);
+    JSONTEST_ASSERT(srcObject.getMemberNames().size() == 1);
+    JSONTEST_ASSERT(objectCopy.getMemberNames().size() == 1);
+    otherObject["key1"] = 15;
+    otherObject["key2"] = 16;
+    JSONTEST_ASSERT(otherObject.getMemberNames().size() == 2);
+    objectCopy.copy(otherObject);
+    JSONTEST_ASSERT(objectCopy["key1"] == 15);
+    JSONTEST_ASSERT(objectCopy["key2"] == 16);
+    JSONTEST_ASSERT(objectCopy.getMemberNames().size() == 2);
+    otherObject["key1"] = 20;
+    JSONTEST_ASSERT(objectCopy["key1"] == 15);
+  }
 }
 
 void ValueTest::checkIsLess(const Json::Value& x, const Json::Value& y) {
