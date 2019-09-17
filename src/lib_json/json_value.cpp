@@ -22,10 +22,8 @@
 // Provide implementation equivalent of std::snprintf for older _MSC compilers
 #if defined(_MSC_VER) && _MSC_VER < 1900
 #include <stdarg.h>
-static int msvc_pre1900_c99_vsnprintf(char* outBuf,
-                                      size_t size,
-                                      const char* format,
-                                      va_list ap) {
+static int msvc_pre1900_c99_vsnprintf(char* outBuf, size_t size,
+                                      const char* format, va_list ap) {
   int count = -1;
   if (size != 0)
     count = _vsnprintf_s(outBuf, size, _TRUNCATE, format, ap);
@@ -34,10 +32,8 @@ static int msvc_pre1900_c99_vsnprintf(char* outBuf,
   return count;
 }
 
-int JSON_API msvc_pre1900_c99_snprintf(char* outBuf,
-                                       size_t size,
-                                       const char* format,
-                                       ...) {
+int JSON_API msvc_pre1900_c99_snprintf(char* outBuf, size_t size,
+                                       const char* format, ...) {
   va_list ap;
   va_start(ap, format);
   const int count = msvc_pre1900_c99_vsnprintf(outBuf, size, format, ap);
@@ -156,10 +152,8 @@ static inline char* duplicateAndPrefixStringValue(const char* value,
       0; // to avoid buffer over-run accidents by users later
   return newString;
 }
-inline static void decodePrefixedString(bool isPrefixed,
-                                        char const* prefixed,
-                                        unsigned* length,
-                                        char const** value) {
+inline static void decodePrefixedString(bool isPrefixed, char const* prefixed,
+                                        unsigned* length, char const** value) {
   if (!isPrefixed) {
     *length = static_cast<unsigned>(strlen(prefixed));
     *value = prefixed;
@@ -235,8 +229,7 @@ LogicError::LogicError(String const& msg) : Exception(msg) {}
 
 Value::CZString::CZString(ArrayIndex index) : cstr_(nullptr), index_(index) {}
 
-Value::CZString::CZString(char const* str,
-                          unsigned length,
+Value::CZString::CZString(char const* str, unsigned length,
                           DuplicationPolicy allocate)
     : cstr_(str) {
   // allocate != duplicate
@@ -1161,8 +1154,7 @@ Value& Value::append(Value&& value) {
   return (*this)[size()] = std::move(value);
 }
 
-Value Value::get(char const* begin,
-                 char const* end,
+Value Value::get(char const* begin, char const* end,
                  Value const& defaultValue) const {
   Value const* found = find(begin, end);
   return !found ? defaultValue : *found;
@@ -1561,11 +1553,8 @@ PathArgument::PathArgument(const String& key)
 // class Path
 // //////////////////////////////////////////////////////////////////
 
-Path::Path(const String& path,
-           const PathArgument& a1,
-           const PathArgument& a2,
-           const PathArgument& a3,
-           const PathArgument& a4,
+Path::Path(const String& path, const PathArgument& a1, const PathArgument& a2,
+           const PathArgument& a3, const PathArgument& a4,
            const PathArgument& a5) {
   InArgs in;
   in.reserve(5);
@@ -1608,8 +1597,7 @@ void Path::makePath(const String& path, const InArgs& in) {
   }
 }
 
-void Path::addPathInArg(const String& /*path*/,
-                        const InArgs& in,
+void Path::addPathInArg(const String& /*path*/, const InArgs& in,
                         InArgs::const_iterator& itInArg,
                         PathArgument::Kind kind) {
   if (itInArg == in.end()) {

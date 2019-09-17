@@ -262,9 +262,7 @@ public:
    * \return \c true if the document was successfully parsed, \c false if an
    * error occurred.
    */
-  virtual bool parse(char const* beginDoc,
-                     char const* endDoc,
-                     Value* root,
+  virtual bool parse(char const* beginDoc, char const* endDoc, Value* root,
                      String* errs) = 0;
 
   class JSON_API Factory {
@@ -364,9 +362,7 @@ public:
  * Someday we might have a real StreamReader, but for now this
  * is convenient.
  */
-bool JSON_API parseFromStream(CharReader::Factory const&,
-                              IStream&,
-                              Value* root,
+bool JSON_API parseFromStream(CharReader::Factory const&, IStream&, Value* root,
                               String* errs);
 
 /** \brief Read from 'sin' into 'root'.

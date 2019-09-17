@@ -9,6 +9,7 @@ sudo: false
 addons:
   homebrew:
     packages:
+    - clang-format
     - meson
     - ninja
     update: false # do not update homebrew by default

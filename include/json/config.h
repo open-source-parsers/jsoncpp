@@ -74,8 +74,8 @@
 #if defined(_MSC_VER) && _MSC_VER < 1900
 // As recommended at
 // https://stackoverflow.com/questions/2915672/snprintf-and-visual-studio-2010
-extern JSON_API int
-msvc_pre1900_c99_snprintf(char* outBuf, size_t size, const char* format, ...);
+extern JSON_API int msvc_pre1900_c99_snprintf(char* outBuf, size_t size,
+                                              const char* format, ...);
 #define jsoncpp_snprintf msvc_pre1900_c99_snprintf
 #else
 #define jsoncpp_snprintf std::snprintf
@@ -139,16 +139,16 @@ typedef UInt64 LargestUInt;
 #endif // if defined(JSON_NO_INT64)
 
 template <typename T>
-using Allocator = typename std::conditional<JSONCPP_USING_SECURE_MEMORY,
-                                            SecureAllocator<T>,
-                                            std::allocator<T>>::type;
+using Allocator =
+    typename std::conditional<JSONCPP_USING_SECURE_MEMORY, SecureAllocator<T>,
+                              std::allocator<T>>::type;
 using String = std::basic_string<char, std::char_traits<char>, Allocator<char>>;
-using IStringStream = std::basic_istringstream<String::value_type,
-                                               String::traits_type,
-                                               String::allocator_type>;
-using OStringStream = std::basic_ostringstream<String::value_type,
-                                               String::traits_type,
-                                               String::allocator_type>;
+using IStringStream =
+    std::basic_istringstream<String::value_type, String::traits_type,
+                             String::allocator_type>;
+using OStringStream =
+    std::basic_ostringstream<String::value_type, String::traits_type,
+                             String::allocator_type>;
 using IStream = std::istream;
 using OStream = std::ostream;
 } // namespace Json

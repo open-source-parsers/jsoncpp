@@ -122,10 +122,8 @@ String valueToString(UInt value) { return valueToString(LargestUInt(value)); }
 #endif // # if defined(JSON_HAS_INT64)
 
 namespace {
-String valueToString(double value,
-                     bool useSpecialFloats,
-                     unsigned int precision,
-                     PrecisionType precisionType) {
+String valueToString(double value, bool useSpecialFloats,
+                     unsigned int precision, PrecisionType precisionType) {
   // Print into the buffer. We need not request the alternative representation
   // that always has a decimal point because JSON doesn't distinguish the
   // concepts of reals and integers.
@@ -168,8 +166,7 @@ String valueToString(double value,
 }
 } // namespace
 
-String valueToString(double value,
-                     unsigned int precision,
+String valueToString(double value, unsigned int precision,
                      PrecisionType precisionType) {
   return valueToString(value, false, precision, precisionType);
 }
@@ -864,14 +861,10 @@ struct CommentStyle {
 };
 
 struct BuiltStyledStreamWriter : public StreamWriter {
-  BuiltStyledStreamWriter(String indentation,
-                          CommentStyle::Enum cs,
-                          String colonSymbol,
-                          String nullSymbol,
-                          String endingLineFeedSymbol,
-                          bool useSpecialFloats,
-                          unsigned int precision,
-                          PrecisionType precisionType);
+  BuiltStyledStreamWriter(String indentation, CommentStyle::Enum cs,
+                          String colonSymbol, String nullSymbol,
+                          String endingLineFeedSymbol, bool useSpecialFloats,
+                          unsigned int precision, PrecisionType precisionType);
   int write(Value const& root, OStream* sout) override;
 
 private:
@@ -903,14 +896,10 @@ private:
   unsigned int precision_;
   PrecisionType precisionType_;
 };
-BuiltStyledStreamWriter::BuiltStyledStreamWriter(String indentation,
-                                                 CommentStyle::Enum cs,
-                                                 String colonSymbol,
-                                                 String nullSymbol,
-                                                 String endingLineFeedSymbol,
-                                                 bool useSpecialFloats,
-                                                 unsigned int precision,
-                                                 PrecisionType precisionType)
+BuiltStyledStreamWriter::BuiltStyledStreamWriter(
+    String indentation, CommentStyle::Enum cs, String colonSymbol,
+    String nullSymbol, String endingLineFeedSymbol, bool useSpecialFloats,
+    unsigned int precision, PrecisionType precisionType)
     : rightMargin_(74), indentation_(std::move(indentation)), cs_(cs),
       colonSymbol_(std::move(colonSymbol)), nullSymbol_(std::move(nullSymbol)),
       endingLineFeedSymbol_(std::move(endingLineFeedSymbol)),
