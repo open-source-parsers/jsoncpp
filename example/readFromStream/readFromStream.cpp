@@ -1,24 +1,22 @@
 #include "json/json.h"
 #include <fstream>
 #include <iostream>
-/*
-parse from stream,collect comments and capture error info.
-
-$g++ readFromStream.cpp -ljsoncpp -std=c++11 -o readFromStream
-$./readFromStream
-// comment head
-{
-    // comment before
-    "key" : "value"
-}
-// comment after
-// comment tail
-*/
+/** \brief Parse from stream, collect comments and capture error info.
+ * Example Usage:
+ * $g++ readFromStream.cpp -ljsoncpp -std=c++11 -o readFromStream
+ * $./readFromStream
+ * // comment head
+ * {
+ *    // comment before
+ *    "key" : "value"
+ * }
+ * // comment after
+ * // comment tail
+ */
 int main(int argc, char* argv[]) {
   Json::Value root;
   std::ifstream ifs;
   ifs.open(argv[1]);
-  root.clear();
 
   Json::CharReaderBuilder builder;
   builder["collectComments"] = true;

@@ -1,33 +1,37 @@
 #include "json/json.h"
 #include <iostream>
-/*
-parse a string to Value object with CharReaderBuilder class or Reader class
-$g++ readFromString.cpp -ljsoncpp -std=c++11 -o readFromString
-$./readFromString
-colin
-20
-*/
+/**
+ * \brief Parse a raw string into Value object using the CharReaderBuilder
+ * class, or the legacy Reader class. 
+ * Example Usage: 
+ * $g++ readFromString.cpp -ljsoncpp -std=c++11 -o readFromString
+ * $./readFromString
+ * colin
+ * 20
+ */
 int main() {
-  std::string strRes = R"({"Age": 20, "Name": "colin"})";
-  auto nLen = (int)strRes.length();
+  const std::string rawJson = R"({"Age": 20, "Name": "colin"})";
+  const int rawJsonLength = static_cast<int>(rawJson.length());
+  constexpr bool shouldUseOldWay = false;
   JSONCPP_STRING err;
   Json::Value root;
 
-#if 0 // old way
-    Json::Reader myreader;
-    myreader.parse(strRes,root);
-#else // new way
-  Json::CharReaderBuilder builder;
-  std::unique_ptr<Json::CharReader> const reader(builder.newCharReader());
-  if (!reader->parse(strRes.c_str(), strRes.c_str() + nLen, &root, &err)) {
-    std::cout << "error" << std::endl;
-    return EXIT_FAILURE;
+  if (shouldUseOldWay) {
+    Json::Reader reader;
+    reader.parse(rawJson, root);
+  } else {
+    Json::CharReaderBuilder builder;
+    const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+    if (!reader->parse(rawJson.c_str(), rawJson.c_str() + rawJsonLength, &root,
+                       &err)) {
+      std::cout << "error" << std::endl;
+      return EXIT_FAILURE;
+    }
   }
-#endif
-  std::string strName = root["Name"].asString();
-  int strAge = root["Age"].asInt();
+  const std::string name = root["Name"].asString();
+  const int age = root["Age"].asInt();
 
-  std::cout << strName << std::endl;
-  std::cout << strAge << std::endl;
+  std::cout << name << std::endl;
+  std::cout << age << std::endl;
   return EXIT_SUCCESS;
 }
