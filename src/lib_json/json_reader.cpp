@@ -86,11 +86,11 @@ bool Reader::containsNewLine(Reader::Location begin, Reader::Location end) {
 // //////////////////////////////////////////////////////////////////
 
 Reader::Reader()
-    : errors_(), document_(), commentsBefore_(), features_(Features::all()) {}
+    :  features_(Features::all()) {}
 
 Reader::Reader(const Features& features)
-    : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
-      lastValue_(), commentsBefore_(), features_(features), collectComments_() {
+    :  begin_(), end_(), current_(), lastValueEnd_(),
+      lastValue_(),  features_(features), collectComments_() {
 }
 
 bool Reader::parse(const std::string& document,
@@ -1023,8 +1023,8 @@ bool OurReader::containsNewLine(OurReader::Location begin,
 }
 
 OurReader::OurReader(OurFeatures const& features)
-    : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
-      lastValue_(), commentsBefore_(), features_(features), collectComments_() {
+    :  begin_(), end_(), current_(), lastValueEnd_(),
+      lastValue_(),  features_(features), collectComments_() {
 }
 
 bool OurReader::parse(const char* beginDoc,
