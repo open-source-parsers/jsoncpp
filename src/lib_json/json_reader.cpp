@@ -51,7 +51,7 @@ static size_t const stackLimit_g =
 namespace Json {
 
 #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
-typedef std::unique_ptr<CharReader> CharReaderPtr;
+using CharReaderPtr = std::unique_ptr<CharReader>;
 #else
 typedef std::auto_ptr<CharReader> CharReaderPtr;
 #endif
@@ -895,8 +895,8 @@ OurFeatures OurFeatures::all() { return {}; }
 // for implementing JSON reading.
 class OurReader {
 public:
-  typedef char Char;
-  typedef const Char* Location;
+  using Char = char;
+  using Location = const Char *;
   struct StructuredError {
     ptrdiff_t offset_start;
     ptrdiff_t offset_limit;
@@ -952,7 +952,7 @@ private:
     Location extra_;
   };
 
-  typedef std::deque<ErrorInfo> Errors;
+  using Errors = std::deque<ErrorInfo>;
 
   bool readToken(Token& token);
   void skipSpaces();
@@ -997,7 +997,7 @@ private:
   static String normalizeEOL(Location begin, Location end);
   static bool containsNewLine(Location begin, Location end);
 
-  typedef std::stack<Value*> Nodes;
+  using Nodes = std::stack<Value *>;
   Nodes nodes_;
   Errors errors_;
   String document_;

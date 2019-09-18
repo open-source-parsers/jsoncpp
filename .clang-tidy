@@ -1,0 +1,11 @@
+---
+Checks:          'modernize-use-using'
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+AnalyzeTemporaryDtors: false
+FormatStyle:     none
+CheckOptions:    
+  - key:             modernize-use-using.IgnoreMacros
+    value:           '0'
+...
+

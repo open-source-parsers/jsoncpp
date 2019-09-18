@@ -84,7 +84,7 @@
 namespace Json {
 
 #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
-typedef std::unique_ptr<StreamWriter> StreamWriterPtr;
+using StreamWriterPtr = std::unique_ptr<StreamWriter>;
 #else
 typedef std::auto_ptr<StreamWriter> StreamWriterPtr;
 #endif
@@ -887,7 +887,7 @@ private:
   void writeCommentAfterValueOnSameLine(Value const& root);
   static bool hasCommentForValue(const Value& value);
 
-  typedef std::vector<String> ChildValues;
+  using ChildValues = std::vector<String>;
 
   ChildValues childValues_;
   String indentString_;
