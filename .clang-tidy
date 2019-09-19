@@ -1,5 +1,5 @@
 ---
-Checks:          'google-readability-casting,modernize-use-using,readability-redundant-member-init'
+Checks:          'google-readability-casting,modernize-use-default-member-init,modernize-use-using,readability-redundant-member-init'
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false

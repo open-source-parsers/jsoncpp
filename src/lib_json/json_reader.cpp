@@ -89,8 +89,7 @@ Reader::Reader()
     :  features_(Features::all()) {}
 
 Reader::Reader(const Features& features)
-    :  begin_(), end_(), current_(), lastValueEnd_(),
-      lastValue_(),  features_(features), collectComments_() {
+    :    features_(features) {
 }
 
 bool Reader::parse(const std::string& document,
