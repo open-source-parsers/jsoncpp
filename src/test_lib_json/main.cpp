@@ -1474,6 +1474,25 @@ JSONTEST_FIXTURE(ValueTest, compareObject) {
   JSONTEST_ASSERT_PRED(checkIsEqual(l1bObject, Json::Value(l1bObject)));
   JSONTEST_ASSERT_PRED(checkIsEqual(l2aObject, Json::Value(l2aObject)));
   JSONTEST_ASSERT_PRED(checkIsEqual(l2bObject, Json::Value(l2bObject)));
+  {
+    Json::Value aObject;
+    aObject["a"] = 10;
+    Json::Value bObject;
+    bObject["b"] = 0;
+    Json::Value cObject;
+    cObject["c"] = 20;
+    cObject["f"] = 15;
+    Json::Value dObject;
+    dObject["d"] = -2;
+    dObject["e"] = 10;
+    JSONTEST_ASSERT_PRED(checkIsLess(aObject, bObject));
+    JSONTEST_ASSERT_PRED(checkIsLess(bObject, cObject));
+    JSONTEST_ASSERT_PRED(checkIsLess(cObject, dObject));
+    JSONTEST_ASSERT_PRED(checkIsEqual(aObject, Json::Value(aObject)));
+    JSONTEST_ASSERT_PRED(checkIsEqual(bObject, Json::Value(bObject)));
+    JSONTEST_ASSERT_PRED(checkIsEqual(cObject, Json::Value(cObject)));
+    JSONTEST_ASSERT_PRED(checkIsEqual(dObject, Json::Value(dObject)));
+  }
 }
 
 JSONTEST_FIXTURE(ValueTest, compareType) {
