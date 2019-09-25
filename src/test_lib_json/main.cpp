@@ -1463,16 +1463,41 @@ JSONTEST_FIXTURE(ValueTest, compareObject) {
   Json::Value l1aObject;
   l1aObject["key1"] = 0;
   Json::Value l1bObject;
-  l1aObject["key1"] = 10;
+  l1bObject["key1"] = 10;
   Json::Value l2aObject;
   l2aObject["key1"] = 0;
   l2aObject["key2"] = 0;
+  Json::Value l2bObject;
+  l2bObject["key1"] = 10;
+  l2bObject["key2"] = 0;
   JSONTEST_ASSERT_PRED(checkIsLess(emptyObject, l1aObject));
-  JSONTEST_ASSERT_PRED(checkIsLess(emptyObject, l2aObject));
-  JSONTEST_ASSERT_PRED(checkIsLess(l1aObject, l2aObject));
+  JSONTEST_ASSERT_PRED(checkIsLess(l1aObject, l1bObject));
+  JSONTEST_ASSERT_PRED(checkIsLess(l1bObject, l2aObject));
+  JSONTEST_ASSERT_PRED(checkIsLess(l2aObject, l2bObject));
   JSONTEST_ASSERT_PRED(checkIsEqual(emptyObject, Json::Value(emptyObject)));
   JSONTEST_ASSERT_PRED(checkIsEqual(l1aObject, Json::Value(l1aObject)));
+  JSONTEST_ASSERT_PRED(checkIsEqual(l1bObject, Json::Value(l1bObject)));
   JSONTEST_ASSERT_PRED(checkIsEqual(l2aObject, Json::Value(l2aObject)));
+  JSONTEST_ASSERT_PRED(checkIsEqual(l2bObject, Json::Value(l2bObject)));
+  {
+    Json::Value aObject;
+    aObject["a"] = 10;
+    Json::Value bObject;
+    bObject["b"] = 0;
+    Json::Value cObject;
+    cObject["c"] = 20;
+    cObject["f"] = 15;
+    Json::Value dObject;
+    dObject["d"] = -2;
+    dObject["e"] = 10;
+    JSONTEST_ASSERT_PRED(checkIsLess(aObject, bObject));
+    JSONTEST_ASSERT_PRED(checkIsLess(bObject, cObject));
+    JSONTEST_ASSERT_PRED(checkIsLess(cObject, dObject));
+    JSONTEST_ASSERT_PRED(checkIsEqual(aObject, Json::Value(aObject)));
+    JSONTEST_ASSERT_PRED(checkIsEqual(bObject, Json::Value(bObject)));
+    JSONTEST_ASSERT_PRED(checkIsEqual(cObject, Json::Value(cObject)));
+    JSONTEST_ASSERT_PRED(checkIsEqual(dObject, Json::Value(dObject)));
+  }
 }
 
 JSONTEST_FIXTURE(ValueTest, compareType) {
