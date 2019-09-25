@@ -23,7 +23,7 @@ jsoncpp_headers = [
   'include/json/assertions.h',
   'include/json/autolink.h',
   'include/json/config.h',
-  'include/json/features.h',
+  'include/json/json_features.h',
   'include/json/forwards.h',
   'include/json/json.h',
   'include/json/reader.h',

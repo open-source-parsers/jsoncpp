@@ -7,7 +7,7 @@
 #define CPPTL_JSON_READER_H_INCLUDED
 
 #if !defined(JSON_IS_AMALGAMATION)
-#include "features.h"
+#include "json_features.h"
 #include "value.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <deque>
