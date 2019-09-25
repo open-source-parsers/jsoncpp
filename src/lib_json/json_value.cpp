@@ -1155,10 +1155,14 @@ Value const& Value::operator[](CppTL::ConstString const& key) const {
 }
 #endif
 
-Value& Value::append(const Value& value) { return (*this)[size()] = value; }
-
+Value& Value::append(const Value& value) { return append(Value(value)); }
 Value& Value::append(Value&& value) {
-  return (*this)[size()] = std::move(value);
+  JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
+                      "in Json::Value::append: requires arrayValue");
+  if (type() == nullValue) {
+    *this = Value(arrayValue);
+  }
+  return this->value_.map_->emplace(size(), std::move(value)).first->second;
 }
 
 Value Value::get(char const* begin,
