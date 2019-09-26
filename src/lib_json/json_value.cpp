@@ -1551,16 +1551,15 @@ Value::iterator Value::end() {
 // class PathArgument
 // //////////////////////////////////////////////////////////////////
 
-PathArgument::PathArgument()  {}
+PathArgument::PathArgument() {}
 
 PathArgument::PathArgument(ArrayIndex index)
-    :  index_(index), kind_(kindIndex) {}
+    : index_(index), kind_(kindIndex) {}
 
-PathArgument::PathArgument(const char* key)
-    : key_(key),  kind_(kindKey) {}
+PathArgument::PathArgument(const char* key) : key_(key), kind_(kindKey) {}
 
 PathArgument::PathArgument(const String& key)
-    : key_(key.c_str()),  kind_(kindKey) {}
+    : key_(key.c_str()), kind_(kindKey) {}
 
 // class Path
 // //////////////////////////////////////////////////////////////////

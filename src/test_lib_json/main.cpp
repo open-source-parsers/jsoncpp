@@ -2643,9 +2643,7 @@ JSONTEST_FIXTURE(IteratorTest, indexes) {
 
 JSONTEST_FIXTURE(IteratorTest, const) {
   Json::Value const v;
-  JSONTEST_ASSERT_THROWS(
-      Json::Value::iterator it(v.begin()) // Compile, but throw.
-      );
+  JSONTEST_ASSERT_THROWS(Json::Value::iterator it(v.begin())); // Compile, but throw.
 
   Json::Value value;
 
