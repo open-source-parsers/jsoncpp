@@ -1179,8 +1179,7 @@ bool Value::insert(ArrayIndex index, Value&& newValue) {
                       "newValue): requires arrayValue");
   ArrayIndex length = size();
   if (index > length) {
-    append(std::move(newValue));
-    return true;
+    return false;
   } else {
     for (ArrayIndex i = length; i > index; i--) {
       (*this)[i] = std::move((*this)[i - 1]);

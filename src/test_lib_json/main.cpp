@@ -324,8 +324,8 @@ JSONTEST_FIXTURE(ValueTest, arrayIssue252) {
 
 JSONTEST_FIXTURE(ValueTest, arrayInsertAtRandomIndex) {
   Json::Value array;
-  Json::Value str0("index2");
-  Json::Value str1("index3");
+  const Json::Value str0("index2");
+  const Json::Value str1("index3");
   array.append("index0"); // append rvalue
   array.append("index1");
   array.append(str0); // append lvalue
