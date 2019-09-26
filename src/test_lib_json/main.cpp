@@ -339,7 +339,7 @@ JSONTEST_FIXTURE(ValueTest, arrayInsertAtRandomIndex) {
   JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[2]);
 
   // insert lvalue at the head
-  array.insert(0, str1);
+  JSONTEST_ASSERT(array.insert(0, str1));
   JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[0]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[1]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[2]);
@@ -350,7 +350,7 @@ JSONTEST_FIXTURE(ValueTest, arrayInsertAtRandomIndex) {
   }
   vec.push_back(&array[3]);
   // insert rvalue at middle
-  array.insert(2, "index4");
+  JSONTEST_ASSERT(array.insert(2, "index4"));
   JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[0]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[1]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[2]);
@@ -362,7 +362,7 @@ JSONTEST_FIXTURE(ValueTest, arrayInsertAtRandomIndex) {
   }
   vec.push_back(&array[4]);
   // insert rvalue at the tail
-  array.insert(5, "index5");
+  JSONTEST_ASSERT(array.insert(5, "index5"));
   JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[0]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[1]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[2]);
@@ -374,19 +374,8 @@ JSONTEST_FIXTURE(ValueTest, arrayInsertAtRandomIndex) {
     JSONTEST_ASSERT_EQUAL(vec[i], &array[i]);
   }
   vec.push_back(&array[5]);
-  // beyond max array size, it should be allowed to insert into its tail
-  array.insert(10, "index10");
-  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[0]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[1]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[2]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[3]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[4]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index5"), array[5]);
-  JSONTEST_ASSERT_EQUAL(Json::Value("index10"), array[6]);
-  // checking address
-  for (int i = 0; i < 6; i++) {
-    JSONTEST_ASSERT_EQUAL(vec[i], &array[i]);
-  }
+  // beyond max array size, it should not be allowed to insert into its tail
+  JSONTEST_ASSERT(!array.insert(10, "index10"));
 }
 JSONTEST_FIXTURE(ValueTest, null) {
   JSONTEST_ASSERT_EQUAL(Json::nullValue, null_.type());
