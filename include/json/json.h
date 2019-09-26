@@ -7,7 +7,7 @@
 #define JSON_JSON_H_INCLUDED
 
 #include "autolink.h"
-#include "features.h"
+#include "json_features.h"
 #include "reader.h"
 #include "value.h"
 #include "writer.h"

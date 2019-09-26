@@ -5,7 +5,7 @@ add_executable(jsontestrunner_exe
                )
 
 if(BUILD_SHARED_LIBS)
-    add_definitions( -DJSON_DLL )
+    add_compile_definitions( JSON_DLL )
 endif()
 target_link_libraries(jsontestrunner_exe jsoncpp_lib)
 

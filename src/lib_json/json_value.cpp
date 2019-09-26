@@ -54,7 +54,6 @@ int JSON_API msvc_pre1900_c99_snprintf(char* outBuf,
 #define JSON_ASSERT_UNREACHABLE assert(false)
 
 namespace Json {
-
 template <typename T>
 static std::unique_ptr<T> cloneUnique(const std::unique_ptr<T>& p) {
   std::unique_ptr<T> r;
@@ -72,10 +71,6 @@ static std::unique_ptr<T> cloneUnique(const std::unique_ptr<T>& p) {
 #else
 #define ALIGNAS(byte_alignment)
 #endif
-// static const unsigned char ALIGNAS(8) kNull[sizeof(Value)] = { 0 };
-// const unsigned char& kNullRef = kNull[0];
-// const Value& Value::null = reinterpret_cast<const Value&>(kNullRef);
-// const Value& Value::nullRef = null;
 
 // static
 Value const& Value::nullSingleton() {
@@ -83,36 +78,22 @@ Value const& Value::nullSingleton() {
   return nullStatic;
 }
 
+#if JSON_USE_NULLREF
 // for backwards compatibility, we'll leave these global references around, but
 // DO NOT use them in JSONCPP library code any more!
+// static
 Value const& Value::null = Value::nullSingleton();
+
+// static
 Value const& Value::nullRef = Value::nullSingleton();
-
-const Int Value::minInt = Int(~(UInt(-1) / 2));
-const Int Value::maxInt = Int(UInt(-1) / 2);
-const UInt Value::maxUInt = UInt(-1);
-#if defined(JSON_HAS_INT64)
-const Int64 Value::minInt64 = Int64(~(UInt64(-1) / 2));
-const Int64 Value::maxInt64 = Int64(UInt64(-1) / 2);
-const UInt64 Value::maxUInt64 = UInt64(-1);
-// The constant is hard-coded because some compiler have trouble
-// converting Value::maxUInt64 to a double correctly (AIX/xlC).
-// Assumes that UInt64 is a 64 bits integer.
-static const double maxUInt64AsDouble = 18446744073709551615.0;
-#endif // defined(JSON_HAS_INT64)
-const LargestInt Value::minLargestInt = LargestInt(~(LargestUInt(-1) / 2));
-const LargestInt Value::maxLargestInt = LargestInt(LargestUInt(-1) / 2);
-const LargestUInt Value::maxLargestUInt = LargestUInt(-1);
-
-const UInt Value::defaultRealPrecision = 17;
+#endif
 
 #if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 template <typename T, typename U>
 static inline bool InRange(double d, T min, U max) {
   // The casts can lose precision, but we are looking only for
   // an approximate range. Might fail on edge cases though. ~cdunn
-  // return d >= static_cast<double>(min) && d <= static_cast<double>(max);
-  return d >= min && d <= max;
+  return d >= static_cast<double>(min) && d <= static_cast<double>(max);
 }
 #else  // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 static inline double integerToDouble(Json::UInt64 value) {
@@ -226,17 +207,20 @@ static inline void releaseStringValue(char* value, unsigned) { free(value); }
 
 namespace Json {
 
+#if JSON_USE_EXCEPTION
 Exception::Exception(String msg) : msg_(std::move(msg)) {}
 Exception::~Exception() JSONCPP_NOEXCEPT {}
 char const* Exception::what() const JSONCPP_NOEXCEPT { return msg_.c_str(); }
 RuntimeError::RuntimeError(String const& msg) : Exception(msg) {}
 LogicError::LogicError(String const& msg) : Exception(msg) {}
-JSONCPP_NORETURN void throwRuntimeError(String const& msg) {
+[[noreturn]] void throwRuntimeError(String const& msg) {
   throw RuntimeError(msg);
 }
-JSONCPP_NORETURN void throwLogicError(String const& msg) {
-  throw LogicError(msg);
-}
+[[noreturn]] void throwLogicError(String const& msg) { throw LogicError(msg); }
+#else // !JSON_USE_EXCEPTION
+[[noreturn]] void throwRuntimeError(String const& msg) { abort(); }
+[[noreturn]] void throwLogicError(String const& msg) { abort(); }
+#endif
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
@@ -847,9 +831,11 @@ bool Value::asBool() const {
     return value_.int_ ? true : false;
   case uintValue:
     return value_.uint_ ? true : false;
-  case realValue:
-    // This is kind of strange. Not recommended.
-    return (value_.real_ != 0.0) ? true : false;
+  case realValue: {
+    // According to JavaScript language zero or NaN is regarded as false
+    const auto value_classification = std::fpclassify(value_.real_);
+    return value_classification != FP_ZERO && value_classification != FP_NAN;
+  }
   default:
     break;
   }
@@ -1168,10 +1154,16 @@ Value const& Value::operator[](CppTL::ConstString const& key) const {
   return *found;
 }
 #endif
-Value& Value::append(const Value& value) { return (*this)[size()] = value; }
+
+Value& Value::append(const Value& value) { return append(Value(value)); }
 
 Value& Value::append(Value&& value) {
-  return (*this)[size()] = std::move(value);
+  JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
+                      "in Json::Value::append: requires arrayValue");
+  if (type() == nullValue) {
+    *this = Value(arrayValue);
+  }
+  return this->value_.map_->emplace(size(), std::move(value)).first->second;
 }
 
 /// \brief Insert value in array at specific index
@@ -1484,7 +1476,10 @@ void Value::Comments::set(CommentPlacement slot, String comment) {
   if (!ptr_) {
     ptr_ = std::unique_ptr<Array>(new Array());
   }
-  (*ptr_)[slot] = std::move(comment);
+  // check comments array boundry.
+  if (slot < CommentPlacement::numberOfCommentPlacement) {
+    (*ptr_)[slot] = std::move(comment);
+  }
 }
 
 void Value::setComment(String comment, CommentPlacement placement) {
@@ -1580,16 +1575,16 @@ Value::iterator Value::end() {
 // class PathArgument
 // //////////////////////////////////////////////////////////////////
 
-PathArgument::PathArgument() : key_() {}
+PathArgument::PathArgument()  {}
 
 PathArgument::PathArgument(ArrayIndex index)
-    : key_(), index_(index), kind_(kindIndex) {}
+    :  index_(index), kind_(kindIndex) {}
 
 PathArgument::PathArgument(const char* key)
-    : key_(key), index_(), kind_(kindKey) {}
+    : key_(key),  kind_(kindKey) {}
 
 PathArgument::PathArgument(const String& key)
-    : key_(key.c_str()), index_(), kind_(kindKey) {}
+    : key_(key.c_str()),  kind_(kindKey) {}
 
 // class Path
 // //////////////////////////////////////////////////////////////////
@@ -1663,20 +1658,20 @@ const Value& Path::resolve(const Value& root) const {
   for (const auto& arg : args_) {
     if (arg.kind_ == PathArgument::kindIndex) {
       if (!node->isArray() || !node->isValidIndex(arg.index_)) {
-        // Error: unable to resolve path (array value expected at position...
-        return Value::null;
+        // Error: unable to resolve path (array value expected at position... )
+        return Value::nullSingleton();
       }
       node = &((*node)[arg.index_]);
     } else if (arg.kind_ == PathArgument::kindKey) {
       if (!node->isObject()) {
         // Error: unable to resolve path (object value expected at position...)
-        return Value::null;
+        return Value::nullSingleton();
       }
       node = &((*node)[arg.key_]);
       if (node == &Value::nullSingleton()) {
         // Error: unable to resolve path (object has no member named '' at
         // position...)
-        return Value::null;
+        return Value::nullSingleton();
       }
     }
   }

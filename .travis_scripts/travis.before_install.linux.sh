@@ -1,7 +1,8 @@
 set -vex
-#before_install: pyenv install 3.5.4 && pyenv global 3.5.4
-#before_install: pyenv global 3.6
-# https://docs.travis-ci.com/user/languages/python/
-# "for Trusty, this means 2.7.6 and 3.4.3"
 
-pyenv global 3.6
+# Preinstalled versions of python are dependent on which Ubuntu distribution
+# you are running. The below version needs to be updated whenever we roll
+# the Ubuntu version used in Travis.
+# https://docs.travis-ci.com/user/languages/python/
+
+pyenv global 3.7.1

@@ -51,7 +51,7 @@ static size_t const stackLimit_g =
 namespace Json {
 
 #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
-typedef std::unique_ptr<CharReader> CharReaderPtr;
+using CharReaderPtr = std::unique_ptr<CharReader>;
 #else
 typedef std::auto_ptr<CharReader> CharReaderPtr;
 #endif
@@ -86,11 +86,10 @@ bool Reader::containsNewLine(Reader::Location begin, Reader::Location end) {
 // //////////////////////////////////////////////////////////////////
 
 Reader::Reader()
-    : errors_(), document_(), commentsBefore_(), features_(Features::all()) {}
+    :  features_(Features::all()) {}
 
 Reader::Reader(const Features& features)
-    : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
-      lastValue_(), commentsBefore_(), features_(features), collectComments_() {
+    :    features_(features) {
 }
 
 bool Reader::parse(const std::string& document,
@@ -111,7 +110,7 @@ bool Reader::parse(std::istream& is, Value& root, bool collectComments) {
   // Since String is reference-counted, this at least does not
   // create an extra copy.
   String doc;
-  std::getline(is, doc, (char)EOF);
+  std::getline(is, doc, static_cast<char>EOF);
   return parse(doc.data(), doc.data() + doc.size(), root, collectComments);
 }
 
@@ -311,7 +310,7 @@ bool Reader::readToken(Token& token) {
   if (!ok)
     token.type_ = tokenError;
   token.end_ = current_;
-  return true;
+  return ok;
 }
 
 void Reader::skipSpaces() {
@@ -324,7 +323,7 @@ void Reader::skipSpaces() {
   }
 }
 
-bool Reader::match(Location pattern, int patternLength) {
+bool Reader::match(const Char* pattern, int patternLength) {
   if (end_ - current_ < patternLength)
     return false;
   int index = patternLength;
@@ -416,7 +415,7 @@ bool Reader::readCppStyleComment() {
 }
 
 void Reader::readNumber() {
-  const char* p = current_;
+  Location p = current_;
   char c = '0'; // stopgap for already consumed character
   // integral part
   while (c >= '0' && c <= '9')
@@ -840,7 +839,7 @@ bool Reader::pushError(const Value& value, const String& message) {
   Token token;
   token.type_ = tokenError;
   token.start_ = begin_ + value.getOffsetStart();
-  token.end_ = end_ + value.getOffsetLimit();
+  token.end_ = begin_ + value.getOffsetLimit();
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
@@ -870,7 +869,8 @@ bool Reader::pushError(const Value& value,
 
 bool Reader::good() const { return errors_.empty(); }
 
-// exact copy of Features
+// Originally copied from the Features class (now deprecated), used internally
+// for features implementation.
 class OurFeatures {
 public:
   static OurFeatures all();
@@ -885,19 +885,17 @@ public:
   size_t stackLimit_;
 }; // OurFeatures
 
-// exact copy of Implementation of class Features
-// ////////////////////////////////
-
 OurFeatures OurFeatures::all() { return {}; }
 
 // Implementation of class Reader
 // ////////////////////////////////
 
-// exact copy of Reader, renamed to OurReader
+// Originally copied from the Reader class (now deprecated), used internally
+// for implementing JSON reading.
 class OurReader {
 public:
-  typedef char Char;
-  typedef const Char* Location;
+  using Char = char;
+  using Location = const Char *;
   struct StructuredError {
     ptrdiff_t offset_start;
     ptrdiff_t offset_limit;
@@ -953,11 +951,11 @@ private:
     Location extra_;
   };
 
-  typedef std::deque<ErrorInfo> Errors;
+  using Errors = std::deque<ErrorInfo>;
 
   bool readToken(Token& token);
   void skipSpaces();
-  bool match(Location pattern, int patternLength);
+  bool match(const Char* pattern, int patternLength);
   bool readComment();
   bool readCStyleComment();
   bool readCppStyleComment();
@@ -998,7 +996,7 @@ private:
   static String normalizeEOL(Location begin, Location end);
   static bool containsNewLine(Location begin, Location end);
 
-  typedef std::stack<Value*> Nodes;
+  using Nodes = std::stack<Value *>;
   Nodes nodes_;
   Errors errors_;
   String document_;
@@ -1024,8 +1022,8 @@ bool OurReader::containsNewLine(OurReader::Location begin,
 }
 
 OurReader::OurReader(OurFeatures const& features)
-    : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
-      lastValue_(), commentsBefore_(), features_(features), collectComments_() {
+    :  begin_(), end_(), current_(), lastValueEnd_(),
+      lastValue_(),  features_(features), collectComments_() {
 }
 
 bool OurReader::parse(const char* beginDoc,
@@ -1049,14 +1047,12 @@ bool OurReader::parse(const char* beginDoc,
   nodes_.push(&root);
 
   bool successful = readValue();
+  nodes_.pop();
   Token token;
   skipCommentTokens(token);
-  if (features_.failIfExtra_) {
-    if ((features_.strictRoot_ || token.type_ != tokenError) &&
-        token.type_ != tokenEndOfStream) {
-      addError("Extra non-whitespace after JSON value.", token);
-      return false;
-    }
+  if (features_.failIfExtra_ && (token.type_ != tokenEndOfStream)) {
+    addError("Extra non-whitespace after JSON value.", token);
+    return false;
   }
   if (collectComments_ && !commentsBefore_.empty())
     root.setComment(commentsBefore_, commentAfter);
@@ -1230,6 +1226,14 @@ bool OurReader::readToken(Token& token) {
       ok = features_.allowSpecialFloats_ && match("nfinity", 7);
     }
     break;
+  case '+':
+    if (readNumber(true)) {
+      token.type_ = tokenNumber;
+    } else {
+      token.type_ = tokenPosInf;
+      ok = features_.allowSpecialFloats_ && match("nfinity", 7);
+    }
+    break;
   case 't':
     token.type_ = tokenTrue;
     ok = match("rue", 3);
@@ -1274,7 +1278,7 @@ bool OurReader::readToken(Token& token) {
   if (!ok)
     token.type_ = tokenError;
   token.end_ = current_;
-  return true;
+  return ok;
 }
 
 void OurReader::skipSpaces() {
@@ -1287,7 +1291,7 @@ void OurReader::skipSpaces() {
   }
 }
 
-bool OurReader::match(Location pattern, int patternLength) {
+bool OurReader::match(const Char* pattern, int patternLength) {
   if (end_ - current_ < patternLength)
     return false;
   int index = patternLength;
@@ -1380,7 +1384,7 @@ bool OurReader::readCppStyleComment() {
 }
 
 bool OurReader::readNumber(bool checkInf) {
-  const char* p = current_;
+  Location p = current_;
   if (checkInf && p != end_ && *p == 'I') {
     current_ = ++p;
     return false;
@@ -1455,17 +1459,17 @@ bool OurReader::readObject(Token& token) {
     } else {
       break;
     }
-
-    Token colon;
-    if (!readToken(colon) || colon.type_ != tokenMemberSeparator) {
-      return addErrorAndRecover("Missing ':' after object member name", colon,
-                                tokenObjectEnd);
-    }
     if (name.length() >= (1U << 30))
       throwRuntimeError("keylength >= 2^30");
     if (features_.rejectDupKeys_ && currentValue().isMember(name)) {
       String msg = "Duplicate key: '" + name + "'";
       return addErrorAndRecover(msg, tokenName, tokenObjectEnd);
+    }
+
+    Token colon;
+    if (!readToken(colon) || colon.type_ != tokenMemberSeparator) {
+      return addErrorAndRecover("Missing ':' after object member name", colon,
+                                tokenObjectEnd);
     }
     Value& value = currentValue()[name];
     nodes_.push(&value);
@@ -1547,36 +1551,45 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   bool isNegative = *current == '-';
   if (isNegative)
     ++current;
-  // TODO: Help the compiler do the div and mod at compile time or get rid of
-  // them.
-  Value::LargestUInt maxIntegerValue =
-      isNegative ? Value::LargestUInt(Value::minLargestInt)
-                 : Value::maxLargestUInt;
-  Value::LargestUInt threshold = maxIntegerValue / 10;
+
+  static constexpr auto positive_threshold = Value::maxLargestUInt / 10;
+  static constexpr auto positive_last_digit = Value::maxLargestUInt % 10;
+  static constexpr auto negative_threshold =
+      Value::LargestUInt(Value::minLargestInt) / 10;
+  static constexpr auto negative_last_digit =
+      Value::LargestUInt(Value::minLargestInt) % 10;
+
+  const auto threshold = isNegative ? negative_threshold : positive_threshold;
+  const auto last_digit =
+      isNegative ? negative_last_digit : positive_last_digit;
+
   Value::LargestUInt value = 0;
   while (current < token.end_) {
     Char c = *current++;
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
-    auto digit(static_cast<Value::UInt>(c - '0'));
+
+    const auto digit(static_cast<Value::UInt>(c - '0'));
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
-      // a) we've only just touched the limit, b) this is the last digit, and
+      // a) we've only just touched the limit, meaing value == threshold,
+      // b) this is the last digit, or
       // c) it's small enough to fit in that rounding delta, we're okay.
       // Otherwise treat this number as a double to avoid overflow.
-      if (value > threshold || current != token.end_ ||
-          digit > maxIntegerValue % 10) {
+      if (value > threshold || current != token.end_ || digit > last_digit) {
         return decodeDouble(token, decoded);
       }
     }
     value = value * 10 + digit;
   }
+
   if (isNegative)
     decoded = -Value::LargestInt(value);
-  else if (value <= Value::LargestUInt(Value::maxInt))
+  else if (value <= Value::LargestUInt(Value::maxLargestInt))
     decoded = Value::LargestInt(value);
   else
     decoded = value;
+
   return true;
 }
 
@@ -1845,7 +1858,7 @@ bool OurReader::pushError(const Value& value, const String& message) {
   Token token;
   token.type_ = tokenError;
   token.start_ = begin_ + value.getOffsetStart();
-  token.end_ = end_ + value.getOffsetLimit();
+  token.end_ = begin_ + value.getOffsetLimit();
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
@@ -1905,11 +1918,10 @@ CharReader* CharReaderBuilder::newCharReader() const {
       settings_["allowDroppedNullPlaceholders"].asBool();
   features.allowNumericKeys_ = settings_["allowNumericKeys"].asBool();
   features.allowSingleQuotes_ = settings_["allowSingleQuotes"].asBool();
-#if defined(JSON_HAS_INT64)
-  features.stackLimit_ = settings_["stackLimit"].asUInt64();
-#else
-  features.stackLimit_ = settings_["stackLimit"].asUInt();
-#endif
+
+  // Stack limit is always a size_t, so we get this as an unsigned int
+  // regardless of it we have 64-bit integer support enabled.
+  features.stackLimit_ = static_cast<size_t>(settings_["stackLimit"].asUInt());
   features.failIfExtra_ = settings_["failIfExtra"].asBool();
   features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();

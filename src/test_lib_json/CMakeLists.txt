@@ -3,12 +3,14 @@
 add_executable( jsoncpp_test
                 jsontest.cpp
                 jsontest.h
+                fuzz.cpp
+                fuzz.h
                 main.cpp
                 )
 
 
 if(BUILD_SHARED_LIBS)
-    add_definitions( -DJSON_DLL )
+    add_compile_definitions( JSON_DLL )
 endif()
 target_link_libraries(jsoncpp_test jsoncpp_lib)
 

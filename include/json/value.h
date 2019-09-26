@@ -24,19 +24,6 @@
 #include <cpptl/forwards.h>
 #endif
 
-// Conditional NORETURN attribute on the throw functions would:
-// a) suppress false positives from static code analysis
-// b) possibly improve optimization opportunities.
-#if !defined(JSONCPP_NORETURN)
-#if defined(_MSC_VER)
-#define JSONCPP_NORETURN __declspec(noreturn)
-#elif defined(__GNUC__)
-#define JSONCPP_NORETURN __attribute__((__noreturn__))
-#else
-#define JSONCPP_NORETURN
-#endif
-#endif
-
 // Disable warning C4251: <data member>: <type> needs to have dll-interface to
 // be used by...
 #if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
@@ -50,6 +37,7 @@
  */
 namespace Json {
 
+#if JSON_USE_EXCEPTION
 /** Base class for all exceptions we throw.
  *
  * We use nothing but these internally. Of course, STL can throw others.
@@ -85,11 +73,12 @@ class JSON_API LogicError : public Exception {
 public:
   LogicError(String const& msg);
 };
+#endif
 
 /// used internally
-JSONCPP_NORETURN void throwRuntimeError(String const& msg);
+[[noreturn]] void throwRuntimeError(String const& msg);
 /// used internally
-JSONCPP_NORETURN void throwLogicError(String const& msg);
+[[noreturn]] void throwLogicError(String const& msg);
 
 /** \brief Type of the value held by a Value object.
  */
@@ -204,38 +193,44 @@ public:
   // Required for boost integration, e. g. BOOST_TEST
   typedef std::string value_type;
 
-  static const Value& null; ///< We regret this reference to a global instance;
-                            ///< prefer the simpler Value().
-  static const Value& nullRef; ///< just a kludge for binary-compatibility; same
-                               ///< as null
-  static Value const& nullSingleton(); ///< Prefer this to null or nullRef.
+#if JSON_USE_NULLREF
+  // Binary compatibility kludges, do not use.
+  static const Value& null;
+  static const Value& nullRef;
+#endif
+
+  // null and nullRef are deprecated, use this instead.
+  static Value const& nullSingleton();
 
   /// Minimum signed integer value that can be stored in a Json::Value.
-  static const LargestInt minLargestInt;
+  static constexpr LargestInt minLargestInt =
+      LargestInt(~(LargestUInt(-1) / 2));
   /// Maximum signed integer value that can be stored in a Json::Value.
-  static const LargestInt maxLargestInt;
+  static constexpr LargestInt maxLargestInt = LargestInt(LargestUInt(-1) / 2);
   /// Maximum unsigned integer value that can be stored in a Json::Value.
-  static const LargestUInt maxLargestUInt;
+  static constexpr LargestUInt maxLargestUInt = LargestUInt(-1);
 
   /// Minimum signed int value that can be stored in a Json::Value.
-  static const Int minInt;
+  static constexpr Int minInt = Int(~(UInt(-1) / 2));
   /// Maximum signed int value that can be stored in a Json::Value.
-  static const Int maxInt;
+  static constexpr Int maxInt = Int(UInt(-1) / 2);
   /// Maximum unsigned int value that can be stored in a Json::Value.
-  static const UInt maxUInt;
+  static constexpr UInt maxUInt = UInt(-1);
 
 #if defined(JSON_HAS_INT64)
   /// Minimum signed 64 bits int value that can be stored in a Json::Value.
-  static const Int64 minInt64;
+  static constexpr Int64 minInt64 = Int64(~(UInt64(-1) / 2));
   /// Maximum signed 64 bits int value that can be stored in a Json::Value.
-  static const Int64 maxInt64;
+  static constexpr Int64 maxInt64 = Int64(UInt64(-1) / 2);
   /// Maximum unsigned 64 bits int value that can be stored in a Json::Value.
-  static const UInt64 maxUInt64;
+  static constexpr UInt64 maxUInt64 = UInt64(-1);
 #endif // defined(JSON_HAS_INT64)
-
   /// Default precision for real value for string representation.
-  static const UInt defaultRealPrecision;
-
+  static constexpr UInt defaultRealPrecision = 17;
+  // The constant is hard-coded because some compiler have trouble
+  // converting Value::maxUInt64 to a double correctly (AIX/xlC).
+  // Assumes that UInt64 is a 64 bits integer.
+  static constexpr double maxUInt64AsDouble = 18446744073709551615.0;
 // Workaround for bug in the NVIDIAs CUDA 9.1 nvcc compiler
 // when using gcc and clang backend compilers.  CZString
 // cannot be defined as private.  See issue #486
@@ -288,21 +283,22 @@ public:
 #endif // ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
 
 public:
-  /** \brief Create a default Value of the given type.
-
-    This is a very useful constructor.
-    To create an empty array, pass arrayValue.
-    To create an empty object, pass objectValue.
-    Another Value can then be set to this one by assignment.
-This is useful since clear() and resize() will not alter types.
-
-    Examples:
-\code
-Json::Value null_value; // null
-Json::Value arr_value(Json::arrayValue); // []
-Json::Value obj_value(Json::objectValue); // {}
-\endcode
-  */
+  /**
+   * \brief Create a default Value of the given type.
+   *
+   * This is a very useful constructor.
+   * To create an empty array, pass arrayValue.
+   * To create an empty object, pass objectValue.
+   * Another Value can then be set to this one by assignment.
+   * This is useful since clear() and resize() will not alter types.
+   *
+   * Examples:
+   *   \code
+   *   Json::Value null_value; // null
+   *   Json::Value arr_value(Json::arrayValue); // []
+   *   Json::Value obj_value(Json::objectValue); // {}
+   *   \endcode
+   */
   Value(ValueType type = nullValue);
   Value(Int value);
   Value(UInt value);
@@ -313,24 +309,25 @@ Json::Value obj_value(Json::objectValue); // {}
   Value(double value);
   Value(const char* value); ///< Copy til first 0. (NULL causes to seg-fault.)
   Value(const char* begin, const char* end); ///< Copy all, incl zeroes.
-  /** \brief Constructs a value from a static string.
-
+  /**
+   * \brief Constructs a value from a static string.
+   *
    * Like other value string constructor but do not duplicate the string for
-   * internal storage. The given string must remain alive after the call to this
-   * constructor.
+   * internal storage. The given string must remain alive after the call to
+   * this constructor.
+   *
    * \note This works only for null-terminated strings. (We cannot change the
-   *   size of this class, so we have nowhere to store the length,
-   *   which might be computed later for various operations.)
+   * size of this class, so we have nowhere to store the length, which might be
+   * computed later for various operations.)
    *
    * Example of usage:
-   * \code
-   * static StaticString foo("some text");
-   * Json::Value aValue(foo);
-   * \endcode
+   *   \code
+   *   static StaticString foo("some text");
+   *   Json::Value aValue(foo);
+   *   \endcode
    */
   Value(const StaticString& value);
-  Value(const String& value); ///< Copy data() til size(). Embedded
-                              ///< zeroes too.
+  Value(const String& value);
 #ifdef JSON_USE_CPPTL
   Value(const CppTL::ConstString& value);
 #endif
@@ -427,35 +424,26 @@ Json::Value obj_value(Json::objectValue); // {}
   /// \post type() is arrayValue
   void resize(ArrayIndex newSize);
 
-  /// Access an array element (zero based index ).
-  /// If the array contains less than index element, then null value are
-  /// inserted
-  /// in the array so that its size is index+1.
+  //@{
+  /// Access an array element (zero based index). If the array contains less
+  /// than index element, then null value are inserted in the array so that
+  /// its size is index+1.
   /// (You may need to say 'value[0u]' to get your compiler to distinguish
-  ///  this from the operator[] which takes a string.)
+  /// this from the operator[] which takes a string.)
   Value& operator[](ArrayIndex index);
-
-  /// Access an array element (zero based index ).
-  /// If the array contains less than index element, then null value are
-  /// inserted
-  /// in the array so that its size is index+1.
-  /// (You may need to say 'value[0u]' to get your compiler to distinguish
-  ///  this from the operator[] which takes a string.)
   Value& operator[](int index);
+  //@}
 
-  /// Access an array element (zero based index )
+  //@{
+  /// Access an array element (zero based index).
   /// (You may need to say 'value[0u]' to get your compiler to distinguish
-  ///  this from the operator[] which takes a string.)
+  /// this from the operator[] which takes a string.)
   const Value& operator[](ArrayIndex index) const;
-
-  /// Access an array element (zero based index )
-  /// (You may need to say 'value[0u]' to get your compiler to distinguish
-  ///  this from the operator[] which takes a string.)
   const Value& operator[](int index) const;
+  //@}
 
   /// If the array contains at least index+1 elements, returns the element
-  /// value,
-  /// otherwise returns defaultValue.
+  /// value, otherwise returns defaultValue.
   Value get(ArrayIndex index, const Value& defaultValue) const;
   /// Return true if index < size().
   bool isValidIndex(ArrayIndex index) const;
@@ -470,7 +458,7 @@ Json::Value obj_value(Json::objectValue); // {}
 
   /// Access an object value by name, create a null member if it does not exist.
   /// \note Because of our implementation, keys are limited to 2^30 -1 chars.
-  ///  Exceeding that will cause an exception.
+  /// Exceeding that will cause an exception.
   Value& operator[](const char* key);
   /// Access an object value by name, returns null if there is no member with
   /// that name.
@@ -483,17 +471,16 @@ Json::Value obj_value(Json::objectValue); // {}
   /// \param key may contain embedded nulls.
   const Value& operator[](const String& key) const;
   /** \brief Access an object value by name, create a null member if it does not
-   exist.
-
+   * exist.
+   *
    * If the object has no entry for that name, then the member name used to
-   store
-   * the new entry is not duplicated.
+   * store the new entry is not duplicated.
    * Example of use:
-   * \code
-   * Json::Value object;
-   * static const StaticString code("code");
-   * object[code] = 1234;
-   * \endcode
+   *   \code
+   *   Json::Value object;
+   *   static const StaticString code("code");
+   *   object[code] = 1234;
+   *   \endcode
    */
   Value& operator[](const StaticString& key);
 #ifdef JSON_USE_CPPTL
@@ -541,20 +528,20 @@ Json::Value obj_value(Json::objectValue); // {}
   /// but 'key' is null-terminated.
   bool removeMember(const char* key, Value* removed);
   /** \brief Remove the named map member.
-
-      Update 'removed' iff removed.
-      \param key may contain embedded nulls.
-      \return true iff removed (no exceptions)
-  */
+   *
+   *  Update 'removed' iff removed.
+   *  \param key may contain embedded nulls.
+   *  \return true iff removed (no exceptions)
+   */
   bool removeMember(String const& key, Value* removed);
   /// Same as removeMember(String const& key, Value* removed)
   bool removeMember(const char* begin, const char* end, Value* removed);
   /** \brief Remove the indexed array element.
-
-      O(n) expensive operations.
-      Update 'removed' iff removed.
-      \return true if removed (no exceptions)
-  */
+   *
+   *  O(n) expensive operations.
+   *  Update 'removed' iff removed.
+   *  \return true if removed (no exceptions)
+   */
   bool removeIndex(ArrayIndex index, Value* removed);
 
   /// Return true if the object has a member named key.
@@ -583,8 +570,8 @@ Json::Value obj_value(Json::objectValue); // {}
   //# endif
 
   /// \deprecated Always pass len.
-  JSONCPP_DEPRECATED("Use setComment(String const&) instead.")
-  void setComment(const char* comment, CommentPlacement placement) {
+  [[deprecated("Use setComment(String const&) instead.")]] void
+  setComment(const char* comment, CommentPlacement placement) {
     setComment(String(comment, strlen(comment)), placement);
   }
   /// Comments must be //... or /* ... */
@@ -613,7 +600,9 @@ Json::Value obj_value(Json::objectValue); // {}
   ptrdiff_t getOffsetLimit() const;
 
 private:
-  void setType(ValueType v) { bits_.value_type_ = static_cast<unsigned char> (v); }
+  void setType(ValueType v) {
+    bits_.value_type_ = static_cast<unsigned char>(v);
+  }
   bool isAllocated() const { return bits_.allocated_; }
   void setIsAllocated(bool v) { bits_.allocated_ = v; }
 
@@ -701,7 +690,7 @@ private:
  * - ".name1.name2.name3"
  * - ".[0][1][2].name1[3]"
  * - ".%" => member name is provided as parameter
- * - ".[%]" => index is provied as parameter
+ * - ".[%]" => index is provided as parameter
  */
 class JSON_API Path {
 public:
@@ -767,8 +756,7 @@ public:
   /// objectValue.
   /// \deprecated This cannot be used for UTF-8 strings, since there can be
   /// embedded nulls.
-  JSONCPP_DEPRECATED("Use `key = name();` instead.")
-  char const* memberName() const;
+  [[deprecated("Use `key = name();` instead.")]] char const* memberName() const;
   /// Return the member name of the referenced Value, or NULL if it is not an
   /// objectValue.
   /// \note Better version than memberName(). Allows embedded nulls.
