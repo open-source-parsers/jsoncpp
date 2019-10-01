@@ -1391,8 +1391,10 @@ void ValueTest::checkIs(const Json::Value& value, const IsCheck& check) {
 
 JSONTEST_FIXTURE(ValueTest, compareNull) {
   JSONTEST_ASSERT_PRED(checkIsEqual(Json::Value(), Json::Value()));
-  JSONTEST_ASSERT_PRED(checkIsEqual(Json::Value::nullSingleton(), Json::Value()));
-  JSONTEST_ASSERT_PRED(checkIsEqual(Json::Value::nullSingleton(), Json::Value::nullSingleton()));
+  JSONTEST_ASSERT_PRED(
+      checkIsEqual(Json::Value::nullSingleton(), Json::Value()));
+  JSONTEST_ASSERT_PRED(
+      checkIsEqual(Json::Value::nullSingleton(), Json::Value::nullSingleton()));
 }
 
 JSONTEST_FIXTURE(ValueTest, compareInt) {
@@ -2644,8 +2646,7 @@ JSONTEST_FIXTURE(IteratorTest, indexes) {
 JSONTEST_FIXTURE(IteratorTest, const) {
   Json::Value const v;
   JSONTEST_ASSERT_THROWS(
-      Json::Value::iterator it(v.begin()) // Compile, but throw.
-      );
+      Json::Value::iterator it(v.begin())); // Compile, but throw.
 
   Json::Value value;
 

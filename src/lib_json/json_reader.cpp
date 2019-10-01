@@ -85,12 +85,9 @@ bool Reader::containsNewLine(Reader::Location begin, Reader::Location end) {
 // Class Reader
 // //////////////////////////////////////////////////////////////////
 
-Reader::Reader()
-    :  features_(Features::all()) {}
+Reader::Reader() : features_(Features::all()) {}
 
-Reader::Reader(const Features& features)
-    :    features_(features) {
-}
+Reader::Reader(const Features& features) : features_(features) {}
 
 bool Reader::parse(const std::string& document,
                    Value& root,
@@ -110,7 +107,7 @@ bool Reader::parse(std::istream& is, Value& root, bool collectComments) {
   // Since String is reference-counted, this at least does not
   // create an extra copy.
   String doc;
-  std::getline(is, doc, static_cast<char>EOF);
+  std::getline(is, doc, static_cast<char> EOF);
   return parse(doc.data(), doc.data() + doc.size(), root, collectComments);
 }
 
@@ -895,7 +892,7 @@ OurFeatures OurFeatures::all() { return {}; }
 class OurReader {
 public:
   using Char = char;
-  using Location = const Char *;
+  using Location = const Char*;
   struct StructuredError {
     ptrdiff_t offset_start;
     ptrdiff_t offset_limit;
@@ -996,7 +993,7 @@ private:
   static String normalizeEOL(Location begin, Location end);
   static bool containsNewLine(Location begin, Location end);
 
-  using Nodes = std::stack<Value *>;
+  using Nodes = std::stack<Value*>;
   Nodes nodes_;
   Errors errors_;
   String document_;
@@ -1022,9 +1019,8 @@ bool OurReader::containsNewLine(OurReader::Location begin,
 }
 
 OurReader::OurReader(OurFeatures const& features)
-    :  begin_(), end_(), current_(), lastValueEnd_(),
-      lastValue_(),  features_(features), collectComments_() {
-}
+    : begin_(), end_(), current_(), lastValueEnd_(), lastValue_(),
+      features_(features), collectComments_() {}
 
 bool OurReader::parse(const char* beginDoc,
                       const char* endDoc,
