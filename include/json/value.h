@@ -9,6 +9,18 @@
 #if !defined(JSON_IS_AMALGAMATION)
 #include "forwards.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
+
+// Conditional NORETURN attribute on the throw functions would:
+// a) suppress false positives from static code analysis
+// b) possibly improve optimization opportunities.
+#if !defined(JSONCPP_NORETURN)
+#if defined(_MSC_VER) && _MSC_VER == 1800
+#define JSONCPP_NORETURN __declspec(noreturn)
+#else
+#define JSONCPP_NORETURN [[noreturn]]
+#endif
+#endif
+
 #include <array>
 #include <exception>
 #include <memory>
@@ -76,9 +88,9 @@ public:
 #endif
 
 /// used internally
-[[noreturn]] void throwRuntimeError(String const& msg);
+JSONCPP_NORETURN void throwRuntimeError(String const& msg);
 /// used internally
-[[noreturn]] void throwLogicError(String const& msg);
+JSONCPP_NORETURN void throwLogicError(String const& msg);
 
 /** \brief Type of the value held by a Value object.
  */
