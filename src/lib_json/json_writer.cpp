@@ -267,7 +267,7 @@ static String toHex16Bit(unsigned int x) {
   return result;
 }
 
-static String valueToQuotedStringN(const char* value, unsigned length) {
+static String valueToQuotedStringN(const char* value, unsigned length, bool emitUTF8 = false ) {
   if (value == nullptr)
     return "";
 
@@ -313,21 +313,26 @@ static String valueToQuotedStringN(const char* value, unsigned length) {
     // Should add a flag to allow this compatibility mode and prevent this
     // sequence from occurring.
     default: {
-      unsigned int cp = utf8ToCodepoint(c, end);
-      // don't escape non-control characters
-      // (short escape sequence are applied above)
-      if (cp < 0x80 && cp >= 0x20)
-        result += static_cast<char>(cp);
-      else if (cp < 0x10000) { // codepoint is in Basic Multilingual Plane
-        result += "\\u";
-        result += toHex16Bit(cp);
-      } else { // codepoint is not in Basic Multilingual Plane
-               // convert to surrogate pair first
-        cp -= 0x10000;
-        result += "\\u";
-        result += toHex16Bit((cp >> 10) + 0xD800);
-        result += "\\u";
-        result += toHex16Bit((cp & 0x3FF) + 0xDC00);
+      if ( emitUTF8 ) {
+        result =+ *c;
+      }
+      else {
+        unsigned int cp = utf8ToCodepoint(c, end);
+        // don't escape non-control characters
+        // (short escape sequence are applied above)
+        if (cp < 0x80 && cp >= 0x20)
+          result += static_cast<char>(cp);
+        else if (cp < 0x10000) { // codepoint is in Basic Multilingual Plane
+          result += "\\u";
+          result += toHex16Bit(cp);
+        } else { // codepoint is not in Basic Multilingual Plane
+                 // convert to surrogate pair first
+          cp -= 0x10000;
+          result += "\\u";
+          result += toHex16Bit((cp >> 10) + 0xD800);
+          result += "\\u";
+          result += toHex16Bit((cp & 0x3FF) + 0xDC00);
+        }
       }
     } break;
     }
@@ -870,6 +875,7 @@ struct BuiltStyledStreamWriter : public StreamWriter {
                           String nullSymbol,
                           String endingLineFeedSymbol,
                           bool useSpecialFloats,
+                          bool emitUTF8,
                           unsigned int precision,
                           PrecisionType precisionType);
   int write(Value const& root, OStream* sout) override;
@@ -900,6 +906,7 @@ private:
   bool addChildValues_ : 1;
   bool indented_ : 1;
   bool useSpecialFloats_ : 1;
+  bool emitUTF8_ : 1;
   unsigned int precision_;
   PrecisionType precisionType_;
 };
@@ -909,13 +916,14 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(String indentation,
                                                  String nullSymbol,
                                                  String endingLineFeedSymbol,
                                                  bool useSpecialFloats,
+                                                 bool emitUTF8,
                                                  unsigned int precision,
                                                  PrecisionType precisionType)
     : rightMargin_(74), indentation_(std::move(indentation)), cs_(cs),
       colonSymbol_(std::move(colonSymbol)), nullSymbol_(std::move(nullSymbol)),
       endingLineFeedSymbol_(std::move(endingLineFeedSymbol)),
       addChildValues_(false), indented_(false),
-      useSpecialFloats_(useSpecialFloats), precision_(precision),
+      useSpecialFloats_(useSpecialFloats), emitUTF8_(emitUTF8), precision_(precision),
       precisionType_(precisionType) {}
 int BuiltStyledStreamWriter::write(Value const& root, OStream* sout) {
   sout_ = sout;
@@ -953,7 +961,7 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
     char const* end;
     bool ok = value.getString(&str, &end);
     if (ok)
-      pushValue(valueToQuotedStringN(str, static_cast<unsigned>(end - str)));
+      pushValue(valueToQuotedStringN(str, static_cast<unsigned>(end - str), emitUTF8_));
     else
       pushValue("");
     break;
@@ -977,7 +985,7 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
         Value const& childValue = value[name];
         writeCommentBeforeValue(childValue);
         writeWithIndent(valueToQuotedStringN(
-            name.data(), static_cast<unsigned>(name.length())));
+            name.data(), static_cast<unsigned>(name.length()), emitUTF8_));
         *sout_ << colonSymbol_;
         writeValue(childValue);
         if (++it == members.end()) {
@@ -1159,6 +1167,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const {
   bool eyc = settings_["enableYAMLCompatibility"].asBool();
   bool dnp = settings_["dropNullPlaceholders"].asBool();
   bool usf = settings_["useSpecialFloats"].asBool();
+  bool emitUTF8 = settings_["emitUTF8"].asBool();
   unsigned int pre = settings_["precision"].asUInt();
   CommentStyle::Enum cs = CommentStyle::All;
   if (cs_str == "All") {
@@ -1190,7 +1199,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const {
     pre = 17;
   String endingLineFeedSymbol;
   return new BuiltStyledStreamWriter(indentation, cs, colonSymbol, nullSymbol,
-                                     endingLineFeedSymbol, usf, pre,
+                                     endingLineFeedSymbol, usf, emitUTF8, pre,
                                      precisionType);
 }
 static void getValidWriterKeys(std::set<String>* valid_keys) {
@@ -1200,6 +1209,7 @@ static void getValidWriterKeys(std::set<String>* valid_keys) {
   valid_keys->insert("enableYAMLCompatibility");
   valid_keys->insert("dropNullPlaceholders");
   valid_keys->insert("useSpecialFloats");
+  valid_keys->insert("emitUTF8");
   valid_keys->insert("precision");
   valid_keys->insert("precisionType");
 }
@@ -1231,6 +1241,7 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings) {
   (*settings)["enableYAMLCompatibility"] = false;
   (*settings)["dropNullPlaceholders"] = false;
   (*settings)["useSpecialFloats"] = false;
+  (*settings)["emitUTF8"] = false;
   (*settings)["precision"] = 17;
   (*settings)["precisionType"] = "significant";
   //! [StreamWriterBuilderDefaults]
