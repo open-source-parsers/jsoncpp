@@ -1935,203 +1935,198 @@ JSONTEST_FIXTURE(FastWriterTest, omitEndingLineFeed) {
 
 struct StyledWriterTest : JsonTest::TestCase {};
 
-JSONTEST_FIXTURE(StyledWriterTest, writeValue) {
-  Json::StyledWriter b;
-  {
-    const Json::String expected("{\n"
-                                "   \"emptyValue\" : null,\n"
-                                "   \"false\" : false,\n"
-                                "   \"null\" : \"null\",\n"
-                                "   \"number\" : -6200000000000000.0,\n"
-                                "   \"real\" : 1.256,\n"
-                                "   \"uintValue\" : 17\n"
-                                "}\n");
+JSONTEST_FIXTURE(StyledWriterTest, writeNumericValue) {
+  Json::StyledWriter writer;
+  const Json::String expected("{\n"
+                              "   \"emptyValue\" : null,\n"
+	                       "   \"false\" : false,\n"
+		               "   \"null\" : \"null\",\n"
+	                       "   \"number\" : -6200000000000000.0,\n"
+		               "   \"real\" : 1.256,\n"
+	                       "   \"uintValue\" : 17\n"
+		               "}\n");
+  Json::Value root;
+  root["emptyValue"] = Json::nullValue;
+  root["false"] = false;
+  root["null"] = "null";
+  root["number"] = -6.2e+15;
+  root["real"] = 1.256;
+  root["uintValue"] = Json::Value(17U);
 
-    Json::Value root;
-    const Json::Value emptyValue(Json::nullValue);
-    root["emptyValue"] = emptyValue;
-    root["false"] = false;
-    root["null"] = "null";
-    root["number"] = -6.2e+15;
-    root["real"] = 1.256;
-    root["uintValue"] = Json::Value(17U);
+  const Json::String result = writer.write(root);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+}
 
-    Json::String result = b.write(root);
-    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
-  }
-  {
-    const Json::String expected(
-        "{\n"
-        "   \"property1\" : [ \"value1\", \"value2\" ],\n"
-        "   \"property2\" : []\n"
-        "}\n");
+JSONTEST_FIXTURE(StyledWriterTest, writeArrays) {
+  Json::StyledWriter writer;
+  const Json::String expected(
+      "{\n"
+      "   \"property1\" : [ \"value1\", \"value2\" ],\n"
+      "   \"property2\" : []\n"
+      "}\n");
+  Json::Value root;
+  root["property1"][0] = "value1";
+  root["property1"][1] = "value2";
+  root["property2"] = Json::arrayValue;
 
-    Json::Value root;
-    Json::Value emptyArray(Json::arrayValue);
-    root["property1"][0] = "value1";
-    root["property1"][1] = "value2";
-    root["property2"] = emptyArray;
+  const Json::String result = writer.write(root);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+}
 
-    Json::String result = b.write(root);
-    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
-  }
-  {
-    const Json::String expected("{\n"
-                                "   \"object1\" : {\n"
-                                "      \"bool\" : true,\n"
-                                "      \"nested\" : 123\n"
-                                "   },\n"
-                                "   \"object2\" : {}\n"
-                                "}\n");
+JSONTEST_FIXTURE(StyledWriterTest, writeNestedObjects) {
+  Json::StyledWriter writer;
+  const Json::String expected("{\n"
+                              "   \"object1\" : {\n"
+			       "      \"bool\" : true,\n"
+			       "      \"nested\" : 123\n"
+			       "   },\n"
+			       "   \"object2\" : {}\n"
+			       "}\n");
+  Json::Value root, child;
+  child["nested"] = 123;
+  child["bool"] = true;
+  root["object1"] = child;
+  root["object2"] = Json::objectValue;
 
-    Json::Value root, child;
-    const Json::Value emptyObject(Json::objectValue);
-    child["nested"] = 123;
-    child["bool"] = true;
-    root["object1"] = child;
-    root["object2"] = emptyObject;
-
-    Json::String result = b.write(root);
-    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
-  }
+  const Json::String result = writer.write(root);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 }
 
 struct StyledStreamWriterTest : JsonTest::TestCase {};
 
-JSONTEST_FIXTURE(StyledStreamWriterTest, writeValue) {
+JSONTEST_FIXTURE(StyledStreamWriterTest, writeNumericValue) {
   Json::StyledStreamWriter writer;
-  {
-    const Json::String expected("{\n"
-                                "\t\"emptyValue\" : null,\n"
-                                "\t\"false\" : false,\n"
-                                "\t\"null\" : \"null\",\n"
-                                "\t\"number\" : -6200000000000000.0,\n"
-                                "\t\"real\" : 1.256,\n"
-                                "\t\"uintValue\" : 17\n"
-                                "}\n");
+  const Json::String expected("{\n"
+                              "\t\"emptyValue\" : null,\n"
+			       "\t\"false\" : false,\n"
+			       "\t\"null\" : \"null\",\n"
+			       "\t\"number\" : -6200000000000000.0,\n"
+			       "\t\"real\" : 1.256,\n"
+			       "\t\"uintValue\" : 17\n"
+			       "}\n");
 
-    Json::Value root;
-    const Json::Value emptyValue(Json::nullValue);
-    root["emptyValue"] = emptyValue;
-    root["false"] = false;
-    root["null"] = "null";
-    root["number"] = -6.2e+15;
-    root["real"] = 1.256;
-    root["uintValue"] = Json::Value(17U);
+  Json::Value root;
+  root["emptyValue"] = Json::nullValue;
+  root["false"] = false;
+  root["null"] = "null";
+  root["number"] = -6.2e+15;    // big float number
+  root["real"] = 1.256;         // float number
+  root["uintValue"] = Json::Value(17U);
 
-    Json::OStringStream sout;
-    writer.write(sout, root);
-    const Json::String result = sout.str();
-    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
-  }
-  {
-    const Json::String expected(
-        "{\n"
-        "\t\"property1\" : [ \"value1\", \"value2\" ],\n"
-        "\t\"property2\" : []\n"
-        "}\n");
+  Json::OStringStream sout;
+  writer.write(sout, root);
+  const Json::String result = sout.str();
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+}
 
-    Json::Value root;
-    const Json::Value emptyArray(Json::arrayValue);
-    root["property1"][0] = "value1";
-    root["property1"][1] = "value2";
-    root["property2"] = emptyArray;
 
-    Json::OStringStream sout;
-    writer.write(sout, root);
-    const Json::String result = sout.str();
-    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
-  }
-  {
-    const Json::String expected("{\n"
-                                "\t\"object1\" : \n"
-                                "\t"
-                                "{\n"
-                                "\t\t\"bool\" : true,\n"
-                                "\t\t\"nested\" : 123\n"
-                                "\t},\n"
-                                "\t\"object2\" : {}\n"
-                                "}\n");
+JSONTEST_FIXTURE(StyledStreamWriterTest, writeArrays) {
+  Json::StyledStreamWriter writer;
+  const Json::String expected(
+      "{\n"
+      "\t\"property1\" : [ \"value1\", \"value2\" ],\n"
+      "\t\"property2\" : []\n"
+      "}\n");
+  Json::Value root;
+  root["property1"][0] = "value1";
+  root["property1"][1] = "value2";
+  root["property2"] = Json::arrayValue;
 
-    Json::Value root, child;
-    const Json::Value emptyObject(Json::objectValue);
-    child["nested"] = 123;
-    child["bool"] = true;
-    root["object1"] = child;
-    root["object2"] = emptyObject;
+  Json::OStringStream sout;
+  writer.write(sout, root);
+  const Json::String result = sout.str();
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+}
 
-    Json::OStringStream sout;
-    writer.write(sout, root);
-    const Json::String result = sout.str();
-    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
-  }
+
+JSONTEST_FIXTURE(StyledStreamWriterTest, writeNestedObjects) {
+  Json::StyledStreamWriter writer;
+  const Json::String expected("{\n"
+                              "\t\"object1\" : \n"
+			       "\t"
+			       "{\n"
+			       "\t\t\"bool\" : true,\n"
+			       "\t\t\"nested\" : 123\n"
+			       "\t},\n"
+			       "\t\"object2\" : {}\n"
+			       "}\n");
+  Json::Value root, child;
+  child["nested"] = 123;
+  child["bool"] = true;
+  root["object1"] = child;
+  root["object2"] = Json::objectValue;
+
+  Json::OStringStream sout;
+  writer.write(sout, root);
+  const Json::String result = sout.str();
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 }
 
 struct StreamWriterTest : JsonTest::TestCase {};
 
-JSONTEST_FIXTURE(StreamWriterTest, writeValue) {
-  Json::StreamWriterBuilder b;
-  {
-    const Json::String expected("{\n"
-                                "\t\"emptyValue\" : null,\n"
-                                "\t\"false\" : false,\n"
-                                "\t\"null\" : \"null\",\n"
-                                "\t\"number\" : -6200000000000000.0,\n"
-                                "\t\"real\" : 1.256,\n"
-                                "\t\"uintValue\" : 17\n"
-                                "}");
+JSONTEST_FIXTURE(StreamWriterTest, writeNumericValue) {
+  Json::StreamWriterBuilder writer;
+  const Json::String expected("{\n"
+                              "\t\"emptyValue\" : null,\n"
+			       "\t\"false\" : false,\n"
+			       "\t\"null\" : \"null\",\n"
+			       "\t\"number\" : -6200000000000000.0,\n"
+			       "\t\"real\" : 1.256,\n"
+			       "\t\"uintValue\" : 17\n"
+			       "}");
+  Json::Value root;
+  root["emptyValue"] = Json::nullValue;
+  root["false"] = false;
+  root["null"] = "null";
+  root["number"] = -6.2e+15;
+  root["real"] = 1.256;
+  root["uintValue"] = Json::Value(17U);
 
-    Json::Value root;
-    const Json::Value emptyValue(Json::nullValue);
-    root["emptyValue"] = emptyValue;
-    root["false"] = false;
-    root["null"] = "null";
-    root["number"] = -6.2e+15;
-    root["real"] = 1.256;
-    root["uintValue"] = Json::Value(17U);
+  const Json::String result = Json::writeString(writer, root);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+}
 
-    Json::String result = Json::writeString(b, root);
-    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
-  }
-  {
-    const Json::String expected("{\n"
-                                "\t\"property1\" : \n"
-                                "\t[\n"
-                                "\t\t\"value1\",\n"
-                                "\t\t\"value2\"\n"
-                                "\t],\n"
-                                "\t\"property2\" : []\n"
-                                "}");
 
-    Json::Value root;
-    const Json::Value emptyArray(Json::arrayValue);
-    root["property1"][0] = "value1";
-    root["property1"][1] = "value2";
-    root["property2"] = emptyArray;
+JSONTEST_FIXTURE(StreamWriterTest, writeArrays) {
+  Json::StreamWriterBuilder writer;
+  const Json::String expected("{\n"
+                              "\t\"property1\" : \n"
+			       "\t[\n"
+			       "\t\t\"value1\",\n"
+			       "\t\t\"value2\"\n"
+			       "\t],\n"
+			       "\t\"property2\" : []\n"
+			       "}");
 
-    Json::String result = Json::writeString(b, root);
-    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
-  }
-  {
-    const Json::String expected("{\n"
-                                "\t\"object1\" : \n"
-                                "\t{\n"
-                                "\t\t\"bool\" : true,\n"
-                                "\t\t\"nested\" : 123\n"
-                                "\t},\n"
-                                "\t\"object2\" : {}\n"
-                                "}");
+  Json::Value root;
+  root["property1"][0] = "value1";
+  root["property1"][1] = "value2";
+  root["property2"] = Json::arrayValue;
 
-    Json::Value root, child;
-    const Json::Value emptyObject(Json::objectValue);
-    child["nested"] = 123;
-    child["bool"] = true;
-    root["object1"] = child;
-    root["object2"] = emptyObject;
+  const Json::String result = Json::writeString(writer, root);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+}
 
-    Json::String result = Json::writeString(b, root);
-    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
-  }
+
+JSONTEST_FIXTURE(StreamWriterTest, writeNestedObjects) {
+  Json::StreamWriterBuilder writer;
+  const Json::String expected("{\n"
+                              "\t\"object1\" : \n"
+			       "\t{\n"
+			       "\t\t\"bool\" : true,\n"
+			       "\t\t\"nested\" : 123\n"
+			       "\t},\n"
+			       "\t\"object2\" : {}\n"
+			       "}");
+
+  Json::Value root, child;
+  child["nested"] = 123;
+  child["bool"] = true;
+  root["object1"] = child;
+  root["object2"] = Json::objectValue;
+
+  const Json::String result = Json::writeString(writer, root);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 }
 
 JSONTEST_FIXTURE(StreamWriterTest, dropNullPlaceholders) {
@@ -2925,9 +2920,15 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, FastWriterTest, dropNullPlaceholders);
   JSONTEST_REGISTER_FIXTURE(runner, FastWriterTest, enableYAMLCompatibility);
   JSONTEST_REGISTER_FIXTURE(runner, FastWriterTest, omitEndingLineFeed);
-  JSONTEST_REGISTER_FIXTURE(runner, StyledWriterTest, writeValue);
-  JSONTEST_REGISTER_FIXTURE(runner, StyledStreamWriterTest, writeValue);
-  JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, writeValue);
+  JSONTEST_REGISTER_FIXTURE(runner, StyledWriterTest, writeNumericValue);
+  JSONTEST_REGISTER_FIXTURE(runner, StyledWriterTest, writeArrays);
+  JSONTEST_REGISTER_FIXTURE(runner, StyledWriterTest, writeNestedObjects);
+  JSONTEST_REGISTER_FIXTURE(runner, StyledStreamWriterTest, writeNumericValue);
+  JSONTEST_REGISTER_FIXTURE(runner, StyledStreamWriterTest, writeArrays);
+  JSONTEST_REGISTER_FIXTURE(runner, StyledStreamWriterTest, writeNestedObjects);
+  JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, writeNumericValue);
+  JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, writeArrays);
+  JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, writeNestedObjects);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, dropNullPlaceholders);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, enableYAMLCompatibility);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, indentation);
