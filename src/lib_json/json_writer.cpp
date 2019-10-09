@@ -314,7 +314,7 @@ static String valueToQuotedStringN(const char* value, unsigned length, bool emit
     // sequence from occurring.
     default: {
       if ( emitUTF8 ) {
-        result =+ *c;
+        result += *c;
       }
       else {
         unsigned int cp = utf8ToCodepoint(c, end);

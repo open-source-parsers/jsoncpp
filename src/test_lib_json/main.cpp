@@ -1996,6 +1996,30 @@ JSONTEST_FIXTURE(StreamWriterTest, writeZeroes) {
   }
 }
 
+JSONTEST_FIXTURE(StreamWriterTest, unicode) {
+  // Create a Json value containing UTF-8 string with some chars that need escape (tab,newline).
+  Json::Value root;
+  root["test"] = "\t\n\xF0\x91\xA2\xA1\x3D\xC4\xB3\xF0\x9B\x84\x9B\xEF\xBD\xA7";
+
+  Json::StreamWriterBuilder b;
+
+  // Default settings - should be unicode escaped.
+  JSONTEST_ASSERT(Json::writeString(b, root) == "{\n\t\"test\" : \"\\t\\n\\ud806\\udca1=\\u0133\\ud82c\\udd1b\\uff67\"\n}");
+
+  // Enable UTF-8
+  b.settings_["emitUTF8"] = true;
+
+  // Should not be unicode escaped.
+  JSONTEST_ASSERT(Json::writeString(b, root) == "{\n\t\"test\" : \"\\t\\n\xF0\x91\xA2\xA1=\xC4\xB3\xF0\x9B\x84\x9B\xEF\xBD\xA7\"\n}");
+
+  // Disable UTF-8
+  b.settings_["emitUTF8"] = false;
+
+  // Should be unicode escaped.
+  JSONTEST_ASSERT(Json::writeString(b, root) == "{\n\t\"test\" : \"\\t\\n\\ud806\\udca1=\\u0133\\ud82c\\udd1b\\uff67\"\n}");
+}
+
+
 struct ReaderTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(ReaderTest, parseWithNoErrors) {
@@ -2731,6 +2755,7 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, enableYAMLCompatibility);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, indentation);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, writeZeroes);
+  JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, unicode);
 
   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseWithNoErrors);
   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest,
