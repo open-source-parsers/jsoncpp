@@ -1933,6 +1933,62 @@ JSONTEST_FIXTURE(FastWriterTest, omitEndingLineFeed) {
   JSONTEST_ASSERT(writer.write(nullValue) == "null");
 }
 
+JSONTEST_FIXTURE(FastWriterTest, writeNumericValue) {
+  Json::FastWriter writer;
+  const Json::String expected("{"
+                              "\"emptyValue\":null,"
+                              "\"false\":false,"
+                              "\"null\":\"null\","
+                              "\"number\":-6200000000000000.0,"
+                              "\"real\":1.256,"
+                              "\"uintValue\":17"
+                              "}\n");
+  Json::Value root;
+  root["emptyValue"] = Json::nullValue;
+  root["false"] = false;
+  root["null"] = "null";
+  root["number"] = -6.2e+15;
+  root["real"] = 1.256;
+  root["uintValue"] = Json::Value(17U);
+
+  const Json::String result = writer.write(root);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+}
+
+JSONTEST_FIXTURE(FastWriterTest, writeArrays) {
+  Json::FastWriter writer;
+  const Json::String expected("{"
+                              "\"property1\":[\"value1\",\"value2\"],"
+                              "\"property2\":[]"
+                              "}\n");
+  Json::Value root;
+  root["property1"][0] = "value1";
+  root["property1"][1] = "value2";
+  root["property2"] = Json::arrayValue;
+
+  const Json::String result = writer.write(root);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+}
+
+JSONTEST_FIXTURE(FastWriterTest, writeNestedObjects) {
+  Json::FastWriter writer;
+  const Json::String expected("{"
+                              "\"object1\":{"
+                              "\"bool\":true,"
+                              "\"nested\":123"
+                              "},"
+                              "\"object2\":{}"
+                              "}\n");
+  Json::Value root, child;
+  child["nested"] = 123;
+  child["bool"] = true;
+  root["object1"] = child;
+  root["object2"] = Json::objectValue;
+
+  const Json::String result = writer.write(root);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+}
+
 struct StyledWriterTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(StyledWriterTest, writeNumericValue) {
@@ -2914,6 +2970,9 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, FastWriterTest, dropNullPlaceholders);
   JSONTEST_REGISTER_FIXTURE(runner, FastWriterTest, enableYAMLCompatibility);
   JSONTEST_REGISTER_FIXTURE(runner, FastWriterTest, omitEndingLineFeed);
+  JSONTEST_REGISTER_FIXTURE(runner, FastWriterTest, writeNumericValue);
+  JSONTEST_REGISTER_FIXTURE(runner, FastWriterTest, writeArrays);
+  JSONTEST_REGISTER_FIXTURE(runner, FastWriterTest, writeNestedObjects);
   JSONTEST_REGISTER_FIXTURE(runner, StyledWriterTest, writeNumericValue);
   JSONTEST_REGISTER_FIXTURE(runner, StyledWriterTest, writeArrays);
   JSONTEST_REGISTER_FIXTURE(runner, StyledWriterTest, writeNestedObjects);
