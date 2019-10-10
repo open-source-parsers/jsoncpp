@@ -2047,6 +2047,63 @@ JSONTEST_FIXTURE(StyledWriterTest, writeNestedObjects) {
   JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 }
 
+JSONTEST_FIXTURE(StyledWriterTest, multiLineArray) {
+  Json::StyledWriter writer;
+  {
+    // Array member has more than 20 print effect rendering lines
+    const Json::String expected("[\n   "
+      "0,\n   1,\n   2,\n   "
+      "3,\n   4,\n   5,\n   "
+      "6,\n   7,\n   8,\n   "
+      "9,\n   10,\n   11,\n   "
+      "12,\n   13,\n   14,\n   "
+      "15,\n   16,\n   17,\n   "
+      "18,\n   19,\n   20\n]\n");
+    Json::Value root;
+    for (int i = 0; i < 21; i++)
+         root[i] = i;
+    const Json::String result = writer.write(root);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+  }
+  {
+    // Array members do not exceed 21 print effects to render a single line
+    const Json::String expected("[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]\n");
+    Json::Value root;
+    for (int i = 0; i < 10; i++)
+         root[i] = i;
+    const Json::String result = writer.write(root);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+  }
+}
+
+JSONTEST_FIXTURE(StyledWriterTest, writeValueWithComment) {
+  Json::StyledWriter writer;
+  {
+    const Json::String expected("\n//commentBeforeValue\n\"hello\"\n");
+    Json::Value root = "hello";
+    root.setComment(Json::String("//commentBeforeValue"),
+                    Json::commentBefore);
+    const Json::String result = writer.write(root);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+  }
+  {
+    const Json::String expected("\"hello\" //commentAfterValueOnSameLine\n");
+    Json::Value root = "hello";
+    root.setComment(Json::String("//commentAfterValueOnSameLine"),
+                    Json::commentAfterOnSameLine);
+    const Json::String result = writer.write(root);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+  }
+  {
+    const Json::String expected("\"hello\"\n//commentAfter\n\n");
+    Json::Value root = "hello";
+    root.setComment(Json::String("//commentAfter"),
+                    Json::commentAfter);
+    const Json::String result = writer.write(root);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+  }
+}
+
 struct StyledStreamWriterTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(StyledStreamWriterTest, writeNumericValue) {
@@ -2114,6 +2171,89 @@ JSONTEST_FIXTURE(StyledStreamWriterTest, writeNestedObjects) {
   JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 }
 
+JSONTEST_FIXTURE(StyledStreamWriterTest, multiLineArray) {
+  Json::StyledStreamWriter writer;
+  {
+    // Array member has more than 20 print effect rendering lines
+    const Json::String expected(
+      "["
+      "\n\t0,"
+      "\n\t1,"
+      "\n\t2,"
+      "\n\t3,"
+      "\n\t4,"
+      "\n\t5,"
+      "\n\t6,"
+      "\n\t7,"
+      "\n\t8,"
+      "\n\t9,"
+      "\n\t10,"
+      "\n\t11,"
+      "\n\t12,"
+      "\n\t13,"
+      "\n\t14,"
+      "\n\t15,"
+      "\n\t16,"
+      "\n\t17,"
+      "\n\t18,"
+      "\n\t19,"
+      "\n\t20\n]\n");
+    Json::StyledStreamWriter writer;
+    Json::Value root;
+    for (int i = 0; i < 21; i++)
+         root[i] = i;
+    Json::OStringStream sout;
+    writer.write(sout, root);
+    const Json::String result = sout.str();
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+  }
+  { 
+    // Array members do not exceed 21 print effects to render a single line
+    const Json::String expected("[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]\n");
+    Json::Value root;
+    for (int i = 0; i < 10; i++)
+         root[i] = i;
+    Json::OStringStream sout;
+    writer.write(sout, root);
+    const Json::String result = sout.str();
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+  }
+}
+
+JSONTEST_FIXTURE(StyledStreamWriterTest, writeValueWithComment) {
+  Json::StyledStreamWriter writer("\t");
+  {
+    const Json::String expected("//commentBeforeValue\n\"hello\"\n");
+    Json::Value root = "hello";
+    Json::OStringStream sout;
+    root.setComment(Json::String("//commentBeforeValue"),
+                    Json::commentBefore);
+    writer.write(sout, root);
+    const Json::String result = sout.str();
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+  }
+  {
+    const Json::String expected("\"hello\" //commentAfterValueOnSameLine\n");
+    Json::Value root = "hello";
+    Json::OStringStream sout;
+    root.setComment(Json::String("//commentAfterValueOnSameLine"),
+                    Json::commentAfterOnSameLine);
+    writer.write(sout, root);
+    const Json::String result = sout.str();
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+  }
+  {
+    const Json::String expected("\"hello\"\n//commentAfter\n");
+    Json::Value root = "hello";
+    Json::OStringStream sout;
+    root.setComment(Json::String("//commentAfter"),
+                    Json::commentAfter);
+    writer.write(sout, root);
+    const Json::String result = sout.str();
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+  }
+}
+
 struct StreamWriterTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE(StreamWriterTest, writeNumericValue) {
@@ -2177,6 +2317,52 @@ JSONTEST_FIXTURE(StreamWriterTest, writeNestedObjects) {
 
   const Json::String result = Json::writeString(writer, root);
   JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+}
+
+JSONTEST_FIXTURE(StreamWriterTest, multiLineArray) {
+  Json::StreamWriterBuilder wb;
+  wb.settings_["commentStyle"] = "None";
+  {
+    // When wb.settings_["commentStyle"] = "None", the effect of
+    // printing multiple lines will be displayed when there are 
+    // more than 20 array members.
+    const Json::String expected(
+      "[\n\t0,"
+      "\n\t1,"
+      "\n\t2,"
+      "\n\t3,"
+      "\n\t4,"
+      "\n\t5,"
+      "\n\t6,"
+      "\n\t7,"
+      "\n\t8,"
+      "\n\t9,"
+      "\n\t10,"
+      "\n\t11,"
+      "\n\t12,"
+      "\n\t13,"
+      "\n\t14,"
+      "\n\t15,"
+      "\n\t16,"
+      "\n\t17,"
+      "\n\t18,"
+      "\n\t19,"
+      "\n\t20\n]");
+    Json::Value root;
+    for (int i = 0; i < 21; i++)
+         root[i] = i;
+    const Json::String result = Json::writeString(wb, root);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+  }
+  {
+    //Array members do not exceed 21 print effects to render a single line
+    const Json::String expected("[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]");
+    Json::Value root;
+    for (int i = 0; i < 10; i++)
+         root[i] = i;
+    const Json::String result = Json::writeString(wb, root);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+  }
 }
 
 JSONTEST_FIXTURE(StreamWriterTest, dropNullPlaceholders) {
@@ -2976,12 +3162,17 @@ int main(int argc, const char* argv[]) {
   JSONTEST_REGISTER_FIXTURE(runner, StyledWriterTest, writeNumericValue);
   JSONTEST_REGISTER_FIXTURE(runner, StyledWriterTest, writeArrays);
   JSONTEST_REGISTER_FIXTURE(runner, StyledWriterTest, writeNestedObjects);
+  JSONTEST_REGISTER_FIXTURE(runner, StyledWriterTest, multiLineArray);
+  JSONTEST_REGISTER_FIXTURE(runner, StyledWriterTest, writeValueWithComment);
   JSONTEST_REGISTER_FIXTURE(runner, StyledStreamWriterTest, writeNumericValue);
   JSONTEST_REGISTER_FIXTURE(runner, StyledStreamWriterTest, writeArrays);
   JSONTEST_REGISTER_FIXTURE(runner, StyledStreamWriterTest, writeNestedObjects);
+  JSONTEST_REGISTER_FIXTURE(runner, StyledStreamWriterTest, multiLineArray);
+  JSONTEST_REGISTER_FIXTURE(runner, StyledStreamWriterTest, writeValueWithComment);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, writeNumericValue);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, writeArrays);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, writeNestedObjects);
+  JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, multiLineArray);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, dropNullPlaceholders);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, enableYAMLCompatibility);
   JSONTEST_REGISTER_FIXTURE(runner, StreamWriterTest, indentation);
