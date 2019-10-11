@@ -681,7 +681,7 @@ public:
   PathArgument();
   PathArgument(ArrayIndex index);
   PathArgument(const char* key);
-  PathArgument(const String& key);
+  PathArgument(String key);
 
 private:
   enum Kind { kindNone = 0, kindIndex, kindKey };

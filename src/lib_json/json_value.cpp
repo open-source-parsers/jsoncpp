@@ -1547,8 +1547,7 @@ PathArgument::PathArgument(ArrayIndex index)
 
 PathArgument::PathArgument(const char* key) : key_(key), kind_(kindKey) {}
 
-PathArgument::PathArgument(const String& key)
-    : key_(key), kind_(kindKey) {}
+PathArgument::PathArgument(String key) : key_(std::move(key)), kind_(kindKey) {}
 
 // class Path
 // //////////////////////////////////////////////////////////////////
