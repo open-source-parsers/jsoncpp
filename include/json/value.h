@@ -657,7 +657,7 @@ private:
     Comments& operator=(Comments&& that);
     bool has(CommentPlacement slot) const;
     String get(CommentPlacement slot) const;
-    void set(CommentPlacement slot, String s);
+    void set(CommentPlacement slot, String comment);
 
   private:
     using Array = std::array<String, numberOfCommentPlacement>;
