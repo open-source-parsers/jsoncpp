@@ -492,7 +492,7 @@ int Value::compare(const Value& other) const {
 bool Value::operator<(const Value& other) const {
   int typeDelta = type() - other.type();
   if (typeDelta)
-    return typeDelta < 0 ? true : false;
+    return typeDelta < 0;
   switch (type()) {
   case nullValue:
     return false;
@@ -506,10 +506,7 @@ bool Value::operator<(const Value& other) const {
     return value_.bool_ < other.value_.bool_;
   case stringValue: {
     if ((value_.string_ == nullptr) || (other.value_.string_ == nullptr)) {
-      if (other.value_.string_)
-        return true;
-      else
-        return false;
+      return other.value_.string_ != nullptr;
     }
     unsigned this_len;
     unsigned other_len;
@@ -821,9 +818,9 @@ bool Value::asBool() const {
   case nullValue:
     return false;
   case intValue:
-    return value_.int_ ? true : false;
+    return value_.int_ != 0;
   case uintValue:
-    return value_.uint_ ? true : false;
+    return value_.uint_ != 0;
   case realValue: {
     // According to JavaScript language zero or NaN is regarded as false
     const auto value_classification = std::fpclassify(value_.real_);
@@ -839,7 +836,7 @@ bool Value::isConvertibleTo(ValueType other) const {
   switch (other) {
   case nullValue:
     return (isNumeric() && asDouble() == 0.0) ||
-           (type() == booleanValue && value_.bool_ == false) ||
+           (type() == booleanValue && !value_.bool_) ||
            (type() == stringValue && asString().empty()) ||
            (type() == arrayValue && value_.map_->empty()) ||
            (type() == objectValue && value_.map_->empty()) ||
