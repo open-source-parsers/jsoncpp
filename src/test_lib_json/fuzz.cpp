@@ -25,6 +25,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
   uint32_t hash_settings = *(const uint32_t*)data;
   data += sizeof(uint32_t);
+  size -= sizeof(uint32_t);
 
   builder.settings_["failIfExtra"] = hash_settings & (1 << 0);
   builder.settings_["allowComments_"] = hash_settings & (1 << 1);
