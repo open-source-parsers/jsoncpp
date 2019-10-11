@@ -68,8 +68,8 @@ public:
   void setTestName(const Json::String& name);
 
   /// Adds an assertion failure.
-  TestResult&
-  addFailure(const char* file, unsigned int line, const char* expr = nullptr);
+  TestResult& addFailure(const char* file, unsigned int line,
+                         const char* expr = nullptr);
 
   /// Removes the last PredicateContext added to the predicate stack
   /// chained list.
@@ -98,9 +98,7 @@ public:
 private:
   TestResult& addToLastFailure(const Json::String& message);
   /// Adds a failure or a predicate context
-  void addFailureInfo(const char* file,
-                      unsigned int line,
-                      const char* expr,
+  void addFailureInfo(const char* file, unsigned int line, const char* expr,
                       unsigned int nestingLevel);
   static Json::String indentText(const Json::String& text,
                                  const Json::String& indent);
@@ -176,12 +174,8 @@ private:
 };
 
 template <typename T, typename U>
-TestResult& checkEqual(TestResult& result,
-                       T expected,
-                       U actual,
-                       const char* file,
-                       unsigned int line,
-                       const char* expr) {
+TestResult& checkEqual(TestResult& result, T expected, U actual,
+                       const char* file, unsigned int line, const char* expr) {
   if (static_cast<U>(expected) != actual) {
     result.addFailure(file, line, expr);
     result << "Expected: " << static_cast<U>(expected) << "\n";
@@ -196,12 +190,9 @@ Json::String ToJsonString(Json::String in);
 Json::String ToJsonString(std::string in);
 #endif
 
-TestResult& checkStringEqual(TestResult& result,
-                             const Json::String& expected,
-                             const Json::String& actual,
-                             const char* file,
-                             unsigned int line,
-                             const char* expr);
+TestResult& checkStringEqual(TestResult& result, const Json::String& expected,
+                             const Json::String& actual, const char* file,
+                             unsigned int line, const char* expr);
 
 } // namespace JsonTest
 
