@@ -203,7 +203,7 @@ namespace Json {
 
 #if JSON_USE_EXCEPTION
 Exception::Exception(String msg) : msg_(std::move(msg)) {}
-Exception::~Exception() JSONCPP_NOEXCEPT {}
+Exception::~Exception() JSONCPP_NOEXCEPT = default;
 char const* Exception::what() const JSONCPP_NOEXCEPT { return msg_.c_str(); }
 RuntimeError::RuntimeError(String const& msg) : Exception(msg) {}
 LogicError::LogicError(String const& msg) : Exception(msg) {}
@@ -1543,7 +1543,7 @@ Value::iterator Value::end() {
 // class PathArgument
 // //////////////////////////////////////////////////////////////////
 
-PathArgument::PathArgument() {}
+PathArgument::PathArgument() = default;
 
 PathArgument::PathArgument(ArrayIndex index)
     : index_(index), kind_(kindIndex) {}
