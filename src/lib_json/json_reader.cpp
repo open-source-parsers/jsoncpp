@@ -85,15 +85,11 @@ bool Reader::containsNewLine(Reader::Location begin, Reader::Location end) {
 // Class Reader
 // //////////////////////////////////////////////////////////////////
 
-Reader::Reader()
-    :  features_(Features::all()) {}
+Reader::Reader() : features_(Features::all()) {}
 
-Reader::Reader(const Features& features)
-    :    features_(features) {
-}
+Reader::Reader(const Features& features) : features_(features) {}
 
-bool Reader::parse(const std::string& document,
-                   Value& root,
+bool Reader::parse(const std::string& document, Value& root,
                    bool collectComments) {
   document_.assign(document.begin(), document.end());
   const char* begin = document_.c_str();
@@ -110,13 +106,11 @@ bool Reader::parse(std::istream& is, Value& root, bool collectComments) {
   // Since String is reference-counted, this at least does not
   // create an extra copy.
   String doc;
-  std::getline(is, doc, static_cast<char>EOF);
+  std::getline(is, doc, static_cast<char> EOF);
   return parse(doc.data(), doc.data() + doc.size(), root, collectComments);
 }
 
-bool Reader::parse(const char* beginDoc,
-                   const char* endDoc,
-                   Value& root,
+bool Reader::parse(const char* beginDoc, const char* endDoc, Value& root,
                    bool collectComments) {
   if (!features_.allowComments_) {
     collectComments = false;
@@ -376,8 +370,7 @@ String Reader::normalizeEOL(Reader::Location begin, Reader::Location end) {
   return normalized;
 }
 
-void Reader::addComment(Location begin,
-                        Location end,
+void Reader::addComment(Location begin, Location end,
                         CommentPlacement placement) {
   assert(collectComments_);
   const String& normalized = normalizeEOL(begin, end);
@@ -680,10 +673,8 @@ bool Reader::decodeString(Token& token, String& decoded) {
   return true;
 }
 
-bool Reader::decodeUnicodeCodePoint(Token& token,
-                                    Location& current,
-                                    Location end,
-                                    unsigned int& unicode) {
+bool Reader::decodeUnicodeCodePoint(Token& token, Location& current,
+                                    Location end, unsigned int& unicode) {
 
   if (!decodeUnicodeEscapeSequence(token, current, end, unicode))
     return false;
@@ -707,8 +698,7 @@ bool Reader::decodeUnicodeCodePoint(Token& token,
   return true;
 }
 
-bool Reader::decodeUnicodeEscapeSequence(Token& token,
-                                         Location& current,
+bool Reader::decodeUnicodeEscapeSequence(Token& token, Location& current,
                                          Location end,
                                          unsigned int& ret_unicode) {
   if (end - current < 4)
@@ -756,8 +746,7 @@ bool Reader::recoverFromError(TokenType skipUntilToken) {
   return false;
 }
 
-bool Reader::addErrorAndRecover(const String& message,
-                                Token& token,
+bool Reader::addErrorAndRecover(const String& message, Token& token,
                                 TokenType skipUntilToken) {
   addError(message, token);
   return recoverFromError(skipUntilToken);
@@ -771,8 +760,7 @@ Reader::Char Reader::getNextChar() {
   return *current_++;
 }
 
-void Reader::getLocationLineAndColumn(Location location,
-                                      int& line,
+void Reader::getLocationLineAndColumn(Location location, int& line,
                                       int& column) const {
   Location current = begin_;
   Location lastLineStart = current;
@@ -848,8 +836,7 @@ bool Reader::pushError(const Value& value, const String& message) {
   return true;
 }
 
-bool Reader::pushError(const Value& value,
-                       const String& message,
+bool Reader::pushError(const Value& value, const String& message,
                        const Value& extra) {
   ptrdiff_t const length = end_ - begin_;
   if (value.getOffsetStart() > length || value.getOffsetLimit() > length ||
@@ -895,7 +882,7 @@ OurFeatures OurFeatures::all() { return {}; }
 class OurReader {
 public:
   using Char = char;
-  using Location = const Char *;
+  using Location = const Char*;
   struct StructuredError {
     ptrdiff_t offset_start;
     ptrdiff_t offset_limit;
@@ -903,9 +890,7 @@ public:
   };
 
   OurReader(OurFeatures const& features);
-  bool parse(const char* beginDoc,
-             const char* endDoc,
-             Value& root,
+  bool parse(const char* beginDoc, const char* endDoc, Value& root,
              bool collectComments = true);
   String getFormattedErrorMessages() const;
   std::vector<StructuredError> getStructuredErrors() const;
@@ -971,24 +956,19 @@ private:
   bool decodeString(Token& token, String& decoded);
   bool decodeDouble(Token& token);
   bool decodeDouble(Token& token, Value& decoded);
-  bool decodeUnicodeCodePoint(Token& token,
-                              Location& current,
-                              Location end,
+  bool decodeUnicodeCodePoint(Token& token, Location& current, Location end,
                               unsigned int& unicode);
-  bool decodeUnicodeEscapeSequence(Token& token,
-                                   Location& current,
-                                   Location end,
-                                   unsigned int& unicode);
+  bool decodeUnicodeEscapeSequence(Token& token, Location& current,
+                                   Location end, unsigned int& unicode);
   bool addError(const String& message, Token& token, Location extra = nullptr);
   bool recoverFromError(TokenType skipUntilToken);
-  bool addErrorAndRecover(const String& message,
-                          Token& token,
+  bool addErrorAndRecover(const String& message, Token& token,
                           TokenType skipUntilToken);
   void skipUntilSpace();
   Value& currentValue();
   Char getNextChar();
-  void
-  getLocationLineAndColumn(Location location, int& line, int& column) const;
+  void getLocationLineAndColumn(Location location, int& line,
+                                int& column) const;
   String getLocationLineAndColumn(Location location) const;
   void addComment(Location begin, Location end, CommentPlacement placement);
   void skipCommentTokens(Token& token);
@@ -996,7 +976,7 @@ private:
   static String normalizeEOL(Location begin, Location end);
   static bool containsNewLine(Location begin, Location end);
 
-  using Nodes = std::stack<Value *>;
+  using Nodes = std::stack<Value*>;
   Nodes nodes_;
   Errors errors_;
   String document_;
@@ -1022,13 +1002,10 @@ bool OurReader::containsNewLine(OurReader::Location begin,
 }
 
 OurReader::OurReader(OurFeatures const& features)
-    :  begin_(), end_(), current_(), lastValueEnd_(),
-      lastValue_(),  features_(features), collectComments_() {
-}
+    : begin_(), end_(), current_(), lastValueEnd_(), lastValue_(),
+      features_(features), collectComments_() {}
 
-bool OurReader::parse(const char* beginDoc,
-                      const char* endDoc,
-                      Value& root,
+bool OurReader::parse(const char* beginDoc, const char* endDoc, Value& root,
                       bool collectComments) {
   if (!features_.allowComments_) {
     collectComments = false;
@@ -1345,8 +1322,7 @@ String OurReader::normalizeEOL(OurReader::Location begin,
   return normalized;
 }
 
-void OurReader::addComment(Location begin,
-                           Location end,
+void OurReader::addComment(Location begin, Location end,
                            CommentPlacement placement) {
   assert(collectComments_);
   const String& normalized = normalizeEOL(begin, end);
@@ -1704,10 +1680,8 @@ bool OurReader::decodeString(Token& token, String& decoded) {
   return true;
 }
 
-bool OurReader::decodeUnicodeCodePoint(Token& token,
-                                       Location& current,
-                                       Location end,
-                                       unsigned int& unicode) {
+bool OurReader::decodeUnicodeCodePoint(Token& token, Location& current,
+                                       Location end, unsigned int& unicode) {
 
   if (!decodeUnicodeEscapeSequence(token, current, end, unicode))
     return false;
@@ -1731,8 +1705,7 @@ bool OurReader::decodeUnicodeCodePoint(Token& token,
   return true;
 }
 
-bool OurReader::decodeUnicodeEscapeSequence(Token& token,
-                                            Location& current,
+bool OurReader::decodeUnicodeEscapeSequence(Token& token, Location& current,
                                             Location end,
                                             unsigned int& ret_unicode) {
   if (end - current < 4)
@@ -1780,8 +1753,7 @@ bool OurReader::recoverFromError(TokenType skipUntilToken) {
   return false;
 }
 
-bool OurReader::addErrorAndRecover(const String& message,
-                                   Token& token,
+bool OurReader::addErrorAndRecover(const String& message, Token& token,
                                    TokenType skipUntilToken) {
   addError(message, token);
   return recoverFromError(skipUntilToken);
@@ -1795,8 +1767,7 @@ OurReader::Char OurReader::getNextChar() {
   return *current_++;
 }
 
-void OurReader::getLocationLineAndColumn(Location location,
-                                         int& line,
+void OurReader::getLocationLineAndColumn(Location location, int& line,
                                          int& column) const {
   Location current = begin_;
   Location lastLineStart = current;
@@ -1867,8 +1838,7 @@ bool OurReader::pushError(const Value& value, const String& message) {
   return true;
 }
 
-bool OurReader::pushError(const Value& value,
-                          const String& message,
+bool OurReader::pushError(const Value& value, const String& message,
                           const Value& extra) {
   ptrdiff_t length = end_ - begin_;
   if (value.getOffsetStart() > length || value.getOffsetLimit() > length ||
@@ -1895,9 +1865,7 @@ class OurCharReader : public CharReader {
 public:
   OurCharReader(bool collectComments, OurFeatures const& features)
       : collectComments_(collectComments), reader_(features) {}
-  bool parse(char const* beginDoc,
-             char const* endDoc,
-             Value* root,
+  bool parse(char const* beginDoc, char const* endDoc, Value* root,
              String* errs) override {
     bool ok = reader_.parse(beginDoc, endDoc, *root, collectComments_);
     if (errs) {
@@ -1993,9 +1961,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings) {
 //////////////////////////////////
 // global functions
 
-bool parseFromStream(CharReader::Factory const& fact,
-                     IStream& sin,
-                     Value* root,
+bool parseFromStream(CharReader::Factory const& fact, IStream& sin, Value* root,
                      String* errs) {
   OStringStream ssin;
   ssin << sin.rdbuf();

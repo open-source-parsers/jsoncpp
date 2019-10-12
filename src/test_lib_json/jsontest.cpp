@@ -82,8 +82,8 @@ TestResult::TestResult() {
 
 void TestResult::setTestName(const Json::String& name) { name_ = name; }
 
-TestResult&
-TestResult::addFailure(const char* file, unsigned int line, const char* expr) {
+TestResult& TestResult::addFailure(const char* file, unsigned int line,
+                                   const char* expr) {
   /// Walks the PredicateContext stack adding them to failures_ if not already
   /// added.
   unsigned int nestingLevel = 0;
@@ -107,10 +107,8 @@ TestResult::addFailure(const char* file, unsigned int line, const char* expr) {
   return *this;
 }
 
-void TestResult::addFailureInfo(const char* file,
-                                unsigned int line,
-                                const char* expr,
-                                unsigned int nestingLevel) {
+void TestResult::addFailureInfo(const char* file, unsigned int line,
+                                const char* expr, unsigned int nestingLevel) {
   Failure failure;
   failure.file_ = file;
   failure.line_ = line;
@@ -342,8 +340,8 @@ int Runner::runCommandLine(int argc, const char* argv[]) const {
 
 #if defined(_MSC_VER) && defined(_DEBUG)
 // Hook MSVCRT assertions to prevent dialog from appearing
-static int
-msvcrtSilentReportHook(int reportType, char* message, int* /*returnValue*/) {
+static int msvcrtSilentReportHook(int reportType, char* message,
+                                  int* /*returnValue*/) {
   // The default CRT handling of error and assertion is to display
   // an error dialog to the user.
   // Instead, when an error or an assertion occurs, we force the
@@ -378,8 +376,8 @@ void Runner::preventDialogOnCrash() {
   _CrtSetReportHook(&msvcrtSilentReportHook);
 #endif // if defined(_MSC_VER)
 
-// @todo investigate this handler (for buffer overflow)
-// _set_security_error_handler
+  // @todo investigate this handler (for buffer overflow)
+  // _set_security_error_handler
 
 #if defined(_WIN32)
   // Prevents the system from popping a dialog for debugging if the
@@ -418,12 +416,9 @@ Json::String ToJsonString(std::string in) {
 }
 #endif
 
-TestResult& checkStringEqual(TestResult& result,
-                             const Json::String& expected,
-                             const Json::String& actual,
-                             const char* file,
-                             unsigned int line,
-                             const char* expr) {
+TestResult& checkStringEqual(TestResult& result, const Json::String& expected,
+                             const Json::String& actual, const char* file,
+                             unsigned int line, const char* expr) {
   if (expected != actual) {
     result.addFailure(file, line, expr);
     result << "Expected: '" << expected << "'\n";

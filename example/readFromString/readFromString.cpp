@@ -2,8 +2,8 @@
 #include <iostream>
 /**
  * \brief Parse a raw string into Value object using the CharReaderBuilder
- * class, or the legacy Reader class. 
- * Example Usage: 
+ * class, or the legacy Reader class.
+ * Example Usage:
  * $g++ readFromString.cpp -ljsoncpp -std=c++11 -o readFromString
  * $./readFromString
  * colin
