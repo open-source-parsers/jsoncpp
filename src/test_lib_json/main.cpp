@@ -362,7 +362,8 @@ JSONTEST_FIXTURE(ValueTest, arrayInsertAtRandomIndex) {
   }
   vec.push_back(&array[4]);
   // insert rvalue at the tail
-  JSONTEST_ASSERT(array.insert(5, "index5"));
+  Json::Value index5("index5");
+  JSONTEST_ASSERT(array.insert(5, std::move(index5)));
   JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array[0]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[1]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[2]);
