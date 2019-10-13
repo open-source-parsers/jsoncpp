@@ -68,8 +68,8 @@ static Json::String readInputTestFile(const char* path) {
   return text;
 }
 
-static void
-printValueTree(FILE* fout, Json::Value& value, const Json::String& path = ".") {
+static void printValueTree(FILE* fout, Json::Value& value,
+                           const Json::String& path = ".") {
   if (value.hasComment(Json::commentBefore)) {
     fprintf(fout, "%s\n", value.getComment(Json::commentBefore).c_str());
   }
@@ -125,8 +125,7 @@ printValueTree(FILE* fout, Json::Value& value, const Json::String& path = ".") {
 static int parseAndSaveValueTree(const Json::String& input,
                                  const Json::String& actual,
                                  const Json::String& kind,
-                                 const Json::Features& features,
-                                 bool parseOnly,
+                                 const Json::Features& features, bool parseOnly,
                                  Json::Value* root) {
   Json::Reader reader(features);
   bool parsingSuccessful =

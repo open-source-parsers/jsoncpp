@@ -9,6 +9,18 @@
 #if !defined(JSON_IS_AMALGAMATION)
 #include "forwards.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
+
+// Conditional NORETURN attribute on the throw functions would:
+// a) suppress false positives from static code analysis
+// b) possibly improve optimization opportunities.
+#if !defined(JSONCPP_NORETURN)
+#if defined(_MSC_VER) && _MSC_VER == 1800
+#define JSONCPP_NORETURN __declspec(noreturn)
+#else
+#define JSONCPP_NORETURN [[noreturn]]
+#endif
+#endif
+
 #include <array>
 #include <exception>
 #include <memory>
@@ -76,9 +88,9 @@ public:
 #endif
 
 /// used internally
-[[noreturn]] void throwRuntimeError(String const& msg);
+JSONCPP_NORETURN void throwRuntimeError(String const& msg);
 /// used internally
-[[noreturn]] void throwLogicError(String const& msg);
+JSONCPP_NORETURN void throwLogicError(String const& msg);
 
 /** \brief Type of the value held by a Value object.
  */
@@ -493,8 +505,8 @@ public:
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
   /// \note key may contain embedded nulls.
-  Value
-  get(const char* begin, const char* end, const Value& defaultValue) const;
+  Value get(const char* begin, const char* end,
+            const Value& defaultValue) const;
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
   /// \param key may contain embedded nulls.
@@ -567,8 +579,8 @@ public:
   //# endif
 
   /// \deprecated Always pass len.
-  [[deprecated("Use setComment(String const&) instead.")]] void
-  setComment(const char* comment, CommentPlacement placement) {
+  JSONCPP_DEPRECATED("Use setComment(String const&) instead.")
+  void setComment(const char* comment, CommentPlacement placement) {
     setComment(String(comment, strlen(comment)), placement);
   }
   /// Comments must be //... or /* ... */
@@ -691,8 +703,7 @@ private:
  */
 class JSON_API Path {
 public:
-  Path(const String& path,
-       const PathArgument& a1 = PathArgument(),
+  Path(const String& path, const PathArgument& a1 = PathArgument(),
        const PathArgument& a2 = PathArgument(),
        const PathArgument& a3 = PathArgument(),
        const PathArgument& a4 = PathArgument(),
@@ -709,10 +720,8 @@ private:
   typedef std::vector<PathArgument> Args;
 
   void makePath(const String& path, const InArgs& in);
-  void addPathInArg(const String& path,
-                    const InArgs& in,
-                    InArgs::const_iterator& itInArg,
-                    PathArgument::Kind kind);
+  void addPathInArg(const String& path, const InArgs& in,
+                    InArgs::const_iterator& itInArg, PathArgument::Kind kind);
   static void invalidPath(const String& path, int location);
 
   Args args_;
@@ -753,7 +762,8 @@ public:
   /// objectValue.
   /// \deprecated This cannot be used for UTF-8 strings, since there can be
   /// embedded nulls.
-  [[deprecated("Use `key = name();` instead.")]] char const* memberName() const;
+  JSONCPP_DEPRECATED("Use `key = name();` instead.")
+  char const* memberName() const;
   /// Return the member name of the referenced Value, or NULL if it is not an
   /// objectValue.
   /// \note Better version than memberName(). Allows embedded nulls.

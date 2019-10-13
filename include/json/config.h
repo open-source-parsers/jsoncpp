@@ -74,8 +74,8 @@
 #if defined(_MSC_VER) && _MSC_VER < 1900
 // As recommended at
 // https://stackoverflow.com/questions/2915672/snprintf-and-visual-studio-2010
-extern JSON_API int
-msvc_pre1900_c99_snprintf(char* outBuf, size_t size, const char* format, ...);
+extern JSON_API int msvc_pre1900_c99_snprintf(char* outBuf, size_t size,
+                                              const char* format, ...);
 #define jsoncpp_snprintf msvc_pre1900_c99_snprintf
 #else
 #define jsoncpp_snprintf std::snprintf
@@ -104,9 +104,26 @@ msvc_pre1900_c99_snprintf(char* outBuf, size_t size, const char* format, ...);
 #define JSONCPP_OP_EXPLICIT
 #endif
 
-#if defined(__clang__)
-#define JSON_USE_INT64_DOUBLE_CONVERSION 1
-#elif defined(__GNUC__) && (__GNUC__ >= 6)
+#ifdef __clang__
+#if __has_extension(attribute_deprecated_with_message)
+#define JSONCPP_DEPRECATED(message) __attribute__((deprecated(message)))
+#endif
+#elif defined(__GNUC__) // not clang (gcc comes later since clang emulates gcc)
+#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5))
+#define JSONCPP_DEPRECATED(message) __attribute__((deprecated(message)))
+#elif (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
+#define JSONCPP_DEPRECATED(message) __attribute__((__deprecated__))
+#endif                  // GNUC version
+#elif defined(_MSC_VER) // MSVC (after clang because clang on Windows emulates
+                        // MSVC)
+#define JSONCPP_DEPRECATED(message) __declspec(deprecated(message))
+#endif // __clang__ || __GNUC__ || _MSC_VER
+
+#if !defined(JSONCPP_DEPRECATED)
+#define JSONCPP_DEPRECATED(message)
+#endif // if !defined(JSONCPP_DEPRECATED)
+
+#if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ >= 6))
 #define JSON_USE_INT64_DOUBLE_CONVERSION 1
 #endif
 
@@ -139,16 +156,16 @@ typedef UInt64 LargestUInt;
 #endif // if defined(JSON_NO_INT64)
 
 template <typename T>
-using Allocator = typename std::conditional<JSONCPP_USING_SECURE_MEMORY,
-                                            SecureAllocator<T>,
-                                            std::allocator<T>>::type;
+using Allocator =
+    typename std::conditional<JSONCPP_USING_SECURE_MEMORY, SecureAllocator<T>,
+                              std::allocator<T>>::type;
 using String = std::basic_string<char, std::char_traits<char>, Allocator<char>>;
-using IStringStream = std::basic_istringstream<String::value_type,
-                                               String::traits_type,
-                                               String::allocator_type>;
-using OStringStream = std::basic_ostringstream<String::value_type,
-                                               String::traits_type,
-                                               String::allocator_type>;
+using IStringStream =
+    std::basic_istringstream<String::value_type, String::traits_type,
+                             String::allocator_type>;
+using OStringStream =
+    std::basic_ostringstream<String::value_type, String::traits_type,
+                             String::allocator_type>;
 using IStream = std::istream;
 using OStream = std::ostream;
 } // namespace Json

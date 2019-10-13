@@ -9,6 +9,7 @@ sudo: false
 addons:
   homebrew:
     packages:
+    - clang-format
     - meson
     - ninja
     update: false # do not update homebrew by default
@@ -17,6 +18,7 @@ addons:
     - ubuntu-toolchain-r-test
     - llvm-toolchain-xenial-8
     packages:
+    - clang-format-8
     - clang-8
     - valgrind
 matrix:
@@ -25,7 +27,7 @@ matrix:
   include:
     - name: Mac clang meson static release testing
       os: osx
-      osx_image: xcode10.2
+      osx_image: xcode11
       compiler: clang
       env:
          CXX="clang++"
