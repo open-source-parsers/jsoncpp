@@ -920,10 +920,6 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(String indentation,
                                                  bool emitUTF8,
                                                  unsigned int precision,
                                                  PrecisionType precisionType)
-BuiltStyledStreamWriter::BuiltStyledStreamWriter(
-    String indentation, CommentStyle::Enum cs, String colonSymbol,
-    String nullSymbol, String endingLineFeedSymbol, bool useSpecialFloats,
-    unsigned int precision, PrecisionType precisionType)
     : rightMargin_(74), indentation_(std::move(indentation)), cs_(cs),
       colonSymbol_(std::move(colonSymbol)), nullSymbol_(std::move(nullSymbol)),
       endingLineFeedSymbol_(std::move(endingLineFeedSymbol)),
