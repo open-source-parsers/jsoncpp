@@ -267,7 +267,9 @@ static String toHex16Bit(unsigned int x) {
   return result;
 }
 
-static String valueToQuotedStringN(const char* value, unsigned length, bool emitUTF8 = false ) {
+static String valueToQuotedStringN(const char* value,
+                                   unsigned length,
+                                   bool emitUTF8 = false) {
   if (value == nullptr)
     return "";
 
@@ -313,25 +315,27 @@ static String valueToQuotedStringN(const char* value, unsigned length, bool emit
     // Should add a flag to allow this compatibility mode and prevent this
     // sequence from occurring.
     default: {
-      if ( emitUTF8 ) {
+      if (emitUTF8) {
         result += *c;
-      }
-      else {
-        unsigned int cp = utf8ToCodepoint(c, end);
+      } else {
+        unsigned int codepoint = utf8ToCodepoint(c, end);
+        const unsigned int FIRST_NON_CONTROL_CODEPOINT = 0x20;
+        const unsigned int LAST_NON_CONTROL_CODEPOINT = 0x7F;
+        const unsigned int FIRST_SURROGATE_PAIR_CODEPOINT = 0x10000;
         // don't escape non-control characters
         // (short escape sequence are applied above)
-        if (cp < 0x80 && cp >= 0x20)
-          result += static_cast<char>(cp);
-        else if (cp < 0x10000) { // codepoint is in Basic Multilingual Plane
+        if (FIRST_NON_CONTROL_CODEPOINT <= codepoint && codepoint <= LAST_NON_CONTROL_CODEPOINT) {
+          result += static_cast<char>(codepoint);
+        } else if (codepoint < FIRST_SURROGATE_PAIR_CODEPOINT) { // codepoint is in Basic Multilingual Plane
           result += "\\u";
-          result += toHex16Bit(cp);
+          result += toHex16Bit(codepoint);
         } else { // codepoint is not in Basic Multilingual Plane
                  // convert to surrogate pair first
-          cp -= 0x10000;
+          codepoint -= FIRST_SURROGATE_PAIR_CODEPOINT;
           result += "\\u";
-          result += toHex16Bit((cp >> 10) + 0xD800);
+          result += toHex16Bit((codepoint >> 10) + 0xD800);
           result += "\\u";
-          result += toHex16Bit((cp & 0x3FF) + 0xDC00);
+          result += toHex16Bit((codepoint & 0x3FF) + 0xDC00);
         }
       }
     } break;
@@ -923,8 +927,8 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(String indentation,
       colonSymbol_(std::move(colonSymbol)), nullSymbol_(std::move(nullSymbol)),
       endingLineFeedSymbol_(std::move(endingLineFeedSymbol)),
       addChildValues_(false), indented_(false),
-      useSpecialFloats_(useSpecialFloats), emitUTF8_(emitUTF8), precision_(precision),
-      precisionType_(precisionType) {}
+      useSpecialFloats_(useSpecialFloats), emitUTF8_(emitUTF8),
+      precision_(precision), precisionType_(precisionType) {}
 int BuiltStyledStreamWriter::write(Value const& root, OStream* sout) {
   sout_ = sout;
   addChildValues_ = false;
@@ -961,7 +965,8 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
     char const* end;
     bool ok = value.getString(&str, &end);
     if (ok)
-      pushValue(valueToQuotedStringN(str, static_cast<unsigned>(end - str), emitUTF8_));
+      pushValue(valueToQuotedStringN(str, static_cast<unsigned>(end - str),
+                                     emitUTF8_));
     else
       pushValue("");
     break;
@@ -1161,13 +1166,13 @@ StreamWriter::Factory::~Factory() = default;
 StreamWriterBuilder::StreamWriterBuilder() { setDefaults(&settings_); }
 StreamWriterBuilder::~StreamWriterBuilder() = default;
 StreamWriter* StreamWriterBuilder::newStreamWriter() const {
-  String indentation = settings_["indentation"].asString();
-  String cs_str = settings_["commentStyle"].asString();
-  String pt_str = settings_["precisionType"].asString();
-  bool eyc = settings_["enableYAMLCompatibility"].asBool();
-  bool dnp = settings_["dropNullPlaceholders"].asBool();
-  bool usf = settings_["useSpecialFloats"].asBool();
-  bool emitUTF8 = settings_["emitUTF8"].asBool();
+  const String indentation = settings_["indentation"].asString();
+  const String cs_str = settings_["commentStyle"].asString();
+  const String pt_str = settings_["precisionType"].asString();
+  const bool eyc = settings_["enableYAMLCompatibility"].asBool();
+  const bool dnp = settings_["dropNullPlaceholders"].asBool();
+  const bool usf = settings_["useSpecialFloats"].asBool();
+  const bool emitUTF8 = settings_["emitUTF8"].asBool();
   unsigned int pre = settings_["precision"].asUInt();
   CommentStyle::Enum cs = CommentStyle::All;
   if (cs_str == "All") {
