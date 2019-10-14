@@ -264,8 +264,7 @@ static String toHex16Bit(unsigned int x) {
   return result;
 }
 
-static String valueToQuotedStringN(const char* value,
-                                   unsigned length,
+static String valueToQuotedStringN(const char* value, unsigned length,
                                    bool emitUTF8 = false) {
   if (value == nullptr)
     return "";
@@ -321,9 +320,12 @@ static String valueToQuotedStringN(const char* value,
         const unsigned int FIRST_SURROGATE_PAIR_CODEPOINT = 0x10000;
         // don't escape non-control characters
         // (short escape sequence are applied above)
-        if (FIRST_NON_CONTROL_CODEPOINT <= codepoint && codepoint <= LAST_NON_CONTROL_CODEPOINT) {
+        if (FIRST_NON_CONTROL_CODEPOINT <= codepoint && 
+            codepoint <= LAST_NON_CONTROL_CODEPOINT) {
           result += static_cast<char>(codepoint);
-        } else if (codepoint < FIRST_SURROGATE_PAIR_CODEPOINT) { // codepoint is in Basic Multilingual Plane
+        } else if (codepoint < 
+                   FIRST_SURROGATE_PAIR_CODEPOINT) { // codepoint is in Basic 
+                                                     // Multilingual Plane
           result += "\\u";
           result += toHex16Bit(codepoint);
         } else { // codepoint is not in Basic Multilingual Plane
@@ -870,14 +872,10 @@ struct CommentStyle {
 };
 
 struct BuiltStyledStreamWriter : public StreamWriter {
-  BuiltStyledStreamWriter(String indentation,
-                          CommentStyle::Enum cs,
-                          String colonSymbol,
-                          String nullSymbol,
-                          String endingLineFeedSymbol,
-                          bool useSpecialFloats,
-                          bool emitUTF8,
-                          unsigned int precision,
+  BuiltStyledStreamWriter(String indentation, CommentStyle::Enum cs,
+                          String colonSymbol, String nullSymbol,
+                          String endingLineFeedSymbol, bool useSpecialFloats,
+                          bool emitUTF8, unsigned int precision,
                           PrecisionType precisionType);
   int write(Value const& root, OStream* sout) override;
 
@@ -911,15 +909,10 @@ private:
   unsigned int precision_;
   PrecisionType precisionType_;
 };
-BuiltStyledStreamWriter::BuiltStyledStreamWriter(String indentation,
-                                                 CommentStyle::Enum cs,
-                                                 String colonSymbol,
-                                                 String nullSymbol,
-                                                 String endingLineFeedSymbol,
-                                                 bool useSpecialFloats,
-                                                 bool emitUTF8,
-                                                 unsigned int precision,
-                                                 PrecisionType precisionType)
+BuiltStyledStreamWriter::BuiltStyledStreamWriter(
+    String indentation, CommentStyle::Enum cs, String colonSymbol,
+    String nullSymbol, String endingLineFeedSymbol, bool useSpecialFloats,
+    bool emitUTF8, unsigned int precision, PrecisionType precisionType)
     : rightMargin_(74), indentation_(std::move(indentation)), cs_(cs),
       colonSymbol_(std::move(colonSymbol)), nullSymbol_(std::move(nullSymbol)),
       endingLineFeedSymbol_(std::move(endingLineFeedSymbol)),
