@@ -23,7 +23,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     return 0;
   }
 
-  uint32_t hash_settings = *(const uint32_t*)data;
+  const uint32_t hash_settings = static_cast<uint32_t>(data[0]) |
+                                 (static_cast<uint32_t>(data[1]) << 8) |
+                                 (static_cast<uint32_t>(data[2]) << 16) |
+                                 (static_cast<uint32_t>(data[3]) << 24);
   data += sizeof(uint32_t);
   size -= sizeof(uint32_t);
 
@@ -36,6 +39,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   builder.settings_["failIfExtra_"] = hash_settings & (1 << 6);
   builder.settings_["rejectDupKeys_"] = hash_settings & (1 << 7);
   builder.settings_["allowSpecialFloats_"] = hash_settings & (1 << 8);
+  builder.settings_["collectComments"] = hash_settings & (1 << 9);
 
   std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
 

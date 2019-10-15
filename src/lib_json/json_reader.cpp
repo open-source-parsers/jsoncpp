@@ -12,6 +12,7 @@
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <cassert>
 #include <cstring>
+#include <iostream>
 #include <istream>
 #include <limits>
 #include <memory>
@@ -942,7 +943,7 @@ private:
   void skipSpaces();
   bool match(const Char* pattern, int patternLength);
   bool readComment();
-  bool readCStyleComment();
+  bool readCStyleComment(bool* containsNewLineResult);
   bool readCppStyleComment();
   bool readString();
   bool readStringSingleQuote();
@@ -977,18 +978,20 @@ private:
   static bool containsNewLine(Location begin, Location end);
 
   using Nodes = std::stack<Value*>;
-  Nodes nodes_;
-  Errors errors_;
-  String document_;
-  Location begin_;
-  Location end_;
-  Location current_;
-  Location lastValueEnd_;
-  Value* lastValue_;
-  String commentsBefore_;
+
+  Nodes nodes_{};
+  Errors errors_{};
+  String document_{};
+  Location begin_ = nullptr;
+  Location end_ = nullptr;
+  Location current_ = nullptr;
+  Location lastValueEnd_ = nullptr;
+  Value* lastValue_ = nullptr;
+  bool lastValueHasAComment_ = false;
+  String commentsBefore_{};
 
   OurFeatures const features_;
-  bool collectComments_;
+  bool collectComments_ = false;
 }; // OurReader
 
 // complete copy of Read impl, for OurReader
@@ -1001,9 +1004,7 @@ bool OurReader::containsNewLine(OurReader::Location begin,
   return false;
 }
 
-OurReader::OurReader(OurFeatures const& features)
-    : begin_(), end_(), current_(), lastValueEnd_(), lastValue_(),
-      features_(features), collectComments_() {}
+OurReader::OurReader(OurFeatures const& features) : features_(features) {}
 
 bool OurReader::parse(const char* beginDoc, const char* endDoc, Value& root,
                       bool collectComments) {
@@ -1134,6 +1135,7 @@ bool OurReader::readValue() {
 
   if (collectComments_) {
     lastValueEnd_ = current_;
+    lastValueHasAComment_ = false;
     lastValue_ = &currentValue();
   }
 
@@ -1280,21 +1282,32 @@ bool OurReader::match(const Char* pattern, int patternLength) {
 }
 
 bool OurReader::readComment() {
-  Location commentBegin = current_ - 1;
-  Char c = getNextChar();
+  const Location commentBegin = current_ - 1;
+  const Char c = getNextChar();
   bool successful = false;
-  if (c == '*')
-    successful = readCStyleComment();
-  else if (c == '/')
+  bool cStyleWithEmbeddedNewline = false;
+
+  const bool isCStyleComment = (c == '*');
+  const bool isCppStyleComment = (c == '/');
+  if (isCStyleComment) {
+    successful = readCStyleComment(&cStyleWithEmbeddedNewline);
+  } else if (isCppStyleComment) {
     successful = readCppStyleComment();
+  }
+
   if (!successful)
     return false;
 
   if (collectComments_) {
     CommentPlacement placement = commentBefore;
-    if (lastValueEnd_ && !containsNewLine(lastValueEnd_, commentBegin)) {
-      if (c != '*' || !containsNewLine(commentBegin, current_))
-        placement = commentAfterOnSameLine;
+
+    if (!lastValueHasAComment_) {
+      if (lastValueEnd_ && !containsNewLine(lastValueEnd_, commentBegin)) {
+        if (isCppStyleComment || !cStyleWithEmbeddedNewline) {
+          placement = commentAfterOnSameLine;
+          lastValueHasAComment_ = true;
+        }
+      }
     }
 
     addComment(commentBegin, current_, placement);
@@ -1334,12 +1347,20 @@ void OurReader::addComment(Location begin, Location end,
   }
 }
 
-bool OurReader::readCStyleComment() {
+bool OurReader::readCStyleComment(bool* containsNewLineResult) {
+  if (containsNewLineResult) {
+    *containsNewLineResult = false;
+  }
+
   while ((current_ + 1) < end_) {
     Char c = getNextChar();
-    if (c == '*' && *current_ == '/')
+    if (c == '*' && *current_ == '/') {
       break;
+    } else if (containsNewLineResult && (c == '\r' || c == '\n')) {
+      *containsNewLineResult = true;
+    }
   }
+
   return getNextChar() == '/';
 }
 
