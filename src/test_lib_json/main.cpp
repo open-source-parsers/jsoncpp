@@ -2435,26 +2435,24 @@ JSONTEST_FIXTURE(StreamWriterTest, unicode) {
   Json::StreamWriterBuilder b;
 
   // Default settings - should be unicode escaped.
-  JSONTEST_ASSERT(
-      Json::writeString(b, root) ==
-      "{\n\t\"test\" : "
-      "\"\\t\\n\\ud806\\udca1=\\u0133\\ud82c\\udd1b\\uff67\"\n}");
+  JSONTEST_ASSERT(Json::writeString(b, root) ==
+                  "{\n\t\"test\" : "
+                  "\"\\t\\n\\ud806\\udca1=\\u0133\\ud82c\\udd1b\\uff67\"\n}");
 
   b.settings_["emitUTF8"] = true;
 
   // Should not be unicode escaped.
   JSONTEST_ASSERT(Json::writeString(b, root) ==
-                  "{\n\t\"test\" : "
-                  "\"\\t\\n\xF0\x91\xA2\xA1=\xC4\xB3\xF0\x9B\x84\x9B\xEF\xBD\xA7\"\n}");
+         "{\n\t\"test\" : "
+         "\"\\t\\n\xF0\x91\xA2\xA1=\xC4\xB3\xF0\x9B\x84\x9B\xEF\xBD\xA7\"\n}");
 
   b.settings_["emitUTF8"] = false;
 
   // Should be unicode escaped.
   JSONTEST_ASSERT(Json::writeString(b, root) ==
-                  "{\n\t\"test\" : "
-                  "\"\\t\\n\\ud806\\udca1=\\u0133\\ud82c\\udd1b\\uff67\"\n}");
+         "{\n\t\"test\" : "
+         "\"\\t\\n\\ud806\\udca1=\\u0133\\ud82c\\udd1b\\uff67\"\n}");
 }
-
 
 struct ReaderTest : JsonTest::TestCase {};
 
