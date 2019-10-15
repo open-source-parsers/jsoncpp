@@ -269,8 +269,7 @@ TestResult& checkStringEqual(TestResult& result, const Json::String& expected,
   class Test##FixtureType##name : public FixtureType {                         \
   public:                                                                      \
     static JsonTest::TestCase* factory() {                                     \
-      static JsonTest::TestCase* singleton = new Test##FixtureType##name();    \
-      return singleton;                                                        \
+      return new Test##FixtureType##name();                                    \
     }                                                                          \
     static bool collect() {                                                    \
       (collections).push_back(JSONTEST_FIXTURE_FACTORY(FixtureType, name));    \
