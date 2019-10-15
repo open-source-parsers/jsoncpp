@@ -264,4 +264,27 @@ TestResult& checkStringEqual(TestResult& result, const Json::String& expected,
 #define JSONTEST_REGISTER_FIXTURE(runner, FixtureType, name)                   \
   (runner).add(JSONTEST_FIXTURE_FACTORY(FixtureType, name))
 
+/// \brief Begin a fixture test case.
+#define JSONTEST_FIXTURE_V2(FixtureType, name, collections)                    \
+  class Test##FixtureType##name : public FixtureType {                         \
+  public:                                                                      \
+    static JsonTest::TestCase* factory() {                                     \
+      static JsonTest::TestCase* singleton = new Test##FixtureType##name();    \
+      return singleton;                                                        \
+    }                                                                          \
+    static bool collect() {                                                    \
+        (collections).push_back(JSONTEST_FIXTURE_FACTORY(FixtureType, name));  \
+        return true;                                                           \
+    }                                                                          \
+                                                                               \
+  public: /* overridden from TestCase */                                       \
+    const char* testName() const override { return #FixtureType "/" #name; }   \
+    void runTestCase() override;                                               \
+  };                                                                           \
+                                                                               \
+  static bool test##FixtureType##name##collect =                               \
+      Test##FixtureType##name::collect();                                      \
+                                                                               \
+  void Test##FixtureType##name::runTestCase()
+
 #endif // ifndef JSONTEST_H_INCLUDED
