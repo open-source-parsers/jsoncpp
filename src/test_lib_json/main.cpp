@@ -3121,7 +3121,7 @@ JSONTEST_FIXTURE_LOCAL(FuzzTest, fuzzDoesntCrash) {
 
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
-  
+
   for (auto it = local_.begin(); it != local_.end(); it++) {
     runner.add(*it);
   }

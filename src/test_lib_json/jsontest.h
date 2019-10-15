@@ -273,8 +273,8 @@ TestResult& checkStringEqual(TestResult& result, const Json::String& expected,
       return singleton;                                                        \
     }                                                                          \
     static bool collect() {                                                    \
-        (collections).push_back(JSONTEST_FIXTURE_FACTORY(FixtureType, name));  \
-        return true;                                                           \
+      (collections).push_back(JSONTEST_FIXTURE_FACTORY(FixtureType, name));    \
+      return true;                                                             \
     }                                                                          \
                                                                                \
   public: /* overridden from TestCase */                                       \
