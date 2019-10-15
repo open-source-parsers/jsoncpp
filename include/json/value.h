@@ -657,7 +657,7 @@ private:
     Comments& operator=(Comments&& that);
     bool has(CommentPlacement slot) const;
     String get(CommentPlacement slot) const;
-    void set(CommentPlacement slot, String s);
+    void set(CommentPlacement slot, String comment);
 
   private:
     using Array = std::array<String, numberOfCommentPlacement>;
@@ -681,7 +681,7 @@ public:
   PathArgument();
   PathArgument(ArrayIndex index);
   PathArgument(const char* key);
-  PathArgument(const String& key);
+  PathArgument(String key);
 
 private:
   enum Kind { kindNone = 0, kindIndex, kindKey };
