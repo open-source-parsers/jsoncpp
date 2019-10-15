@@ -320,11 +320,11 @@ static String valueToQuotedStringN(const char* value, unsigned length,
         const unsigned int FIRST_SURROGATE_PAIR_CODEPOINT = 0x10000;
         // don't escape non-control characters
         // (short escape sequence are applied above)
-        if (FIRST_NON_CONTROL_CODEPOINT <= codepoint && 
+        if (FIRST_NON_CONTROL_CODEPOINT <= codepoint &&
             codepoint <= LAST_NON_CONTROL_CODEPOINT) {
           result += static_cast<char>(codepoint);
-        } else if (codepoint < 
-                   FIRST_SURROGATE_PAIR_CODEPOINT) { // codepoint is in Basic 
+        } else if (codepoint <
+                   FIRST_SURROGATE_PAIR_CODEPOINT) { // codepoint is in Basic
                                                      // Multilingual Plane
           result += "\\u";
           result += toHex16Bit(codepoint);
