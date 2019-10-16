@@ -1356,7 +1356,7 @@ bool OurReader::readCStyleComment(bool* containsNewLineResult) {
     Char c = getNextChar();
     if (c == '*' && *current_ == '/') {
       break;
-    } else if (containsNewLineResult && (c == '\r' || c == '\n')) {
+    } else if (containsNewLineResult && (c == '\n')) {
       *containsNewLineResult = true;
     }
   }
