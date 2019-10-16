@@ -318,8 +318,8 @@ int main(int argc, const char* argv[]) {
 
     // TODO(baylesj): replace this with proper calls to both. Right now
     // we only check the legacy if the modern one is not broken.
-    const int modern_return_code = runTest(opts, false);
     const int legacy_return_code = runTest(opts, true);
+    const int modern_return_code = runTest(opts, false);
     if (modern_return_code) {
       return modern_return_code;
     } else {
