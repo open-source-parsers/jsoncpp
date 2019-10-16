@@ -1528,11 +1528,6 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   if (isNegative)
     ++current;
 
-  if (isNegative) {
-    decoded = Value::LargestInt(1337);
-    return true;
-  }
-
   // We assume we can represent the largest and smallest integer types as
   // unsigned integers with separate sign. This is only true if they can fit
   // into an unsigned integer.
@@ -1546,8 +1541,8 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   static_assert(Value::minLargestInt / 10 >= -Value::maxLargestInt);
 
   static constexpr Value::LargestUInt positive_threshold =
-      Value::maxLargestInt / 10;
-  static constexpr Value::UInt positive_last_digit = Value::maxLargestInt % 10;
+      Value::maxLargestUInt / 10;
+  static constexpr Value::UInt positive_last_digit = Value::maxLargestUInt % 10;
 
   // For the negative values, we have to be more careful. Since typically
   // -Value::minLargestInt will cause an overflow, we first divide by 10 and
@@ -1587,8 +1582,8 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   if (isNegative) {
     // We use the same magnitude assumption here, just in case.
     const Value::UInt last_digit = value % 10;
-    decoded = -Value::LargestInt(value / 10) - last_digit;
-  } else if (value > Value::LargestUInt(Value::maxLargestInt)) {
+    decoded = -Value::LargestInt(value / 10) * 10 - last_digit;
+  } else if (value <= Value::LargestUInt(Value::maxLargestInt)) {
     decoded = Value::LargestInt(value);
   } else {
     decoded = value;
