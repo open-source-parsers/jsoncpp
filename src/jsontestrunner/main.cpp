@@ -16,6 +16,7 @@
 #include <algorithm> // sort
 #include <cstdio>
 #include <json/json.h>
+#include <memory>
 #include <sstream>
 
 struct Options {
@@ -126,15 +127,39 @@ static int parseAndSaveValueTree(const Json::String& input,
                                  const Json::String& actual,
                                  const Json::String& kind,
                                  const Json::Features& features, bool parseOnly,
-                                 Json::Value* root) {
-  Json::Reader reader(features);
-  bool parsingSuccessful =
-      reader.parse(input.data(), input.data() + input.size(), *root);
-  if (!parsingSuccessful) {
-    printf("Failed to parse %s file: \n%s\n", kind.c_str(),
-           reader.getFormattedErrorMessages().c_str());
-    return 1;
+                                 Json::Value* root, bool use_legacy) {
+  if (!use_legacy) {
+    Json::CharReaderBuilder builder;
+
+    builder.settings_["allowComments"] = features.allowComments_;
+    builder.settings_["strictRoot"] = features.strictRoot_;
+    builder.settings_["allowDroppedNullPlaceholders"] =
+        features.allowDroppedNullPlaceholders_;
+    builder.settings_["allowNumericKeys"] = features.allowNumericKeys_;
+
+    std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+    Json::String errors;
+    const bool parsingSuccessful =
+        reader->parse(input.data(), input.data() + input.size(), root, &errors);
+
+    if (!parsingSuccessful) {
+      printf("Failed to parse %s file: \n%s\n", kind.c_str(), errors.c_str());
+      return 1;
+    }
+
+  // We may instead check the legacy implementation (to ensure it doesn't
+  // randomly get broken).
+  } else {
+    Json::Reader reader(features);
+    const bool parsingSuccessful =
+        reader.parse(input.data(), input.data() + input.size(), *root);
+    if (!parsingSuccessful) {
+      printf("Failed to parse %s file: \n%s\n", kind.c_str(),
+             reader.getFormattedErrorMessages().c_str());
+      return 1;
+    }
   }
+
   if (!parseOnly) {
     FILE* factual = fopen(actual.c_str(), "wt");
     if (!factual) {
@@ -240,7 +265,8 @@ static int parseCommandLine(int argc, const char* argv[], Options* opts) {
   opts->path = argv[index];
   return 0;
 }
-static int runTest(Options const& opts) {
+
+static int runTest(Options const& opts, bool use_legacy) {
   int exitCode = 0;
 
   Json::String input = readInputTestFile(opts.path.c_str());
@@ -262,23 +288,25 @@ static int runTest(Options const& opts) {
 
   Json::Value root;
   exitCode = parseAndSaveValueTree(input, actualPath, "input", opts.features,
-                                   opts.parseOnly, &root);
+                                   opts.parseOnly, &root, use_legacy);
   if (exitCode || opts.parseOnly) {
     return exitCode;
   }
+
   Json::String rewrite;
   exitCode = rewriteValueTree(rewritePath, root, opts.write, &rewrite);
   if (exitCode) {
     return exitCode;
   }
+
   Json::Value rewriteRoot;
   exitCode = parseAndSaveValueTree(rewrite, rewriteActualPath, "rewrite",
-                                   opts.features, opts.parseOnly, &rewriteRoot);
-  if (exitCode) {
-    return exitCode;
-  }
-  return 0;
+                                   opts.features, opts.parseOnly, &rewriteRoot,
+                                   use_legacy);
+
+  return exitCode;
 }
+
 int main(int argc, const char* argv[]) {
   Options opts;
   try {
@@ -287,7 +315,16 @@ int main(int argc, const char* argv[]) {
       printf("Failed to parse command-line.");
       return exitCode;
     }
-    return runTest(opts);
+
+    // TODO(baylesj): replace this with proper calls to both. Right now
+    // we only check the legacy if the modern one is not broken.
+    const int modern_return_code = runTest(opts, false);
+    const int legacy_return_code = runTest(opts, true);
+    if (modern_return_code) {
+      return modern_return_code;
+    } else {
+      return legacy_return_code;
+    }
   } catch (const std::exception& e) {
     printf("Unhandled exception:\n%s\n", e.what());
     return 1;
