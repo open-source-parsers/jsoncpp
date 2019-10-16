@@ -11,6 +11,7 @@
 #include <json/value.h>
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <cassert>
+#include <cinttypes>
 #include <cstring>
 #include <istream>
 #include <limits>
@@ -1528,15 +1529,35 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   if (isNegative)
     ++current;
 
-  static constexpr auto positive_threshold = Value::maxLargestUInt / 10;
-  static constexpr auto positive_last_digit = Value::maxLargestUInt % 10;
-  static constexpr auto negative_threshold =
-      Value::LargestUInt(Value::minLargestInt) / 10;
-  static constexpr auto negative_last_digit =
-      Value::LargestUInt(Value::minLargestInt) % 10;
+  // We assume we can represent the largest and smallest integer types as
+  // unsigned integers with separate sign. This is only true if they can fit
+  // into an unsigned integer.
+  static_assert(Value::maxLargestInt <= Value::maxLargestUInt);
 
-  const auto threshold = isNegative ? negative_threshold : positive_threshold;
-  const auto last_digit =
+  // We need to convert minLargestInt into a positive number. The easiest way
+  // to do this conversion is to assume our "threshold" value of minLargestInt
+  // divided by 10 can fit in maxLargestInt when absolute valued. This should
+  // be a safe assumption.
+  static_assert(Value::minLargestInt <= -Value::maxLargestInt);
+  static_assert(Value::minLargestInt / 10 >= -Value::maxLargestInt);
+
+  static constexpr Value::LargestUInt positive_threshold =
+      Value::maxLargestInt / 10;
+  static constexpr Value::UInt positive_last_digit = Value::maxLargestInt % 10;
+
+  // For the negative values, we have to be more careful. Since typically
+  // -Value::minLargestInt will cause an overflow, we first divide by 10 and
+  // then take the inverse. This assumes that minLargestInt is only a single
+  // power of 10 different in magnitude, which we check above. For the last
+  // digit, we take the modulus before negating for the same reason.
+  static const Value::LargestUInt negative_threshold =
+      Value::LargestUInt(-(Value::minLargestInt / 10));
+  static const Value::UInt negative_last_digit =
+      Value::UInt(-(Value::minLargestInt % 10));
+
+  const Value::LargestUInt threshold =
+      isNegative ? negative_threshold : positive_threshold;
+  const Value::UInt last_digit =
       isNegative ? negative_last_digit : positive_last_digit;
 
   Value::LargestUInt value = 0;
@@ -1545,7 +1566,7 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
 
-    const auto digit(static_cast<Value::UInt>(c - '0'));
+    const Value::UInt digit(static_cast<Value::UInt>(c - '0'));
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, meaing value == threshold,
