@@ -1148,6 +1148,7 @@ Value const& Value::operator[](CppTL::ConstString const& key) const {
 #endif
 
 Value& Value::append(const Value& value) { return append(Value(value)); }
+
 Value& Value::append(Value&& value) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
                       "in Json::Value::append: requires arrayValue");
@@ -1155,6 +1156,21 @@ Value& Value::append(Value&& value) {
     *this = Value(arrayValue);
   }
   return this->value_.map_->emplace(size(), std::move(value)).first->second;
+}
+
+bool Value::insert(ArrayIndex index, Value newValue) {
+  JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
+                      "in Json::Value::insert: requires arrayValue");
+  ArrayIndex length = size();
+  if (index > length) {
+    return false;
+  } else {
+    for (ArrayIndex i = length; i > index; i--) {
+      (*this)[i] = std::move((*this)[i - 1]);
+    }
+    (*this)[index] = std::move(newValue);
+    return true;
+  }
 }
 
 Value Value::get(char const* begin, char const* end,

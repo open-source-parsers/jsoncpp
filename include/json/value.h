@@ -464,6 +464,8 @@ public:
   /// Equivalent to jsonvalue[jsonvalue.size()] = value;
   Value& append(const Value& value);
   Value& append(Value&& value);
+  /// \brief Insert value in array at specific index
+  bool insert(ArrayIndex index, Value newValue);
 
   /// Access an object value by name, create a null member if it does not exist.
   /// \note Because of our implementation, keys are limited to 2^30 -1 chars.
