@@ -299,6 +299,8 @@ public:
    *     if allowComments is false.
    * - `"allowComments": false or true`
    *   - true if comments are allowed.
+   * - `"allowTrailingCommas": false or true`
+   *   - true if trailing commas in objects and arrays are allowed.
    * - `"strictRoot": false or true`
    *   - true if root must be either an array or an object value
    * - `"allowDroppedNullPlaceholders": false or true`

@@ -66,6 +66,7 @@ Features Features::all() { return {}; }
 Features Features::strictMode() {
   Features features;
   features.allowComments_ = false;
+  features.allowTrailingCommas_ = false;
   features.strictRoot_ = true;
   features.allowDroppedNullPlaceholders_ = false;
   features.allowNumericKeys_ = false;
@@ -453,7 +454,7 @@ bool Reader::readObject(Token& token) {
       initialTokenOk = readToken(tokenName);
     if (!initialTokenOk)
       break;
-    if (tokenName.type_ == tokenObjectEnd && name.empty()) // empty object
+    if (tokenName.type_ == tokenObjectEnd && (name.empty() || features_.allowTrailingCommas_)) // empty object or trailing comma
       return true;
     name.clear();
     if (tokenName.type_ == tokenString) {
@@ -862,6 +863,7 @@ class OurFeatures {
 public:
   static OurFeatures all();
   bool allowComments_;
+  bool allowTrailingCommas_;
   bool strictRoot_;
   bool allowDroppedNullPlaceholders_;
   bool allowNumericKeys_;
@@ -1421,7 +1423,7 @@ bool OurReader::readObject(Token& token) {
       initialTokenOk = readToken(tokenName);
     if (!initialTokenOk)
       break;
-    if (tokenName.type_ == tokenObjectEnd && name.empty()) // empty object
+    if (tokenName.type_ == tokenObjectEnd && (name.empty() || features_.allowTrailingCommas_)) // empty object or trailing comma
       return true;
     name.clear();
     if (tokenName.type_ == tokenString) {
@@ -1881,6 +1883,7 @@ CharReader* CharReaderBuilder::newCharReader() const {
   bool collectComments = settings_["collectComments"].asBool();
   OurFeatures features = OurFeatures::all();
   features.allowComments_ = settings_["allowComments"].asBool();
+  features.allowTrailingCommas_ = settings_["allowTrailingCommas"].asBool();
   features.strictRoot_ = settings_["strictRoot"].asBool();
   features.allowDroppedNullPlaceholders_ =
       settings_["allowDroppedNullPlaceholders"].asBool();
@@ -1899,6 +1902,7 @@ static void getValidReaderKeys(std::set<String>* valid_keys) {
   valid_keys->clear();
   valid_keys->insert("collectComments");
   valid_keys->insert("allowComments");
+  valid_keys->insert("allowTrailingCommas");
   valid_keys->insert("strictRoot");
   valid_keys->insert("allowDroppedNullPlaceholders");
   valid_keys->insert("allowNumericKeys");
@@ -1932,6 +1936,7 @@ Value& CharReaderBuilder::operator[](const String& key) {
 void CharReaderBuilder::strictMode(Json::Value* settings) {
   //! [CharReaderBuilderStrictMode]
   (*settings)["allowComments"] = false;
+  (*settings)["allowTrailingCommas"] = false;
   (*settings)["strictRoot"] = true;
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
@@ -1947,6 +1952,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings) {
   //! [CharReaderBuilderDefaults]
   (*settings)["collectComments"] = true;
   (*settings)["allowComments"] = true;
+  (*settings)["allowTrailingCommas"] = true;
   (*settings)["strictRoot"] = false;
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;

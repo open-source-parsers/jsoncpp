@@ -36,6 +36,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   builder.settings_["failIfExtra_"] = hash_settings & (1 << 6);
   builder.settings_["rejectDupKeys_"] = hash_settings & (1 << 7);
   builder.settings_["allowSpecialFloats_"] = hash_settings & (1 << 8);
+  builder.settings_["allowTrailingCommas_"] = hash_settings & (1 << 9);
 
   std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
 
