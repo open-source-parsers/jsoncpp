@@ -5,7 +5,11 @@ add_executable(jsontestrunner_exe
                )
 
 if(BUILD_SHARED_LIBS)
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
     add_compile_definitions( JSON_DLL )
+  else()
+    add_definitions( -DJSON_DLL )
+  endif()
 endif()
 target_link_libraries(jsontestrunner_exe jsoncpp_lib)
 
