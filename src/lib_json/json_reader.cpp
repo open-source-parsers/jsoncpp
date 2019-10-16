@@ -889,7 +889,7 @@ public:
     String message;
   };
 
-  OurReader(OurFeatures const& features);
+  explicit OurReader(OurFeatures const& features);
   bool parse(const char* beginDoc, const char* endDoc, Value& root,
              bool collectComments = true);
   String getFormattedErrorMessages() const;

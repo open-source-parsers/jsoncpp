@@ -203,7 +203,7 @@ namespace Json {
 
 #if JSON_USE_EXCEPTION
 Exception::Exception(String msg) : msg_(std::move(msg)) {}
-Exception::~Exception() JSONCPP_NOEXCEPT {}
+Exception::~Exception() JSONCPP_NOEXCEPT = default;
 char const* Exception::what() const JSONCPP_NOEXCEPT { return msg_.c_str(); }
 RuntimeError::RuntimeError(String const& msg) : Exception(msg) {}
 LogicError::LogicError(String const& msg) : Exception(msg) {}
@@ -263,7 +263,7 @@ Value::CZString::CZString(CZString&& other)
 Value::CZString::~CZString() {
   if (cstr_ && storage_.policy_ == duplicate) {
     releaseStringValue(const_cast<char*>(cstr_),
-                       storage_.length_ + 1u); // +1 for null terminating
+                       storage_.length_ + 1U); // +1 for null terminating
                                                // character for sake of
                                                // completeness but not actually
                                                // necessary
@@ -494,7 +494,7 @@ int Value::compare(const Value& other) const {
 bool Value::operator<(const Value& other) const {
   int typeDelta = type() - other.type();
   if (typeDelta)
-    return typeDelta < 0 ? true : false;
+    return typeDelta < 0;
   switch (type()) {
   case nullValue:
     return false;
@@ -508,10 +508,7 @@ bool Value::operator<(const Value& other) const {
     return value_.bool_ < other.value_.bool_;
   case stringValue: {
     if ((value_.string_ == nullptr) || (other.value_.string_ == nullptr)) {
-      if (other.value_.string_)
-        return true;
-      else
-        return false;
+      return other.value_.string_ != nullptr;
     }
     unsigned this_len;
     unsigned other_len;
@@ -809,7 +806,7 @@ float Value::asFloat() const {
   case nullValue:
     return 0.0;
   case booleanValue:
-    return value_.bool_ ? 1.0f : 0.0f;
+    return value_.bool_ ? 1.0F : 0.0F;
   default:
     break;
   }
@@ -823,9 +820,9 @@ bool Value::asBool() const {
   case nullValue:
     return false;
   case intValue:
-    return value_.int_ ? true : false;
+    return value_.int_ != 0;
   case uintValue:
-    return value_.uint_ ? true : false;
+    return value_.uint_ != 0;
   case realValue: {
     // According to JavaScript language zero or NaN is regarded as false
     const auto value_classification = std::fpclassify(value_.real_);
@@ -841,7 +838,7 @@ bool Value::isConvertibleTo(ValueType other) const {
   switch (other) {
   case nullValue:
     return (isNumeric() && asDouble() == 0.0) ||
-           (type() == booleanValue && value_.bool_ == false) ||
+           (type() == booleanValue && !value_.bool_) ||
            (type() == stringValue && asString().empty()) ||
            (type() == arrayValue && value_.map_->empty()) ||
            (type() == objectValue && value_.map_->empty()) ||
@@ -896,7 +893,7 @@ ArrayIndex Value::size() const {
 
 bool Value::empty() const {
   if (isNull() || isArray() || isObject())
-    return size() == 0u;
+    return size() == 0U;
   else
     return false;
 }
@@ -1561,15 +1558,14 @@ Value::iterator Value::end() {
 // class PathArgument
 // //////////////////////////////////////////////////////////////////
 
-PathArgument::PathArgument() {}
+PathArgument::PathArgument() = default;
 
 PathArgument::PathArgument(ArrayIndex index)
     : index_(index), kind_(kindIndex) {}
 
 PathArgument::PathArgument(const char* key) : key_(key), kind_(kindKey) {}
 
-PathArgument::PathArgument(const String& key)
-    : key_(key.c_str()), kind_(kindKey) {}
+PathArgument::PathArgument(String key) : key_(std::move(key)), kind_(kindKey) {}
 
 // class Path
 // //////////////////////////////////////////////////////////////////
