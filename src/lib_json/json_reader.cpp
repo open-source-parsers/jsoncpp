@@ -1531,14 +1531,14 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   // We assume we can represent the largest and smallest integer types as
   // unsigned integers with separate sign. This is only true if they can fit
   // into an unsigned integer.
-  static_assert(Value::maxLargestInt <= Value::maxLargestUInt);
+  static_assert(Value::maxLargestInt <= Value::maxLargestUInt, "Int must be smaller than UInt");
 
   // We need to convert minLargestInt into a positive number. The easiest way
   // to do this conversion is to assume our "threshold" value of minLargestInt
   // divided by 10 can fit in maxLargestInt when absolute valued. This should
   // be a safe assumption.
-  static_assert(Value::minLargestInt <= -Value::maxLargestInt);
-  static_assert(Value::minLargestInt / 10 >= -Value::maxLargestInt);
+  static_assert(Value::minLargestInt <= -Value::maxLargestInt, "The absolute value of minLargestInt must be greater than or equal to maxLargestInt");
+  static_assert(Value::minLargestInt / 10 >= -Value::maxLargestInt, "The absolute value of minLargestInt must be only 1 magnitude larger than maxLargest Int");
 
   static constexpr Value::LargestUInt positive_threshold =
       Value::maxLargestUInt / 10;
