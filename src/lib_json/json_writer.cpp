@@ -264,7 +264,8 @@ static String toHex16Bit(unsigned int x) {
   return result;
 }
 
-static String valueToQuotedStringN(const char* value, unsigned length) {
+static String valueToQuotedStringN(const char* value, unsigned length,
+                                   bool emitUTF8 = false) {
   if (value == nullptr)
     return "";
 
@@ -310,21 +311,31 @@ static String valueToQuotedStringN(const char* value, unsigned length) {
     // Should add a flag to allow this compatibility mode and prevent this
     // sequence from occurring.
     default: {
-      unsigned int cp = utf8ToCodepoint(c, end);
-      // don't escape non-control characters
-      // (short escape sequence are applied above)
-      if (cp < 0x80 && cp >= 0x20)
-        result += static_cast<char>(cp);
-      else if (cp < 0x10000) { // codepoint is in Basic Multilingual Plane
-        result += "\\u";
-        result += toHex16Bit(cp);
-      } else { // codepoint is not in Basic Multilingual Plane
-               // convert to surrogate pair first
-        cp -= 0x10000;
-        result += "\\u";
-        result += toHex16Bit((cp >> 10) + 0xD800);
-        result += "\\u";
-        result += toHex16Bit((cp & 0x3FF) + 0xDC00);
+      if (emitUTF8) {
+        result += *c;
+      } else {
+        unsigned int codepoint = utf8ToCodepoint(c, end);
+        const unsigned int FIRST_NON_CONTROL_CODEPOINT = 0x20;
+        const unsigned int LAST_NON_CONTROL_CODEPOINT = 0x7F;
+        const unsigned int FIRST_SURROGATE_PAIR_CODEPOINT = 0x10000;
+        // don't escape non-control characters
+        // (short escape sequence are applied above)
+        if (FIRST_NON_CONTROL_CODEPOINT <= codepoint &&
+            codepoint <= LAST_NON_CONTROL_CODEPOINT) {
+          result += static_cast<char>(codepoint);
+        } else if (codepoint <
+                   FIRST_SURROGATE_PAIR_CODEPOINT) { // codepoint is in Basic
+                                                     // Multilingual Plane
+          result += "\\u";
+          result += toHex16Bit(codepoint);
+        } else { // codepoint is not in Basic Multilingual Plane
+                 // convert to surrogate pair first
+          codepoint -= FIRST_SURROGATE_PAIR_CODEPOINT;
+          result += "\\u";
+          result += toHex16Bit((codepoint >> 10) + 0xD800);
+          result += "\\u";
+          result += toHex16Bit((codepoint & 0x3FF) + 0xDC00);
+        }
       }
     } break;
     }
@@ -864,7 +875,8 @@ struct BuiltStyledStreamWriter : public StreamWriter {
   BuiltStyledStreamWriter(String indentation, CommentStyle::Enum cs,
                           String colonSymbol, String nullSymbol,
                           String endingLineFeedSymbol, bool useSpecialFloats,
-                          unsigned int precision, PrecisionType precisionType);
+                          bool emitUTF8, unsigned int precision,
+                          PrecisionType precisionType);
   int write(Value const& root, OStream* sout) override;
 
 private:
@@ -893,19 +905,20 @@ private:
   bool addChildValues_ : 1;
   bool indented_ : 1;
   bool useSpecialFloats_ : 1;
+  bool emitUTF8_ : 1;
   unsigned int precision_;
   PrecisionType precisionType_;
 };
 BuiltStyledStreamWriter::BuiltStyledStreamWriter(
     String indentation, CommentStyle::Enum cs, String colonSymbol,
     String nullSymbol, String endingLineFeedSymbol, bool useSpecialFloats,
-    unsigned int precision, PrecisionType precisionType)
+    bool emitUTF8, unsigned int precision, PrecisionType precisionType)
     : rightMargin_(74), indentation_(std::move(indentation)), cs_(cs),
       colonSymbol_(std::move(colonSymbol)), nullSymbol_(std::move(nullSymbol)),
       endingLineFeedSymbol_(std::move(endingLineFeedSymbol)),
       addChildValues_(false), indented_(false),
-      useSpecialFloats_(useSpecialFloats), precision_(precision),
-      precisionType_(precisionType) {}
+      useSpecialFloats_(useSpecialFloats), emitUTF8_(emitUTF8),
+      precision_(precision), precisionType_(precisionType) {}
 int BuiltStyledStreamWriter::write(Value const& root, OStream* sout) {
   sout_ = sout;
   addChildValues_ = false;
@@ -942,7 +955,8 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
     char const* end;
     bool ok = value.getString(&str, &end);
     if (ok)
-      pushValue(valueToQuotedStringN(str, static_cast<unsigned>(end - str)));
+      pushValue(valueToQuotedStringN(str, static_cast<unsigned>(end - str),
+                                     emitUTF8_));
     else
       pushValue("");
     break;
@@ -966,7 +980,7 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
         Value const& childValue = value[name];
         writeCommentBeforeValue(childValue);
         writeWithIndent(valueToQuotedStringN(
-            name.data(), static_cast<unsigned>(name.length())));
+            name.data(), static_cast<unsigned>(name.length()), emitUTF8_));
         *sout_ << colonSymbol_;
         writeValue(childValue);
         if (++it == members.end()) {
@@ -1142,12 +1156,13 @@ StreamWriter::Factory::~Factory() = default;
 StreamWriterBuilder::StreamWriterBuilder() { setDefaults(&settings_); }
 StreamWriterBuilder::~StreamWriterBuilder() = default;
 StreamWriter* StreamWriterBuilder::newStreamWriter() const {
-  String indentation = settings_["indentation"].asString();
-  String cs_str = settings_["commentStyle"].asString();
-  String pt_str = settings_["precisionType"].asString();
-  bool eyc = settings_["enableYAMLCompatibility"].asBool();
-  bool dnp = settings_["dropNullPlaceholders"].asBool();
-  bool usf = settings_["useSpecialFloats"].asBool();
+  const String indentation = settings_["indentation"].asString();
+  const String cs_str = settings_["commentStyle"].asString();
+  const String pt_str = settings_["precisionType"].asString();
+  const bool eyc = settings_["enableYAMLCompatibility"].asBool();
+  const bool dnp = settings_["dropNullPlaceholders"].asBool();
+  const bool usf = settings_["useSpecialFloats"].asBool();
+  const bool emitUTF8 = settings_["emitUTF8"].asBool();
   unsigned int pre = settings_["precision"].asUInt();
   CommentStyle::Enum cs = CommentStyle::All;
   if (cs_str == "All") {
@@ -1179,7 +1194,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const {
     pre = 17;
   String endingLineFeedSymbol;
   return new BuiltStyledStreamWriter(indentation, cs, colonSymbol, nullSymbol,
-                                     endingLineFeedSymbol, usf, pre,
+                                     endingLineFeedSymbol, usf, emitUTF8, pre,
                                      precisionType);
 }
 static void getValidWriterKeys(std::set<String>* valid_keys) {
@@ -1189,6 +1204,7 @@ static void getValidWriterKeys(std::set<String>* valid_keys) {
   valid_keys->insert("enableYAMLCompatibility");
   valid_keys->insert("dropNullPlaceholders");
   valid_keys->insert("useSpecialFloats");
+  valid_keys->insert("emitUTF8");
   valid_keys->insert("precision");
   valid_keys->insert("precisionType");
 }
@@ -1220,6 +1236,7 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings) {
   (*settings)["enableYAMLCompatibility"] = false;
   (*settings)["dropNullPlaceholders"] = false;
   (*settings)["useSpecialFloats"] = false;
+  (*settings)["emitUTF8"] = false;
   (*settings)["precision"] = 17;
   (*settings)["precisionType"] = "significant";
   //! [StreamWriterBuilderDefaults]
