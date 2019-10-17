@@ -15,9 +15,9 @@
 
 #include <algorithm> // sort
 #include <cstdio>
+#include <iostream>
 #include <json/json.h>
 #include <memory>
-#include <iostream>
 #include <sstream>
 
 struct Options {
@@ -149,8 +149,8 @@ static int parseAndSaveValueTree(const Json::String& input,
       return 1;
     }
 
-  // We may instead check the legacy implementation (to ensure it doesn't
-  // randomly get broken).
+    // We may instead check the legacy implementation (to ensure it doesn't
+    // randomly get broken).
   } else {
     Json::Reader reader(features);
     const bool parsingSuccessful =
@@ -165,7 +165,8 @@ static int parseAndSaveValueTree(const Json::String& input,
   if (!parseOnly) {
     FILE* factual = fopen(actual.c_str(), "wt");
     if (!factual) {
-      std::cerr << "Failed to create '" << kind << "' actual file." << std::endl;
+      std::cerr << "Failed to create '" << kind << "' actual file."
+                << std::endl;
       return 2;
     }
     printValueTree(factual, *root);
@@ -227,7 +228,8 @@ static void printConfig() {
 }
 
 static int printUsage(const char* argv[]) {
-  std::cout << "Usage: " << argv[0] << " [--strict] input-json-file" << std::endl;
+  std::cout << "Usage: " << argv[0] << " [--strict] input-json-file"
+            << std::endl;
   return 3;
 }
 
@@ -279,7 +281,8 @@ static int runTest(Options const& opts, bool use_legacy) {
 
   Json::String basePath = removeSuffix(opts.path, ".json");
   if (!opts.parseOnly && basePath.empty()) {
-    std::cerr << "Bad input path '" << opts.path << "'. Must end with '.expected'" << std::endl;
+    std::cerr << "Bad input path '" << opts.path
+              << "'. Must end with '.expected'" << std::endl;
     return 3;
   }
 
@@ -322,7 +325,8 @@ int main(int argc, const char* argv[]) {
       return modern_return_code;
     }
 
-    const std::string filename = opts.path.substr(opts.path.find_last_of("\\/") + 1);
+    const std::string filename =
+        opts.path.substr(opts.path.find_last_of("\\/") + 1);
     const bool should_run_legacy = (filename.rfind("legacy_", 0) == 0);
     if (should_run_legacy) {
       return runTest(opts, true);
