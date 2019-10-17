@@ -1348,15 +1348,13 @@ void OurReader::addComment(Location begin, Location end,
 }
 
 bool OurReader::readCStyleComment(bool* containsNewLineResult) {
-  if (containsNewLineResult) {
-    *containsNewLineResult = false;
-  }
+  *containsNewLineResult = false;
 
   while ((current_ + 1) < end_) {
     Char c = getNextChar();
     if (c == '*' && *current_ == '/') {
       break;
-    } else if (containsNewLineResult && (c == '\n')) {
+    } else if (c == '\n') {
       *containsNewLineResult = true;
     }
   }
