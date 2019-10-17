@@ -62,6 +62,10 @@ matrix:
         BUILD_TYPE=Debug
         LIB_TYPE=shared
         DESTDIR=/tmp/cmake_json_cpp
+      before_install:
+          - pip install --user cpp-coveralls
       script: ./.travis_scripts/cmake_builder.sh
+      after_success:
+          - coveralls --include src/lib_json --include include
 notifications:
   email: false
