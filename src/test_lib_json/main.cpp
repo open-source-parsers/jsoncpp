@@ -2572,6 +2572,35 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseWithDetailError) {
   JSONTEST_ASSERT(errors.at(0).message == "Bad escape sequence in string");
 }
 
+JSONTEST_FIXTURE_LOCAL(ReaderTest, pushErrorTest) {
+  Json::Reader reader;
+  Json::Value root;
+  {
+    bool ok = reader.parse("{ \"AUTHOR\" : 123 }", root);
+    JSONTEST_ASSERT(ok);
+    if (!root["AUTHOR"].isString()) {
+      ok = reader.pushError(root["AUTHOR"], "AUTHOR must be a string");
+    }
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
+                    "* Line 1, Column 14\n"
+                    "  AUTHOR must be a string\n");
+  }
+  {
+    bool ok = reader.parse("{ \"AUTHOR\" : 123 }", root);
+    JSONTEST_ASSERT(ok);
+    if (!root["AUTHOR"].isString()) {
+      ok = reader.pushError(root["AUTHOR"], "AUTHOR must be a string",
+                            root["AUTHOR"]);
+    }
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
+                    "* Line 1, Column 14\n"
+                    "  AUTHOR must be a string\n"
+                    "See Line 1, Column 14 for detail.\n");
+  }
+}
+
 struct CharReaderTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithNoErrors) {
