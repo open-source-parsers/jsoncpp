@@ -1577,7 +1577,8 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
       // b) this is the last digit, or
       // c) it's small enough to fit in that rounding delta, we're okay.
       // Otherwise treat this number as a double to avoid overflow.
-      if (value > threshold || current != token.end_ || digit > max_last_digit) {
+      if (value > threshold || current != token.end_ ||
+          digit > max_last_digit) {
         return decodeDouble(token, decoded);
       }
     }
