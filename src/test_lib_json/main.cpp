@@ -2258,7 +2258,6 @@ JSONTEST_FIXTURE_LOCAL(StyledStreamWriterTest, multiLineArray) {
                                 "\n\t18,"
                                 "\n\t19,"
                                 "\n\t20\n]\n");
-    Json::StyledStreamWriter writer;
     Json::Value root;
     for (int i = 0; i < 21; i++)
       root[i] = i;

@@ -1561,7 +1561,7 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
 
   const Value::LargestUInt threshold =
       isNegative ? negative_threshold : positive_threshold;
-  const Value::UInt last_digit =
+  const Value::UInt max_last_digit =
       isNegative ? negative_last_digit : positive_last_digit;
 
   Value::LargestUInt value = 0;
@@ -1577,7 +1577,7 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
       // b) this is the last digit, or
       // c) it's small enough to fit in that rounding delta, we're okay.
       // Otherwise treat this number as a double to avoid overflow.
-      if (value > threshold || current != token.end_ || digit > last_digit) {
+      if (value > threshold || current != token.end_ || digit > max_last_digit) {
         return decodeDouble(token, decoded);
       }
     }
@@ -1586,7 +1586,7 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
 
   if (isNegative) {
     // We use the same magnitude assumption here, just in case.
-    const Value::UInt last_digit = value % 10;
+    const Value::UInt last_digit = static_cast<Value::UInt>(value % 10);
     decoded = -Value::LargestInt(value / 10) * 10 - last_digit;
   } else if (value <= Value::LargestUInt(Value::maxLargestInt)) {
     decoded = Value::LargestInt(value);
