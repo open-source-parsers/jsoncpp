@@ -1524,9 +1524,10 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   // larger than the maximum supported value of an integer then
   // we decode the number as a double.
   Location current = token.start_;
-  bool isNegative = *current == '-';
-  if (isNegative)
+  const bool isNegative = *current == '-';
+  if (isNegative) {
     ++current;
+  }
 
   // We assume we can represent the largest and smallest integer types as
   // unsigned integers with separate sign. This is only true if they can fit
@@ -1554,9 +1555,9 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   // then take the inverse. This assumes that minLargestInt is only a single
   // power of 10 different in magnitude, which we check above. For the last
   // digit, we take the modulus before negating for the same reason.
-  static const Value::LargestUInt negative_threshold =
+  static constexpr Value::LargestUInt negative_threshold =
       Value::LargestUInt(-(Value::minLargestInt / 10));
-  static const Value::UInt negative_last_digit =
+  static constexpr Value::UInt negative_last_digit =
       Value::UInt(-(Value::minLargestInt % 10));
 
   const Value::LargestUInt threshold =
@@ -1610,37 +1611,12 @@ bool OurReader::decodeDouble(Token& token) {
 
 bool OurReader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
-  const int bufferSize = 32;
-  int count;
-  ptrdiff_t const length = token.end_ - token.start_;
-
-  // Sanity check to avoid buffer overflow exploits.
-  if (length < 0) {
-    return addError("Unable to parse token length", token);
-  }
-  auto const ulength = static_cast<size_t>(length);
-
-  // Avoid using a string constant for the format control string given to
-  // sscanf, as this can cause hard to debug crashes on OS X. See here for more
-  // info:
-  //
-  //     http://developer.apple.com/library/mac/#DOCUMENTATION/DeveloperTools/gcc-4.0.1/gcc/Incompatibilities.html
-  char format[] = "%lf";
-
-  if (length <= bufferSize) {
-    Char buffer[bufferSize + 1];
-    memcpy(buffer, token.start_, ulength);
-    buffer[length] = 0;
-    fixNumericLocaleInput(buffer, buffer + length);
-    count = sscanf(buffer, format, &value);
-  } else {
-    String buffer(token.start_, token.end_);
-    count = sscanf(buffer.c_str(), format, &value);
-  }
-
-  if (count != 1)
+  const String buffer(token.start_, token.end_);
+  IStringStream is(buffer);
+  if (!(is >> value)) {
     return addError(
         "'" + String(token.start_, token.end_) + "' is not a number.", token);
+  }
   decoded = value;
   return true;
 }
@@ -1658,13 +1634,13 @@ bool OurReader::decodeString(Token& token) {
 
 bool OurReader::decodeString(Token& token, String& decoded) {
   decoded.reserve(static_cast<size_t>(token.end_ - token.start_ - 2));
-  Location current = token.start_ + 1; // skip '"'
-  Location end = token.end_ - 1;       // do not include '"'
+  Location current = token.start_ + 1;  // skip '"'
+  Location end = token.end_ - 1;        // do not include '"'
   while (current != end) {
     Char c = *current++;
-    if (c == '"')
+    if (c == '"') {
       break;
-    else if (c == '\\') {
+    } else if (c == '\\') {
       if (current == end)
         return addError("Empty escape sequence in string", token, current);
       Char escape = *current++;
