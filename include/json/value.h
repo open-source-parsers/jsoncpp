@@ -460,10 +460,8 @@ public:
   /// Return true if index < size().
   bool isValidIndex(ArrayIndex index) const;
   /// \brief Append value to array at the end.
-  ///
   /// Equivalent to jsonvalue[jsonvalue.size()] = value;
-  Value& append(const Value& value);
-  Value& append(Value&& value);
+  Value& append(Value value);
   /// \brief Insert value in array at specific index
   bool insert(ArrayIndex index, Value newValue);
 

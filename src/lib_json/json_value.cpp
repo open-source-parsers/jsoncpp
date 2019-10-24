@@ -1147,9 +1147,7 @@ Value const& Value::operator[](CppTL::ConstString const& key) const {
 }
 #endif
 
-Value& Value::append(const Value& value) { return append(Value(value)); }
-
-Value& Value::append(Value&& value) {
+Value& Value::append(Value value) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
                       "in Json::Value::append: requires arrayValue");
   if (type() == nullValue) {
