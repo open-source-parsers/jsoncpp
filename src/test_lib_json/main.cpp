@@ -267,6 +267,21 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, objects) {
   did = object1_.removeMember("some other id", gotPtr);
   JSONTEST_ASSERT_EQUAL(nullptr, gotPtr);
   JSONTEST_ASSERT_EQUAL(true, did);
+
+  // Using other removeMember interfaces, the test idea is the same as above.
+  object1_["some other id"] = "foo";
+  const Json::String key("some other id");
+  did = object1_.removeMember(key, &got);
+  JSONTEST_ASSERT_EQUAL(Json::Value("foo"), got);
+  JSONTEST_ASSERT_EQUAL(true, did);
+  got = Json::Value("bar");
+  did = object1_.removeMember(key, &got);
+  JSONTEST_ASSERT_EQUAL(Json::Value("bar"), got);
+  JSONTEST_ASSERT_EQUAL(false, did);
+
+  object1_["some other id"] = "foo";
+  object1_.removeMember(key);
+  JSONTEST_ASSERT_EQUAL(Json::nullValue, object1_[key]);
 }
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, arrays) {
@@ -313,6 +328,50 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, arrays) {
   JSONTEST_ASSERT_EQUAL(true, array1_.removeIndex(2, &got));
   JSONTEST_ASSERT_EQUAL(Json::Value(17), got);
   JSONTEST_ASSERT_EQUAL(false, array1_.removeIndex(2, &got)); // gone now
+}
+JSONTEST_FIXTURE_LOCAL(ValueTest, resizeArray) {
+  Json::Value array;
+  {
+    for (int i = 0; i < 10; i++)
+      array[i] = i;
+    JSONTEST_ASSERT_EQUAL(array.size(), 10);
+    // The length set is greater than the length of the array.
+    array.resize(15);
+    JSONTEST_ASSERT_EQUAL(array.size(), 15);
+
+    // The length set is less than the length of the array.
+    array.resize(5);
+    JSONTEST_ASSERT_EQUAL(array.size(), 5);
+
+    // The length of the array is set to 0.
+    array.resize(0);
+    JSONTEST_ASSERT_EQUAL(array.size(), 0);
+  }
+  {
+    for (int i = 0; i < 10; i++)
+      array[i] = i;
+    JSONTEST_ASSERT_EQUAL(array.size(), 10);
+    array.clear();
+    JSONTEST_ASSERT_EQUAL(array.size(), 0);
+  }
+}
+JSONTEST_FIXTURE_LOCAL(ValueTest, getArrayValue) {
+  Json::Value array;
+  for (int i = 0; i < 5; i++)
+    array[i] = i;
+
+  JSONTEST_ASSERT_EQUAL(array.size(), 5);
+  const Json::Value defaultValue(10);
+  Json::ArrayIndex index = 0;
+  for (; index <= 4; index++)
+    JSONTEST_ASSERT_EQUAL(index, array.get(index, defaultValue).asInt());
+
+  index = 4;
+  JSONTEST_ASSERT_EQUAL(array.isValidIndex(index), true);
+  index = 5;
+  JSONTEST_ASSERT_EQUAL(array.isValidIndex(index), false);
+  JSONTEST_ASSERT_EQUAL(defaultValue, array.get(index, defaultValue));
+  JSONTEST_ASSERT_EQUAL(array.isValidIndex(index), false);
 }
 JSONTEST_FIXTURE_LOCAL(ValueTest, arrayIssue252) {
   int count = 5;
@@ -1964,7 +2023,89 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, precision) {
   result = Json::writeString(b, v);
   JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 }
+JSONTEST_FIXTURE_LOCAL(ValueTest, searchValueByPath) {
+  Json::Value root, subroot;
+  root["property1"][0] = 0;
+  root["property1"][1] = 1;
+  subroot["object"] = "object";
+  root["property2"] = subroot;
 
+  const Json::Value defaultValue("error");
+  Json::FastWriter writer;
+
+  {
+    const Json::String expected("{"
+                                "\"property1\":[0,1],"
+                                "\"property2\":{\"object\":\"object\"}"
+                                "}\n");
+    Json::String outcome = writer.write(root);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, outcome);
+
+    // Array member exists.
+    const Json::Path path1(".property1.[%]", 1);
+    Json::Value result = path1.resolve(root);
+    JSONTEST_ASSERT_EQUAL(Json::Value(1), result);
+    result = path1.resolve(root, defaultValue);
+    JSONTEST_ASSERT_EQUAL(Json::Value(1), result);
+
+    // Array member does not exist.
+    const Json::Path path2(".property1.[2]");
+    result = path2.resolve(root);
+    JSONTEST_ASSERT_EQUAL(Json::nullValue, result);
+    result = path2.resolve(root, defaultValue);
+    JSONTEST_ASSERT_EQUAL(defaultValue, result);
+
+    // Access array path form error
+    const Json::Path path3(".property1.0");
+    result = path3.resolve(root);
+    JSONTEST_ASSERT_EQUAL(Json::nullValue, result);
+    result = path3.resolve(root, defaultValue);
+    JSONTEST_ASSERT_EQUAL(defaultValue, result);
+
+    // Object member exists.
+    const Json::Path path4(".property2.%", "object");
+    result = path4.resolve(root);
+    JSONTEST_ASSERT_EQUAL(Json::Value("object"), result);
+    result = path4.resolve(root, defaultValue);
+    JSONTEST_ASSERT_EQUAL(Json::Value("object"), result);
+
+    // Object member does not exist.
+    const Json::Path path5(".property2.hello");
+    result = path5.resolve(root);
+    JSONTEST_ASSERT_EQUAL(Json::nullValue, result);
+    result = path5.resolve(root, defaultValue);
+    JSONTEST_ASSERT_EQUAL(defaultValue, result);
+
+    // Access object path form error
+    const Json::Path path6(".property2.[0]");
+    result = path5.resolve(root);
+    JSONTEST_ASSERT_EQUAL(Json::nullValue, result);
+    result = path6.resolve(root, defaultValue);
+    JSONTEST_ASSERT_EQUAL(defaultValue, result);
+
+    // resolve will not change the value
+    outcome = writer.write(root);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, outcome);
+  }
+  {
+    const Json::String expected("{"
+                                "\"property1\":[0,1,null],"
+                                "\"property2\":{"
+                                "\"hello\":null,"
+                                "\"object\":\"object\"}}\n");
+    Json::Path path1(".property1.[%]", 2);
+    Json::Value& value1 = path1.make(root);
+    JSONTEST_ASSERT_EQUAL(Json::nullValue, value1);
+
+    Json::Path path2(".property2.%", "hello");
+    Json::Value& value2 = path2.make(root);
+    JSONTEST_ASSERT_EQUAL(Json::nullValue, value2);
+
+    // make will change the value
+    const Json::String outcome = writer.write(root);
+    JSONTEST_ASSERT_STRING_EQUAL(expected, outcome);
+  }
+}
 struct FastWriterTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE_LOCAL(FastWriterTest, dropNullPlaceholders) {
