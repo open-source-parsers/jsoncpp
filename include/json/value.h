@@ -399,39 +399,32 @@ public:
   double asDouble() const;
   bool asBool() const;
 
-  template <class T>
-  struct asLookupHelper;
+  template <class T> struct asLookupHelper;
 
-  #define defAsLookupHelper(type, lookup) \
-  template<> \
-  struct asLookupHelper< type > { \
-    static type as(const Value& val) { \
-      return val. lookup (); \
-    } \
+#define defAsLookupHelper(type, lookup)                                        \
+  template <> struct asLookupHelper<type> {                                    \
+    static type as(const Value& val) { return val.lookup(); }                  \
   }
 
   defAsLookupHelper(const char*, asCString);
   defAsLookupHelper(String, asString);
-  #ifdef JSON_USE_CPPTL
+#ifdef JSON_USE_CPPTL
   defAsLookupHelper(CppTL::ConstString, asConstString);
-  #endif
+#endif
   defAsLookupHelper(Int, asInt);
   defAsLookupHelper(UInt, asUInt);
-  #if defined(JSON_HAS_INT64)
+#if defined(JSON_HAS_INT64)
   defAsLookupHelper(Int64, asInt64);
   defAsLookupHelper(UInt64, asUInt64);
-  #endif // if defined(JSON_HAS_INT64)
+#endif // if defined(JSON_HAS_INT64)
   // (U)LargestInt is a type alias of int or int64 and thus cannot be defined
   defAsLookupHelper(float, asFloat);
   defAsLookupHelper(double, asDouble);
   defAsLookupHelper(bool, asBool);
 
-  #undef defAsLookupHelper
+#undef defAsLookupHelper
 
-  template <class T>
-  T as() const {
-    return asLookupHelper<T>::as(*this);
-  }
+  template <class T> T as() const { return asLookupHelper<T>::as(*this); }
 
   bool isNull() const;
   bool isBool() const;
@@ -446,15 +439,11 @@ public:
   bool isArray() const;
   bool isObject() const;
 
-  template <class T>
-  struct isLookupHelper;
+  template <class T> struct isLookupHelper;
 
-  #define defIsLookupHelper(type, lookup) \
-  template<> \
-  struct isLookupHelper< type > { \
-    static bool is(const Value& val) { \
-      return val. lookup (); \
-    } \
+#define defIsLookupHelper(type, lookup)                                        \
+  template <> struct isLookupHelper<type> {                                    \
+    static bool is(const Value& val) { return val.lookup(); }                  \
   }
 
   defIsLookupHelper(bool, isBool);
@@ -466,12 +455,9 @@ public:
   defIsLookupHelper(const char*, isString);
   defIsLookupHelper(String, isString);
 
-  #undef defIsLookupHelper
+#undef defIsLookupHelper
 
-  template <class T>
-  bool is() const {
-    return isLookupHelper<T>::is(*this);
-  }
+  template <class T> bool is() const { return isLookupHelper<T>::is(*this); }
 
   bool isConvertibleTo(ValueType other) const;
 
