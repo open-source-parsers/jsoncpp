@@ -3376,7 +3376,8 @@ JSONTEST_FIXTURE_LOCAL(TemplatedAs, equalBehaviorString) {
 #ifdef JSON_USE_CPPTL
 JSONTEST_FIXTURE_LOCAL(TemplatedAs, equalBehaviorConstString) {
   Json::Value json = "hello world";
-  JSONTEST_ASSERT_STRING_EQUAL(json.asConstString(), json.as<CppTL::ConstString>());
+  JSONTEST_ASSERT_STRING_EQUAL(json.asConstString(),
+                               json.as<CppTL::ConstString>());
 }
 #endif
 
