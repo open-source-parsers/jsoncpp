@@ -44,7 +44,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
 
   Json::Value root;
-  const char* data_str = reinterpret_cast<const char*>(data);
+  const auto data_str = reinterpret_cast<const char*>(data);
   try {
     reader->parse(data_str, data_str + size, &root, nullptr);
   } catch (Json::Exception const&) {

@@ -41,7 +41,7 @@ public:
 /// Must be a POD to allow inline initialisation without stepping
 /// into the debugger.
 struct PredicateContext {
-  typedef unsigned int Id;
+  using Id = unsigned int;
   Id id_;
   const char* file_;
   unsigned int line_;
@@ -103,7 +103,7 @@ private:
   static Json::String indentText(const Json::String& text,
                                  const Json::String& indent);
 
-  typedef std::deque<Failure> Failures;
+  using Failures = std::deque<Failure>;
   Failures failures_;
   Json::String name_;
   PredicateContext rootPredicateNode_;
@@ -130,7 +130,7 @@ private:
 };
 
 /// Function pointer type for TestCase factory
-typedef TestCase* (*TestCaseFactory)();
+using TestCaseFactory = TestCase* (*)();
 
 class Runner {
 public:
@@ -169,7 +169,7 @@ private:
   static void preventDialogOnCrash();
 
 private:
-  typedef std::deque<TestCaseFactory> Factories;
+  using Factories = std::deque<TestCaseFactory>;
   Factories tests_;
 };
 
