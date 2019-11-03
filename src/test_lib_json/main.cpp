@@ -3361,115 +3361,51 @@ int main(int argc, const char* argv[]) {
   return runner.runCommandLine(argc, argv);
 }
 
-struct TemplatedAs : JsonTest::TestCase {};
+struct MemberTemplateAs : JsonTest::TestCase {
+  template <typename T, typename F>
+  JsonTest::TestResult& EqEval(T v, F f) const {
+    const Json::Value j = v;
+    return JSONTEST_ASSERT_EQUAL(j.as<T>(), f(j));
+  }
+};
 
-JSONTEST_FIXTURE_LOCAL(TemplatedAs, equalBehaviorCString) {
-  Json::Value json = "hello world";
-  JSONTEST_ASSERT_STRING_EQUAL(json.asCString(), json.as<const char*>());
-}
-
-JSONTEST_FIXTURE_LOCAL(TemplatedAs, equalBehaviorString) {
-  Json::Value json = "hello world";
-  JSONTEST_ASSERT_STRING_EQUAL(json.asString(), json.as<Json::String>());
-}
-
+JSONTEST_FIXTURE_LOCAL(MemberTemplateAs, BehavesSameAsNamedAs) {
+  const Json::Value jstr = "hello world";
+  JSONTEST_ASSERT_STRING_EQUAL(jstr.as<const char*>(), jstr.asCString());
+  JSONTEST_ASSERT_STRING_EQUAL(jstr.as<Json::String>(), jstr.asString());
 #ifdef JSON_USE_CPPTL
-JSONTEST_FIXTURE_LOCAL(TemplatedAs, equalBehaviorConstString) {
-  Json::Value json = "hello world";
-  JSONTEST_ASSERT_STRING_EQUAL(json.asConstString(),
-                               json.as<CppTL::ConstString>());
-}
+  JSONTEST_ASSERT_STRING_EQUAL(js.as<CppTL::ConstString>(), js.asConstString());
 #endif
-
-JSONTEST_FIXTURE_LOCAL(TemplatedAs, equalBehaviorInt) {
-  Json::Value json = Json::Int(64);
-  JSONTEST_ASSERT_EQUAL(json.asInt(), json.as<Json::Int>());
-}
-
-JSONTEST_FIXTURE_LOCAL(TemplatedAs, equalBehaviorUInt) {
-  Json::Value json = Json::UInt(64);
-  JSONTEST_ASSERT_EQUAL(json.asUInt(), json.as<Json::UInt>());
-}
-
+  EqEval(Json::Int(64), [](const Json::Value& j) { return j.asInt(); });
+  EqEval(Json::UInt(64), [](const Json::Value& j) { return j.asUInt(); });
 #if defined(JSON_HAS_INT64)
-JSONTEST_FIXTURE_LOCAL(TemplatedAs, equalBehaviorInt64) {
-  Json::Value json = Json::Int64(64);
-  JSONTEST_ASSERT_EQUAL(json.asUInt64(), json.as<Json::Int64>());
-}
-
-JSONTEST_FIXTURE_LOCAL(TemplatedAs, equalBehaviorUInt64) {
-  Json::Value json = Json::UInt64(64);
-  JSONTEST_ASSERT_EQUAL(json.asUInt64(), json.as<Json::UInt64>());
-}
+  EqEval(Json::Int64(64), [](const Json::Value& j) { return j.asInt64(); });
+  EqEval(Json::UInt64(64), [](const Json::Value& j) { return j.asUInt64(); });
 #endif // if defined(JSON_HAS_INT64)
+  EqEval(Json::LargestInt(64),
+         [](const Json::Value& j) { return j.asLargestInt(); });
+  EqEval(Json::LargestUInt(64),
+         [](const Json::Value& j) { return j.asLargestUInt(); });
 
-JSONTEST_FIXTURE_LOCAL(TemplatedAs, equalBehaviorLargestInt) {
-  Json::Value json = Json::LargestInt(64);
-  JSONTEST_ASSERT_EQUAL(json.asLargestInt(), json.as<Json::LargestInt>());
+  EqEval(69.69f, [](const Json::Value& j) { return j.asFloat(); });
+  EqEval(69.69, [](const Json::Value& j) { return j.asDouble(); });
+  EqEval(false, [](const Json::Value& j) { return j.asBool(); });
+  EqEval(true, [](const Json::Value& j) { return j.asBool(); });
 }
 
-JSONTEST_FIXTURE_LOCAL(TemplatedAs, equalBehaviorLargestUInt) {
-  Json::Value json = Json::LargestUInt(64);
-  JSONTEST_ASSERT_EQUAL(json.asLargestUInt(), json.as<Json::LargestUInt>());
-}
+class MemberTemplateIs : public JsonTest::TestCase {};
 
-JSONTEST_FIXTURE_LOCAL(TemplatedAs, equalBehaviorFloat) {
-  Json::Value json = float(69.69);
-  JSONTEST_ASSERT_EQUAL(json.asFloat(), json.as<float>());
-}
-
-JSONTEST_FIXTURE_LOCAL(TemplatedAs, equalBehaviorDouble) {
-  Json::Value json = double(69.69);
-  JSONTEST_ASSERT_EQUAL(json.asDouble(), json.as<double>());
-}
-
-JSONTEST_FIXTURE_LOCAL(TemplatedAs, equalBehaviorBool) {
-  Json::Value jsonTrue = true;
-  Json::Value jsonFalse = false;
-  JSONTEST_ASSERT_EQUAL(jsonTrue.asBool(), jsonTrue.as<bool>());
-  JSONTEST_ASSERT_EQUAL(jsonFalse.asBool(), jsonFalse.as<bool>());
-}
-
-struct TemplatedIs : JsonTest::TestCase {};
-
-JSONTEST_FIXTURE_LOCAL(TemplatedIs, equalBehaviorIsBool) {
-  Json::Value json = true;
-  JSONTEST_ASSERT_EQUAL(json.isBool(), json.is<bool>());
-}
-
-JSONTEST_FIXTURE_LOCAL(TemplatedIs, equalBehaviorIsInt) {
-  Json::Value json = 142;
-  JSONTEST_ASSERT_EQUAL(json.isInt(), json.is<Json::Int>());
-}
-
-JSONTEST_FIXTURE_LOCAL(TemplatedIs, equalBehaviorIsInt64) {
-  Json::Value json = 142;
-  JSONTEST_ASSERT_EQUAL(json.isInt64(), json.is<Json::Int64>());
-}
-
-JSONTEST_FIXTURE_LOCAL(TemplatedIs, equalBehaviorIsUInt) {
-  Json::Value json = 142;
-  JSONTEST_ASSERT_EQUAL(json.isUInt(), json.is<Json::UInt>());
-}
-
-JSONTEST_FIXTURE_LOCAL(TemplatedIs, equalBehaviorIsUInt64) {
-  Json::Value json = 142;
-  JSONTEST_ASSERT_EQUAL(json.isUInt64(), json.is<Json::UInt64>());
-}
-
-JSONTEST_FIXTURE_LOCAL(TemplatedIs, equalBehaviorIsDouble) {
-  Json::Value json = 40.63;
-  JSONTEST_ASSERT_EQUAL(json.isDouble(), json.is<double>());
-}
-
-JSONTEST_FIXTURE_LOCAL(TemplatedIs, equalBehaviorIsCString) {
-  Json::Value json = "hello world";
-  JSONTEST_ASSERT_EQUAL(json.isString(), json.is<const char*>());
-}
-
-JSONTEST_FIXTURE_LOCAL(TemplatedIs, equalBehaviorIsString) {
-  Json::Value json = "hello world";
-  JSONTEST_ASSERT_EQUAL(json.isString(), json.is<Json::String>());
+JSONTEST_FIXTURE_LOCAL(MemberTemplateIs, BehavesSameAsNamedIs) {
+  const Json::Value values[] = {true, 142, 40.63, "hello world"};
+  for (const Json::Value& j : values) {
+    JSONTEST_ASSERT_EQUAL(j.is<bool>(), j.isBool());
+    JSONTEST_ASSERT_EQUAL(j.is<Json::Int>(), j.isInt());
+    JSONTEST_ASSERT_EQUAL(j.is<Json::Int64>(), j.isInt64());
+    JSONTEST_ASSERT_EQUAL(j.is<Json::UInt>(), j.isUInt());
+    JSONTEST_ASSERT_EQUAL(j.is<Json::UInt64>(), j.isUInt64());
+    JSONTEST_ASSERT_EQUAL(j.is<double>(), j.isDouble());
+    JSONTEST_ASSERT_EQUAL(j.is<Json::String>(), j.isString());
+  }
 }
 
 #if defined(__GNUC__)

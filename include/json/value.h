@@ -399,33 +399,6 @@ public:
   double asDouble() const;
   bool asBool() const;
 
-  template <class T> struct asLookupHelper;
-
-#define defAsLookupHelper(type, lookup)                                        \
-  template <> struct asLookupHelper<type> {                                    \
-    static type as(const Value& val) { return val.lookup(); }                  \
-  }
-
-  defAsLookupHelper(const char*, asCString);
-  defAsLookupHelper(String, asString);
-#ifdef JSON_USE_CPPTL
-  defAsLookupHelper(CppTL::ConstString, asConstString);
-#endif
-  defAsLookupHelper(Int, asInt);
-  defAsLookupHelper(UInt, asUInt);
-#if defined(JSON_HAS_INT64)
-  defAsLookupHelper(Int64, asInt64);
-  defAsLookupHelper(UInt64, asUInt64);
-#endif // if defined(JSON_HAS_INT64)
-  // (U)LargestInt is a type alias of int or int64 and thus cannot be defined
-  defAsLookupHelper(float, asFloat);
-  defAsLookupHelper(double, asDouble);
-  defAsLookupHelper(bool, asBool);
-
-#undef defAsLookupHelper
-
-  template <class T> T as() const { return asLookupHelper<T>::as(*this); }
-
   bool isNull() const;
   bool isBool() const;
   bool isInt() const;
@@ -439,25 +412,42 @@ public:
   bool isArray() const;
   bool isObject() const;
 
-  template <class T> struct isLookupHelper;
+  /// The `as<T>` and `is<T>` member function templates and specializations.
+  template <typename T> T as() const = delete;
+  template <typename T> bool is() const = delete;
 
-#define defIsLookupHelper(type, lookup)                                        \
-  template <> struct isLookupHelper<type> {                                    \
-    static bool is(const Value& val) { return val.lookup(); }                  \
+  template <> bool as<bool>() const { return asBool(); }
+  template <> bool is<bool>() const { return isBool(); }
+
+  template <> Int as<Int>() const { return asInt(); }
+  template <> bool is<Int>() const { return isInt(); }
+
+  template <> UInt as<UInt>() const { return asUInt(); }
+  template <> bool is<UInt>() const { return isUInt(); }
+
+#if defined(JSON_HAS_INT64)
+  template <> Int64 as<Int64>() const { return asInt64(); }
+  template <> bool is<Int64>() const { return isInt64(); }
+
+  template <> UInt64 as<UInt64>() const { return asUInt64(); }
+  template <> bool is<UInt64>() const { return isUInt64(); }
+#endif
+
+  template <> double as<double>() const { return asDouble(); }
+  template <> bool is<double>() const { return isDouble(); }
+
+  template <> String as<String>() const { return asString(); }
+  template <> bool is<String>() const { return isString(); }
+
+  /// These `as` specializations are type conversions, and do not have a
+  /// corresponding `is`.
+  template <> float as<float>() const { return asFloat(); }
+  template <> const char* as<const char*>() const { return asCString(); }
+#ifdef JSON_USE_CPPTL
+  template <> CppTL::ConstString as<CppTL::ConstString>() const {
+    return asConstString();
   }
-
-  defIsLookupHelper(bool, isBool);
-  defIsLookupHelper(Int, isInt);
-  defIsLookupHelper(Int64, isInt64);
-  defIsLookupHelper(UInt, isUInt);
-  defIsLookupHelper(UInt64, isUInt64);
-  defIsLookupHelper(double, isDouble);
-  defIsLookupHelper(const char*, isString);
-  defIsLookupHelper(String, isString);
-
-#undef defIsLookupHelper
-
-  template <class T> bool is() const { return isLookupHelper<T>::is(*this); }
+#endif
 
   bool isConvertibleTo(ValueType other) const;
 
