@@ -2234,7 +2234,6 @@ JSONTEST_FIXTURE_LOCAL(StyledStreamWriterTest, writeNestedObjects) {
 }
 
 JSONTEST_FIXTURE_LOCAL(StyledStreamWriterTest, multiLineArray) {
-  Json::StyledStreamWriter writer;
   {
     // Array member has more than 20 print effect rendering lines
     const Json::String expected("[\n\t0,"
@@ -2268,6 +2267,7 @@ JSONTEST_FIXTURE_LOCAL(StyledStreamWriterTest, multiLineArray) {
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
   }
   {
+    Json::StyledStreamWriter writer;
     // Array members do not exceed 21 print effects to render a single line
     const Json::String expected("[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]\n");
     Json::Value root;
