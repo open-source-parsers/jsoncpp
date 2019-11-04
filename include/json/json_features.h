@@ -45,7 +45,8 @@ public:
   /// \c true if comments are allowed. Default: \c true.
   bool allowComments_{true};
 
-  /// \c true if trailing commas in objects and arrays are allowed. Default \c true.
+  /// \c true if trailing commas in objects and arrays are allowed. Default \c
+  /// true.
   bool allowTrailingCommas_{true};
 
   /// \c true if root must be either an array or an object value. Default: \c
