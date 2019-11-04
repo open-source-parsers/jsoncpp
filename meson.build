@@ -71,7 +71,7 @@ jsoncpp_dep = declare_dependency(
   )
 
 # tests
-python = import('python3').find_python()
+python = import('python').find_installation()
 
 jsoncpp_test = executable(
   'jsoncpp_test',
