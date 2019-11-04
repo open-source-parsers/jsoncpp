@@ -454,7 +454,9 @@ bool Reader::readObject(Token& token) {
       initialTokenOk = readToken(tokenName);
     if (!initialTokenOk)
       break;
-    if (tokenName.type_ == tokenObjectEnd && (name.empty() || features_.allowTrailingCommas_)) // empty object or trailing comma
+    if (tokenName.type_ == tokenObjectEnd &&
+        (name.empty() ||
+         features_.allowTrailingCommas_)) // empty object or trailing comma
       return true;
     name.clear();
     if (tokenName.type_ == tokenString) {
@@ -505,7 +507,11 @@ bool Reader::readArray(Token& token) {
   int index = 0;
   for (;;) {
     skipSpaces();
-    if (current_ != end_ && *current_ == ']' && (index == 0 || (features_.allowTrailingCommas_ && !features_.allowDroppedNullPlaceholders_))) // empty array or trailing comma
+    if (current_ != end_ && *current_ == ']' &&
+        (index == 0 ||
+         (features_.allowTrailingCommas_ &&
+          !features_.allowDroppedNullPlaceholders_))) // empty array or trailing
+                                                      // comma
     {
       Token endArray;
       readToken(endArray);
@@ -1424,7 +1430,9 @@ bool OurReader::readObject(Token& token) {
       initialTokenOk = readToken(tokenName);
     if (!initialTokenOk)
       break;
-    if (tokenName.type_ == tokenObjectEnd && (name.empty() || features_.allowTrailingCommas_)) // empty object or trailing comma
+    if (tokenName.type_ == tokenObjectEnd &&
+        (name.empty() ||
+         features_.allowTrailingCommas_)) // empty object or trailing comma
       return true;
     name.clear();
     if (tokenName.type_ == tokenString) {
@@ -1481,7 +1489,11 @@ bool OurReader::readArray(Token& token) {
   int index = 0;
   for (;;) {
     skipSpaces();
-    if (current_ != end_ && *current_ == ']' && (index == 0 || (features_.allowTrailingCommas_ && !features_.allowDroppedNullPlaceholders_))) // empty array or trailing comma
+    if (current_ != end_ && *current_ == ']' &&
+        (index == 0 ||
+         (features_.allowTrailingCommas_ &&
+          !features_.allowDroppedNullPlaceholders_))) // empty array or trailing
+                                                      // comma
     {
       Token endArray;
       readToken(endArray);
