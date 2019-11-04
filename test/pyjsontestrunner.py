@@ -6,7 +6,6 @@
 """Simple implementation of a json test runner to run the test against
 json-py."""
 
-from __future__ import print_function
 import sys
 import os.path
 import json
@@ -37,11 +36,11 @@ def valueTreeToString(fout, value, path="."):
         for index, childValue in zip(xrange(0, len(value)), value):
             valueTreeToString(fout, childValue, path + "[%d]" % index)
     elif ty is types.StringType:
-        fout.write('%s="%s"\n' % (path, value))
+        fout.write(f'{path}="{value}"\n')
     elif ty is types.IntType:
         fout.write("%s=%d\n" % (path, value))
     elif ty is types.FloatType:
-        fout.write("%s=%.16g\n" % (path, value))
+        fout.write(f"{path}={value:.16g}\n")
     elif value is True:
         fout.write("%s=true\n" % path)
     elif value is False:

@@ -3,8 +3,6 @@
 # recognized in your jurisdiction.
 # See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-from __future__ import print_function
-from __future__ import unicode_literals
 from io import open
 from glob import glob
 import sys
@@ -68,8 +66,8 @@ def compareOutputs(expected, actual, message):
 def safeReadFile(path):
     try:
         return open(path, "rt", encoding="utf-8").read()
-    except IOError as e:
-        return '<File "%s" is missing: %s>' % (path, e)
+    except OSError as e:
+        return f'<File "{path}" is missing: {e}>'
 
 
 def runAllTests(
@@ -141,7 +139,7 @@ def runAllTests(
         print("TESTING:", input_path, end=" ")
         options = is_json_checker_test and "--json-checker" or ""
         options += " --json-writer %s" % writerClass
-        cmd = '%s%s %s "%s"' % (
+        cmd = '{}{} {} "{}"'.format(
             valgrind_path,
             jsontest_executable_path,
             options,

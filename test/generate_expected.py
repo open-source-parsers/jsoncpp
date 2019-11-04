@@ -3,7 +3,6 @@
 # recognized in your jurisdiction.
 # See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-from __future__ import print_function
 import glob
 import os.path
 

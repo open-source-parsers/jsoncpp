@@ -3,8 +3,6 @@
 # recognized in your jurisdiction.
 # See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-from __future__ import print_function
-from __future__ import unicode_literals
 from io import open
 from glob import glob
 import sys
@@ -16,7 +14,7 @@ import optparse
 VALGRIND_CMD = "valgrind --tool=memcheck --leak-check=yes --undef-value-errors=yes"
 
 
-class TestProxy(object):
+class TestProxy:
     def __init__(self, test_exe_path, use_valgrind=False):
         self.test_exe_path = os.path.normpath(os.path.abspath(test_exe_path))
         self.use_valgrind = use_valgrind
