@@ -332,7 +332,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, arrays) {
 JSONTEST_FIXTURE_LOCAL(ValueTest, resizeArray) {
   Json::Value array;
   {
-    for (int i = 0; i < 10; i++)
+    for (Json::ArrayIndex i = 0; i < 10; i++)
       array[i] = i;
     JSONTEST_ASSERT_EQUAL(array.size(), 10);
     // The length set is greater than the length of the array.
@@ -348,7 +348,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, resizeArray) {
     JSONTEST_ASSERT_EQUAL(array.size(), 0);
   }
   {
-    for (int i = 0; i < 10; i++)
+    for (Json::ArrayIndex i = 0; i < 10; i++)
       array[i] = i;
     JSONTEST_ASSERT_EQUAL(array.size(), 10);
     array.clear();
@@ -357,7 +357,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, resizeArray) {
 }
 JSONTEST_FIXTURE_LOCAL(ValueTest, getArrayValue) {
   Json::Value array;
-  for (int i = 0; i < 5; i++)
+  for (Json::ArrayIndex i = 0; i < 5; i++)
     array[i] = i;
 
   JSONTEST_ASSERT_EQUAL(array.size(), 5);
@@ -395,7 +395,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, arrayInsertAtRandomIndex) {
   array.append(str0); // append lvalue
 
   std::vector<Json::Value*> vec; // storage value address for checking
-  for (int i = 0; i < 3; i++) {
+  for (Json::ArrayIndex i = 0; i < 3; i++) {
     vec.push_back(&array[i]);
   }
   JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[0]); // check append
@@ -2265,7 +2265,7 @@ JSONTEST_FIXTURE_LOCAL(StyledWriterTest, multiLineArray) {
                                 "15,\n   16,\n   17,\n   "
                                 "18,\n   19,\n   20\n]\n");
     Json::Value root;
-    for (int i = 0; i < 21; i++)
+    for (Json::ArrayIndex i = 0; i < 21; i++)
       root[i] = i;
     const Json::String result = writer.write(root);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
@@ -2274,7 +2274,7 @@ JSONTEST_FIXTURE_LOCAL(StyledWriterTest, multiLineArray) {
     // Array members do not exceed 21 print effects to render a single line
     const Json::String expected("[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]\n");
     Json::Value root;
-    for (int i = 0; i < 10; i++)
+    for (Json::ArrayIndex i = 0; i < 10; i++)
       root[i] = i;
     const Json::String result = writer.write(root);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
@@ -2400,7 +2400,7 @@ JSONTEST_FIXTURE_LOCAL(StyledStreamWriterTest, multiLineArray) {
                                 "\n\t20\n]\n");
     Json::StyledStreamWriter writer;
     Json::Value root;
-    for (int i = 0; i < 21; i++)
+    for (Json::ArrayIndex i = 0; i < 21; i++)
       root[i] = i;
     Json::OStringStream sout;
     writer.write(sout, root);
@@ -2412,7 +2412,7 @@ JSONTEST_FIXTURE_LOCAL(StyledStreamWriterTest, multiLineArray) {
     // Array members do not exceed 21 print effects to render a single line
     const Json::String expected("[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]\n");
     Json::Value root;
-    for (int i = 0; i < 10; i++)
+    for (Json::ArrayIndex i = 0; i < 10; i++)
       root[i] = i;
     Json::OStringStream sout;
     writer.write(sout, root);
@@ -2547,7 +2547,7 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, multiLineArray) {
                                 "\n\t19,"
                                 "\n\t20\n]");
     Json::Value root;
-    for (int i = 0; i < 21; i++)
+    for (Json::ArrayIndex i = 0; i < 21; i++)
       root[i] = i;
     const Json::String result = Json::writeString(wb, root);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
@@ -2556,7 +2556,7 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, multiLineArray) {
     // Array members do not exceed 21 print effects to render a single line
     const Json::String expected("[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]");
     Json::Value root;
-    for (int i = 0; i < 10; i++)
+    for (Json::ArrayIndex i = 0; i < 10; i++)
       root[i] = i;
     const Json::String result = Json::writeString(wb, root);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
