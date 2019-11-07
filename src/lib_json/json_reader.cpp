@@ -637,7 +637,7 @@ bool Reader::decodeString(Token& token, String& decoded) {
     Char c = *current++;
     if (c == '"')
       break;
-    else if (c == '\\') {
+    if (c == '\\') {
       if (current == end)
         return addError("Empty escape sequence in string", token, current);
       Char escape = *current++;
@@ -1358,11 +1358,10 @@ bool OurReader::readCStyleComment(bool* containsNewLineResult) {
 
   while ((current_ + 1) < end_) {
     Char c = getNextChar();
-    if (c == '*' && *current_ == '/') {
+    if (c == '*' && *current_ == '/')
       break;
-    } else if (c == '\n') {
+    if (c == '\n')
       *containsNewLineResult = true;
-    }
   }
 
   return getNextChar() == '/';
@@ -1669,9 +1668,9 @@ bool OurReader::decodeString(Token& token, String& decoded) {
   Location end = token.end_ - 1;       // do not include '"'
   while (current != end) {
     Char c = *current++;
-    if (c == '"') {
+    if (c == '"')
       break;
-    } else if (c == '\\') {
+    if (c == '\\') {
       if (current == end)
         return addError("Empty escape sequence in string", token, current);
       Char escape = *current++;

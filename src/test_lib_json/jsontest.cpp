@@ -267,19 +267,18 @@ bool Runner::runAllTest(bool printSummary) const {
       printf("All %zu tests passed\n", count);
     }
     return true;
-  } else {
-    for (auto& result : failures) {
-      result.printFailure(count > 1);
-    }
-
-    if (printSummary) {
-      size_t const failedCount = failures.size();
-      size_t const passedCount = count - failedCount;
-      printf("%zu/%zu tests passed (%zu failure(s))\n", passedCount, count,
-             failedCount);
-    }
-    return false;
   }
+  for (auto& result : failures) {
+    result.printFailure(count > 1);
+  }
+
+  if (printSummary) {
+    size_t const failedCount = failures.size();
+    size_t const passedCount = count - failedCount;
+    printf("%zu/%zu tests passed (%zu failure(s))\n", passedCount, count,
+           failedCount);
+  }
+  return false;
 }
 
 bool Runner::testIndex(const Json::String& testName, size_t& indexOut) const {
@@ -308,7 +307,8 @@ int Runner::runCommandLine(int argc, const char* argv[]) const {
     if (opt == "--list-tests") {
       listTests();
       return 0;
-    } else if (opt == "--test-auto") {
+    }
+    if (opt == "--test-auto") {
       preventDialogOnCrash();
     } else if (opt == "--test") {
       ++index;
