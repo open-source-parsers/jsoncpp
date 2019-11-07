@@ -1476,9 +1476,7 @@ void ValueTest::checkMemberCount(Json::Value& value,
   JSONTEST_ASSERT_PRED(checkConstMemberCount(value, expectedCount));
 }
 
-ValueTest::IsCheck::IsCheck()
-
-    = default;
+ValueTest::IsCheck::IsCheck() = default;
 
 void ValueTest::checkIs(const Json::Value& value, const IsCheck& check) {
   JSONTEST_ASSERT_EQUAL(check.isObject_, value.isObject());
@@ -3752,8 +3750,8 @@ JSONTEST_FIXTURE_LOCAL(FuzzTest, fuzzDoesntCrash) {
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
 
-  for (auto it = local_.begin(); it != local_.end(); it++) {
-    runner.add(*it);
+  for (auto& local : local_) {
+    runner.add(local);
   }
 
   return runner.runCommandLine(argc, argv);
