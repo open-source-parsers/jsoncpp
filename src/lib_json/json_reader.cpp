@@ -1585,9 +1585,9 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   // then take the inverse. This assumes that minLargestInt is only a single
   // power of 10 different in magnitude, which we check above. For the last
   // digit, we take the modulus before negating for the same reason.
-  static constexpr Value::LargestUInt negative_threshold =
+  static constexpr auto negative_threshold =
       Value::LargestUInt(-(Value::minLargestInt / 10));
-  static constexpr Value::UInt negative_last_digit =
+  static constexpr auto negative_last_digit =
       Value::UInt(-(Value::minLargestInt % 10));
 
   const Value::LargestUInt threshold =
@@ -1601,7 +1601,7 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
 
-    const Value::UInt digit(static_cast<Value::UInt>(c - '0'));
+    const auto digit(static_cast<Value::UInt>(c - '0'));
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, meaing value == threshold,
@@ -1618,7 +1618,7 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
 
   if (isNegative) {
     // We use the same magnitude assumption here, just in case.
-    const Value::UInt last_digit = static_cast<Value::UInt>(value % 10);
+    const auto last_digit = static_cast<Value::UInt>(value % 10);
     decoded = -Value::LargestInt(value / 10) * 10 - last_digit;
   } else if (value <= Value::LargestUInt(Value::maxLargestInt)) {
     decoded = Value::LargestInt(value);
