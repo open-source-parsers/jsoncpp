@@ -703,13 +703,14 @@ template <> inline bool Value::is<String>() const { return isString(); }
 /// These `as` specializations are type conversions, and do not have a
 /// corresponding `is`.
 template <> inline float Value::as<float>() const { return asFloat(); }
-template <> inline const char* Value::as<const char*>() const { return asCString(); }
+template <> inline const char* Value::as<const char*>() const {
+  return asCString();
+}
 #ifdef JSON_USE_CPPTL
 template <> inline CppTL::ConstString Value::as<CppTL::ConstString>() const {
   return asConstString();
 }
 #endif
-
 
 /** \brief Experimental and untested: represents an element of the "path" to
  * access a node.
