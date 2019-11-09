@@ -1540,19 +1540,45 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   // larger than the maximum supported value of an integer then
   // we decode the number as a double.
   Location current = token.start_;
-  bool isNegative = *current == '-';
-  if (isNegative)
+  const bool isNegative = *current == '-';
+  if (isNegative) {
     ++current;
+  }
 
-  static constexpr auto positive_threshold = Value::maxLargestUInt / 10;
-  static constexpr auto positive_last_digit = Value::maxLargestUInt % 10;
-  static constexpr auto negative_threshold =
-      Value::LargestUInt(Value::minLargestInt) / 10;
-  static constexpr auto negative_last_digit =
-      Value::LargestUInt(Value::minLargestInt) % 10;
+  // We assume we can represent the largest and smallest integer types as
+  // unsigned integers with separate sign. This is only true if they can fit
+  // into an unsigned integer.
+  static_assert(Value::maxLargestInt <= Value::maxLargestUInt,
+                "Int must be smaller than UInt");
 
-  const auto threshold = isNegative ? negative_threshold : positive_threshold;
-  const auto last_digit =
+  // We need to convert minLargestInt into a positive number. The easiest way
+  // to do this conversion is to assume our "threshold" value of minLargestInt
+  // divided by 10 can fit in maxLargestInt when absolute valued. This should
+  // be a safe assumption.
+  static_assert(Value::minLargestInt <= -Value::maxLargestInt,
+                "The absolute value of minLargestInt must be greater than or "
+                "equal to maxLargestInt");
+  static_assert(Value::minLargestInt / 10 >= -Value::maxLargestInt,
+                "The absolute value of minLargestInt must be only 1 magnitude "
+                "larger than maxLargest Int");
+
+  static constexpr Value::LargestUInt positive_threshold =
+      Value::maxLargestUInt / 10;
+  static constexpr Value::UInt positive_last_digit = Value::maxLargestUInt % 10;
+
+  // For the negative values, we have to be more careful. Since typically
+  // -Value::minLargestInt will cause an overflow, we first divide by 10 and
+  // then take the inverse. This assumes that minLargestInt is only a single
+  // power of 10 different in magnitude, which we check above. For the last
+  // digit, we take the modulus before negating for the same reason.
+  static constexpr Value::LargestUInt negative_threshold =
+      Value::LargestUInt(-(Value::minLargestInt / 10));
+  static constexpr Value::UInt negative_last_digit =
+      Value::UInt(-(Value::minLargestInt % 10));
+
+  const Value::LargestUInt threshold =
+      isNegative ? negative_threshold : positive_threshold;
+  const Value::UInt max_last_digit =
       isNegative ? negative_last_digit : positive_last_digit;
 
   Value::LargestUInt value = 0;
@@ -1561,26 +1587,30 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
 
-    const auto digit(static_cast<Value::UInt>(c - '0'));
+    const Value::UInt digit(static_cast<Value::UInt>(c - '0'));
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, meaing value == threshold,
       // b) this is the last digit, or
       // c) it's small enough to fit in that rounding delta, we're okay.
       // Otherwise treat this number as a double to avoid overflow.
-      if (value > threshold || current != token.end_ || digit > last_digit) {
+      if (value > threshold || current != token.end_ ||
+          digit > max_last_digit) {
         return decodeDouble(token, decoded);
       }
     }
     value = value * 10 + digit;
   }
 
-  if (isNegative)
-    decoded = -Value::LargestInt(value);
-  else if (value <= Value::LargestUInt(Value::maxLargestInt))
+  if (isNegative) {
+    // We use the same magnitude assumption here, just in case.
+    const Value::UInt last_digit = static_cast<Value::UInt>(value % 10);
+    decoded = -Value::LargestInt(value / 10) * 10 - last_digit;
+  } else if (value <= Value::LargestUInt(Value::maxLargestInt)) {
     decoded = Value::LargestInt(value);
-  else
+  } else {
     decoded = value;
+  }
 
   return true;
 }
@@ -1597,37 +1627,12 @@ bool OurReader::decodeDouble(Token& token) {
 
 bool OurReader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
-  const int bufferSize = 32;
-  int count;
-  ptrdiff_t const length = token.end_ - token.start_;
-
-  // Sanity check to avoid buffer overflow exploits.
-  if (length < 0) {
-    return addError("Unable to parse token length", token);
-  }
-  auto const ulength = static_cast<size_t>(length);
-
-  // Avoid using a string constant for the format control string given to
-  // sscanf, as this can cause hard to debug crashes on OS X. See here for more
-  // info:
-  //
-  //     http://developer.apple.com/library/mac/#DOCUMENTATION/DeveloperTools/gcc-4.0.1/gcc/Incompatibilities.html
-  char format[] = "%lf";
-
-  if (length <= bufferSize) {
-    Char buffer[bufferSize + 1];
-    memcpy(buffer, token.start_, ulength);
-    buffer[length] = 0;
-    fixNumericLocaleInput(buffer, buffer + length);
-    count = sscanf(buffer, format, &value);
-  } else {
-    String buffer(token.start_, token.end_);
-    count = sscanf(buffer.c_str(), format, &value);
-  }
-
-  if (count != 1)
+  const String buffer(token.start_, token.end_);
+  IStringStream is(buffer);
+  if (!(is >> value)) {
     return addError(
         "'" + String(token.start_, token.end_) + "' is not a number.", token);
+  }
   decoded = value;
   return true;
 }
@@ -1649,9 +1654,9 @@ bool OurReader::decodeString(Token& token, String& decoded) {
   Location end = token.end_ - 1;       // do not include '"'
   while (current != end) {
     Char c = *current++;
-    if (c == '"')
+    if (c == '"') {
       break;
-    else if (c == '\\') {
+    } else if (c == '\\') {
       if (current == end)
         return addError("Empty escape sequence in string", token, current);
       Char escape = *current++;

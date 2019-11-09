@@ -15,7 +15,7 @@ project(
     'cpp_std=c++11',
     'warning_level=1'],
   license : 'Public Domain',
-  meson_version : '>= 0.50.0')
+  meson_version : '>= 0.49.0')
 
 
 jsoncpp_headers = [
