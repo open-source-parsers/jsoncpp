@@ -416,39 +416,6 @@ public:
   template <typename T> T as() const = delete;
   template <typename T> bool is() const = delete;
 
-  template <> bool as<bool>() const { return asBool(); }
-  template <> bool is<bool>() const { return isBool(); }
-
-  template <> Int as<Int>() const { return asInt(); }
-  template <> bool is<Int>() const { return isInt(); }
-
-  template <> UInt as<UInt>() const { return asUInt(); }
-  template <> bool is<UInt>() const { return isUInt(); }
-
-#if defined(JSON_HAS_INT64)
-  template <> Int64 as<Int64>() const { return asInt64(); }
-  template <> bool is<Int64>() const { return isInt64(); }
-
-  template <> UInt64 as<UInt64>() const { return asUInt64(); }
-  template <> bool is<UInt64>() const { return isUInt64(); }
-#endif
-
-  template <> double as<double>() const { return asDouble(); }
-  template <> bool is<double>() const { return isDouble(); }
-
-  template <> String as<String>() const { return asString(); }
-  template <> bool is<String>() const { return isString(); }
-
-  /// These `as` specializations are type conversions, and do not have a
-  /// corresponding `is`.
-  template <> float as<float>() const { return asFloat(); }
-  template <> const char* as<const char*>() const { return asCString(); }
-#ifdef JSON_USE_CPPTL
-  template <> CppTL::ConstString as<CppTL::ConstString>() const {
-    return asConstString();
-  }
-#endif
-
   bool isConvertibleTo(ValueType other) const;
 
   /// Number of values in array or object
@@ -709,6 +676,40 @@ private:
   ptrdiff_t start_;
   ptrdiff_t limit_;
 };
+
+template <> inline bool Value::as<bool>() const { return asBool(); }
+template <> inline bool Value::is<bool>() const { return isBool(); }
+
+template <> inline Int Value::as<Int>() const { return asInt(); }
+template <> inline bool Value::is<Int>() const { return isInt(); }
+
+template <> inline UInt Value::as<UInt>() const { return asUInt(); }
+template <> inline bool Value::is<UInt>() const { return isUInt(); }
+
+#if defined(JSON_HAS_INT64)
+template <> inline Int64 Value::as<Int64>() const { return asInt64(); }
+template <> inline bool Value::is<Int64>() const { return isInt64(); }
+
+template <> inline UInt64 Value::as<UInt64>() const { return asUInt64(); }
+template <> inline bool Value::is<UInt64>() const { return isUInt64(); }
+#endif
+
+template <> inline double Value::as<double>() const { return asDouble(); }
+template <> inline bool Value::is<double>() const { return isDouble(); }
+
+template <> inline String Value::as<String>() const { return asString(); }
+template <> inline bool Value::is<String>() const { return isString(); }
+
+/// These `as` specializations are type conversions, and do not have a
+/// corresponding `is`.
+template <> inline float Value::as<float>() const { return asFloat(); }
+template <> inline const char* Value::as<const char*>() const { return asCString(); }
+#ifdef JSON_USE_CPPTL
+template <> inline CppTL::ConstString Value::as<CppTL::ConstString>() const {
+  return asConstString();
+}
+#endif
+
 
 /** \brief Experimental and untested: represents an element of the "path" to
  * access a node.
