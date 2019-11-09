@@ -1634,8 +1634,8 @@ bool OurReader::decodeString(Token& token) {
 
 bool OurReader::decodeString(Token& token, String& decoded) {
   decoded.reserve(static_cast<size_t>(token.end_ - token.start_ - 2));
-  Location current = token.start_ + 1;  // skip '"'
-  Location end = token.end_ - 1;        // do not include '"'
+  Location current = token.start_ + 1; // skip '"'
+  Location end = token.end_ - 1;       // do not include '"'
   while (current != end) {
     Char c = *current++;
     if (c == '"') {
