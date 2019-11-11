@@ -16,6 +16,7 @@
 #include <cstring>
 #include <iomanip>
 #include <iostream>
+#include <iterator>
 #include <json/config.h>
 #include <json/json.h>
 #include <limits>
@@ -3394,18 +3395,85 @@ JSONTEST_FIXTURE_LOCAL(BuilderTest, settings) {
 
 struct IteratorTest : JsonTest::TestCase {};
 
-JSONTEST_FIXTURE_LOCAL(IteratorTest, distance) {
+JSONTEST_FIXTURE_LOCAL(IteratorTest, convert) {
+  Json::Value j;
+  const Json::Value& cj = j;
+  auto it = j.begin();
+  Json::Value::const_iterator cit;
+  cit = it;
+  JSONTEST_ASSERT(cit == cj.begin());
+}
+
+JSONTEST_FIXTURE_LOCAL(IteratorTest, decrement) {
   Json::Value json;
   json["k1"] = "a";
   json["k2"] = "b";
-  int dist = 0;
-  Json::String str;
-  for (Json::ValueIterator it = json.begin(); it != json.end(); ++it) {
-    dist = it - json.begin();
-    str = it->asString().c_str();
+  std::vector<std::string> values;
+  for (auto it = json.end(); it != json.begin();) {
+    --it;
+    values.push_back(it->asString());
   }
-  JSONTEST_ASSERT_EQUAL(1, dist);
-  JSONTEST_ASSERT_STRING_EQUAL("b", str);
+  JSONTEST_ASSERT((values == std::vector<std::string>{"b", "a"}));
+}
+
+JSONTEST_FIXTURE_LOCAL(IteratorTest, reverseIterator) {
+  Json::Value json;
+  json["k1"] = "a";
+  json["k2"] = "b";
+  std::vector<std::string> values;
+  using Iter = decltype(json.begin());
+  auto re = std::reverse_iterator<Iter>(json.begin());
+  for (auto it = std::reverse_iterator<Iter>(json.end()); it != re; ++it) {
+    values.push_back(it->asString());
+  }
+  JSONTEST_ASSERT((values == std::vector<std::string>{"b", "a"}));
+}
+
+JSONTEST_FIXTURE_LOCAL(IteratorTest, distance) {
+  {
+    Json::Value json;
+    json["k1"] = "a";
+    json["k2"] = "b";
+    int i = 0;
+    auto it = json.begin();
+    for (;; ++it, ++i) {
+      auto dist = it - json.begin();
+      JSONTEST_ASSERT_EQUAL(i, dist);
+      if (it == json.end())
+        break;
+    }
+  }
+  {
+    Json::Value j; // empty
+    JSONTEST_ASSERT_EQUAL(j.end() - j.end(), 0);
+    JSONTEST_ASSERT_EQUAL(j.end() - j.begin(), 0);
+  }
+}
+
+JSONTEST_FIXTURE_LOCAL(IteratorTest, nullValues) {
+  {
+    Json::Value json;
+    auto end = json.end();
+    auto endCopy = end;
+    JSONTEST_ASSERT(endCopy == end);
+    endCopy = end;
+    JSONTEST_ASSERT(endCopy == end);
+  }
+  {
+    // Same test, now with const Value.
+    const Json::Value json;
+    auto end = json.end();
+    auto endCopy = end;
+    JSONTEST_ASSERT(endCopy == end);
+    endCopy = end;
+    JSONTEST_ASSERT(endCopy == end);
+  }
+}
+
+JSONTEST_FIXTURE_LOCAL(IteratorTest, staticStringKey) {
+  Json::Value json;
+  json[Json::StaticString("k1")] = "a";
+  JSONTEST_ASSERT_EQUAL(Json::Value("k1"), json.begin().key());
 }
 
 JSONTEST_FIXTURE_LOCAL(IteratorTest, names) {
@@ -3416,11 +3484,13 @@ JSONTEST_FIXTURE_LOCAL(IteratorTest, names) {
   JSONTEST_ASSERT(it != json.end());
   JSONTEST_ASSERT_EQUAL(Json::Value("k1"), it.key());
   JSONTEST_ASSERT_STRING_EQUAL("k1", it.name());
+  JSONTEST_ASSERT_STRING_EQUAL("k1", it.memberName());
   JSONTEST_ASSERT_EQUAL(-1, it.index());
   ++it;
   JSONTEST_ASSERT(it != json.end());
   JSONTEST_ASSERT_EQUAL(Json::Value("k2"), it.key());
   JSONTEST_ASSERT_STRING_EQUAL("k2", it.name());
+  JSONTEST_ASSERT_STRING_EQUAL("k2", it.memberName());
   JSONTEST_ASSERT_EQUAL(-1, it.index());
   ++it;
   JSONTEST_ASSERT(it == json.end());
@@ -3444,7 +3514,7 @@ JSONTEST_FIXTURE_LOCAL(IteratorTest, indexes) {
   JSONTEST_ASSERT(it == json.end());
 }
 
-JSONTEST_FIXTURE_LOCAL(IteratorTest, const) {
+JSONTEST_FIXTURE_LOCAL(IteratorTest, constness) {
   Json::Value const v;
   JSONTEST_ASSERT_THROWS(
       Json::Value::iterator it(v.begin())); // Compile, but throw.
