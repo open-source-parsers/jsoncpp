@@ -135,23 +135,23 @@ extern JSON_API int msvc_pre1900_c99_snprintf(char* outBuf, size_t size,
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
 namespace Json {
-typedef int Int;
-typedef unsigned int UInt;
+using Int = int;
+using UInt = unsigned int;
 #if defined(JSON_NO_INT64)
-typedef int LargestInt;
-typedef unsigned int LargestUInt;
+using LargestInt = int;
+using LargestUInt = unsigned int;
 #undef JSON_HAS_INT64
 #else                 // if defined(JSON_NO_INT64)
 // For Microsoft Visual use specific types as long long is not supported
 #if defined(_MSC_VER) // Microsoft Visual Studio
-typedef __int64 Int64;
-typedef unsigned __int64 UInt64;
+using Int64 = __int64;
+using UInt64 = unsigned __int64;
 #else                 // if defined(_MSC_VER) // Other platforms, use long long
-typedef int64_t Int64;
-typedef uint64_t UInt64;
+using Int64 = int64_t;
+using UInt64 = uint64_t;
 #endif                // if defined(_MSC_VER)
-typedef Int64 LargestInt;
-typedef UInt64 LargestUInt;
+using LargestInt = Int64;
+using LargestUInt = UInt64;
 #define JSON_HAS_INT64
 #endif // if defined(JSON_NO_INT64)
 

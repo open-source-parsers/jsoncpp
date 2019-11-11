@@ -252,7 +252,7 @@ private:
   static bool hasCommentForValue(const Value& value);
   static String normalizeEOL(const String& text);
 
-  typedef std::vector<String> ChildValues;
+  using ChildValues = std::vector<String>;
 
   ChildValues childValues_;
   String document_;
@@ -326,7 +326,7 @@ private:
   static bool hasCommentForValue(const Value& value);
   static String normalizeEOL(const String& text);
 
-  typedef std::vector<String> ChildValues;
+  using ChildValues = std::vector<String>;
 
   ChildValues childValues_;
   OStream* document_;
