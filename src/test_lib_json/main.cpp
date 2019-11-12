@@ -3444,9 +3444,9 @@ JSONTEST_FIXTURE_LOCAL(IteratorTest, distance) {
     }
   }
   {
-    Json::Value j; // empty
-    JSONTEST_ASSERT_EQUAL(j.end() - j.end(), 0);
-    JSONTEST_ASSERT_EQUAL(j.end() - j.begin(), 0);
+    Json::Value empty;
+    JSONTEST_ASSERT_EQUAL(empty.end() - empty.end(), 0);
+    JSONTEST_ASSERT_EQUAL(empty.end() - empty.begin(), 0);
   }
 }
 
