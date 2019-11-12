@@ -3502,6 +3502,53 @@ int main(int argc, const char* argv[]) {
   return runner.runCommandLine(argc, argv);
 }
 
+struct MemberTemplateAs : JsonTest::TestCase {
+  template <typename T, typename F>
+  JsonTest::TestResult& EqEval(T v, F f) const {
+    const Json::Value j = v;
+    return JSONTEST_ASSERT_EQUAL(j.as<T>(), f(j));
+  }
+};
+
+JSONTEST_FIXTURE_LOCAL(MemberTemplateAs, BehavesSameAsNamedAs) {
+  const Json::Value jstr = "hello world";
+  JSONTEST_ASSERT_STRING_EQUAL(jstr.as<const char*>(), jstr.asCString());
+  JSONTEST_ASSERT_STRING_EQUAL(jstr.as<Json::String>(), jstr.asString());
+#ifdef JSON_USE_CPPTL
+  JSONTEST_ASSERT_STRING_EQUAL(js.as<CppTL::ConstString>(), js.asConstString());
+#endif
+  EqEval(Json::Int(64), [](const Json::Value& j) { return j.asInt(); });
+  EqEval(Json::UInt(64), [](const Json::Value& j) { return j.asUInt(); });
+#if defined(JSON_HAS_INT64)
+  EqEval(Json::Int64(64), [](const Json::Value& j) { return j.asInt64(); });
+  EqEval(Json::UInt64(64), [](const Json::Value& j) { return j.asUInt64(); });
+#endif // if defined(JSON_HAS_INT64)
+  EqEval(Json::LargestInt(64),
+         [](const Json::Value& j) { return j.asLargestInt(); });
+  EqEval(Json::LargestUInt(64),
+         [](const Json::Value& j) { return j.asLargestUInt(); });
+
+  EqEval(69.69f, [](const Json::Value& j) { return j.asFloat(); });
+  EqEval(69.69, [](const Json::Value& j) { return j.asDouble(); });
+  EqEval(false, [](const Json::Value& j) { return j.asBool(); });
+  EqEval(true, [](const Json::Value& j) { return j.asBool(); });
+}
+
+class MemberTemplateIs : public JsonTest::TestCase {};
+
+JSONTEST_FIXTURE_LOCAL(MemberTemplateIs, BehavesSameAsNamedIs) {
+  const Json::Value values[] = {true, 142, 40.63, "hello world"};
+  for (const Json::Value& j : values) {
+    JSONTEST_ASSERT_EQUAL(j.is<bool>(), j.isBool());
+    JSONTEST_ASSERT_EQUAL(j.is<Json::Int>(), j.isInt());
+    JSONTEST_ASSERT_EQUAL(j.is<Json::Int64>(), j.isInt64());
+    JSONTEST_ASSERT_EQUAL(j.is<Json::UInt>(), j.isUInt());
+    JSONTEST_ASSERT_EQUAL(j.is<Json::UInt64>(), j.isUInt64());
+    JSONTEST_ASSERT_EQUAL(j.is<double>(), j.isDouble());
+    JSONTEST_ASSERT_EQUAL(j.is<Json::String>(), j.isString());
+  }
+}
+
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
