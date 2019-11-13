@@ -1948,9 +1948,8 @@ void CharReaderBuilder::setDefaults(Json::Value* settings) {
 
 bool parseFromStream(CharReader::Factory const& fact, IStream& sin, Value* root,
                      String* errs) {
-  OStringStream ssin;
-  ssin << sin.rdbuf();
-  String doc = ssin.str();
+  String doc;
+  std::getline(sin, doc, static_cast<char> EOF);
   char const* begin = doc.data();
   char const* end = begin + doc.size();
   // Note that we do not actually need a null-terminator.
