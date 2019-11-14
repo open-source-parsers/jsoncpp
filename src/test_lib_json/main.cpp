@@ -22,11 +22,7 @@
 #include <sstream>
 #include <string>
 
-#if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
 using CharReaderPtr = std::unique_ptr<Json::CharReader>;
-#else
-typedef std::auto_ptr<Json::CharReader> CharReaderPtr;
-#endif
 
 // Make numeric limits more convenient to talk about.
 // Assumes int type in 32 bits.
