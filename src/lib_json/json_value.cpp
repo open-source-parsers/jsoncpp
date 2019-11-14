@@ -140,7 +140,7 @@ static inline char* duplicateAndPrefixStringValue(const char* value,
                                     sizeof(unsigned) - 1U,
                       "in Json::Value::duplicateAndPrefixStringValue(): "
                       "length too big for prefixing");
-  unsigned actualLength = length + static_cast<unsigned>(sizeof(unsigned)) + 1U;
+  size_t actualLength = sizeof(length) + length + 1;
   auto newString = static_cast<char*>(malloc(actualLength));
   if (newString == nullptr) {
     throwRuntimeError("in Json::Value::duplicateAndPrefixStringValue(): "
