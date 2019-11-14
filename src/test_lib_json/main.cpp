@@ -2979,14 +2979,6 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseObjectWithErrors) {
                             "  Missing '}' or object member name\n");
     JSONTEST_ASSERT_EQUAL("value", root["property"]);
   }
-  {
-    char const doc[] = "{ \"property\" : \"value\" , }";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
-    JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT(errs == "* Line 1, Column 26\n"
-                            "  Missing '}' or object member name\n");
-    JSONTEST_ASSERT_EQUAL("value", root["property"]);
-  }
 }
 
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseArrayWithErrors) {
