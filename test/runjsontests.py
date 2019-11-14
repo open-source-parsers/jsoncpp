@@ -84,7 +84,7 @@ def runAllTests(jsontest_executable_path, input_dir = None,
             10,   # fails because we allow extra values after close
             13,   # fails because we allow leading zeroes in numbers
             18,   # fails because we allow deeply nested values
-            25,   # fails because we allow tab characters in strings.
+            25,   # fails because we allow tab characters in strings
             27,   # fails because we allow string line breaks
         ]]
         test_jsonchecker = [ test for test in all_tests
