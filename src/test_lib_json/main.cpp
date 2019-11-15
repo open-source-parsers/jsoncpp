@@ -14,6 +14,7 @@
 #include "jsontest.h"
 #include <cmath>
 #include <cstring>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <iterator>
