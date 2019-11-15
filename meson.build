@@ -21,7 +21,6 @@ project(
 jsoncpp_headers = [
   'include/json/allocator.h',
   'include/json/assertions.h',
-  'include/json/autolink.h',
   'include/json/config.h',
   'include/json/json_features.h',
   'include/json/forwards.h',

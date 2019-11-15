@@ -3584,9 +3584,6 @@ JSONTEST_FIXTURE_LOCAL(MemberTemplateAs, BehavesSameAsNamedAs) {
   const Json::Value jstr = "hello world";
   JSONTEST_ASSERT_STRING_EQUAL(jstr.as<const char*>(), jstr.asCString());
   JSONTEST_ASSERT_STRING_EQUAL(jstr.as<Json::String>(), jstr.asString());
-#ifdef JSON_USE_CPPTL
-  JSONTEST_ASSERT_STRING_EQUAL(js.as<CppTL::ConstString>(), js.asConstString());
-#endif
   EqEval(Json::Int(64), [](const Json::Value& j) { return j.asInt(); });
   EqEval(Json::UInt(64), [](const Json::Value& j) { return j.asUInt(); });
 #if defined(JSON_HAS_INT64)
