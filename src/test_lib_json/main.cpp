@@ -63,27 +63,22 @@ static std::deque<JsonTest::TestCaseFactory> local_;
 
 struct ValueTest : JsonTest::TestCase {
   Json::Value null_;
-  Json::Value emptyArray_;
-  Json::Value emptyObject_;
-  Json::Value integer_;
-  Json::Value unsignedInteger_;
-  Json::Value smallUnsignedInteger_;
-  Json::Value real_;
-  Json::Value float_;
+  Json::Value emptyArray_{Json::arrayValue};
+  Json::Value emptyObject_{Json::objectValue};
+  Json::Value integer_{123456789};
+  Json::Value unsignedInteger_{34567890};
+  Json::Value smallUnsignedInteger_{Json::Value::UInt(Json::Value::maxInt)};
+  Json::Value real_{1234.56789};
+  Json::Value float_{0.00390625f};
   Json::Value array1_;
   Json::Value object1_;
-  Json::Value emptyString_;
-  Json::Value string1_;
-  Json::Value string_;
-  Json::Value true_;
-  Json::Value false_;
+  Json::Value emptyString_{""};
+  Json::Value string1_{"a"};
+  Json::Value string_{"sometext with space"};
+  Json::Value true_{true};
+  Json::Value false_{false};
 
-  ValueTest()
-      : emptyArray_(Json::arrayValue), emptyObject_(Json::objectValue),
-        integer_(123456789), unsignedInteger_(34567890u),
-        smallUnsignedInteger_(Json::Value::UInt(Json::Value::maxInt)),
-        real_(1234.56789), float_(0.00390625f), emptyString_(""), string1_("a"),
-        string_("sometext with space"), true_(true), false_(false) {
+  ValueTest() {
     array1_.append(1234);
     object1_["id"] = 1234;
   }
@@ -124,53 +119,45 @@ struct ValueTest : JsonTest::TestCase {
 };
 
 Json::String ValueTest::normalizeFloatingPointStr(const Json::String& s) {
-  Json::String::size_type index = s.find_last_of("eE");
-  if (index != Json::String::npos) {
-    Json::String::size_type hasSign =
-        (s[index + 1] == '+' || s[index + 1] == '-') ? 1 : 0;
-    Json::String::size_type exponentStartIndex = index + 1 + hasSign;
-    Json::String normalized = s.substr(0, exponentStartIndex);
-    Json::String::size_type indexDigit =
-        s.find_first_not_of('0', exponentStartIndex);
-    Json::String exponent = "0";
-    if (indexDigit != Json::String::npos) // There is an exponent different
-                                          // from 0
-    {
-      exponent = s.substr(indexDigit);
-    }
-    return normalized + exponent;
+  auto index = s.find_last_of("eE");
+  if (index == s.npos)
+    return s;
+  int hasSign = (s[index + 1] == '+' || s[index + 1] == '-') ? 1 : 0;
+  auto exponentStartIndex = index + 1 + hasSign;
+  Json::String normalized = s.substr(0, exponentStartIndex);
+  auto indexDigit = s.find_first_not_of('0', exponentStartIndex);
+  Json::String exponent = "0";
+  if (indexDigit != s.npos) { // nonzero exponent
+    exponent = s.substr(indexDigit);
   }
-  return s;
+  return normalized + exponent;
 }
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, checkNormalizeFloatingPointStr) {
-  JSONTEST_ASSERT_STRING_EQUAL("0.0", normalizeFloatingPointStr("0.0"));
-  JSONTEST_ASSERT_STRING_EQUAL("0e0", normalizeFloatingPointStr("0e0"));
-  JSONTEST_ASSERT_STRING_EQUAL("1234.0", normalizeFloatingPointStr("1234.0"));
-  JSONTEST_ASSERT_STRING_EQUAL("1234.0e0",
-                               normalizeFloatingPointStr("1234.0e0"));
-  JSONTEST_ASSERT_STRING_EQUAL("1234.0e-1",
-                               normalizeFloatingPointStr("1234.0e-1"));
-  JSONTEST_ASSERT_STRING_EQUAL("1234.0e+0",
-                               normalizeFloatingPointStr("1234.0e+0"));
-  JSONTEST_ASSERT_STRING_EQUAL("1234.0e+1",
-                               normalizeFloatingPointStr("1234.0e+001"));
-  JSONTEST_ASSERT_STRING_EQUAL("1234e-1", normalizeFloatingPointStr("1234e-1"));
-  JSONTEST_ASSERT_STRING_EQUAL("1234e+0",
-                               normalizeFloatingPointStr("1234e+000"));
-  JSONTEST_ASSERT_STRING_EQUAL("1234e+1",
-                               normalizeFloatingPointStr("1234e+001"));
-  JSONTEST_ASSERT_STRING_EQUAL("1234e10", normalizeFloatingPointStr("1234e10"));
-  JSONTEST_ASSERT_STRING_EQUAL("1234e10",
-                               normalizeFloatingPointStr("1234e010"));
-  JSONTEST_ASSERT_STRING_EQUAL("1234e+10",
-                               normalizeFloatingPointStr("1234e+010"));
-  JSONTEST_ASSERT_STRING_EQUAL("1234e-10",
-                               normalizeFloatingPointStr("1234e-010"));
-  JSONTEST_ASSERT_STRING_EQUAL("1234e+100",
-                               normalizeFloatingPointStr("1234e+100"));
-  JSONTEST_ASSERT_STRING_EQUAL("1234e-100",
-                               normalizeFloatingPointStr("1234e-100"));
+  struct TestData {
+    std::string in;
+    std::string out;
+  } const testData[] = {
+      {"0.0", "0.0"},
+      {"0e0", "0e0"},
+      {"1234.0", "1234.0"},
+      {"1234.0e0", "1234.0e0"},
+      {"1234.0e-1", "1234.0e-1"},
+      {"1234.0e+0", "1234.0e+0"},
+      {"1234.0e+001", "1234.0e+1"},
+      {"1234e-1", "1234e-1"},
+      {"1234e+000", "1234e+0"},
+      {"1234e+001", "1234e+1"},
+      {"1234e10", "1234e10"},
+      {"1234e010", "1234e10"},
+      {"1234e+010", "1234e+10"},
+      {"1234e-010", "1234e-10"},
+      {"1234e+100", "1234e+100"},
+      {"1234e-100", "1234e-100"},
+  };
+  for (const auto& td : testData) {
+    JSONTEST_ASSERT_STRING_EQUAL(normalizeFloatingPointStr(td.in), td.out);
+  }
 }
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, memberCount) {
@@ -3145,6 +3132,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderFailIfExtraTest, issue164) {
     JSONTEST_ASSERT_EQUAL("property", root);
   }
 }
+
 JSONTEST_FIXTURE_LOCAL(CharReaderFailIfExtraTest, issue107) {
   // This is interpreted as an int value followed by a colon.
   Json::CharReaderBuilder b;
@@ -3231,124 +3219,66 @@ JSONTEST_FIXTURE_LOCAL(CharReaderFailIfExtraTest, parseComment) {
     JSONTEST_ASSERT_EQUAL(true, root.asBool());
   }
 }
-struct CharReaderAllowDropNullTest : JsonTest::TestCase {};
+
+struct CharReaderAllowDropNullTest : JsonTest::TestCase {
+  using Value = Json::Value;
+  using ValueCheck = std::function<void(const Value&)>;
+
+  Value nullValue = Value{Json::nullValue};
+  Value emptyArray = Value{Json::arrayValue};
+
+  ValueCheck checkEq(const Value& v) {
+    return [=](const Value& root) { JSONTEST_ASSERT_EQUAL(root, v); };
+  }
+
+  ValueCheck objGetAnd(std::string idx, ValueCheck f) {
+    return [=](const Value& root) { f(root.get(idx, true)); };
+  }
+
+  ValueCheck arrGetAnd(int idx, ValueCheck f) {
+    return [=](const Value& root) { f(root[idx]); };
+  }
+};
 
 JSONTEST_FIXTURE_LOCAL(CharReaderAllowDropNullTest, issue178) {
-  Json::CharReaderBuilder b;
-  b.settings_["allowDroppedNullPlaceholders"] = true;
-  Json::Value root;
-  Json::String errs;
-  CharReaderPtr reader(b.newCharReader());
-  {
-    char const doc[] = "{\"a\":,\"b\":true}";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
+  struct TestSpec {
+    int line;
+    std::string doc;
+    size_t rootSize;
+    ValueCheck onRoot;
+  };
+  const TestSpec specs[] = {
+      {__LINE__, R"({"a":,"b":true})", 2, objGetAnd("a", checkEq(nullValue))},
+      {__LINE__, R"({"a":,"b":true})", 2, objGetAnd("a", checkEq(nullValue))},
+      {__LINE__, R"({"a":})", 1, objGetAnd("a", checkEq(nullValue))},
+      {__LINE__, "[]", 0, checkEq(emptyArray)},
+      {__LINE__, "[null]", 1},
+      {__LINE__, "[,]", 2},
+      {__LINE__, "[,,,]", 4},
+      {__LINE__, "[null,]", 2},
+      {__LINE__, "[,null]", 2},
+      {__LINE__, "[,,]", 3},
+      {__LINE__, "[null,,]", 3},
+      {__LINE__, "[,null,]", 3},
+      {__LINE__, "[,,null]", 3},
+      {__LINE__, "[[],,,]", 4, arrGetAnd(0, checkEq(emptyArray))},
+      {__LINE__, "[,[],,]", 4, arrGetAnd(1, checkEq(emptyArray))},
+      {__LINE__, "[,,,[]]", 4, arrGetAnd(3, checkEq(emptyArray))},
+  };
+  for (const auto& spec : specs) {
+    Json::CharReaderBuilder b;
+    b.settings_["allowDroppedNullPlaceholders"] = true;
+    std::unique_ptr<Json::CharReader> reader(b.newCharReader());
+
+    Json::Value root;
+    Json::String errs;
+    bool ok = reader->parse(spec.doc.data(), spec.doc.data() + spec.doc.size(),
+                            &root, &errs);
     JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT_STRING_EQUAL("", errs);
-    JSONTEST_ASSERT_EQUAL(2u, root.size());
-    JSONTEST_ASSERT_EQUAL(Json::nullValue, root.get("a", true));
-  }
-  {
-    char const doc[] = "{\"a\":}";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT_STRING_EQUAL("", errs);
-    JSONTEST_ASSERT_EQUAL(1u, root.size());
-    JSONTEST_ASSERT_EQUAL(Json::nullValue, root.get("a", true));
-  }
-  {
-    char const doc[] = "[]";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(errs.empty());
-    JSONTEST_ASSERT_EQUAL(0u, root.size());
-    JSONTEST_ASSERT_EQUAL(Json::arrayValue, root);
-  }
-  {
-    char const doc[] = "[null]";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(errs.empty());
-    JSONTEST_ASSERT_EQUAL(1u, root.size());
-  }
-  {
-    char const doc[] = "[,]";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT_STRING_EQUAL("", errs);
-    JSONTEST_ASSERT_EQUAL(2u, root.size());
-  }
-  {
-    char const doc[] = "[,,,]";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT_STRING_EQUAL("", errs);
-    JSONTEST_ASSERT_EQUAL(4u, root.size());
-  }
-  {
-    char const doc[] = "[null,]";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT_STRING_EQUAL("", errs);
-    JSONTEST_ASSERT_EQUAL(2u, root.size());
-  }
-  {
-    char const doc[] = "[,null]";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(errs.empty());
-    JSONTEST_ASSERT_EQUAL(2u, root.size());
-  }
-  {
-    char const doc[] = "[,,]";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT_STRING_EQUAL("", errs);
-    JSONTEST_ASSERT_EQUAL(3u, root.size());
-  }
-  {
-    char const doc[] = "[null,,]";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT_STRING_EQUAL("", errs);
-    JSONTEST_ASSERT_EQUAL(3u, root.size());
-  }
-  {
-    char const doc[] = "[,null,]";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT_STRING_EQUAL("", errs);
-    JSONTEST_ASSERT_EQUAL(3u, root.size());
-  }
-  {
-    char const doc[] = "[,,null]";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(errs.empty());
-    JSONTEST_ASSERT_EQUAL(3u, root.size());
-  }
-  {
-    char const doc[] = "[[],,,]";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT_STRING_EQUAL("", errs);
-    JSONTEST_ASSERT_EQUAL(4u, root.size());
-    JSONTEST_ASSERT_EQUAL(Json::arrayValue, root[0u]);
-  }
-  {
-    char const doc[] = "[,[],,]";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT_STRING_EQUAL("", errs);
-    JSONTEST_ASSERT_EQUAL(4u, root.size());
-    JSONTEST_ASSERT_EQUAL(Json::arrayValue, root[1u]);
-  }
-  {
-    char const doc[] = "[,,,[]]";
-    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(errs.empty());
-    JSONTEST_ASSERT_EQUAL(4u, root.size());
-    JSONTEST_ASSERT_EQUAL(Json::arrayValue, root[3u]);
+    JSONTEST_ASSERT_STRING_EQUAL(errs, "");
+    if (spec.onRoot) {
+      spec.onRoot(root);
+    }
   }
 }
 
