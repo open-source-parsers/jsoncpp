@@ -2662,13 +2662,6 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseObject) {
     JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
                     "* Line 1, Column 12\n  Missing ':' after object "
                     "member name\n");
-    std::vector<Json::Reader::StructuredError> errors =
-        reader.getStructuredErrors();
-    JSONTEST_ASSERT(errors.size() == 1);
-    JSONTEST_ASSERT(errors.at(0).offset_start == 11);
-    JSONTEST_ASSERT(errors.at(0).offset_limit == 12);
-    JSONTEST_ASSERT(errors.at(0).message ==
-                    "Missing ':' after object member name");
   }
   {
     bool ok = reader.parse("{\"property\" : \"value\" ", root);
@@ -2676,13 +2669,6 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseObject) {
     JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
                     "* Line 1, Column 23\n  Missing ',' or '}' in object "
                     "declaration\n");
-    std::vector<Json::Reader::StructuredError> errors =
-        reader.getStructuredErrors();
-    JSONTEST_ASSERT(errors.size() == 1);
-    JSONTEST_ASSERT(errors.at(0).offset_start == 22);
-    JSONTEST_ASSERT(errors.at(0).offset_limit == 22);
-    JSONTEST_ASSERT(errors.at(0).message ==
-                    "Missing ',' or '}' in object declaration");
   }
   {
     bool ok = reader.parse("{\"property\" : \"value\", ", root);
@@ -2690,13 +2676,6 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseObject) {
     JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
                     "* Line 1, Column 24\n  Missing '}' or object "
                     "member name\n");
-    std::vector<Json::Reader::StructuredError> errors =
-        reader.getStructuredErrors();
-    JSONTEST_ASSERT(errors.size() == 1);
-    JSONTEST_ASSERT(errors.at(0).offset_start == 23);
-    JSONTEST_ASSERT(errors.at(0).offset_limit == 23);
-    JSONTEST_ASSERT(errors.at(0).message ==
-                    "Missing '}' or object member name");
   }
 }
 
@@ -2709,13 +2688,6 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseArray) {
     JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
                     "* Line 1, Column 11\n  Missing ',' or ']' in array "
                     "declaration\n");
-    std::vector<Json::Reader::StructuredError> errors =
-        reader.getStructuredErrors();
-    JSONTEST_ASSERT(errors.size() == 1);
-    JSONTEST_ASSERT(errors.at(0).offset_start == 10);
-    JSONTEST_ASSERT(errors.at(0).offset_limit == 10);
-    JSONTEST_ASSERT(errors.at(0).message ==
-                    "Missing ',' or ']' in array declaration");
   }
   {
     bool ok = reader.parse("[ \"value1\" \"value2\" ] ", root);
@@ -2723,13 +2695,6 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseArray) {
     JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
                     "* Line 1, Column 12\n  Missing ',' or ']' in array "
                     "declaration\n");
-    std::vector<Json::Reader::StructuredError> errors =
-        reader.getStructuredErrors();
-    JSONTEST_ASSERT(errors.size() == 1);
-    JSONTEST_ASSERT(errors.at(0).offset_start == 11);
-    JSONTEST_ASSERT(errors.at(0).offset_limit == 19);
-    JSONTEST_ASSERT(errors.at(0).message ==
-                    "Missing ',' or ']' in array declaration");
   }
 }
 
@@ -2750,31 +2715,15 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseString) {
                     "  additional six characters expected to "
                     "parse unicode surrogate pair.\n"
                     "See Line 1, Column 10 for detail.\n");
-    std::vector<Json::Reader::StructuredError> errors =
-        reader.getStructuredErrors();
-    JSONTEST_ASSERT(errors.size() == 1);
-    JSONTEST_ASSERT(errors.at(0).offset_start == 2);
-    JSONTEST_ASSERT(errors.at(0).offset_limit == 10);
-    JSONTEST_ASSERT(errors.at(0).message ==
-                    "additional six characters expected to "
-                    "parse unicode surrogate pair.");
   }
   {
-    bool ok = reader.parse("[ \"\\uD801\\d1234\" ]", root);
+    bool ok = reader.parse("[ \"\\ud801\\d1234\" ]", root);
     JSONTEST_ASSERT(!ok);
     JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
                     "* Line 1, Column 3\n"
                     "  expecting another \\u token to begin the "
                     "second half of a unicode surrogate pair\n"
                     "See Line 1, Column 12 for detail.\n");
-    std::vector<Json::Reader::StructuredError> errors =
-        reader.getStructuredErrors();
-    JSONTEST_ASSERT(errors.size() == 1);
-    JSONTEST_ASSERT(errors.at(0).offset_start == 2);
-    JSONTEST_ASSERT(errors.at(0).offset_limit == 16);
-    JSONTEST_ASSERT(errors.at(0).message ==
-                    "expecting another \\u token to begin the "
-                    "second half of a unicode surrogate pair");
   }
   {
     bool ok = reader.parse("[ \"\\ua3t@\" ]", root);
@@ -2784,14 +2733,6 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseString) {
                     "  Bad unicode escape sequence in string: "
                     "hexadecimal digit expected.\n"
                     "See Line 1, Column 9 for detail.\n");
-    std::vector<Json::Reader::StructuredError> errors =
-        reader.getStructuredErrors();
-    JSONTEST_ASSERT(errors.size() == 1);
-    JSONTEST_ASSERT(errors.at(0).offset_start == 2);
-    JSONTEST_ASSERT(errors.at(0).offset_limit == 10);
-    JSONTEST_ASSERT(errors.at(0).message ==
-                    "Bad unicode escape sequence in string: "
-                    "hexadecimal digit expected.");
   }
   {
     bool ok = reader.parse("[ \"\\ua3t\" ]", root);
@@ -2801,14 +2742,6 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseString) {
         "* Line 1, Column 3\n"
         "  Bad unicode escape sequence in string: four digits expected.\n"
         "See Line 1, Column 6 for detail.\n");
-    std::vector<Json::Reader::StructuredError> errors =
-        reader.getStructuredErrors();
-    JSONTEST_ASSERT(errors.size() == 1);
-    JSONTEST_ASSERT(errors.at(0).offset_start == 2);
-    JSONTEST_ASSERT(errors.at(0).offset_limit == 9);
-    JSONTEST_ASSERT(
-        errors.at(0).message ==
-        "Bad unicode escape sequence in string: four digits expected.");
   }
 }
 
@@ -2883,7 +2816,7 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseWithNoErrorsTestingOffsets) {
   JSONTEST_ASSERT(root.getOffsetLimit() == 115);
 }
 
-JSONTEST_FIXTURE_LOCAL(ReaderTest, parseWithOneError) {
+JSONTEST_FIXTURE_LOCAL(ReaderTest, parseWithOneErrorTestingOffsets) {
   Json::Reader reader;
   Json::Value root;
   {
@@ -2928,13 +2861,6 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseSpecialFloat) {
         reader.getFormattedErrorMessages() ==
         "* Line 1, Column 9\n  Syntax error: value, object or array "
         "expected.\n");
-    std::vector<Json::Reader::StructuredError> errors =
-        reader.getStructuredErrors();
-    JSONTEST_ASSERT(errors.size() == 1);
-    JSONTEST_ASSERT(errors.at(0).offset_start == 8);
-    JSONTEST_ASSERT(errors.at(0).offset_limit == 9);
-    JSONTEST_ASSERT(errors.at(0).message ==
-                    "Syntax error: value, object or array expected.");
   }
   {
     bool ok = reader.parse("{ \"a\" : Infiniaa }", root);
@@ -2943,13 +2869,6 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseSpecialFloat) {
         reader.getFormattedErrorMessages() ==
         "* Line 1, Column 9\n  Syntax error: value, object or array "
         "expected.\n");
-    std::vector<Json::Reader::StructuredError> errors =
-        reader.getStructuredErrors();
-    JSONTEST_ASSERT(errors.size() == 1);
-    JSONTEST_ASSERT(errors.at(0).offset_start == 8);
-    JSONTEST_ASSERT(errors.at(0).offset_limit == 9);
-    JSONTEST_ASSERT(errors.at(0).message ==
-                    "Syntax error: value, object or array expected.");
   }
 }
 
@@ -2963,14 +2882,6 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, strictModeParseNumber) {
                   "* Line 1, Column 1\n"
                   "  A valid JSON document must be either an array or"
                   " an object value.\n");
-  std::vector<Json::Reader::StructuredError> errors =
-      reader.getStructuredErrors();
-  JSONTEST_ASSERT(errors.size() == 1);
-  JSONTEST_ASSERT(errors.at(0).offset_start == 0);
-  JSONTEST_ASSERT(errors.at(0).offset_limit == 3);
-  JSONTEST_ASSERT(errors.at(0).message ==
-                  "A valid JSON document must be either an array or"
-                  " an object value.");
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseChineseWithOneError) {
@@ -2981,13 +2892,6 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseChineseWithOneError) {
   JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
                   "* Line 1, Column 19\n  Syntax error: value, object or array "
                   "expected.\n");
-  std::vector<Json::Reader::StructuredError> errors =
-      reader.getStructuredErrors();
-  JSONTEST_ASSERT(errors.size() == 1);
-  JSONTEST_ASSERT(errors.at(0).offset_start == 18);
-  JSONTEST_ASSERT(errors.at(0).offset_limit == 19);
-  JSONTEST_ASSERT(errors.at(0).message ==
-                  "Syntax error: value, object or array expected.");
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseWithDetailError) {
@@ -2998,12 +2902,6 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseWithDetailError) {
   JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
                   "* Line 1, Column 16\n  Bad escape sequence in string\nSee "
                   "Line 1, Column 20 for detail.\n");
-  std::vector<Json::Reader::StructuredError> errors =
-      reader.getStructuredErrors();
-  JSONTEST_ASSERT(errors.size() == 1);
-  JSONTEST_ASSERT(errors.at(0).offset_start == 15);
-  JSONTEST_ASSERT(errors.at(0).offset_limit == 23);
-  JSONTEST_ASSERT(errors.at(0).message == "Bad escape sequence in string");
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, pushErrorTest) {
