@@ -2691,17 +2691,16 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseWithNoErrors) {
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseObject) {
-  checkParse(
-      R"({"property"})", {{11, 12, "Missing ':' after object member name"}},
-      "* Line 1, Column 12\n  Missing ':' after object member name\n");
+  checkParse(R"({"property"})",
+             {{11, 12, "Missing ':' after object member name"}},
+             "* Line 1, Column 12\n  Missing ':' after object member name\n");
   checkParse(
       R"({"property" : "value" )",
       {{22, 22, "Missing ',' or '}' in object declaration"}},
       "* Line 1, Column 23\n  Missing ',' or '}' in object declaration\n");
-  checkParse(
-      R"({"property" : "value", )",
-      {{23, 23, "Missing '}' or object member name"}},
-      "* Line 1, Column 24\n  Missing '}' or object member name\n");
+  checkParse(R"({"property" : "value", )",
+             {{23, 23, "Missing '}' or object member name"}},
+             "* Line 1, Column 24\n  Missing '}' or object member name\n");
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseArray) {
@@ -2762,13 +2761,12 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, streamParseWithNoErrors) {
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseWithNoErrorsTestingOffsets) {
-  checkParse(
-      R"({)"
-      R"( "property" : ["value", "value2"],)"
-      R"( "obj" : { "nested" : -6.2e+15, "bool" : true},)"
-      R"( "null" : null,)"
-      R"( "false" : false)"
-      R"( })");
+  checkParse(R"({)"
+             R"( "property" : ["value", "value2"],)"
+             R"( "obj" : { "nested" : -6.2e+15, "bool" : true},)"
+             R"( "null" : null,)"
+             R"( "false" : false)"
+             R"( })");
   auto checkOffsets = [&](const Json::Value& v, int start, int limit) {
     JSONTEST_ASSERT_EQUAL(v.getOffsetStart(), start);
     JSONTEST_ASSERT_EQUAL(v.getOffsetLimit(), limit);
@@ -2816,13 +2814,13 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, strictModeParseNumber) {
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseChineseWithOneError) {
-  checkParse(
-      R"({ "pr)"
-      "\u4f50\u8574"
-      R"(erty" :: "value" })",
-      {{18, 19, "Syntax error: value, object or array expected."}},
-      "* Line 1, Column 19\n  Syntax error: value, object or array "
-      "expected.\n");
+  // \u4f50\u85e4 佐藤
+  checkParse(R"({ "pr)"
+             "佐藤"
+             R"(erty" :: "value" })",
+             {{18, 19, "Syntax error: value, object or array expected."}},
+             "* Line 1, Column 19\n  Syntax error: value, object or array "
+             "expected.\n");
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseWithDetailError) {
