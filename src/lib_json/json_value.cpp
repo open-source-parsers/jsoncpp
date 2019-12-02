@@ -1126,7 +1126,11 @@ Value& Value::append(Value&& value) {
   return this->value_.map_->emplace(size(), std::move(value)).first->second;
 }
 
-bool Value::insert(ArrayIndex index, Value newValue) {
+bool Value::insert(ArrayIndex index, const Value& newValue) {
+  return insert(index, Value(newValue));
+}
+
+bool Value::insert(ArrayIndex index, Value&& newValue) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
                       "in Json::Value::insert: requires arrayValue");
   ArrayIndex length = size();
