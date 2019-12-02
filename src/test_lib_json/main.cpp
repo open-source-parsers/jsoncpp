@@ -21,6 +21,7 @@
 #include <json/config.h>
 #include <json/json.h>
 #include <limits>
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -2643,350 +2644,214 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, unicode) {
 }
 
 struct ReaderTest : JsonTest::TestCase {
-  void testStructuredError(Json::Reader reader, Json::ArrayIndex errors_size,
-                           Json::Reader::StructuredError structederror[]) {
-    std::vector<Json::Reader::StructuredError> errors =
-        reader.getStructuredErrors();
-    JSONTEST_ASSERT(errors.size() == errors_size);
-    for (size_t i = 0; i < errors_size; i++) {
-      JSONTEST_ASSERT(errors.at(i).offset_start ==
-                      structederror[i].offset_start);
-      JSONTEST_ASSERT(errors.at(i).offset_limit ==
-                      structederror[i].offset_limit);
-      JSONTEST_ASSERT(errors.at(i).message == structederror[i].message);
+  void setStrictMode() {
+    reader = std::unique_ptr<Json::Reader>(
+        new Json::Reader(Json::Features{}.strictMode()));
+  }
+
+  void checkStructuredErrors(
+      const std::vector<Json::Reader::StructuredError>& actual,
+      const std::vector<Json::Reader::StructuredError>& expected) {
+    JSONTEST_ASSERT_EQUAL(actual.size(), expected.size());
+    for (size_t i = 0; i < actual.size(); ++i) {
+      const auto& a = actual[i];
+      const auto& e = expected[i];
+      JSONTEST_ASSERT_EQUAL(a.offset_start, e.offset_start) << i;
+      JSONTEST_ASSERT_EQUAL(a.offset_limit, e.offset_limit) << i;
+      JSONTEST_ASSERT_EQUAL(a.message, e.message) << i;
     }
   }
+
+  template <typename Input> void checkParse(Input&& input) {
+    JSONTEST_ASSERT(reader->parse(input, root));
+  }
+
+  template <typename Input>
+  void
+  checkParse(Input&& input,
+             const std::vector<Json::Reader::StructuredError>& structured) {
+    JSONTEST_ASSERT(!reader->parse(input, root));
+    checkStructuredErrors(reader->getStructuredErrors(), structured);
+  }
+
+  template <typename Input>
+  void checkParse(Input&& input,
+                  const std::vector<Json::Reader::StructuredError>& structured,
+                  const std::string& formatted) {
+    checkParse(input, structured);
+    JSONTEST_ASSERT_EQUAL(reader->getFormattedErrorMessages(), formatted);
+  }
+
+  std::unique_ptr<Json::Reader> reader{new Json::Reader()};
+  Json::Value root;
 };
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseWithNoErrors) {
-  Json::Reader reader;
-  Json::Value root;
-  bool ok = reader.parse("{ \"property\" : \"value\" }", root);
-  JSONTEST_ASSERT(ok);
-  JSONTEST_ASSERT(reader.getFormattedErrorMessages().empty());
-  JSONTEST_ASSERT(reader.getStructuredErrors().empty());
+  checkParse(R"({ "property" : "value" })");
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseObject) {
-  Json::Reader reader;
-  Json::Value root;
-  {
-    bool ok = reader.parse("{\"property\"}", root);
-    JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
-                    "* Line 1, Column 12\n  Missing ':' after object "
-                    "member name\n");
-    Json::Reader::StructuredError structuredError[] = {
-        {11, 12, "Missing ':' after object member name"}};
-    testStructuredError(reader, 1, structuredError);
-  }
-  {
-    bool ok = reader.parse("{\"property\" : \"value\" ", root);
-    JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
-                    "* Line 1, Column 23\n  Missing ',' or '}' in object "
-                    "declaration\n");
-    Json::Reader::StructuredError structuredError[] = {
-        {22, 22, "Missing ',' or '}' in object declaration"}};
-    testStructuredError(reader, 1, structuredError);
-  }
-  {
-    bool ok = reader.parse("{\"property\" : \"value\", ", root);
-    JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
-                    "* Line 1, Column 24\n  Missing '}' or object "
-                    "member name\n");
-    Json::Reader::StructuredError structuredError[] = {
-        {23, 23, "Missing '}' or object member name"}};
-    testStructuredError(reader, 1, structuredError);
-  }
+  checkParse(
+      R"({"property"})", {{11, 12, "Missing ':' after object member name"}},
+      "* Line 1, Column 12\n  Missing ':' after object member name\n");
+  checkParse(
+      R"({"property" : "value" )",
+      {{22, 22, "Missing ',' or '}' in object declaration"}},
+      "* Line 1, Column 23\n  Missing ',' or '}' in object declaration\n");
+  checkParse(
+      R"({"property" : "value", )",
+      {{23, 23, "Missing '}' or object member name"}},
+      "* Line 1, Column 24\n  Missing '}' or object member name\n");
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseArray) {
-  Json::Reader reader;
-  Json::Value root;
-  {
-    bool ok = reader.parse("[ \"value\" ", root);
-    JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
-                    "* Line 1, Column 11\n  Missing ',' or ']' in array "
-                    "declaration\n");
-    Json::Reader::StructuredError structuredError[] = {
-        {10, 10, "Missing ',' or ']' in array declaration"}};
-    testStructuredError(reader, 1, structuredError);
-  }
-  {
-    bool ok = reader.parse("[ \"value1\" \"value2\" ] ", root);
-    JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
-                    "* Line 1, Column 12\n  Missing ',' or ']' in array "
-                    "declaration\n");
-    Json::Reader::StructuredError structuredError[] = {
-        {11, 19, "Missing ',' or ']' in array declaration"}};
-    testStructuredError(reader, 1, structuredError);
-  }
+  checkParse(
+      R"([ "value" )", {{10, 10, "Missing ',' or ']' in array declaration"}},
+      "* Line 1, Column 11\n  Missing ',' or ']' in array declaration\n");
+  checkParse(
+      R"([ "value1" "value2" ] )",
+      {{11, 19, "Missing ',' or ']' in array declaration"}},
+      "* Line 1, Column 12\n  Missing ',' or ']' in array declaration\n");
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseString) {
-  Json::Reader reader;
-  Json::Value root;
-  {
-    bool ok = reader.parse("[ \"\\u8A2a\" ]", root);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(reader.getFormattedErrorMessages().empty());
-    JSONTEST_ASSERT(reader.getStructuredErrors().empty());
-  }
-  {
-    bool ok = reader.parse("[ \"\\ud801\" ]", root);
-    JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
-                    "* Line 1, Column 3\n"
-                    "  additional six characters expected to "
-                    "parse unicode surrogate pair.\n"
-                    "See Line 1, Column 10 for detail.\n");
-    Json::Reader::StructuredError structuredError[] = {
-        {2, 10,
-         "additional six characters expected to "
-         "parse unicode surrogate pair."}};
-    testStructuredError(reader, 1, structuredError);
-  }
-  {
-    bool ok = reader.parse("[ \"\\ud801\\d1234\" ]", root);
-    JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
-                    "* Line 1, Column 3\n"
-                    "  expecting another \\u token to begin the "
-                    "second half of a unicode surrogate pair\n"
-                    "See Line 1, Column 12 for detail.\n");
-    Json::Reader::StructuredError structuredError[] = {
-        {2, 16,
-         "expecting another \\u token to begin the "
-         "second half of a unicode surrogate pair"}};
-    testStructuredError(reader, 1, structuredError);
-  }
-  {
-    bool ok = reader.parse("[ \"\\ua3t@\" ]", root);
-    JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
-                    "* Line 1, Column 3\n"
-                    "  Bad unicode escape sequence in string: "
-                    "hexadecimal digit expected.\n"
-                    "See Line 1, Column 9 for detail.\n");
-    Json::Reader::StructuredError structuredError[] = {
-        {2, 10,
-         "Bad unicode escape sequence in string: "
-         "hexadecimal digit expected."}};
-    testStructuredError(reader, 1, structuredError);
-  }
-  {
-    bool ok = reader.parse("[ \"\\ua3t\" ]", root);
-    JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT(
-        reader.getFormattedErrorMessages() ==
-        "* Line 1, Column 3\n"
-        "  Bad unicode escape sequence in string: four digits expected.\n"
-        "See Line 1, Column 6 for detail.\n");
-    Json::Reader::StructuredError structuredError[] = {
-        {2, 9, "Bad unicode escape sequence in string: four digits expected."}};
-    testStructuredError(reader, 1, structuredError);
-  }
+  checkParse(R"([ "\u8a2a" ])");
+  checkParse(
+      R"([ "\ud801" ])",
+      {{2, 10,
+        "additional six characters expected to parse unicode surrogate "
+        "pair."}},
+      "* Line 1, Column 3\n"
+      "  additional six characters expected to parse unicode surrogate pair.\n"
+      "See Line 1, Column 10 for detail.\n");
+  checkParse(R"([ "\ud801\d1234" ])",
+             {{2, 16,
+               "expecting another \\u token to begin the "
+               "second half of a unicode surrogate pair"}},
+             "* Line 1, Column 3\n"
+             "  expecting another \\u token to begin the "
+             "second half of a unicode surrogate pair\n"
+             "See Line 1, Column 12 for detail.\n");
+  checkParse(R"([ "\ua3t@" ])",
+             {{2, 10,
+               "Bad unicode escape sequence in string: "
+               "hexadecimal digit expected."}},
+             "* Line 1, Column 3\n"
+             "  Bad unicode escape sequence in string: "
+             "hexadecimal digit expected.\n"
+             "See Line 1, Column 9 for detail.\n");
+  checkParse(
+      R"([ "\ua3t" ])",
+      {{2, 9, "Bad unicode escape sequence in string: four digits expected."}},
+      "* Line 1, Column 3\n"
+      "  Bad unicode escape sequence in string: four digits expected.\n"
+      "See Line 1, Column 6 for detail.\n");
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseComment) {
-  Json::Reader reader;
-  Json::Value root;
-  {
-    bool ok = reader.parse("{ /*commentBeforeValue*/"
-                           " \"property\" : \"value\" }"
-                           "//commentAfterValue\n",
-                           root);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(reader.getFormattedErrorMessages().empty());
-    JSONTEST_ASSERT(reader.getStructuredErrors().empty());
-  }
-  {
-    bool ok = reader.parse("{ \"property\" : \"value\" } "
-                           "//trailing\n//comment\n",
-                           root);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(reader.getFormattedErrorMessages().empty());
-    JSONTEST_ASSERT(reader.getStructuredErrors().empty());
-  }
-  {
-    bool ok = reader.parse(" true //comment1\n//comment2\r"
-                           "//comment3\r\n",
-                           root);
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(reader.getFormattedErrorMessages().empty());
-    JSONTEST_ASSERT(reader.getStructuredErrors().empty());
-  }
+  checkParse(
+      R"({ /*commentBeforeValue*/ "property" : "value" }//commentAfterValue)"
+      "\n");
+  checkParse(" true //comment1\n//comment2\r//comment3\r\n");
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, streamParseWithNoErrors) {
-  Json::Reader reader;
-  std::string styled = "{ \"property\" : \"value\" }";
+  std::string styled = R"({ "property" : "value" })";
   std::istringstream iss(styled);
-  Json::Value root;
-  bool ok = reader.parse(iss, root);
-  JSONTEST_ASSERT(ok);
-  JSONTEST_ASSERT(reader.getFormattedErrorMessages().empty());
-  JSONTEST_ASSERT(reader.getStructuredErrors().empty());
+  checkParse(iss);
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseWithNoErrorsTestingOffsets) {
-  Json::Reader reader;
-  Json::Value root;
-  bool ok = reader.parse("{ \"property\" : [\"value\", \"value2\"], \"obj\" : "
-                         "{ \"nested\" : -6.2e+15, \"bool\" : true}, \"null\" :"
-                         " null, \"false\" : false }",
-                         root);
-  JSONTEST_ASSERT(ok);
-  JSONTEST_ASSERT(reader.getFormattedErrorMessages().empty());
-  JSONTEST_ASSERT(reader.getStructuredErrors().empty());
-  JSONTEST_ASSERT(root["property"].getOffsetStart() == 15);
-  JSONTEST_ASSERT(root["property"].getOffsetLimit() == 34);
-  JSONTEST_ASSERT(root["property"][0].getOffsetStart() == 16);
-  JSONTEST_ASSERT(root["property"][0].getOffsetLimit() == 23);
-  JSONTEST_ASSERT(root["property"][1].getOffsetStart() == 25);
-  JSONTEST_ASSERT(root["property"][1].getOffsetLimit() == 33);
-  JSONTEST_ASSERT(root["obj"].getOffsetStart() == 44);
-  JSONTEST_ASSERT(root["obj"].getOffsetLimit() == 81);
-  JSONTEST_ASSERT(root["obj"]["nested"].getOffsetStart() == 57);
-  JSONTEST_ASSERT(root["obj"]["nested"].getOffsetLimit() == 65);
-  JSONTEST_ASSERT(root["obj"]["bool"].getOffsetStart() == 76);
-  JSONTEST_ASSERT(root["obj"]["bool"].getOffsetLimit() == 80);
-  JSONTEST_ASSERT(root["null"].getOffsetStart() == 92);
-  JSONTEST_ASSERT(root["null"].getOffsetLimit() == 96);
-  JSONTEST_ASSERT(root["false"].getOffsetStart() == 108);
-  JSONTEST_ASSERT(root["false"].getOffsetLimit() == 113);
-  JSONTEST_ASSERT(root.getOffsetStart() == 0);
-  JSONTEST_ASSERT(root.getOffsetLimit() == 115);
+  checkParse(
+      R"({)"
+      R"( "property" : ["value", "value2"],)"
+      R"( "obj" : { "nested" : -6.2e+15, "bool" : true},)"
+      R"( "null" : null,)"
+      R"( "false" : false)"
+      R"( })");
+  auto checkOffsets = [&](const Json::Value& v, int start, int limit) {
+    JSONTEST_ASSERT_EQUAL(v.getOffsetStart(), start);
+    JSONTEST_ASSERT_EQUAL(v.getOffsetLimit(), limit);
+  };
+  checkOffsets(root, 0, 115);
+  checkOffsets(root["property"], 15, 34);
+  checkOffsets(root["property"][0], 16, 23);
+  checkOffsets(root["property"][1], 25, 33);
+  checkOffsets(root["obj"], 44, 81);
+  checkOffsets(root["obj"]["nested"], 57, 65);
+  checkOffsets(root["obj"]["bool"], 76, 80);
+  checkOffsets(root["null"], 92, 96);
+  checkOffsets(root["false"], 108, 113);
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseWithOneError) {
-  Json::Reader reader;
-  Json::Value root;
-  {
-    bool ok = reader.parse("{ \"property\" :: \"value\" }", root);
-    JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT(
-        reader.getFormattedErrorMessages() ==
-        "* Line 1, Column 15\n  Syntax error: value, object or array "
-        "expected.\n");
-    Json::Reader::StructuredError structuredError[] = {
-        {14, 15, "Syntax error: value, object or array expected."}};
-    testStructuredError(reader, 1, structuredError);
-  }
-  {
-    bool ok = reader.parse("s", root);
-    JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT(
-        reader.getFormattedErrorMessages() ==
-        "* Line 1, Column 1\n  Syntax error: value, object or array "
-        "expected.\n");
-    Json::Reader::StructuredError structuredError[] = {
-        {0, 1, "Syntax error: value, object or array expected."}};
-    testStructuredError(reader, 1, structuredError);
-  }
+  checkParse(R"({ "property" :: "value" })",
+             {{14, 15, "Syntax error: value, object or array expected."}},
+             "* Line 1, Column 15\n  Syntax error: value, object or array "
+             "expected.\n");
+  checkParse("s", {{0, 1, "Syntax error: value, object or array expected."}},
+             "* Line 1, Column 1\n  Syntax error: value, object or array "
+             "expected.\n");
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseSpecialFloat) {
-  Json::Reader reader;
-  Json::Value root;
-  {
-    bool ok = reader.parse("{ \"a\" : Infi }", root);
-    JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT(
-        reader.getFormattedErrorMessages() ==
-        "* Line 1, Column 9\n  Syntax error: value, object or array "
-        "expected.\n");
-    Json::Reader::StructuredError structuredError[] = {
-        {8, 9, "Syntax error: value, object or array expected."}};
-    testStructuredError(reader, 1, structuredError);
-  }
-  {
-    bool ok = reader.parse("{ \"a\" : Infiniaa }", root);
-    JSONTEST_ASSERT(!ok);
-    JSONTEST_ASSERT(
-        reader.getFormattedErrorMessages() ==
-        "* Line 1, Column 9\n  Syntax error: value, object or array "
-        "expected.\n");
-    Json::Reader::StructuredError structuredError[] = {
-        {8, 9, "Syntax error: value, object or array expected."}};
-    testStructuredError(reader, 1, structuredError);
-  }
+  checkParse(R"({ "a" : Infi })",
+             {{8, 9, "Syntax error: value, object or array expected."}},
+             "* Line 1, Column 9\n  Syntax error: value, object or array "
+             "expected.\n");
+  checkParse(R"({ "a" : Infiniaa })",
+             {{8, 9, "Syntax error: value, object or array expected."}},
+             "* Line 1, Column 9\n  Syntax error: value, object or array "
+             "expected.\n");
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, strictModeParseNumber) {
-  Json::Features feature;
-  Json::Reader reader(feature.strictMode());
-  Json::Value root;
-  bool ok = reader.parse("123", root);
-  JSONTEST_ASSERT(!ok);
-  JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
-                  "* Line 1, Column 1\n"
-                  "  A valid JSON document must be either an array or"
-                  " an object value.\n");
-  Json::Reader::StructuredError structuredError[] = {
-      {0, 3,
-       "A valid JSON document must be either an array or"
-       " an object value."}};
-  testStructuredError(reader, 1, structuredError);
+  setStrictMode();
+  checkParse(
+      "123",
+      {{0, 3,
+        "A valid JSON document must be either an array or an object value."}},
+      "* Line 1, Column 1\n"
+      "  A valid JSON document must be either an array or an object value.\n");
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseChineseWithOneError) {
-  Json::Reader reader;
-  Json::Value root;
-  bool ok = reader.parse("{ \"pr佐藤erty\" :: \"value\" }", root);
-  JSONTEST_ASSERT(!ok);
-  JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
-                  "* Line 1, Column 19\n  Syntax error: value, object or array "
-                  "expected.\n");
-  Json::Reader::StructuredError structuredError[] = {
-      {18, 19, "Syntax error: value, object or array expected."}};
-  testStructuredError(reader, 1, structuredError);
+  checkParse(
+      R"({ "pr)"
+      "\u4f50\u8574"
+      R"(erty" :: "value" })",
+      {{18, 19, "Syntax error: value, object or array expected."}},
+      "* Line 1, Column 19\n  Syntax error: value, object or array "
+      "expected.\n");
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseWithDetailError) {
-  Json::Reader reader;
-  Json::Value root;
-  bool ok = reader.parse("{ \"property\" : \"v\\alue\" }", root);
-  JSONTEST_ASSERT(!ok);
-  JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
-                  "* Line 1, Column 16\n  Bad escape sequence in string\nSee "
-                  "Line 1, Column 20 for detail.\n");
-  Json::Reader::StructuredError structuredError[] = {
-      {15, 23, "Bad escape sequence in string"}};
-  testStructuredError(reader, 1, structuredError);
+  checkParse(R"({ "property" : "v\alue" })",
+             {{15, 23, "Bad escape sequence in string"}},
+             "* Line 1, Column 16\n"
+             "  Bad escape sequence in string\n"
+             "See Line 1, Column 20 for detail.\n");
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, pushErrorTest) {
-  Json::Reader reader;
-  Json::Value root;
-  {
-    bool ok = reader.parse("{ \"AUTHOR\" : 123 }", root);
-    JSONTEST_ASSERT(ok);
-    if (!root["AUTHOR"].isString()) {
-      ok = reader.pushError(root["AUTHOR"], "AUTHOR must be a string");
-    }
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
-                    "* Line 1, Column 14\n"
-                    "  AUTHOR must be a string\n");
+  checkParse(R"({ "AUTHOR" : 123 })");
+  if (!root["AUTHOR"].isString()) {
+    JSONTEST_ASSERT(
+        reader->pushError(root["AUTHOR"], "AUTHOR must be a string"));
   }
-  {
-    bool ok = reader.parse("{ \"AUTHOR\" : 123 }", root);
-    JSONTEST_ASSERT(ok);
-    if (!root["AUTHOR"].isString()) {
-      ok = reader.pushError(root["AUTHOR"], "AUTHOR must be a string",
-                            root["AUTHOR"]);
-    }
-    JSONTEST_ASSERT(ok);
-    JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
-                    "* Line 1, Column 14\n"
-                    "  AUTHOR must be a string\n"
-                    "See Line 1, Column 14 for detail.\n");
+  JSONTEST_ASSERT_STRING_EQUAL(reader->getFormattedErrorMessages(),
+                               "* Line 1, Column 14\n"
+                               "  AUTHOR must be a string\n");
+
+  checkParse(R"({ "AUTHOR" : 123 })");
+  if (!root["AUTHOR"].isString()) {
+    JSONTEST_ASSERT(reader->pushError(root["AUTHOR"], "AUTHOR must be a string",
+                                      root["AUTHOR"]));
   }
+  JSONTEST_ASSERT_STRING_EQUAL(reader->getFormattedErrorMessages(),
+                               "* Line 1, Column 14\n"
+                               "  AUTHOR must be a string\n"
+                               "See Line 1, Column 14 for detail.\n");
 }
 
 struct CharReaderTest : JsonTest::TestCase {};
