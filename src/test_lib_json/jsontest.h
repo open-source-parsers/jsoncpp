@@ -8,6 +8,7 @@
 
 #include <cstdio>
 #include <deque>
+#include <iomanip>
 #include <json/config.h>
 #include <json/value.h>
 #include <json/writer.h>
@@ -83,9 +84,7 @@ public:
   // Generic operator that will work with anything ostream can deal with.
   template <typename T> TestResult& operator<<(const T& value) {
     Json::OStringStream oss;
-    oss.precision(16);
-    oss.setf(std::ios_base::floatfield);
-    oss << value;
+    oss << std::setprecision(16) << std::hexfloat << value;
     return addToLastFailure(oss.str());
   }
 

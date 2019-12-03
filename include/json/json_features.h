@@ -3,8 +3,8 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#ifndef CPPTL_JSON_FEATURES_H_INCLUDED
-#define CPPTL_JSON_FEATURES_H_INCLUDED
+#ifndef JSON_FEATURES_H_INCLUDED
+#define JSON_FEATURES_H_INCLUDED
 
 #if !defined(JSON_IS_AMALGAMATION)
 #include "forwards.h"
@@ -23,6 +23,7 @@ public:
   /** \brief A configuration that allows all features and assumes all strings
    * are UTF-8.
    * - C & C++ comments are allowed
+   * - Trailing commas in objects and arrays are allowed.
    * - Root object can be any JSON value
    * - Assumes Value strings are encoded in UTF-8
    */
@@ -31,6 +32,7 @@ public:
   /** \brief A configuration that is strictly compatible with the JSON
    * specification.
    * - Comments are forbidden.
+   * - Trailing commas in objects and arrays are forbidden.
    * - Root object must be either an array or an object value.
    * - Assumes Value strings are encoded in UTF-8
    */
@@ -42,6 +44,10 @@ public:
 
   /// \c true if comments are allowed. Default: \c true.
   bool allowComments_{true};
+
+  /// \c true if trailing commas in objects and arrays are allowed. Default \c
+  /// true.
+  bool allowTrailingCommas_{true};
 
   /// \c true if root must be either an array or an object value. Default: \c
   /// false.
@@ -58,4 +64,4 @@ public:
 
 #pragma pack(pop)
 
-#endif // CPPTL_JSON_FEATURES_H_INCLUDED
+#endif // JSON_FEATURES_H_INCLUDED

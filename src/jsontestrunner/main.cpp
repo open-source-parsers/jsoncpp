@@ -15,7 +15,9 @@
 
 #include <algorithm> // sort
 #include <cstdio>
+#include <iostream>
 #include <json/json.h>
+#include <memory>
 #include <sstream>
 
 struct Options {
@@ -126,19 +128,45 @@ static int parseAndSaveValueTree(const Json::String& input,
                                  const Json::String& actual,
                                  const Json::String& kind,
                                  const Json::Features& features, bool parseOnly,
-                                 Json::Value* root) {
-  Json::Reader reader(features);
-  bool parsingSuccessful =
-      reader.parse(input.data(), input.data() + input.size(), *root);
-  if (!parsingSuccessful) {
-    printf("Failed to parse %s file: \n%s\n", kind.c_str(),
-           reader.getFormattedErrorMessages().c_str());
-    return 1;
+                                 Json::Value* root, bool use_legacy) {
+  if (!use_legacy) {
+    Json::CharReaderBuilder builder;
+
+    builder.settings_["allowComments"] = features.allowComments_;
+    builder.settings_["strictRoot"] = features.strictRoot_;
+    builder.settings_["allowDroppedNullPlaceholders"] =
+        features.allowDroppedNullPlaceholders_;
+    builder.settings_["allowNumericKeys"] = features.allowNumericKeys_;
+
+    std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+    Json::String errors;
+    const bool parsingSuccessful =
+        reader->parse(input.data(), input.data() + input.size(), root, &errors);
+
+    if (!parsingSuccessful) {
+      std::cerr << "Failed to parse " << kind << " file: " << std::endl
+                << errors << std::endl;
+      return 1;
+    }
+
+    // We may instead check the legacy implementation (to ensure it doesn't
+    // randomly get broken).
+  } else {
+    Json::Reader reader(features);
+    const bool parsingSuccessful =
+        reader.parse(input.data(), input.data() + input.size(), *root);
+    if (!parsingSuccessful) {
+      std::cerr << "Failed to parse " << kind << " file: " << std::endl
+                << reader.getFormatedErrorMessages() << std::endl;
+      return 1;
+    }
   }
+
   if (!parseOnly) {
     FILE* factual = fopen(actual.c_str(), "wt");
     if (!factual) {
-      printf("Failed to create %s actual file.\n", kind.c_str());
+      std::cerr << "Failed to create '" << kind << "' actual file."
+                << std::endl;
       return 2;
     }
     printValueTree(factual, *root);
@@ -172,7 +200,7 @@ static int rewriteValueTree(const Json::String& rewritePath,
   *rewrite = write(root);
   FILE* fout = fopen(rewritePath.c_str(), "wt");
   if (!fout) {
-    printf("Failed to create rewrite file: %s\n", rewritePath.c_str());
+    std::cerr << "Failed to create rewrite file: " << rewritePath << std::endl;
     return 2;
   }
   fprintf(fout, "%s\n", rewrite->c_str());
@@ -193,14 +221,15 @@ static Json::String removeSuffix(const Json::String& path,
 static void printConfig() {
 // Print the configuration used to compile JsonCpp
 #if defined(JSON_NO_INT64)
-  printf("JSON_NO_INT64=1\n");
+  std::cout << "JSON_NO_INT64=1" << std::endl;
 #else
-  printf("JSON_NO_INT64=0\n");
+  std::cout << "JSON_NO_INT64=0" << std::endl;
 #endif
 }
 
 static int printUsage(const char* argv[]) {
-  printf("Usage: %s [--strict] input-json-file", argv[0]);
+  std::cout << "Usage: " << argv[0] << " [--strict] input-json-file"
+            << std::endl;
   return 3;
 }
 
@@ -230,7 +259,7 @@ static int parseCommandLine(int argc, const char* argv[], Options* opts) {
     } else if (writerName == "BuiltStyledStreamWriter") {
       opts->write = &useBuiltStyledStreamWriter;
     } else {
-      printf("Unknown '--json-writer %s'\n", writerName.c_str());
+      std::cerr << "Unknown '--json-writer' " << writerName << std::endl;
       return 4;
     }
   }
@@ -240,19 +269,20 @@ static int parseCommandLine(int argc, const char* argv[], Options* opts) {
   opts->path = argv[index];
   return 0;
 }
-static int runTest(Options const& opts) {
+
+static int runTest(Options const& opts, bool use_legacy) {
   int exitCode = 0;
 
   Json::String input = readInputTestFile(opts.path.c_str());
   if (input.empty()) {
-    printf("Failed to read input or empty input: %s\n", opts.path.c_str());
+    std::cerr << "Invalid input file: " << opts.path << std::endl;
     return 3;
   }
 
   Json::String basePath = removeSuffix(opts.path, ".json");
   if (!opts.parseOnly && basePath.empty()) {
-    printf("Bad input path. Path does not end with '.expected':\n%s\n",
-           opts.path.c_str());
+    std::cerr << "Bad input path '" << opts.path
+              << "'. Must end with '.expected'" << std::endl;
     return 3;
   }
 
@@ -262,34 +292,47 @@ static int runTest(Options const& opts) {
 
   Json::Value root;
   exitCode = parseAndSaveValueTree(input, actualPath, "input", opts.features,
-                                   opts.parseOnly, &root);
+                                   opts.parseOnly, &root, use_legacy);
   if (exitCode || opts.parseOnly) {
     return exitCode;
   }
+
   Json::String rewrite;
   exitCode = rewriteValueTree(rewritePath, root, opts.write, &rewrite);
   if (exitCode) {
     return exitCode;
   }
+
   Json::Value rewriteRoot;
   exitCode = parseAndSaveValueTree(rewrite, rewriteActualPath, "rewrite",
-                                   opts.features, opts.parseOnly, &rewriteRoot);
-  if (exitCode) {
-    return exitCode;
-  }
-  return 0;
+                                   opts.features, opts.parseOnly, &rewriteRoot,
+                                   use_legacy);
+
+  return exitCode;
 }
+
 int main(int argc, const char* argv[]) {
   Options opts;
   try {
     int exitCode = parseCommandLine(argc, argv, &opts);
     if (exitCode != 0) {
-      printf("Failed to parse command-line.");
+      std::cerr << "Failed to parse command-line." << std::endl;
       return exitCode;
     }
-    return runTest(opts);
+
+    const int modern_return_code = runTest(opts, false);
+    if (modern_return_code) {
+      return modern_return_code;
+    }
+
+    const std::string filename =
+        opts.path.substr(opts.path.find_last_of("\\/") + 1);
+    const bool should_run_legacy = (filename.rfind("legacy_", 0) == 0);
+    if (should_run_legacy) {
+      return runTest(opts, true);
+    }
   } catch (const std::exception& e) {
-    printf("Unhandled exception:\n%s\n", e.what());
+    std::cerr << "Unhandled exception:" << std::endl << e.what() << std::endl;
     return 1;
   }
 }

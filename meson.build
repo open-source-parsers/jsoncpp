@@ -15,13 +15,12 @@ project(
     'cpp_std=c++11',
     'warning_level=1'],
   license : 'Public Domain',
-  meson_version : '>= 0.50.0')
+  meson_version : '>= 0.49.0')
 
 
 jsoncpp_headers = [
   'include/json/allocator.h',
   'include/json/assertions.h',
-  'include/json/autolink.h',
   'include/json/config.h',
   'include/json/json_features.h',
   'include/json/forwards.h',
@@ -71,7 +70,7 @@ jsoncpp_dep = declare_dependency(
   )
 
 # tests
-python = import('python3').find_python()
+python = import('python').find_installation()
 
 jsoncpp_test = executable(
   'jsoncpp_test',

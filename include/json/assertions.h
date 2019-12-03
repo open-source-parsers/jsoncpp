@@ -3,8 +3,8 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#ifndef CPPTL_JSON_ASSERTIONS_H_INCLUDED
-#define CPPTL_JSON_ASSERTIONS_H_INCLUDED
+#ifndef JSON_ASSERTIONS_H_INCLUDED
+#define JSON_ASSERTIONS_H_INCLUDED
 
 #include <cstdlib>
 #include <sstream>
@@ -56,4 +56,4 @@
     JSON_FAIL_MESSAGE(message);                                                \
   }
 
-#endif // CPPTL_JSON_ASSERTIONS_H_INCLUDED
+#endif // JSON_ASSERTIONS_H_INCLUDED

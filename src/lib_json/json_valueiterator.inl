@@ -30,9 +30,6 @@ void ValueIteratorBase::decrement() { --current_; }
 
 ValueIteratorBase::difference_type
 ValueIteratorBase::computeDistance(const SelfType& other) const {
-#ifdef JSON_USE_CPPTL_SMALLMAP
-  return other.current_ - current_;
-#else
   // Iterator for null value are initialized using the default
   // constructor, which initialize current_ to the default
   // std::map::iterator. As begin() and end() are two instance
@@ -53,7 +50,6 @@ ValueIteratorBase::computeDistance(const SelfType& other) const {
     ++myDistance;
   }
   return myDistance;
-#endif
 }
 
 bool ValueIteratorBase::isEqual(const SelfType& other) const {

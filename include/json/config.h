@@ -14,16 +14,6 @@
 #include <string>
 #include <type_traits>
 
-/// If defined, indicates that json library is embedded in CppTL library.
-//# define JSON_IN_CPPTL 1
-
-/// If defined, indicates that json may leverage CppTL library
-//#  define JSON_USE_CPPTL 1
-/// If defined, indicates that cpptl vector based map should be used instead of
-/// std::map
-/// as Value container.
-//#  define JSON_USE_CPPTL_SMALLMAP 1
-
 // If non-zero, the library uses exceptions to report bad input instead of C
 // assertion macros. The default is to use exceptions.
 #ifndef JSON_USE_EXCEPTION
@@ -40,28 +30,22 @@
 /// Remarks: it is automatically defined in the generated amalgamated header.
 // #define JSON_IS_AMALGAMATION
 
-#ifdef JSON_IN_CPPTL
-#include <cpptl/config.h>
-#ifndef JSON_USE_CPPTL
-#define JSON_USE_CPPTL 1
-#endif
-#endif
-
-#ifdef JSON_IN_CPPTL
-#define JSON_API CPPTL_API
-#elif defined(JSON_DLL_BUILD)
+// Export macros for DLL visibility
+#if defined(JSON_DLL_BUILD)
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #define JSON_API __declspec(dllexport)
 #define JSONCPP_DISABLE_DLL_INTERFACE_WARNING
 #elif defined(__GNUC__) || defined(__clang__)
 #define JSON_API __attribute__((visibility("default")))
 #endif // if defined(_MSC_VER)
+
 #elif defined(JSON_DLL)
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #define JSON_API __declspec(dllimport)
 #define JSONCPP_DISABLE_DLL_INTERFACE_WARNING
 #endif // if defined(_MSC_VER)
-#endif // ifdef JSON_IN_CPPTL
+#endif // ifdef JSON_DLL_BUILD
+
 #if !defined(JSON_API)
 #define JSON_API
 #endif

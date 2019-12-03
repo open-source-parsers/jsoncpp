@@ -8,16 +8,13 @@
 #include <json/value.h>
 #include <json/writer.h>
 #endif // if !defined(JSON_IS_AMALGAMATION)
+#include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <cstring>
 #include <sstream>
 #include <utility>
-#ifdef JSON_USE_CPPTL
-#include <cpptl/conststring.h>
-#endif
-#include <algorithm> // min()
-#include <cstddef>   // size_t
 
 // Provide implementation equivalent of std::snprintf for older _MSC compilers
 #if defined(_MSC_VER) && _MSC_VER < 1900
@@ -419,14 +416,6 @@ Value::Value(const StaticString& value) {
   value_.string_ = const_cast<char*>(value.c_str());
 }
 
-#ifdef JSON_USE_CPPTL
-Value::Value(const CppTL::ConstString& value) {
-  initBasic(stringValue, true);
-  value_.string_ = duplicateAndPrefixStringValue(
-      value, static_cast<unsigned>(value.length()));
-}
-#endif
-
 Value::Value(bool value) {
   initBasic(booleanValue);
   value_.bool_ = value;
@@ -654,15 +643,6 @@ String Value::asString() const {
     JSON_FAIL_MESSAGE("Type is not convertible to string");
   }
 }
-
-#ifdef JSON_USE_CPPTL
-CppTL::ConstString Value::asConstString() const {
-  unsigned len;
-  char const* str;
-  decodePrefixedString(isAllocated(), value_.string_, &len, &str);
-  return CppTL::ConstString(str, len);
-}
-#endif
 
 Value::Int Value::asInt() const {
   switch (type()) {
@@ -1136,18 +1116,6 @@ Value& Value::operator[](const StaticString& key) {
   return resolveReference(key.c_str());
 }
 
-#ifdef JSON_USE_CPPTL
-Value& Value::operator[](const CppTL::ConstString& key) {
-  return resolveReference(key.c_str(), key.end_c_str());
-}
-Value const& Value::operator[](CppTL::ConstString const& key) const {
-  Value const* found = find(key.c_str(), key.end_c_str());
-  if (!found)
-    return nullSingleton();
-  return *found;
-}
-#endif
-
 Value& Value::append(const Value& value) { return append(Value(value)); }
 
 Value& Value::append(Value&& value) {
@@ -1159,7 +1127,11 @@ Value& Value::append(Value&& value) {
   return this->value_.map_->emplace(size(), std::move(value)).first->second;
 }
 
-bool Value::insert(ArrayIndex index, Value newValue) {
+bool Value::insert(ArrayIndex index, const Value& newValue) {
+  return insert(index, Value(newValue));
+}
+
+bool Value::insert(ArrayIndex index, Value&& newValue) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
                       "in Json::Value::insert: requires arrayValue");
   ArrayIndex length = size();
@@ -1241,13 +1213,6 @@ bool Value::removeIndex(ArrayIndex index, Value* removed) {
   return true;
 }
 
-#ifdef JSON_USE_CPPTL
-Value Value::get(const CppTL::ConstString& key,
-                 const Value& defaultValue) const {
-  return get(key.c_str(), key.end_c_str(), defaultValue);
-}
-#endif
-
 bool Value::isMember(char const* begin, char const* end) const {
   Value const* value = find(begin, end);
   return nullptr != value;
@@ -1258,12 +1223,6 @@ bool Value::isMember(char const* key) const {
 bool Value::isMember(String const& key) const {
   return isMember(key.data(), key.data() + key.length());
 }
-
-#ifdef JSON_USE_CPPTL
-bool Value::isMember(const CppTL::ConstString& key) const {
-  return isMember(key.c_str(), key.end_c_str());
-}
-#endif
 
 Value::Members Value::getMemberNames() const {
   JSON_ASSERT_MESSAGE(
@@ -1280,31 +1239,6 @@ Value::Members Value::getMemberNames() const {
   }
   return members;
 }
-//
-//# ifdef JSON_USE_CPPTL
-// EnumMemberNames
-// Value::enumMemberNames() const
-//{
-//   if ( type() == objectValue )
-//   {
-//      return CppTL::Enum::any(  CppTL::Enum::transform(
-//         CppTL::Enum::keys( *(value_.map_), CppTL::Type<const CZString &>() ),
-//         MemberNamesTransform() ) );
-//   }
-//   return EnumMemberNames();
-//}
-//
-//
-// EnumValues
-// Value::enumValues() const
-//{
-//   if ( type() == objectValue  ||  type() == arrayValue )
-//      return CppTL::Enum::anyValues( *(value_.map_),
-//                                     CppTL::Type<const Value &>() );
-//   return EnumValues();
-//}
-//
-//# endif
 
 static bool IsIntegral(double d) {
   double integral_part;
