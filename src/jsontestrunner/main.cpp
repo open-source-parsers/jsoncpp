@@ -58,7 +58,7 @@ static Json::String readInputTestFile(const char* path) {
     return "";
   fseek(file, 0, SEEK_END);
   long const size = ftell(file);
-  size_t const usize = static_cast<unsigned long>(size);
+  const auto usize = static_cast<size_t>(size);
   fseek(file, 0, SEEK_SET);
   char* buffer = new char[size + 1];
   buffer[size] = 0;

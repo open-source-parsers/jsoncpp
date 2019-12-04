@@ -36,8 +36,8 @@ namespace Json {
 class JSONCPP_DEPRECATED(
     "Use CharReader and CharReaderBuilder instead.") JSON_API Reader {
 public:
-  typedef char Char;
-  typedef const Char* Location;
+  using Char = char;
+  using Location = const Char*;
 
   /** \brief An error tagged with where in the JSON text it was encountered.
    *
@@ -187,7 +187,7 @@ private:
     Location extra_;
   };
 
-  typedef std::deque<ErrorInfo> Errors;
+  using Errors = std::deque<ErrorInfo>;
 
   bool readToken(Token& token);
   void skipSpaces();
@@ -226,7 +226,7 @@ private:
   static bool containsNewLine(Location begin, Location end);
   static String normalizeEOL(Location begin, Location end);
 
-  typedef std::stack<Value*> Nodes;
+  using Nodes = std::stack<Value*>;
   Nodes nodes_;
   Errors errors_;
   String document_;

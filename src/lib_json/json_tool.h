@@ -71,7 +71,7 @@ enum {
 };
 
 // Defines a char buffer for use with uintToString().
-typedef char UIntToStringBuffer[uintToStringBufferSize];
+using UIntToStringBuffer = char[uintToStringBufferSize];
 
 /** Converts an unsigned integer to string.
  * @param value Unsigned integer to convert to string

@@ -54,7 +54,7 @@ namespace Json {
 #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
 using CharReaderPtr = std::unique_ptr<CharReader>;
 #else
-typedef std::auto_ptr<CharReader> CharReaderPtr;
+using CharReaderPtr = std::auto_ptr<CharReader>;
 #endif
 
 // Implementation of class Features
