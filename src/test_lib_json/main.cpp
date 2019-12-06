@@ -121,13 +121,18 @@ struct ValueTest : JsonTest::TestCase {
 };
 
 Json::String ValueTest::normalizeFloatingPointStr(const Json::String& s) {
-  auto index = s.find_last_of("eE");
-  if (index == s.npos)
+  Json::String::size_type exponentIndex = s.find_last_of("eE");
+  if (exponentIndex == s.npos) {
     return s;
-  int hasSign = (s[index + 1] == '+' || s[index + 1] == '-') ? 1 : 0;
-  auto exponentStartIndex = index + 1 + hasSign;
-  Json::String normalized = s.substr(0, exponentStartIndex);
-  auto indexDigit = s.find_first_not_of('0', exponentStartIndex);
+  }
+  ++exponentIndex;
+  const bool hasSign = s[exponentIndex] == '+' || s[exponentIndex] == '-';
+  if (hasSign) {
+    ++exponentIndex;
+  }
+
+  const Json::String normalized = s.substr(0u, exponentIndex);
+  const Json::String::size_type indexDigit = s.find_first_not_of('0', exponentIndex);
   Json::String exponent = "0";
   if (indexDigit != s.npos) { // nonzero exponent
     exponent = s.substr(indexDigit);
