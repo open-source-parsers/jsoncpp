@@ -124,7 +124,7 @@ Json::String ValueTest::normalizeFloatingPointStr(const Json::String& s) {
   auto index = s.find_last_of("eE");
   if (index == s.npos)
     return s;
-  std::size_t signWidth = (s[index + 1] == '+' || s[index + 1] == '-' ) ? 1 : 0;
+  std::size_t signWidth = (s[index + 1] == '+' || s[index + 1] == '-') ? 1 : 0;
   auto exponentStartIndex = index + 1 + signWidth;
   Json::String normalized = s.substr(0, exponentStartIndex);
   auto indexDigit = s.find_first_not_of('0', exponentStartIndex);
