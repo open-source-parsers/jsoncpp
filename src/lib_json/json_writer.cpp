@@ -178,8 +178,9 @@ static bool isAnyCharRequiredQuoting(char const* s, size_t n) {
 
   char const* const end = s + n;
   for (char const* cur = s; cur < end; ++cur) {
-    if (*cur == '\\' || *cur == '\"' || *cur < ' ' ||
-        static_cast<unsigned char>(*cur) < 0x80)
+    if (*cur == '\\' || *cur == '\"' ||
+        static_cast<unsigned char>(*cur) < ' ' ||
+        static_cast<unsigned char>(*cur) >= 0x80)
       return true;
   }
   return false;
