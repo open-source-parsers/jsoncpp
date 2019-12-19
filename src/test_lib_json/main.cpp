@@ -2648,6 +2648,10 @@ struct ReaderTest : JsonTest::TestCase {
         new Json::Reader(Json::Features{}.strictMode()));
   }
 
+  void setFeatures(Json::Features& features) {
+    reader = std::unique_ptr<Json::Reader>(new Json::Reader(features));
+  }
+
   void checkStructuredErrors(
       const std::vector<Json::Reader::StructuredError>& actual,
       const std::vector<Json::Reader::StructuredError>& expected) {
@@ -2849,6 +2853,13 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, pushErrorTest) {
                                "* Line 1, Column 14\n"
                                "  AUTHOR must be a string\n"
                                "See Line 1, Column 14 for detail.\n");
+}
+
+JSONTEST_FIXTURE_LOCAL(ReaderTest, allowNumericKeysTest) {
+  Json::Features features;
+  features.allowNumericKeys_ = true;
+  setFeatures(features);
+  checkParse(R"({ 123 : "abc" })");
 }
 
 struct CharReaderTest : JsonTest::TestCase {};
