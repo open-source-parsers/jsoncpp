@@ -70,7 +70,7 @@ project(JSONCPP
         # 2. /include/json/version.h
         # 3. /CMakeLists.txt
         # IMPORTANT: also update the SOVERSION!!
-        VERSION 1.9.2 # <major>[.<minor>[.<patch>[.<tweak>]]]
+        VERSION 1.9.3 # <major>[.<minor>[.<patch>[.<tweak>]]]
         LANGUAGES CXX)
 
 message(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
