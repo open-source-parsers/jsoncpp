@@ -67,7 +67,6 @@ Features Features::all() { return {}; }
 Features Features::strictMode() {
   Features features;
   features.allowComments_ = false;
-  features.allowTrailingCommas_ = false;
   features.strictRoot_ = true;
   features.allowDroppedNullPlaceholders_ = false;
   features.allowNumericKeys_ = false;
@@ -455,9 +454,7 @@ bool Reader::readObject(Token& token) {
       initialTokenOk = readToken(tokenName);
     if (!initialTokenOk)
       break;
-    if (tokenName.type_ == tokenObjectEnd &&
-        (name.empty() ||
-         features_.allowTrailingCommas_)) // empty object or trailing comma
+    if (tokenName.type_ == tokenObjectEnd && name.empty()) // empty object
       return true;
     name.clear();
     if (tokenName.type_ == tokenString) {
@@ -505,20 +502,15 @@ bool Reader::readArray(Token& token) {
   Value init(arrayValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(token.start_ - begin_);
+  skipSpaces();
+  if (current_ != end_ && *current_ == ']') // empty array
+  {
+    Token endArray;
+    readToken(endArray);
+    return true;
+  }
   int index = 0;
   for (;;) {
-    skipSpaces();
-    if (current_ != end_ && *current_ == ']' &&
-        (index == 0 ||
-         (features_.allowTrailingCommas_ &&
-          !features_.allowDroppedNullPlaceholders_))) // empty array or trailing
-                                                      // comma
-    {
-      Token endArray;
-      readToken(endArray);
-      return true;
-    }
-
     Value& value = currentValue()[index++];
     nodes_.push(&value);
     bool ok = readValue();
