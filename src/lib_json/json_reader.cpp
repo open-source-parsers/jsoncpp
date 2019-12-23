@@ -467,7 +467,7 @@ bool Reader::readObject(Token& token) {
       Value numberName;
       if (!decodeNumber(tokenName, numberName))
         return recoverFromError(tokenObjectEnd);
-      name = String(numberName.asCString());
+      name = numberName.asString();
     } else {
       break;
     }
