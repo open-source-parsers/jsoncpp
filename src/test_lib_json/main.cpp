@@ -1819,7 +1819,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, StaticString) {
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, WideString) {
   // https://github.com/open-source-parsers/jsoncpp/issues/756
-  const std::string uni = u8"式，进"; // "\u5f0f\uff0c\u8fdb"
+  const std::string uni = u8"\u5f0f\uff0c\u8fdb"; // "式，进"
   std::string styled;
   {
     Json::Value v;
@@ -2817,9 +2817,8 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, strictModeParseNumber) {
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseChineseWithOneError) {
-  // \u4f50\u85e4 佐藤
   checkParse(R"({ "pr)"
-             "佐藤"
+             u8"\u4f50\u85e4" // 佐藤
              R"(erty" :: "value" })",
              {{18, 19, "Syntax error: value, object or array expected."}},
              "* Line 1, Column 19\n  Syntax error: value, object or array "
