@@ -1819,7 +1819,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, StaticString) {
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, WideString) {
   // https://github.com/open-source-parsers/jsoncpp/issues/756
-  const std::string uni = u8"式，进"; // "\u5f0f\uff0c\u8fdb"
+  const std::string uni = u8"\u5f0f\uff0c\u8fdb"; // "式，进"
   std::string styled;
   {
     Json::Value v;
@@ -2655,13 +2655,13 @@ struct ReaderTest : JsonTest::TestCase {
   void checkStructuredErrors(
       const std::vector<Json::Reader::StructuredError>& actual,
       const std::vector<Json::Reader::StructuredError>& expected) {
-    JSONTEST_ASSERT_EQUAL(actual.size(), expected.size());
+    JSONTEST_ASSERT_EQUAL(expected.size(), actual.size());
     for (size_t i = 0; i < actual.size(); ++i) {
       const auto& a = actual[i];
       const auto& e = expected[i];
-      JSONTEST_ASSERT_EQUAL(a.offset_start, e.offset_start) << i;
-      JSONTEST_ASSERT_EQUAL(a.offset_limit, e.offset_limit) << i;
-      JSONTEST_ASSERT_EQUAL(a.message, e.message) << i;
+      JSONTEST_ASSERT_EQUAL(e.offset_start, a.offset_start) << i;
+      JSONTEST_ASSERT_EQUAL(e.offset_limit, a.offset_limit) << i;
+      JSONTEST_ASSERT_EQUAL(e.message, a.message) << i;
     }
   }
 
@@ -2682,7 +2682,7 @@ struct ReaderTest : JsonTest::TestCase {
                   const std::vector<Json::Reader::StructuredError>& structured,
                   const std::string& formatted) {
     checkParse(input, structured);
-    JSONTEST_ASSERT_EQUAL(reader->getFormattedErrorMessages(), formatted);
+    JSONTEST_ASSERT_EQUAL(formatted, reader->getFormattedErrorMessages());
   }
 
   std::unique_ptr<Json::Reader> reader{new Json::Reader()};
@@ -2771,8 +2771,8 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseWithNoErrorsTestingOffsets) {
              R"( "false" : false)"
              R"( })");
   auto checkOffsets = [&](const Json::Value& v, int start, int limit) {
-    JSONTEST_ASSERT_EQUAL(v.getOffsetStart(), start);
-    JSONTEST_ASSERT_EQUAL(v.getOffsetLimit(), limit);
+    JSONTEST_ASSERT_EQUAL(start, v.getOffsetStart());
+    JSONTEST_ASSERT_EQUAL(limit, v.getOffsetLimit());
   };
   checkOffsets(root, 0, 115);
   checkOffsets(root["property"], 15, 34);
@@ -2817,9 +2817,8 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, strictModeParseNumber) {
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseChineseWithOneError) {
-  // \u4f50\u85e4 佐藤
   checkParse(R"({ "pr)"
-             "佐藤"
+             u8"\u4f50\u85e4" // 佐藤
              R"(erty" :: "value" })",
              {{18, 19, "Syntax error: value, object or array expected."}},
              "* Line 1, Column 19\n  Syntax error: value, object or array "
@@ -2921,7 +2920,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseString) {
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
     JSONTEST_ASSERT(errs.empty());
-    JSONTEST_ASSERT_EQUAL("訪", root[0].asString()); // "\u8A2a"
+    JSONTEST_ASSERT_EQUAL(u8"\u8A2a", root[0].asString()); // "訪"
   }
   {
     char const doc[] = "[ \"\\uD801\" ]";
@@ -3633,8 +3632,8 @@ JSONTEST_FIXTURE_LOCAL(IteratorTest, distance) {
   }
   {
     Json::Value empty;
-    JSONTEST_ASSERT_EQUAL(empty.end() - empty.end(), 0);
-    JSONTEST_ASSERT_EQUAL(empty.end() - empty.begin(), 0);
+    JSONTEST_ASSERT_EQUAL(0, empty.end() - empty.end());
+    JSONTEST_ASSERT_EQUAL(0, empty.end() - empty.begin());
   }
 }
 
