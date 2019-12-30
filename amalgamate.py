@@ -99,6 +99,8 @@ def amalgamate_source(source_top_dir=None,
     header.add_text("/// If defined, indicates that the source file is amalgamated")
     header.add_text("/// to prevent private header inclusion.")
     header.add_text("#define JSON_IS_AMALGAMATION")
+    header.add_file(os.path.join(INCLUDE_PATH, "version.h"))
+    header.add_file(os.path.join(INCLUDE_PATH, "allocator.h"))
     header.add_file(os.path.join(INCLUDE_PATH, "config.h"))
     header.add_file(os.path.join(INCLUDE_PATH, "forwards.h"))
     header.add_text("#endif //ifndef JSON_FORWARD_AMALGAMATED_H_INCLUDED")
