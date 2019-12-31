@@ -95,11 +95,6 @@ option(JSONCPP_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ON)
 option(JSONCPP_WITH_EXAMPLE "Compile JsonCpp example" OFF)
 option(BUILD_SHARED_LIBS "Build jsoncpp_lib as a shared library." OFF)
 
-# Enable runtime search path support for dynamic libraries on OSX
-if(APPLE)
-    set(CMAKE_MACOSX_RPATH 1)
-endif()
-
 # Adhere to GNU filesystem layout conventions
 include(GNUInstallDirs)
 
