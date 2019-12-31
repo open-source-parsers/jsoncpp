@@ -56,8 +56,8 @@ endif()
 
 # ====
 
-# Ensures that CMAKE_BUILD_TYPE has a default value
-if(NOT DEFINED CMAKE_BUILD_TYPE)
+# Ensure that CMAKE_BUILD_TYPE has a value specified for single configuration generators.
+if(NOT DEFINED CMAKE_BUILD_TYPE AND NOT DEFINED CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING
         "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Coverage.")
 endif()
