@@ -1,4 +1,4 @@
-if(CMAKE_COMPILER_IS_GNUCXX)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     #Get compiler version.
     execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion
         OUTPUT_VARIABLE GNUCXX_VERSION
