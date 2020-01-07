@@ -9,7 +9,7 @@ project(
   # 2. /include/json/version.h
   # 3. /CMakeLists.txt
   # IMPORTANT: also update the SOVERSION!!
-  version : '1.9.2',
+  version : '1.9.3',
   default_options : [
     'buildtype=release',
     'cpp_std=c++11',
@@ -18,7 +18,7 @@ project(
   meson_version : '>= 0.49.0')
 
 
-jsoncpp_headers = [
+jsoncpp_headers = files([
   'include/json/allocator.h',
   'include/json/assertions.h',
   'include/json/config.h',
@@ -28,7 +28,8 @@ jsoncpp_headers = [
   'include/json/reader.h',
   'include/json/value.h',
   'include/json/version.h',
-  'include/json/writer.h']
+  'include/json/writer.h',
+])
 jsoncpp_include_directories = include_directories('include')
 
 install_headers(
@@ -44,13 +45,12 @@ else
 endif
 
 jsoncpp_lib = library(
-  'jsoncpp',
-  [ jsoncpp_headers,
-    'src/lib_json/json_tool.h',
+  'jsoncpp', files([
     'src/lib_json/json_reader.cpp',
     'src/lib_json/json_value.cpp',
-    'src/lib_json/json_writer.cpp'],
-  soversion : 22,
+    'src/lib_json/json_writer.cpp',
+  ]),
+  soversion : 23,
   install : true,
   include_directories : jsoncpp_include_directories,
   cpp_args: dll_export_flag)
@@ -66,18 +66,21 @@ import('pkgconfig').generate(
 jsoncpp_dep = declare_dependency(
   include_directories : jsoncpp_include_directories,
   link_with : jsoncpp_lib,
-  version : meson.project_version(),
-  )
+  version : meson.project_version())
 
 # tests
-python = import('python').find_installation()
+if meson.is_subproject() or not get_option('tests')
+  subdir_done()
+endif
+
+python = import('python').find_installation('python3')
 
 jsoncpp_test = executable(
-  'jsoncpp_test',
-  [ 'src/test_lib_json/jsontest.cpp',
-    'src/test_lib_json/jsontest.h',
+  'jsoncpp_test', files([
+    'src/test_lib_json/jsontest.cpp',
     'src/test_lib_json/main.cpp',
-    'src/test_lib_json/fuzz.cpp'],
+    'src/test_lib_json/fuzz.cpp',
+  ]),
   include_directories : jsoncpp_include_directories,
   link_with : jsoncpp_lib,
   install : false,
