@@ -10,7 +10,7 @@ set(EXAMPLES
 add_definitions(-D_GLIBCXX_USE_CXX11_ABI)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra ")
+    add_compile_options(-Wall -Wextra)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_definitions(
         -D_SCL_SECURE_NO_WARNINGS
