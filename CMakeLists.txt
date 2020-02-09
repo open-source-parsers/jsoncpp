@@ -38,7 +38,7 @@ foreach(pold "") # Currently Empty
 endforeach()
 
 # ==== Define language standard configurations requiring at least c++11 standard
-if(CMAKE_CXX_STANDARD EQUAL "98" )
+if(CMAKE_CXX_STANDARD EQUAL "98")
     message(FATAL_ERROR "CMAKE_CXX_STANDARD:STRING=98 is not supported.")
 endif()
 
@@ -95,13 +95,13 @@ include(GNUInstallDirs)
 
 set(DEBUG_LIBNAME_SUFFIX "" CACHE STRING "Optional suffix to append to the library name for a debug build")
 
-set(JSONCPP_USE_SECURE_MEMORY "0" CACHE STRING "-D...=1 to use memory-wiping allocator for STL" )
+set(JSONCPP_USE_SECURE_MEMORY "0" CACHE STRING "-D...=1 to use memory-wiping allocator for STL")
 
-configure_file( "${PROJECT_SOURCE_DIR}/version.in"
-                "${PROJECT_BINARY_DIR}/version"
-                NEWLINE_STYLE UNIX )
+configure_file("${PROJECT_SOURCE_DIR}/version.in"
+    "${PROJECT_BINARY_DIR}/version"
+    NEWLINE_STYLE UNIX)
 
-macro(UseCompilationWarningAsError)
+macro(use_compilation_warning_as_error)
     if(MSVC)
         # Only enabled in debug because some old versions of VS STL generate
         # warnings when compiled in release configuration.
@@ -127,7 +127,7 @@ macro(UseCompilationWarningAsError)
 endmacro()
 
 # Include our configuration header
-include_directories( ${jsoncpp_SOURCE_DIR}/include )
+include_directories(${jsoncpp_SOURCE_DIR}/include)
 
 if(MSVC)
     # Only enabled in debug because some old versions of VS STL generate
@@ -190,10 +190,10 @@ find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-endif(CCACHE_FOUND)
+endif()
 
 if(JSONCPP_WITH_WARNING_AS_ERROR)
-    UseCompilationWarningAsError()
+    use_compilation_warning_as_error()
 endif()
 
 if(JSONCPP_WITH_PKGCONFIG_SUPPORT)
@@ -206,11 +206,11 @@ if(JSONCPP_WITH_PKGCONFIG_SUPPORT)
 endif()
 
 if(JSONCPP_WITH_CMAKE_PACKAGE)
-        include (CMakePackageConfigHelpers)
+        include(CMakePackageConfigHelpers)
         install(EXPORT jsoncpp
                 DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp
                 FILE        jsoncppConfig.cmake)
-        write_basic_package_version_file ("${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake"
+        write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake"
                 VERSION ${PROJECT_VERSION}
                 COMPATIBILITY SameMajorVersion)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake
@@ -218,8 +218,8 @@ if(JSONCPP_WITH_CMAKE_PACKAGE)
 endif()
 
 if(JSONCPP_WITH_TESTS)
-  enable_testing()
-  include(CTest)
+    enable_testing()
+    include(CTest)
 endif()
 
 # Build the different applications
@@ -230,5 +230,5 @@ add_subdirectory( include )
 
 #install the example
 if(JSONCPP_WITH_EXAMPLE)
-  add_subdirectory( example )
+    add_subdirectory( example )
 endif()
