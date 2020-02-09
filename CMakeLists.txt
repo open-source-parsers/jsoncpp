@@ -62,19 +62,29 @@ if(NOT DEFINED CMAKE_BUILD_TYPE)
         "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Coverage.")
 endif()
 
+# ---------------------------------------------------------------------------
+# use ccache if found, has to be done before project()
+# ---------------------------------------------------------------------------
+find_program(CCACHE_EXECUTABLE "ccache" HINTS /usr/local/bin /opt/local/bin)
+if(CCACHE_EXECUTABLE)
+    message(STATUS "use ccache")
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}" CACHE PATH "ccache" FORCE)
+    set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}" CACHE PATH "ccache" FORCE)
+endif()
+
 project(JSONCPP
         # Note: version must be updated in three places when doing a release. This
         # annoying process ensures that amalgamate, CMake, and meson all report the
         # correct version.
-        # 1. /meson.build
-        # 2. /include/json/version.h
-        # 3. /CMakeLists.txt
-        # IMPORTANT: also update the SOVERSION!!
+        # 1. ./meson.build
+        # 2. ./include/json/version.h
+        # 3. ./CMakeLists.txt
+        # IMPORTANT: also update the JSONCPP_SOVERSION!!
         VERSION 1.9.3 # <major>[.<minor>[.<patch>[.<tweak>]]]
         LANGUAGES CXX)
 
 message(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
-set( JSONCPP_SOVERSION 22 )
+set(JSONCPP_SOVERSION 23)
 
 option(JSONCPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executables" ON)
 option(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)
@@ -106,22 +116,22 @@ macro(use_compilation_warning_as_error)
         # Only enabled in debug because some old versions of VS STL generate
         # warnings when compiled in release configuration.
         if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
-          add_compile_options($<$<CONFIG:Debug>:/WX>)
+            add_compile_options($<$<CONFIG:Debug>:/WX>)
         else()
-          set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /WX ")
+            set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /WX ")
         endif()
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
-          add_compile_options(-Werror)
+            add_compile_options(-Werror)
         else()
-          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
         endif()
         if(JSONCPP_WITH_STRICT_ISO)
-          if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
-            add_compile_options(-pedantic-errors)
-          else()
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic-errors")
-          endif()
+            if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
+                add_compile_options(-pedantic-errors)
+            else()
+                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic-errors")
+            endif()
         endif()
     endif()
 endmacro()
@@ -133,63 +143,57 @@ if(MSVC)
     # Only enabled in debug because some old versions of VS STL generate
     # unreachable code warning when compiled in release configuration.
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
-      add_compile_options($<$<CONFIG:Debug>:/W4>)
+        add_compile_options($<$<CONFIG:Debug>:/W4>)
     else()
-      set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /W4 ")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /W4 ")
     endif()
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     # using regular Clang or AppleClang
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
-      add_compile_options(-Wall -Wconversion -Wshadow -Werror=conversion -Werror=sign-compare)
+        add_compile_options(-Wall -Wconversion -Wshadow -Werror=conversion -Werror=sign-compare)
     else()
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wconversion -Wshadow -Werror=conversion -Werror=sign-compare")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wconversion -Wshadow -Werror=conversion -Werror=sign-compare")
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # using GCC
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
-      add_compile_options(-Wall -Wconversion -Wshadow -Wextra)
+        add_compile_options(-Wall -Wconversion -Wshadow -Wextra)
     else()
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wconversion -Wshadow -Wextra")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wconversion -Wshadow -Wextra")
     endif()
     # not yet ready for -Wsign-conversion
 
     if(JSONCPP_WITH_STRICT_ISO)
-      if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
-        add_compile_options(-pedantic)
-      else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
-      endif()
+        if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
+            add_compile_options(-Wpedantic)
+        else()
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic")
+        endif()
     endif()
     if(JSONCPP_WITH_WARNING_AS_ERROR)
-      if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
-        add_compile_options(-Werror=conversion)
-      else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=conversion")
-      endif()
+        if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
+            add_compile_options(-Werror=conversion)
+        else()
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=conversion")
+        endif()
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     # using Intel compiler
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
-      add_compile_options(-Wall -Wconversion -Wshadow -Wextra -Werror=conversion)
+        add_compile_options(-Wall -Wconversion -Wshadow -Wextra -Werror=conversion)
     else()
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wconversion -Wshadow -Wextra -Werror=conversion")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wconversion -Wshadow -Wextra -Werror=conversion")
     endif()
 
     if(JSONCPP_WITH_STRICT_ISO AND NOT JSONCPP_WITH_WARNING_AS_ERROR)
-      if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
-        add_compile_options(-pedantic)
-      else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
-      endif()
+        if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
+            add_compile_options(-Wpedantic)
+        else()
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic")
+        endif()
     endif()
-endif()
-
-find_program(CCACHE_FOUND ccache)
-if(CCACHE_FOUND)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif()
 
 if(JSONCPP_WITH_WARNING_AS_ERROR)
@@ -206,15 +210,15 @@ if(JSONCPP_WITH_PKGCONFIG_SUPPORT)
 endif()
 
 if(JSONCPP_WITH_CMAKE_PACKAGE)
-        include(CMakePackageConfigHelpers)
-        install(EXPORT jsoncpp
-                DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp
-                FILE        jsoncppConfig.cmake)
-        write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake"
-                VERSION ${PROJECT_VERSION}
-                COMPATIBILITY SameMajorVersion)
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake
-                DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp)
+    include(CMakePackageConfigHelpers)
+    install(EXPORT jsoncpp
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp
+        FILE        jsoncppConfig.cmake)
+    write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake"
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY SameMajorVersion)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp)
 endif()
 
 if(JSONCPP_WITH_TESTS)
@@ -223,12 +227,12 @@ if(JSONCPP_WITH_TESTS)
 endif()
 
 # Build the different applications
-add_subdirectory( src )
+add_subdirectory(src)
 
 #install the includes
-add_subdirectory( include )
+add_subdirectory(include)
 
 #install the example
 if(JSONCPP_WITH_EXAMPLE)
-    add_subdirectory( example )
+    add_subdirectory(example)
 endif()
