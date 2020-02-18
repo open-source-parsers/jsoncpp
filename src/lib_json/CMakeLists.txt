@@ -1,13 +1,6 @@
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    #Get compiler version.
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion
-        OUTPUT_VARIABLE GNUCXX_VERSION
-    )
-
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.1.2)
     #-Werror=* was introduced -after- GCC 4.1.2
-    if(GNUCXX_VERSION VERSION_GREATER 4.1.2)
-        add_compile_options("-Werror=strict-aliasing")
-    endif()
+    add_compile_options("-Werror=strict-aliasing")
 endif()
 
 include(CheckIncludeFileCXX)
