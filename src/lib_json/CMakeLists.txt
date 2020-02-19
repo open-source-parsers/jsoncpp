@@ -81,11 +81,13 @@ if(BUILD_SHARED_LIBS)
     endif()
 endif()
 
-
 add_library(jsoncpp_lib ${PUBLIC_HEADERS} ${jsoncpp_sources})
-set_target_properties(jsoncpp_lib PROPERTIES VERSION ${JSONCPP_VERSION} SOVERSION ${JSONCPP_SOVERSION})
-set_target_properties(jsoncpp_lib PROPERTIES OUTPUT_NAME jsoncpp)
-set_target_properties(jsoncpp_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties( jsoncpp_lib PROPERTIES
+    OUTPUT_NAME jsoncpp
+    VERSION ${JSONCPP_VERSION}
+    SOVERSION ${JSONCPP_SOVERSION}
+    POSITION_INDEPENDENT_CODE ON
+)
 
 # Set library's runtime search path on OSX
 if(APPLE)
