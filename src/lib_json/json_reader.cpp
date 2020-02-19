@@ -1973,7 +1973,7 @@ IStream& operator>>(IStream& sin, Value& root) {
   String errs;
   bool ok = parseFromStream(b, sin, &root, &errs);
   if (!ok) {
-    throwRuntimeError(errs);
+    sin.setstate(std::ios::failbit);
   }
   return sin;
 }
