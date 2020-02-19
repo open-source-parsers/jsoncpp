@@ -103,8 +103,6 @@ endif()
 # Adhere to GNU filesystem layout conventions
 include(GNUInstallDirs)
 
-set(DEBUG_LIBNAME_SUFFIX "" CACHE STRING "Optional suffix to append to the library name for a debug build")
-
 set(JSONCPP_USE_SECURE_MEMORY "0" CACHE STRING "-D...=1 to use memory-wiping allocator for STL")
 
 configure_file("${PROJECT_SOURCE_DIR}/version.in"
