@@ -18,6 +18,7 @@
 #include <memory>
 #include <set>
 #include <sstream>
+#include <string.h>
 #include <utility>
 
 #include <cstdio>
@@ -939,6 +940,7 @@ private:
 
   bool readToken(Token& token);
   void skipSpaces();
+  void skipBom();
   bool match(const Char* pattern, int patternLength);
   bool readComment();
   bool readCStyleComment(bool* containsNewLineResult);
@@ -1009,7 +1011,6 @@ bool OurReader::parse(const char* beginDoc, const char* endDoc, Value& root,
   if (!features_.allowComments_) {
     collectComments = false;
   }
-
   begin_ = beginDoc;
   end_ = endDoc;
   collectComments_ = collectComments;
@@ -1022,6 +1023,8 @@ bool OurReader::parse(const char* beginDoc, const char* endDoc, Value& root,
     nodes_.pop();
   nodes_.push(&root);
 
+  // skip byte order mark if it exists at the beginning of the UTF-8 text.
+  skipBom();
   bool successful = readValue();
   nodes_.pop();
   Token token;
@@ -1265,6 +1268,13 @@ void OurReader::skipSpaces() {
       ++current_;
     else
       break;
+  }
+}
+
+void OurReader::skipBom() {
+  if (strncmp(begin_, "\xEF\xBB\xBF", 3) == 0) {
+    begin_ += 3;
+    current_ = begin_;
   }
 }
 

@@ -3578,6 +3578,19 @@ JSONTEST_FIXTURE_LOCAL(BuilderTest, settings) {
   }
 }
 
+struct BomTest : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE_LOCAL(BomTest, withBom) {
+  const std::string with_bom = u8"\xEF\xBB\xBF{\"key\" : \"value\"}";
+  Json::Value root;
+  JSONCPP_STRING errs;
+  std::istringstream iss(with_bom);
+  bool ok = parseFromStream(Json::CharReaderBuilder(), iss, &root, &errs);
+  JSONTEST_ASSERT(ok);
+  JSONTEST_ASSERT(errs.empty());
+  JSONTEST_ASSERT_STRING_EQUAL(root["key"].asString(), "value");
+}
+
 struct IteratorTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE_LOCAL(IteratorTest, convert) {
