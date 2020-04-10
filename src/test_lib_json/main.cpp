@@ -2469,7 +2469,7 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, writeNumericValue) {
 JSONTEST_FIXTURE_LOCAL(StreamWriterTest, writeArrays) {
   Json::StreamWriterBuilder writer;
   const Json::String expected("{\n"
-                              "\t\"property1\" : \n"
+                              "\t\"property1\" :\n"
                               "\t[\n"
                               "\t\t\"value1\",\n"
                               "\t\t\"value2\"\n"
@@ -2489,7 +2489,7 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, writeArrays) {
 JSONTEST_FIXTURE_LOCAL(StreamWriterTest, writeNestedObjects) {
   Json::StreamWriterBuilder writer;
   const Json::String expected("{\n"
-                              "\t\"object1\" : \n"
+                              "\t\"object1\" :\n"
                               "\t{\n"
                               "\t\t\"bool\" : true,\n"
                               "\t\t\"nested\" : 123\n"
