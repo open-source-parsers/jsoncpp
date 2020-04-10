@@ -991,7 +991,7 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
         writeWithIndent(valueToQuotedStringN(
             name.data(), static_cast<unsigned>(name.length()), emitUTF8_));
         if ((childValue.type() == objectValue &&
-             !value.getMemberNames().empty()) ||
+             !childValue.getMemberNames().empty()) ||
             (childValue.type() == arrayValue && childValue.size() > 0 &&
              ((cs_ == CommentStyle::All) || isMultilineArray(childValue))))
           *sout_ << colonSymbolNoTrailingSpace_;
