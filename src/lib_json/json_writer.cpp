@@ -924,7 +924,7 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
   if (colonSymbol_[colonSymbol_.size() - 1] == ' ') {
     colonSymbolNoTrailingSpace_ =
         colonSymbol_.substr(0, colonSymbol_.size() - 1);
-  }else{
+  } else {
     colonSymbolNoTrailingSpace_ = colonSymbol_;
   }
 }
