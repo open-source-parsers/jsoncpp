@@ -901,6 +901,7 @@ private:
   String indentation_;
   CommentStyle::Enum cs_;
   String colonSymbol_;
+  String colonSymbolNoTrailingSpace_;
   String nullSymbol_;
   String endingLineFeedSymbol_;
   bool addChildValues_ : 1;
@@ -919,7 +920,11 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
       endingLineFeedSymbol_(std::move(endingLineFeedSymbol)),
       addChildValues_(false), indented_(false),
       useSpecialFloats_(useSpecialFloats), emitUTF8_(emitUTF8),
-      precision_(precision), precisionType_(precisionType) {}
+      precision_(precision), precisionType_(precisionType) {
+        if(colonSymbol_[colonSymbol_.size()-1]==' '){
+          colonSymbolNoTrailingSpace_ = colonSymbol_.substr(0, (colonSymbol_.find_last_not_of(' ') + 1));
+        }
+      }
 int BuiltStyledStreamWriter::write(Value const& root, OStream* sout) {
   sout_ = sout;
   addChildValues_ = false;
@@ -982,7 +987,12 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
         writeCommentBeforeValue(childValue);
         writeWithIndent(valueToQuotedStringN(
             name.data(), static_cast<unsigned>(name.length()), emitUTF8_));
-        *sout_ << colonSymbol_;
+        if ((childValue.type() == objectValue) ||
+            (childValue.type() == arrayValue && childValue.size() > 0 &&
+             ((cs_ == CommentStyle::All) || isMultilineArray(childValue))))
+          *sout_ << colonSymbolNoTrailingSpace_;
+        else
+          *sout_ << colonSymbol_;
         writeValue(childValue);
         if (++it == members.end()) {
           writeCommentAfterValueOnSameLine(childValue);
