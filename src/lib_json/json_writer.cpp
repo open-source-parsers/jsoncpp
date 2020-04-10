@@ -923,7 +923,9 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
       precision_(precision), precisionType_(precisionType) {
   if (colonSymbol_[colonSymbol_.size() - 1] == ' ') {
     colonSymbolNoTrailingSpace_ =
-        colonSymbol_.substr(0, (colonSymbol_.find_last_not_of(' ') + 1));
+        colonSymbol_.substr(0, colonSymbol_.size() - 1);
+  }else{
+    colonSymbolNoTrailingSpace_ = colonSymbol_;
   }
 }
 int BuiltStyledStreamWriter::write(Value const& root, OStream* sout) {
