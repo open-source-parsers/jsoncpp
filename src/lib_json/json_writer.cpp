@@ -921,10 +921,11 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
       addChildValues_(false), indented_(false),
       useSpecialFloats_(useSpecialFloats), emitUTF8_(emitUTF8),
       precision_(precision), precisionType_(precisionType) {
-        if(colonSymbol_[colonSymbol_.size()-1]==' '){
-          colonSymbolNoTrailingSpace_ = colonSymbol_.substr(0, (colonSymbol_.find_last_not_of(' ') + 1));
-        }
-      }
+  if (colonSymbol_[colonSymbol_.size() - 1] == ' ') {
+    colonSymbolNoTrailingSpace_ =
+        colonSymbol_.substr(0, (colonSymbol_.find_last_not_of(' ') + 1));
+  }
+}
 int BuiltStyledStreamWriter::write(Value const& root, OStream* sout) {
   sout_ = sout;
   addChildValues_ = false;
