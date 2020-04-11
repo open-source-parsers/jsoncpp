@@ -2592,7 +2592,7 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, indentation) {
 JSONTEST_FIXTURE_LOCAL(StreamWriterTest, writeZeroes) {
   Json::String binary("hi", 3); // include trailing 0
   JSONTEST_ASSERT_EQUAL(3, binary.length());
-  Json::String expected("\"hi\\u0000\""); // unicoded zero
+  Json::String expected(R"("hi\u0000")"); // unicoded zero
   Json::StreamWriterBuilder b;
   {
     Json::Value root;
@@ -2866,7 +2866,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithNoErrors) {
   CharReaderPtr reader(b.newCharReader());
   Json::String errs;
   Json::Value root;
-  char const doc[] = "{ \"property\" : \"value\" }";
+  char const doc[] = R"({ "property" : "value" })";
   bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
   JSONTEST_ASSERT(ok);
   JSONTEST_ASSERT(errs.empty());
@@ -2914,14 +2914,14 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseString) {
     JSONTEST_ASSERT_EQUAL("", root[0]);
   }
   {
-    char const doc[] = "[\"\\u8A2a\"]";
+    char const doc[] = R"(["\u8A2a"])";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
     JSONTEST_ASSERT(errs.empty());
     JSONTEST_ASSERT_EQUAL(u8"\u8A2a", root[0].asString()); // "訪"
   }
   {
-    char const doc[] = "[ \"\\uD801\" ]";
+    char const doc[] = R"([ "\uD801" ])";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(!ok);
     JSONTEST_ASSERT(errs == "* Line 1, Column 3\n"
@@ -2930,7 +2930,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseString) {
                             "See Line 1, Column 10 for detail.\n");
   }
   {
-    char const doc[] = "[ \"\\uD801\\d1234\" ]";
+    char const doc[] = R"([ "\uD801\d1234" ])";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(!ok);
     JSONTEST_ASSERT(errs == "* Line 1, Column 3\n"
@@ -2939,7 +2939,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseString) {
                             "See Line 1, Column 12 for detail.\n");
   }
   {
-    char const doc[] = "[ \"\\ua3t@\" ]";
+    char const doc[] = R"([ "\ua3t@" ])";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(!ok);
     JSONTEST_ASSERT(errs == "* Line 1, Column 3\n"
@@ -2948,7 +2948,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseString) {
                             "See Line 1, Column 9 for detail.\n");
   }
   {
-    char const doc[] = "[ \"\\ua3t\" ]";
+    char const doc[] = R"([ "\ua3t" ])";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(!ok);
     JSONTEST_ASSERT(
@@ -2960,7 +2960,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseString) {
   {
     b.settings_["allowSingleQuotes"] = true;
     CharReaderPtr charreader(b.newCharReader());
-    char const doc[] = "{'a': 'x\\ty', \"b\":'x\\\\y'}";
+    char const doc[] = R"({'a': 'x\ty', "b":'x\\y'})";
     bool ok = charreader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
     JSONTEST_ASSERT_STRING_EQUAL("", errs);
@@ -3007,7 +3007,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseObjectWithErrors) {
   Json::Value root;
   Json::String errs;
   {
-    char const doc[] = "{ \"property\" : \"value\" ";
+    char const doc[] = R"({ "property" : "value" )";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(!ok);
     JSONTEST_ASSERT(errs == "* Line 1, Column 24\n"
@@ -3015,7 +3015,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseObjectWithErrors) {
     JSONTEST_ASSERT_EQUAL("value", root["property"]);
   }
   {
-    char const doc[] = "{ \"property\" : \"value\" ,";
+    char const doc[] = R"({ "property" : "value" ,)";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(!ok);
     JSONTEST_ASSERT(errs == "* Line 1, Column 25\n"
@@ -3038,7 +3038,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseArrayWithErrors) {
     JSONTEST_ASSERT_EQUAL("value", root[0]);
   }
   {
-    char const doc[] = "[ \"value1\" \"value2\" ]";
+    char const doc[] = R"([ "value1" "value2" ])";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(!ok);
     JSONTEST_ASSERT(errs == "* Line 1, Column 12\n"
@@ -3052,7 +3052,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithOneError) {
   CharReaderPtr reader(b.newCharReader());
   Json::String errs;
   Json::Value root;
-  char const doc[] = "{ \"property\" :: \"value\" }";
+  char const doc[] = R"({ "property" :: "value" })";
   bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
   JSONTEST_ASSERT(!ok);
   JSONTEST_ASSERT(errs ==
@@ -3078,7 +3078,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithDetailError) {
   CharReaderPtr reader(b.newCharReader());
   Json::String errs;
   Json::Value root;
-  char const doc[] = "{ \"property\" : \"v\\alue\" }";
+  char const doc[] = R"({ "property" : "v\alue" })";
   bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
   JSONTEST_ASSERT(!ok);
   JSONTEST_ASSERT(errs ==
@@ -3089,7 +3089,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithDetailError) {
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithStackLimit) {
   Json::CharReaderBuilder b;
   Json::Value root;
-  char const doc[] = "{ \"property\" : \"value\" }";
+  char const doc[] = R"({ "property" : "value" })";
   {
     b.settings_["stackLimit"] = 2;
     CharReaderPtr reader(b.newCharReader());
@@ -3109,7 +3109,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithStackLimit) {
 }
 
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, testOperator) {
-  const std::string styled = "{ \"property\" : \"value\" }";
+  const std::string styled = R"({ "property" : "value" })";
   std::istringstream iss(styled);
   Json::Value root;
   iss >> root;
@@ -3122,7 +3122,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderStrictModeTest, dupKeys) {
   Json::CharReaderBuilder b;
   Json::Value root;
   char const doc[] =
-      "{ \"property\" : \"value\", \"key\" : \"val1\", \"key\" : \"val2\" }";
+      R"({ "property" : "value", "key" : "val1", "key" : "val2" })";
   {
     b.strictMode(&b.settings_);
     CharReaderPtr reader(b.newCharReader());
@@ -3141,7 +3141,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderFailIfExtraTest, issue164) {
   // This is interpreted as a string value followed by a colon.
   Json::CharReaderBuilder b;
   Json::Value root;
-  char const doc[] = " \"property\" : \"value\" }";
+  char const doc[] = R"( "property" : "value" })";
   {
     b.settings_["failIfExtra"] = false;
     CharReaderPtr reader(b.newCharReader());
@@ -3445,8 +3445,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderAllowSpecialFloatsTest, issue209) {
   Json::String errs;
   CharReaderPtr reader(b.newCharReader());
   {
-    char const doc[] =
-        "{\"a\":NaN,\"b\":Infinity,\"c\":-Infinity,\"d\":+Infinity}";
+    char const doc[] = R"({"a":NaN,"b":Infinity,"c":-Infinity,"d":+Infinity})";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
     JSONTEST_ASSERT_STRING_EQUAL("", errs);
@@ -3497,7 +3496,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderAllowSpecialFloatsTest, issue209) {
   }
 
   {
-    char const doc[] = "{\"posInf\": +Infinity, \"NegInf\": -Infinity}";
+    char const doc[] = R"({"posInf": +Infinity, "NegInf": -Infinity})";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
     JSONTEST_ASSERT_STRING_EQUAL("", errs);
@@ -3719,7 +3718,7 @@ JSONTEST_FIXTURE_LOCAL(IteratorTest, constness) {
   for (; iter != value.end(); ++iter) {
     out << *iter << ',';
   }
-  Json::String expected = "\" 9\",\"10\",\"11\",";
+  Json::String expected = R"(" 9","10","11",)";
   JSONTEST_ASSERT_STRING_EQUAL(expected, out.str());
 }
 
