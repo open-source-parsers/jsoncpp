@@ -1874,7 +1874,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, CommentBefore) {
     Json::String result = Json::writeString(wbuilder, val);
     JSONTEST_ASSERT_STRING_EQUAL(expected, result);
     Json::String res2 = val.toStyledString();
-    Json::String exp2 = "";
+    Json::String exp2;
     exp2 += expected;
     exp2 += "\n";
     JSONTEST_ASSERT_STRING_EQUAL(exp2, res2);
