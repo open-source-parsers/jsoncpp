@@ -421,7 +421,7 @@ public:
   bool empty() const;
 
   /// Return !isNull()
-  JSONCPP_OP_EXPLICIT operator bool() const;
+  explicit operator bool() const;
 
   /// Remove all object members and array elements.
   /// \pre type() is arrayValue, objectValue, or nullValue

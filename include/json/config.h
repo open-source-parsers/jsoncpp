@@ -76,16 +76,12 @@ extern JSON_API int msvc_pre1900_c99_snprintf(char* outBuf, size_t size,
 
 #if __cplusplus >= 201103L
 #define JSONCPP_NOEXCEPT noexcept
-#define JSONCPP_OP_EXPLICIT explicit
 #elif defined(_MSC_VER) && _MSC_VER < 1900
 #define JSONCPP_NOEXCEPT throw()
-#define JSONCPP_OP_EXPLICIT explicit
 #elif defined(_MSC_VER) && _MSC_VER >= 1900
 #define JSONCPP_NOEXCEPT noexcept
-#define JSONCPP_OP_EXPLICIT explicit
 #else
 #define JSONCPP_NOEXCEPT throw()
-#define JSONCPP_OP_EXPLICIT
 #endif
 
 #ifdef __clang__
