@@ -111,7 +111,7 @@ static void printValueTree(FILE* fout, Json::Value& value,
     Json::Value::Members members(value.getMemberNames());
     std::sort(members.begin(), members.end());
     Json::String suffix = *(path.end() - 1) == '.' ? "" : ".";
-    for (auto name : members) {
+    for (const auto& name : members) {
       printValueTree(fout, value[name], path + suffix + name);
     }
   } break;
