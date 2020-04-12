@@ -12,6 +12,7 @@
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <algorithm>
 #include <cassert>
+#include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <istream>
@@ -20,15 +21,6 @@
 #include <set>
 #include <sstream>
 #include <utility>
-
-#include <cstdio>
-#if __cplusplus >= 201103L
-
-#if !defined(sscanf)
-#define sscanf std::sscanf
-#endif
-
-#endif //__cplusplus
 
 #if defined(_MSC_VER)
 #if !defined(_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)
