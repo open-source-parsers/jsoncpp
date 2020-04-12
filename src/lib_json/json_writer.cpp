@@ -19,14 +19,6 @@
 #include <sstream>
 #include <utility>
 
-#if !defined(isnan)
-using std::isnan;
-#endif
-
-#if !defined(isfinite)
-using std::isfinite;
-#endif
-
 #if defined(_MSC_VER)
 // Disable warning about strdup being deprecated.
 #pragma warning(disable : 4996)
@@ -74,11 +66,11 @@ String valueToString(double value, bool useSpecialFloats,
   // Print into the buffer. We need not request the alternative representation
   // that always has a decimal point because JSON doesn't distinguish the
   // concepts of reals and integers.
-  if (!isfinite(value)) {
+  if (!std::isfinite(value)) {
     static const char* const reps[2][3] = {{"NaN", "-Infinity", "Infinity"},
                                            {"null", "-1e+9999", "1e+9999"}};
     return reps[useSpecialFloats ? 0 : 1]
-               [isnan(value) ? 0 : (value < 0) ? 1 : 2];
+               [std::isnan(value) ? 0 : (value < 0) ? 1 : 2];
   }
 
   String buffer(size_t(36), '\0');
