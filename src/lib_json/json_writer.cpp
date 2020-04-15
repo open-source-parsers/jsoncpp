@@ -987,7 +987,8 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
             (childValue.type() == arrayValue && !childValue.empty() &&
              ((cs_ == CommentStyle::All) || isMultilineArray(childValue)))) {
           // Line-ending colon, so trim any trailing space from it
-          for (; n && colonSymbol_[n - 1] == ' '; --n) ;
+          for (; n && colonSymbol_[n - 1] == ' '; --n)
+            ;
         }
         sout_->write(colonSymbol_.data(), n);
         writeValue(childValue);
