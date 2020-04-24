@@ -108,6 +108,7 @@ test(
 test(
   'jsonchecker_jsontestrunner',
   python,
+  is_parallel : false,
   args : [
     '-B',
     join_paths(meson.current_source_dir(), 'test/runjsontests.py'),
