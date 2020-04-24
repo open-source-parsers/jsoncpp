@@ -29,7 +29,8 @@ class CharReaderBuilder;
 class Features;
 
 // value.h
-using ArrayIndex = unsigned int;
+typedef unsigned int ArrayIndex;
+
 class StaticString;
 class Path;
 class PathArgument;

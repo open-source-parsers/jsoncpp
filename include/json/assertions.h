@@ -56,4 +56,10 @@
     JSON_FAIL_MESSAGE(message);                                                \
   }
 
+#if JSONCPP_VER_11
+#define JSONCPP_STATIC_ASSERT static_assert
+#else
+#define JSONCPP_STATIC_ASSERT JSON_ASSERT_MESSAGE
+#endif
+
 #endif // JSON_ASSERTIONS_H_INCLUDED

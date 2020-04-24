@@ -9,18 +9,18 @@ sudo: false
 addons:
   homebrew:
     packages:
-    - clang-format
-    - meson
-    - ninja
+      - clang-format
+      - meson
+      - ninja
     update: false # do not update homebrew by default
   apt:
     sources:
-    - ubuntu-toolchain-r-test
-    - llvm-toolchain-xenial-8
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-xenial-8
     packages:
-    - clang-format-8
-    - clang-8
-    - valgrind
+      - clang-format-8
+      - clang-8
+      - valgrind
 matrix:
   allow_failures:
     - os: osx
@@ -30,27 +30,76 @@ matrix:
       osx_image: xcode11
       compiler: clang
       env:
-         CXX="clang++"
-         CC="clang"
-         LIB_TYPE=static
-         BUILD_TYPE=release
+        CXX="clang++"
+        CC="clang"
+        LIB_TYPE=static
+        BUILD_TYPE=release
+        LANGUAGE_STANDARD="11"
       script: ./.travis_scripts/meson_builder.sh
     - name: Linux xenial clang meson static release testing
       os: linux
       dist: xenial
       compiler: clang
       env:
-         CXX="clang++"
-         CC="clang"
-         LIB_TYPE=static
-         BUILD_TYPE=release
+        CXX="clang++"
+        CC="clang"
+        LIB_TYPE=static
+        BUILD_TYPE=release
+        LANGUAGE_STANDARD="11"
       # before_install and install steps only needed for linux meson builds
       before_install:
-          - source ./.travis_scripts/travis.before_install.${TRAVIS_OS_NAME}.sh
+        - source ./.travis_scripts/travis.before_install.${TRAVIS_OS_NAME}.sh
       install:
-           - source ./.travis_scripts/travis.install.${TRAVIS_OS_NAME}.sh
+        - source ./.travis_scripts/travis.install.${TRAVIS_OS_NAME}.sh
       script: ./.travis_scripts/meson_builder.sh
-    - name: Linux xenial gcc cmake coverage
+    - name: Linux xenial gcc-4.6 meson static release with C++03 testing
+      os: linux
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.6
+            - valgrind
+      env:
+        MATRIX_EVAL="CC=gcc-4.6 CXX=g++-4.6"
+        CC=gcc-4.6
+        CXX=g++-4.6
+        LIB_TYPE=static
+        BUILD_TYPE=release
+        LANGUAGE_STANDARD="03"
+      # before_install and install steps only needed for linux meson builds
+      before_install:
+        - source ./.travis_scripts/travis.before_install.${TRAVIS_OS_NAME}.sh
+      install:
+        - source ./.travis_scripts/travis.install.${TRAVIS_OS_NAME}.sh
+      script: ./.travis_scripts/meson_builder.sh
+    - name: Linux xenial gcc-4.6 meson static release with C++98 testing
+      os: linux
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.6
+            - valgrind
+      env:
+        MATRIX_EVAL="CC=gcc-4.6 CXX=g++-4.6"
+        CC=gcc-4.6
+        CXX=g++-4.6
+        LIB_TYPE=static
+        BUILD_TYPE=release
+        LANGUAGE_STANDARD="98"
+      # before_install and install steps only needed for linux meson builds
+      before_install:
+        - source ./.travis_scripts/travis.before_install.${TRAVIS_OS_NAME}.sh
+      install:
+        - source ./.travis_scripts/travis.install.${TRAVIS_OS_NAME}.sh
+      script: ./.travis_scripts/meson_builder.sh
+
+    - name: Linux xenial gcc-5.4 cmake-3.12 coverage
       os: linux
       dist: xenial
       compiler: gcc
@@ -62,10 +111,57 @@ matrix:
         BUILD_TYPE=Debug
         LIB_TYPE=shared
         DESTDIR=/tmp/cmake_json_cpp
+        LANGUAGE_STANDARD="11"
       before_install:
-          - pip install --user cpp-coveralls
+        - pip install --user cpp-coveralls
       script: ./.travis_scripts/cmake_builder.sh
       after_success:
-          - coveralls --include src/lib_json --include include
+        - coveralls --include src/lib_json --include include
+    - name: Linux xenial gcc-4.6 cmake-3.12 with C++03 testing
+      os: linux
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.6
+            - valgrind
+      env:
+        MATRIX_EVAL="CC=gcc-4.6 CXX=g++-4.6"
+        CC=gcc-4.6
+        CXX=g++-4.6
+        BUILD_TOOL="Unix Makefiles"
+        LIB_TYPE=static
+        BUILD_TYPE=release
+        DESTDIR=/tmp/cmake_json_cpp
+        LANGUAGE_STANDARD="03"
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get install python3
+      script: ./.travis_scripts/cmake_builder.sh
+    - name: Linux xenial gcc-4.6 cmake-3.12 with C++98 testing
+      os: linux
+      dist: xenial
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.6
+            - valgrind
+      env:
+        MATRIX_EVAL="CC=gcc-4.6 CXX=g++-4.6"
+        CC=gcc-4.6
+        CXX=g++-4.6
+        BUILD_TOOL="Unix Makefiles"
+        LIB_TYPE=static
+        BUILD_TYPE=release
+        DESTDIR=/tmp/cmake_json_cpp
+        LANGUAGE_STANDARD="98"
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get install python3
+      script: ./.travis_scripts/cmake_builder.sh
 notifications:
   email: false

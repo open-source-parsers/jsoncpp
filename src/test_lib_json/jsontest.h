@@ -42,7 +42,7 @@ public:
 /// Must be a POD to allow inline initialisation without stepping
 /// into the debugger.
 struct PredicateContext {
-  using Id = unsigned int;
+  typedef unsigned int Id;
   Id id_;
   const char* file_;
   unsigned int line_;
@@ -61,7 +61,7 @@ public:
   /// Not encapsulated to prevent step into when debugging failed assertions
   /// Incremented by one on assertion predicate entry, decreased by one
   /// by addPredicateContext().
-  PredicateContext::Id predicateId_{1};
+  PredicateContext::Id predicateId_;
 
   /// \internal Implementation detail for predicate macros
   PredicateContext* predicateStackTail_;
@@ -70,7 +70,7 @@ public:
 
   /// Adds an assertion failure.
   TestResult& addFailure(const char* file, unsigned int line,
-                         const char* expr = nullptr);
+                         const char* expr = JSONCPP_NULL);
 
   /// Removes the last PredicateContext added to the predicate stack
   /// chained list.
@@ -84,7 +84,9 @@ public:
   // Generic operator that will work with anything ostream can deal with.
   template <typename T> TestResult& operator<<(const T& value) {
     Json::OStringStream oss;
-    oss << std::setprecision(16) << std::hexfloat << value;
+    oss.precision(16);
+    oss.setf(std::ios_base::floatfield);
+    oss << value;
     return addToLastFailure(oss.str());
   }
 
@@ -102,13 +104,13 @@ private:
   static Json::String indentText(const Json::String& text,
                                  const Json::String& indent);
 
-  using Failures = std::deque<Failure>;
+  typedef std::deque<Failure> Failures;
   Failures failures_;
   Json::String name_;
   PredicateContext rootPredicateNode_;
-  PredicateContext::Id lastUsedPredicateId_{0};
+  PredicateContext::Id lastUsedPredicateId_;
   /// Failure which is the target of the messages added using operator <<
-  Failure* messageTarget_{nullptr};
+  Failure* messageTarget_;
 };
 
 class TestCase {
@@ -122,14 +124,14 @@ public:
   virtual const char* testName() const = 0;
 
 protected:
-  TestResult* result_{nullptr};
+  TestResult* result_;
 
 private:
   virtual void runTestCase() = 0;
 };
 
 /// Function pointer type for TestCase factory
-using TestCaseFactory = TestCase* (*)();
+typedef TestCase* (*TestCaseFactory)();
 
 class Runner {
 public:
@@ -159,8 +161,8 @@ public:
   static void printUsage(const char* appName);
 
 private: // prevents copy construction and assignment
-  Runner(const Runner& other) = delete;
-  Runner& operator=(const Runner& other) = delete;
+  Runner(const Runner& other) JSONCPP_CTOR_DELETE;
+  Runner& operator=(const Runner& other) JSONCPP_CTOR_DELETE;
 
 private:
   void listTests() const;
@@ -168,7 +170,7 @@ private:
   static void preventDialogOnCrash();
 
 private:
-  using Factories = std::deque<TestCaseFactory>;
+  typedef std::deque<TestCaseFactory> Factories;
   Factories tests_;
 };
 
@@ -251,8 +253,10 @@ TestResult& checkStringEqual(TestResult& result, const Json::String& expected,
     }                                                                          \
                                                                                \
   public: /* overridden from TestCase */                                       \
-    const char* testName() const override { return #FixtureType "/" #name; }   \
-    void runTestCase() override;                                               \
+    const char* testName() const JSONCPP_OVERRIDE {                            \
+      return #FixtureType "/" #name;                                           \
+    }                                                                          \
+    void runTestCase() JSONCPP_OVERRIDE;                                       \
   };                                                                           \
                                                                                \
   void Test##FixtureType##name::runTestCase()
@@ -276,8 +280,10 @@ TestResult& checkStringEqual(TestResult& result, const Json::String& expected,
     }                                                                          \
                                                                                \
   public: /* overridden from TestCase */                                       \
-    const char* testName() const override { return #FixtureType "/" #name; }   \
-    void runTestCase() override;                                               \
+    const char* testName() const JSONCPP_OVERRIDE {                            \
+      return #FixtureType "/" #name;                                           \
+    }                                                                          \
+    void runTestCase() JSONCPP_OVERRIDE;                                       \
   };                                                                           \
                                                                                \
   static bool test##FixtureType##name##collect =                               \

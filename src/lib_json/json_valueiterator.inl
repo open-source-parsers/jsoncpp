@@ -15,7 +15,7 @@ namespace Json {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-ValueIteratorBase::ValueIteratorBase() : current_() {}
+ValueIteratorBase::ValueIteratorBase() : current_(), isNull_(true) {}
 
 ValueIteratorBase::ValueIteratorBase(
     const Value::ObjectValues::iterator& current)
@@ -98,8 +98,8 @@ char const* ValueIteratorBase::memberName() const {
 char const* ValueIteratorBase::memberName(char const** end) const {
   const char* cname = (*current_).first.data();
   if (!cname) {
-    *end = nullptr;
-    return nullptr;
+    *end = JSONCPP_NULL;
+    return JSONCPP_NULL;
   }
   *end = cname + (*current_).first.length();
   return cname;
@@ -113,7 +113,7 @@ char const* ValueIteratorBase::memberName(char const** end) const {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-ValueConstIterator::ValueConstIterator() = default;
+ValueConstIterator::ValueConstIterator() {}
 
 ValueConstIterator::ValueConstIterator(
     const Value::ObjectValues::iterator& current)
@@ -136,7 +136,7 @@ operator=(const ValueIteratorBase& other) {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
-ValueIterator::ValueIterator() = default;
+ValueIterator::ValueIterator() {}
 
 ValueIterator::ValueIterator(const Value::ObjectValues::iterator& current)
     : ValueIteratorBase(current) {}
@@ -146,7 +146,7 @@ ValueIterator::ValueIterator(const ValueConstIterator& other)
   throwRuntimeError("ConstIterator to Iterator should never be allowed.");
 }
 
-ValueIterator::ValueIterator(const ValueIterator& other) = default;
+ValueIterator::ValueIterator(const ValueIterator& other) {}
 
 ValueIterator& ValueIterator::operator=(const SelfType& other) {
   copy(other);

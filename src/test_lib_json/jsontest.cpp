@@ -73,10 +73,11 @@ namespace JsonTest {
 // class TestResult
 // //////////////////////////////////////////////////////////////////
 
-TestResult::TestResult() {
+TestResult::TestResult()
+    : predicateId_(1), lastUsedPredicateId_(0), messageTarget_(JSONCPP_NULL) {
   // The root predicate has id 0
   rootPredicateNode_.id_ = 0;
-  rootPredicateNode_.next_ = nullptr;
+  rootPredicateNode_.next_ = JSONCPP_NULL;
   predicateStackTail_ = &rootPredicateNode_;
 }
 
@@ -88,7 +89,7 @@ TestResult& TestResult::addFailure(const char* file, unsigned int line,
   /// added.
   unsigned int nestingLevel = 0;
   PredicateContext* lastNode = rootPredicateNode_.next_;
-  for (; lastNode != nullptr; lastNode = lastNode->next_) {
+  for (; lastNode != JSONCPP_NULL; lastNode = lastNode->next_) {
     if (lastNode->id_ > lastUsedPredicateId_) // new PredicateContext
     {
       lastUsedPredicateId_ = lastNode->id_;
@@ -121,17 +122,18 @@ void TestResult::addFailureInfo(const char* file, unsigned int line,
 
 TestResult& TestResult::popPredicateContext() {
   PredicateContext* lastNode = &rootPredicateNode_;
-  while (lastNode->next_ != nullptr && lastNode->next_->next_ != nullptr) {
+  while (lastNode->next_ != JSONCPP_NULL &&
+         lastNode->next_->next_ != JSONCPP_NULL) {
     lastNode = lastNode->next_;
   }
   // Set message target to popped failure
   PredicateContext* tail = lastNode->next_;
-  if (tail != nullptr && tail->failure_ != nullptr) {
+  if (tail != JSONCPP_NULL && tail->failure_ != JSONCPP_NULL) {
     messageTarget_ = tail->failure_;
   }
   // Remove tail from list
   predicateStackTail_ = lastNode;
-  lastNode->next_ = nullptr;
+  lastNode->next_ = JSONCPP_NULL;
   return *this;
 }
 
@@ -147,7 +149,9 @@ void TestResult::printFailure(bool printTestName) const {
   }
 
   // Print in reverse to display the callstack in the right order
-  for (const auto& failure : failures_) {
+  for (Failures::const_iterator it = failures_.begin(); it != failures_.end();
+       ++it) {
+    const Failure& failure = *it;
     Json::String indent(failure.nestingLevel_ * 2, ' ');
     if (failure.file_) {
       printf("%s%s(%u): ", indent.c_str(), failure.file_, failure.line_);
@@ -181,7 +185,7 @@ Json::String TestResult::indentText(const Json::String& text,
 }
 
 TestResult& TestResult::addToLastFailure(const Json::String& message) {
-  if (messageTarget_ != nullptr) {
+  if (messageTarget_ != JSONCPP_NULL) {
     messageTarget_->message_ += message;
   }
   return *this;
@@ -202,9 +206,9 @@ TestResult& TestResult::operator<<(bool value) {
 // class TestCase
 // //////////////////////////////////////////////////////////////////
 
-TestCase::TestCase() = default;
+TestCase::TestCase() : result_(JSONCPP_NULL) {}
 
-TestCase::~TestCase() = default;
+TestCase::~TestCase() {}
 
 void TestCase::run(TestResult& result) {
   result_ = &result;
@@ -214,7 +218,7 @@ void TestCase::run(TestResult& result) {
 // class Runner
 // //////////////////////////////////////////////////////////////////
 
-Runner::Runner() = default;
+Runner::Runner() {}
 
 Runner& Runner::add(TestCaseFactory factory) {
   tests_.push_back(factory);
@@ -268,7 +272,8 @@ bool Runner::runAllTest(bool printSummary) const {
     }
     return true;
   }
-  for (auto& result : failures) {
+  for (size_t index = 0; index < failures.size(); ++index) {
+    TestResult& result = failures[index];
     result.printFailure(count > 1);
   }
 

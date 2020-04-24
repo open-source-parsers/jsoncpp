@@ -24,7 +24,9 @@ struct Options {
   Json::String path;
   Json::Features features;
   bool parseOnly;
-  using writeFuncType = Json::String (*)(Json::Value const&);
+
+  typedef Json::String (*writeFuncType)(Json::Value const&);
+
   writeFuncType write;
 };
 
@@ -57,10 +59,10 @@ static Json::String readInputTestFile(const char* path) {
   if (!file)
     return "";
   fseek(file, 0, SEEK_END);
-  auto const size = ftell(file);
-  auto const usize = static_cast<size_t>(size);
+  long const size = ftell(file);
+  size_t const usize = static_cast<size_t>(size);
   fseek(file, 0, SEEK_SET);
-  auto buffer = new char[size + 1];
+  char* buffer = new char[size + 1];
   buffer[size] = 0;
   Json::String text;
   if (fread(buffer, 1, usize, file) == usize)
@@ -111,7 +113,9 @@ static void printValueTree(FILE* fout, Json::Value& value,
     Json::Value::Members members(value.getMemberNames());
     std::sort(members.begin(), members.end());
     Json::String suffix = *(path.end() - 1) == '.' ? "" : ".";
-    for (auto name : members) {
+    for (Json::Value::Members::const_iterator it = members.begin();
+         it != members.end(); it++) {
+      const Json::String& name = *it;
       printValueTree(fout, value[name], path + suffix + name);
     }
   } break;
@@ -138,7 +142,7 @@ static int parseAndSaveValueTree(const Json::String& input,
         features.allowDroppedNullPlaceholders_;
     builder.settings_["allowNumericKeys"] = features.allowNumericKeys_;
 
-    std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+    Json::CharReader* reader(builder.newCharReader());
     Json::String errors;
     const bool parsingSuccessful =
         reader->parse(input.data(), input.data() + input.size(), root, &errors);
@@ -148,7 +152,7 @@ static int parseAndSaveValueTree(const Json::String& input,
                 << errors << std::endl;
       return 1;
     }
-
+    delete reader;
     // We may instead check the legacy implementation (to ensure it doesn't
     // randomly get broken).
   } else {

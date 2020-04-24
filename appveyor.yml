@@ -14,7 +14,7 @@ environment:
 build_script:
   - cmake --version
   - cd c:\projects\jsoncpp
-  - cmake -G "%CMAKE_GENERATOR%" -DCMAKE_INSTALL_PREFIX:PATH=%CD:\=/%/install -DBUILD_SHARED_LIBS:BOOL=ON .
+  - cmake -G "%CMAKE_GENERATOR%" -DCMAKE_INSTALL_PREFIX:PATH=%CD:\=/%/install -DBUILD_SHARED_LIBS:BOOL=ON -DBUILD_WITH_CXX_11=ON .
   # Use ctest to make a dashboard build:
   # - ctest -D Experimental(Start|Update|Configure|Build|Test|Coverage|MemCheck|Submit)
   # NOTE: Testing on window is not yet finished:

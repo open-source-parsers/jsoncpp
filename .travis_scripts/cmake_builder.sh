@@ -66,7 +66,7 @@ cmake --version
 echo ${CXX}
 ${CXX} --version
 _COMPILER_NAME=`basename ${CXX}`
-if [ "${BUILD_TYPE}" == "shared" ]; then
+if [ "${BUILD_TYPE}" = "shared" ]; then
   _CMAKE_BUILD_SHARED_LIBS=ON
 else
   _CMAKE_BUILD_SHARED_LIBS=OFF
@@ -98,6 +98,13 @@ else
   export _BUILD_EXE=make
 fi
 
+# Language standard
+if [ "${LANGUAGE_STANDARD}" = "11" ]; then
+  _BUILD_WITH_CXX_11=ON
+else
+  _BUILD_WITH_CXX_11=OFF
+fi
+
 _BUILD_DIR_NAME="build-cmake_${BUILD_TYPE}_${LIB_TYPE}_${_COMPILER_NAME}_${_BUILD_EXE}"
 mkdir -p ${_BUILD_DIR_NAME}
 cd "${_BUILD_DIR_NAME}"
@@ -112,6 +119,7 @@ cd "${_BUILD_DIR_NAME}"
     -DCMAKE_BUILD_TYPE:STRING=${BUILD_TYPE} \
     -DBUILD_SHARED_LIBS:BOOL=${_CMAKE_BUILD_SHARED_LIBS} \
     -DCMAKE_INSTALL_PREFIX:PATH=${DESTDIR} \
+    -DBUILD_WITH_CXX_11=${_BUILD_WITH_CXX_11} \
     ../
 
   ctest -C ${BUILD_TYPE} -D ExperimentalStart -D ExperimentalConfigure -D ExperimentalBuild ${CTEST_TESTING_OPTION} -D ExperimentalSubmit

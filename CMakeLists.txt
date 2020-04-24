@@ -37,25 +37,6 @@ foreach(pold "") # Currently Empty
     endif()
 endforeach()
 
-# ==== Define language standard configurations requiring at least c++11 standard
-if(CMAKE_CXX_STANDARD EQUAL "98")
-    message(FATAL_ERROR "CMAKE_CXX_STANDARD:STRING=98 is not supported.")
-endif()
-
-#####
-##  Set the default target properties
-if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 11) # Supported values are ``11``, ``14``, and ``17``.
-endif()
-if(NOT CMAKE_CXX_STANDARD_REQUIRED)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-endif()
-if(NOT CMAKE_CXX_EXTENSIONS)
-    set(CMAKE_CXX_EXTENSIONS OFF)
-endif()
-
-# ====
-
 # Ensures that CMAKE_BUILD_TYPE has a default value
 if(NOT DEFINED CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING
@@ -84,7 +65,11 @@ project(JSONCPP
         LANGUAGES CXX)
 
 message(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
-set(JSONCPP_SOVERSION 23)
+if(CMAKE_CXX_STANDARD EQUAL 11)
+set(JSONCPP_SOVERSION 24)
+else()
+set(JSONCPP_SOVERSION 25)
+endif()
 
 option(JSONCPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executables" ON)
 option(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)
@@ -94,6 +79,25 @@ option(JSONCPP_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" ON)
 option(JSONCPP_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ON)
 option(JSONCPP_WITH_EXAMPLE "Compile JsonCpp example" OFF)
 option(BUILD_SHARED_LIBS "Build jsoncpp_lib as a shared library." OFF)
+option(BUILD_WITH_CXX_11 "Build jsoncpp_lib with C++11 standard." ON)
+
+##  To compatible with C++0x and C++1x
+set(CMAKE_MINIMUN_CXX_STANDARD 98)
+set(CMAKE_CXX_COMPILER "/usr/bin/g++")
+
+execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE CXX_VERSION)
+if(CXX_VERSION VERSION_GREATER 4.8.0)
+    if(BUILD_WITH_CXX_11)
+        set(CMAKE_CXX_STANDARD 11)
+        message(STATUS "Compiled with C++11(or newer) standard!")
+    else()
+        set(CMAKE_CXX_STANDARD 98)
+        message(STATUS "Compiled with C++0x standard!")
+    endif()
+else()
+    set(CMAKE_CXX_STANDARD 98)
+    message(STATUS "Compiled with C++0x standard!")
+endif()
 
 # Enable runtime search path support for dynamic libraries on OSX
 if(APPLE)
@@ -167,9 +171,9 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
     if(JSONCPP_WITH_STRICT_ISO)
         if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
-            add_compile_options(-Wpedantic)
+            add_compile_options(-Wall)
         else()
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
         endif()
     endif()
     if(JSONCPP_WITH_WARNING_AS_ERROR)
@@ -208,7 +212,7 @@ if(JSONCPP_WITH_PKGCONFIG_SUPPORT)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pkg-config/jsoncpp.pc"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()
-
+if (CMAKE_CXX_STANDARD EQUAL 11)
 if(JSONCPP_WITH_CMAKE_PACKAGE)
     include(CMakePackageConfigHelpers)
     install(EXPORT jsoncpp
@@ -220,7 +224,14 @@ if(JSONCPP_WITH_CMAKE_PACKAGE)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp)
 endif()
+else()
+if(JSONCPP_WITH_CMAKE_PACKAGE)
+    install(EXPORT jsoncpp
+            DESTINATION ${PACKAGE_INSTALL_DIR}/jsoncpp
+            FILE jsoncppConfig.cmake)
 
+endif()
+endif()
 if(JSONCPP_WITH_TESTS)
     enable_testing()
     include(CTest)
