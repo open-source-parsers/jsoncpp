@@ -3581,7 +3581,7 @@ JSONTEST_FIXTURE_LOCAL(BuilderTest, settings) {
 struct BomTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE_LOCAL(BomTest, withBom) {
-  const std::string with_bom = u8"\xEF\xBB\xBF{\"key\" : \"value\"}";
+  const std::string with_bom = "\xEF\xBB\xBF{\"key\" : \"value\"}";
   Json::Value root;
   JSONCPP_STRING errs;
   std::istringstream iss(with_bom);

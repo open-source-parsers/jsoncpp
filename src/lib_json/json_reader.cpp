@@ -18,7 +18,6 @@
 #include <memory>
 #include <set>
 #include <sstream>
-#include <string.h>
 #include <utility>
 
 #include <cstdio>
@@ -1011,6 +1010,7 @@ bool OurReader::parse(const char* beginDoc, const char* endDoc, Value& root,
   if (!features_.allowComments_) {
     collectComments = false;
   }
+
   begin_ = beginDoc;
   end_ = endDoc;
   collectComments_ = collectComments;
