@@ -62,6 +62,10 @@ def safeReadFile(path):
     except IOError as e:
         return '<File "%s" is missing: %s>' % (path,e)
 
+class FailError(Exception):
+    def __init__(self, msg):
+        super(Exception, self).__init__(msg)
+
 def runAllTests(jsontest_executable_path, input_dir = None,
                  use_valgrind=False, with_json_checker=False,
                  writerClass='StyledWriter'):
@@ -69,45 +73,26 @@ def runAllTests(jsontest_executable_path, input_dir = None,
         input_dir = os.path.join(os.getcwd(), 'data')
     tests = glob(os.path.join(input_dir, '*.json'))
     if with_json_checker:
-        all_test_jsonchecker = glob(os.path.join(input_dir, '../jsonchecker', '*.json'))
-        # These tests fail with strict json support, but pass with jsoncpp extra lieniency
-        """
-        Failure details:
-        * Test ../jsonchecker/fail25.json
-        Parsing should have failed:
-        ["	tab	character	in	string	"]
-
-        * Test ../jsonchecker/fail13.json
-        Parsing should have failed:
-        {"Numbers cannot have leading zeroes": 013}
-
-        * Test ../jsonchecker/fail18.json
-        Parsing should have failed:
-        [[[[[[[[[[[[[[[[[[[["Too deep"]]]]]]]]]]]]]]]]]]]]
-
-        * Test ../jsonchecker/fail8.json
-        Parsing should have failed:
-        ["Extra close"]]
-
-        * Test ../jsonchecker/fail7.json
-        Parsing should have failed:
-        ["Comma after the close"],
-
-        * Test ../jsonchecker/fail10.json
-        Parsing should have failed:
-        {"Extra value after close": true} "misplaced quoted value"
-
-        * Test ../jsonchecker/fail27.json
-        Parsing should have failed:
-        ["line
-        break"]
-        """
-        known_differences_withjsonchecker = [ "fail25.json", "fail13.json", "fail18.json", "fail8.json",
-                                              "fail7.json", "fail10.json", "fail27.json" ]
-        test_jsonchecker = [ test for test in all_test_jsonchecker if os.path.basename(test) not in known_differences_withjsonchecker ]
+        all_tests = glob(os.path.join(input_dir, '../jsonchecker', '*.json'))
+        # These tests fail with strict json support, but pass with JsonCPP's
+        # extra leniency features. When adding a new exclusion to this list,
+        # remember to add the test's number and reasoning here:
+        known = ["fail{}.json".format(n) for n in [
+            4, 9, # fail because we allow trailing commas
+            7,    # fails because we allow commas after close
+            8,    # fails because we allow extra close
+            10,   # fails because we allow extra values after close
+            13,   # fails because we allow leading zeroes in numbers
+            18,   # fails because we allow deeply nested values
+            25,   # fails because we allow tab characters in strings
+            27,   # fails because we allow string line breaks
+        ]]
+        test_jsonchecker = [ test for test in all_tests
+                             if os.path.basename(test) not in known]
 
     else:
         test_jsonchecker = []
+
     failed_tests = []
     valgrind_path = use_valgrind and VALGRIND_CMD or ''
     for input_path in tests + test_jsonchecker:
@@ -161,10 +146,9 @@ def runAllTests(jsontest_executable_path, input_dir = None,
             print()
         print('Test results: %d passed, %d failed.' % (len(tests)-len(failed_tests),
                                                        len(failed_tests)))
-        return 1
+        raise FailError(repr(failed_tests))
     else:
         print('All %d tests passed.' % len(tests))
-        return 0
 
 def main():
     from optparse import OptionParser
@@ -187,24 +171,21 @@ def main():
         input_path = os.path.normpath(os.path.abspath(args[1]))
     else:
         input_path = None
-    status = runAllTests(jsontest_executable_path, input_path,
+    runAllTests(jsontest_executable_path, input_path,
                          use_valgrind=options.valgrind,
                          with_json_checker=options.with_json_checker,
                          writerClass='StyledWriter')
-    if status:
-        sys.exit(status)
-    status = runAllTests(jsontest_executable_path, input_path,
+    runAllTests(jsontest_executable_path, input_path,
                          use_valgrind=options.valgrind,
                          with_json_checker=options.with_json_checker,
                          writerClass='StyledStreamWriter')
-    if status:
-        sys.exit(status)
-    status = runAllTests(jsontest_executable_path, input_path,
+    runAllTests(jsontest_executable_path, input_path,
                          use_valgrind=options.valgrind,
                          with_json_checker=options.with_json_checker,
                          writerClass='BuiltStyledStreamWriter')
-    if status:
-        sys.exit(status)
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except FailError:
+        sys.exit(1)
