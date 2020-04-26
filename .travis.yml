@@ -63,7 +63,6 @@ matrix:
             - g++-4.6
             - valgrind
       env:
-        MATRIX_EVAL="CC=gcc-4.6 CXX=g++-4.6"
         CC=gcc-4.6
         CXX=g++-4.6
         LIB_TYPE=static
@@ -86,7 +85,6 @@ matrix:
             - g++-4.6
             - valgrind
       env:
-        MATRIX_EVAL="CC=gcc-4.6 CXX=g++-4.6"
         CC=gcc-4.6
         CXX=g++-4.6
         LIB_TYPE=static
@@ -117,29 +115,6 @@ matrix:
       script: ./.travis_scripts/cmake_builder.sh
       after_success:
         - coveralls --include src/lib_json --include include
-    - name: Linux xenial gcc-4.6 cmake-3.12 with C++03 testing
-      os: linux
-      dist: xenial
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-4.6
-            - valgrind
-      env:
-        MATRIX_EVAL="CC=gcc-4.6 CXX=g++-4.6"
-        CC=gcc-4.6
-        CXX=g++-4.6
-        BUILD_TOOL="Unix Makefiles"
-        LIB_TYPE=static
-        BUILD_TYPE=release
-        DESTDIR=/tmp/cmake_json_cpp
-        LANGUAGE_STANDARD="03"
-      before_install:
-        - sudo apt-get update
-        - sudo apt-get install python3
-      script: ./.travis_scripts/cmake_builder.sh
     - name: Linux xenial gcc-4.6 cmake-3.12 with C++98 testing
       os: linux
       dist: xenial
@@ -151,9 +126,9 @@ matrix:
             - g++-4.6
             - valgrind
       env:
-        MATRIX_EVAL="CC=gcc-4.6 CXX=g++-4.6"
         CC=gcc-4.6
         CXX=g++-4.6
+        DO_MemCheck=ON
         BUILD_TOOL="Unix Makefiles"
         LIB_TYPE=static
         BUILD_TYPE=release
@@ -162,6 +137,19 @@ matrix:
       before_install:
         - sudo apt-get update
         - sudo apt-get install python3
+      script: ./.travis_scripts/cmake_builder.sh
+    - name: Linux xenial gcc-5.4 cmake-3.12 with C++98 testing
+      os: linux
+      dist: xenial
+      env:
+        CC=gcc
+        CXX=g++
+        DO_MemCheck=ON
+        BUILD_TOOL="Unix Makefiles"
+        LIB_TYPE=static
+        BUILD_TYPE=release
+        DESTDIR=/tmp/cmake_json_cpp
+        LANGUAGE_STANDARD="98"
       script: ./.travis_scripts/cmake_builder.sh
 notifications:
   email: false
