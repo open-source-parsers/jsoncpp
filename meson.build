@@ -103,5 +103,17 @@ test(
     '-B',
     join_paths(meson.current_source_dir(), 'test/runjsontests.py'),
     jsontestrunner,
-    join_paths(meson.current_source_dir(), 'test/data')]
+    join_paths(meson.current_source_dir(), 'test/data')],
+  )
+test(
+  'jsonchecker_jsontestrunner',
+  python,
+  is_parallel : false,
+  args : [
+    '-B',
+    join_paths(meson.current_source_dir(), 'test/runjsontests.py'),
+    '--with-json-checker',
+    jsontestrunner,
+    join_paths(meson.current_source_dir(), 'test/data')],
+    workdir : join_paths(meson.current_source_dir(), 'test/data'),
   )
