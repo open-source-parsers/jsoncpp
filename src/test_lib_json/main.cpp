@@ -2828,7 +2828,11 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, strictModeParseNumber) {
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseChineseWithOneError) {
   checkParse("{ \"pr"
+#if JSONCPP_VER_11
+             u8"\u4f50\u85e4" // 佐藤
+#else
              "\u4f50\u85e4" // 佐藤
+#endif
              "erty\" :: \"value\" }",
              {{18, 19, "Syntax error: value, object or array expected."}},
              "* Line 1, Column 19\n  Syntax error: value, object or array "
