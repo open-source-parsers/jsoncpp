@@ -146,7 +146,8 @@ ValueIterator::ValueIterator(const ValueConstIterator& other)
   throwRuntimeError("ConstIterator to Iterator should never be allowed.");
 }
 
-ValueIterator::ValueIterator(const ValueIterator& other) {}
+ValueIterator::ValueIterator(const ValueIterator& other)
+    : ValueIteratorBase(other) {}
 
 ValueIterator& ValueIterator::operator=(const SelfType& other) {
   copy(other);

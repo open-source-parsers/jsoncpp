@@ -2980,18 +2980,19 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseString) {
         "  Bad unicode escape sequence in string: four digits expected.\n"
         "See Line 1, Column 6 for detail.\n");
   }
+  delete reader;
   {
     b.settings_["allowSingleQuotes"] = true;
-    CharReaderPtr charreader(b.newCharReader());
+    CharReaderPtr charReader(b.newCharReader());
     char const doc[] = "{'a': 'x\\ty', \"b\":'x\\\\y'}";
-    bool ok = charreader->parse(doc, doc + std::strlen(doc), &root, &errs);
+    bool ok = charReader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
     JSONTEST_ASSERT_STRING_EQUAL("", errs);
     JSONTEST_ASSERT_EQUAL(2u, root.size());
     JSONTEST_ASSERT_STRING_EQUAL("x\ty", root["a"].asString());
     JSONTEST_ASSERT_STRING_EQUAL("x\\y", root["b"].asString());
+    delete charReader;
   }
-  delete reader;
 }
 
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseComment) {

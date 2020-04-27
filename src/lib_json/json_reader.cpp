@@ -51,12 +51,7 @@ static size_t const stackLimit_g =
 
 namespace Json {
 
-#if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
-typedef std::unique_ptr<CharReader> CharReaderPtr;
-#else
 typedef CharReader* CharReaderPtr;
-
-#endif
 
 // Implementation of class Features
 // ////////////////////////////////
@@ -1990,7 +1985,9 @@ bool parseFromStream(CharReader::Factory const& fact, IStream& sin, Value* root,
   char const* end = begin + doc.size();
   // Note that we do not actually need a null-terminator.
   CharReaderPtr const reader(fact.newCharReader());
-  return reader->parse(begin, end, root, errs);
+  bool ret = reader->parse(begin, end, root, errs);
+  delete reader;
+  return ret;
 }
 
 IStream& operator>>(IStream& sin, Value& root) {

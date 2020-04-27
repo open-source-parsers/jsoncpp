@@ -44,6 +44,7 @@
 
 #if JSONCPP_VER_11
 #else
+#undef JSONCPP_TEMPLATE_DELETE
 #define JSONCPP_TEMPLATE_DELETE
 #include <string.h>
 #endif

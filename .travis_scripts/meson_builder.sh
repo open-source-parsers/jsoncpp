@@ -65,7 +65,7 @@ _COMPILER_NAME=`basename ${CXX}`
 _BUILD_DIR_NAME="build-${BUILD_TYPE}_${LIB_TYPE}_${_COMPILER_NAME}"
 
 ./.travis_scripts/run-clang-format.sh
-meson --fatal-meson-warnings --buildtype ${BUILD_TYPE} --default-library ${LIB_TYPE} . "${_BUILD_DIR_NAME}"
+meson --fatal-meson-warnings --werror --buildtype ${BUILD_TYPE} --default-library ${LIB_TYPE} . "${_BUILD_DIR_NAME}"
 
 cd "${_BUILD_DIR_NAME}"
   meson configure -Dcpp_std="c++${LANGUAGE_STANDARD}"
