@@ -80,7 +80,7 @@ extern JSON_API int msvc_pre1900_c99_snprintf(char* outBuf, size_t size,
 // These Macros are maintained for backwards compatibility of external tools.
 #if (defined(_MSC_VER) && _MSC_VER >= 1900) ||                                 \
     (defined(__GNUC__) && __cplusplus >= 201103L) ||                           \
-    (defined(__clang__) && __clang_major__ == 3 && __clang_minor__ > 3)
+    (defined(__clang__) && __clang_major__ == 3 && __clang_minor__ >= 3)
 
 #define JSONCPP_VER_11 1
 #else
@@ -103,11 +103,9 @@ extern JSON_API int msvc_pre1900_c99_snprintf(char* outBuf, size_t size,
 #define JSONCPP_MOVE(value) value
 #endif
 
-// Define deprecated attribute
+// Define *deprecated* attribute
 // [[deprecated]] is in C++14 or in Visual Studio 2015 and later
 // For compatibility, [[deprecated]] is not used
-// and there is no performance improvement for this usage, so we don't need to
-// use it.
 #ifdef __clang__
 #if __has_extension(attribute_deprecated_with_message)
 #define JSONCPP_DEPRECATED(message) __attribute__((deprecated(message)))
@@ -127,11 +125,10 @@ extern JSON_API int msvc_pre1900_c99_snprintf(char* outBuf, size_t size,
 #define JSONCPP_DEPRECATED(message)
 #endif // if !defined(JSONCPP_DEPRECATED)
 
-// Define int64 double voncersion in Clang platform
 #if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ >= 6))
 #define JSON_USE_INT64_DOUBLE_CONVERSION 1
 #endif
-// Define AMALGAMATION macro
+
 #if !defined(JSON_IS_AMALGAMATION)
 #if JSONCPP_VER_11
 #include "allocator.h"

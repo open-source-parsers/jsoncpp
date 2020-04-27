@@ -14,8 +14,6 @@
 // a) suppress false positives from static code analysis
 // b) possibly improve optimization opportunities.
 // For compatibility, [[noreturn]] is not used
-// and there is no performance improvement for this usage, so we don't need to
-// use it.
 #if !defined(JSONCPP_NORETURN)
 #if defined(_MSC_VER)
 #define JSONCPP_NORETURN __declspec(noreturn)
@@ -24,7 +22,7 @@
 #else
 #define JSONCPP_NORETURN
 #endif
-#endif
+#endif // if !defined(JSONCPP_NORETURN)
 
 // Support for '= delete' with template declarations was a late addition
 // to the c++11 standard and is rejected by clang 3.8 and Apple clang 8.2

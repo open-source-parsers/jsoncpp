@@ -30,7 +30,6 @@ class Features;
 
 // value.h
 typedef unsigned int ArrayIndex;
-
 class StaticString;
 class Path;
 class PathArgument;
