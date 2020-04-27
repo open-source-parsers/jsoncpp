@@ -42,7 +42,7 @@
 #endif
 #endif
 
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
 #else
 #undef JSONCPP_TEMPLATE_DELETE
 #define JSONCPP_TEMPLATE_DELETE
@@ -272,12 +272,12 @@ private:
     CZString(ArrayIndex index);
     CZString(char const* str, unsigned length, DuplicationPolicy allocate);
     CZString(CZString const& other);
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
     CZString(CZString&& other);
 #endif
     ~CZString();
     CZString& operator=(const CZString& other);
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
     CZString& operator=(CZString&& other);
 #endif
     bool operator<(CZString const& other) const;
@@ -355,7 +355,7 @@ public:
   Value(const String& value);
   Value(bool value);
   Value(const Value& other);
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
   Value(Value&& other);
 #endif
   ~Value();
@@ -363,7 +363,7 @@ public:
   /// \note Overwrite existing comments. To preserve comments, use
   /// #swapPayload().
   Value& operator=(const Value& other);
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
   Value& operator=(Value&& other);
 #endif
 
@@ -478,13 +478,13 @@ public:
   ///
   /// Equivalent to jsonvalue[jsonvalue.size()] = value;
   Value& append(const Value& value);
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
   Value& append(Value&& value);
 #endif
 
   /// \brief Insert value in array at specific index
   bool insert(ArrayIndex index, const Value& newValue);
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
   bool insert(ArrayIndex index, Value&& newValue);
 #endif
 

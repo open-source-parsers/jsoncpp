@@ -252,7 +252,7 @@ Value::CZString::CZString(const CZString& other) {
       3U;
   storage_.length_ = other.storage_.length_;
 }
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
 Value::CZString::CZString(CZString&& other)
     : cstr_(other.cstr_), index_(other.index_) {
   other.cstr_ = JSONCPP_NULL;
@@ -278,7 +278,7 @@ Value::CZString& Value::CZString::operator=(const CZString& other) {
   index_ = other.index_;
   return *this;
 }
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
 Value::CZString& Value::CZString::operator=(CZString&& other) {
   cstr_ = other.cstr_;
   index_ = other.index_;
@@ -426,7 +426,7 @@ Value::Value(const Value& other) {
   dupPayload(other);
   dupMeta(other);
 }
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
 Value::Value(Value&& other) {
   initBasic(nullValue);
   swap(other);
@@ -442,7 +442,7 @@ Value& Value::operator=(const Value& other) {
   Value(other).swap(*this);
   return *this;
 }
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
 Value& Value::operator=(Value&& other) {
   other.swap(*this);
   return *this;
@@ -1120,7 +1120,7 @@ Value& Value::operator[](const StaticString& key) {
   return resolveReference(key.c_str());
 }
 
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
 Value& Value::append(const Value& value) { return append(Value(value)); }
 Value& Value::append(Value&& value) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
@@ -1134,7 +1134,7 @@ Value& Value::append(Value&& value) {
 Value& Value::append(const Value& value) { return (*this)[size()] = value; }
 #endif
 
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
 bool Value::insert(ArrayIndex index, const Value& newValue) {
   return insert(index, Value(newValue));
 }

@@ -12,7 +12,7 @@
 #include <sstream>
 #include <string>
 
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
 #include <cstddef> // typedef ptrdiff_t
 #include <cstdint> // typedef int64_t, uint64_t
 #else
@@ -82,12 +82,12 @@ extern JSON_API int msvc_pre1900_c99_snprintf(char* outBuf, size_t size,
     (defined(__GNUC__) && __cplusplus >= 201103L) ||                           \
     (defined(__clang__) && __clang_major__ == 3 && __clang_minor__ >= 3)
 
-#define JSONCPP_VER_11 1
+#define JSONCPP_CXX_STD_11 1
 #else
-#define JSONCPP_VER_11 0
+#define JSONCPP_CXX_STD_11 0
 #endif
 
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
 #define JSONCPP_NULL nullptr
 #define JSONCPP_CONST constexpr
 #define JSONCPP_CTOR_DELETE = delete
@@ -130,7 +130,7 @@ extern JSON_API int msvc_pre1900_c99_snprintf(char* outBuf, size_t size,
 #endif
 
 #if !defined(JSON_IS_AMALGAMATION)
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
 #include "allocator.h"
 #endif
 #include "version.h"
@@ -159,7 +159,7 @@ typedef UInt64 LargestUInt;
 #define JSON_HAS_INT64
 #endif // if defined(JSON_NO_INT64)
 
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
 template <typename T>
 using Allocator =
     typename std::conditional<JSONCPP_USING_SECURE_MEMORY, SecureAllocator<T>,
@@ -179,7 +179,7 @@ typedef std::istringstream IStringStream;
 typedef std::ostringstream OStringStream;
 typedef std::istream IStream;
 typedef std::ostream OStream;
-#endif // JSONCPP_VER_11
+#endif // JSONCPP_CXX_STD_11
 } // namespace Json
 
 // Legacy names (formerly macros).

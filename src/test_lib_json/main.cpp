@@ -2651,7 +2651,7 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, unicode) {
                   "{\n\t\"test\" : "
                   "\"\\t\\n\\ud806\\udca1=\\u0133\\ud82c\\udd1b\\uff67\"\n}");
 }
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
 struct ReaderTest : JsonTest::TestCase {
   void setStrictMode() {
     reader = std::unique_ptr<Json::Reader>(
@@ -2828,7 +2828,7 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, strictModeParseNumber) {
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseChineseWithOneError) {
   checkParse("{ \"pr"
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
              u8"\u4f50\u85e4" // 佐藤
 #else
              "\u4f50\u85e4" // 佐藤
@@ -2874,7 +2874,7 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, allowNumericKeysTest) {
   setFeatures(features);
   checkParse("{ 123 : \"abc\" }");
 }
-#endif // JSONCPP_VER_11
+#endif // JSONCPP_CXX_STD_11
 struct CharReaderTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithNoErrors) {
@@ -2937,11 +2937,11 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseString) {
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
     JSONTEST_ASSERT(errs.empty());
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
     JSONTEST_ASSERT_EQUAL(u8"\u8A2a", root[0].asString()); // "訪"
 #else
     JSONTEST_ASSERT_EQUAL("\u8A2a", root[0].asString()); // "訪"
-#endif // JSONCPP_VER_11
+#endif // JSONCPP_CXX_STD_11
   }
   {
     char const doc[] = "[ \"\\uD801\" ]";
@@ -3317,7 +3317,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderFailIfExtraTest, parseComment) {
   }
   delete reader;
 }
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
 struct CharReaderAllowDropNullTest : JsonTest::TestCase {
   typedef Json::Value Value;
   typedef std::function<void(const Value&)> ValueCheck;
@@ -3379,7 +3379,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderAllowDropNullTest, issue178) {
     }
   }
 }
-#endif // JSONCPP_VER_11
+#endif // JSONCPP_CXX_STD_11
 struct CharReaderAllowNumericKeysTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE_LOCAL(CharReaderAllowNumericKeysTest, allowNumericKeys) {
@@ -3786,7 +3786,7 @@ JSONTEST_FIXTURE_LOCAL(IteratorTest, constness) {
   Json::String expected = "\" 9\",\"10\",\"11\",";
   JSONTEST_ASSERT_STRING_EQUAL(expected, out.str());
 }
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
 struct RValueTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE_LOCAL(RValueTest, moveConstruction) {
@@ -3798,7 +3798,7 @@ JSONTEST_FIXTURE_LOCAL(RValueTest, moveConstruction) {
   JSONTEST_ASSERT_EQUAL(Json::objectValue, moved.type());
   JSONTEST_ASSERT_EQUAL(Json::stringValue, moved["key"].type());
 }
-#endif // JSONCPP_VER_11
+#endif // JSONCPP_CXX_STD_11
 struct FuzzTest : JsonTest::TestCase {};
 
 // Build and run the fuzz test without any fuzzer, so that it's guaranteed not
@@ -3821,7 +3821,7 @@ int main(int argc, const char* argv[]) {
 
   return runner.runCommandLine(argc, argv);
 }
-#if JSONCPP_VER_11
+#if JSONCPP_CXX_STD_11
 struct MemberTemplateAs : JsonTest::TestCase {
   template <typename T, typename F>
   JsonTest::TestResult& EqEval(T v, F f) const {
@@ -3850,7 +3850,7 @@ JSONTEST_FIXTURE_LOCAL(MemberTemplateAs, BehavesSameAsNamedAs) {
   EqEval(false, [](const Json::Value& j) { return j.asBool(); });
   EqEval(true, [](const Json::Value& j) { return j.asBool(); });
 }
-#endif // JSONCPP_VER_11
+#endif // JSONCPP_CXX_STD_11
 class MemberTemplateIs : public JsonTest::TestCase {};
 
 JSONTEST_FIXTURE_LOCAL(MemberTemplateIs, BehavesSameAsNamedIs) {
