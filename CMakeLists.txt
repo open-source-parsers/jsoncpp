@@ -65,11 +65,7 @@ project(JSONCPP
         LANGUAGES CXX)
 
 message(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
-if(CMAKE_CXX_STANDARD EQUAL 11)
 set(JSONCPP_SOVERSION 24)
-else()
-set(JSONCPP_SOVERSION 25)
-endif()
 
 option(JSONCPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executables" ON)
 option(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)
