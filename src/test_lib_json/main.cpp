@@ -3590,13 +3590,13 @@ JSONTEST_FIXTURE_LOCAL(BomTest, skipBom) {
   JSONTEST_ASSERT(errs.empty());
   JSONTEST_ASSERT_STRING_EQUAL(root["key"].asString(), "value");
 }
-JSONTEST_FIXTURE_LOCAL(BomTest, allowBom) {
+JSONTEST_FIXTURE_LOCAL(BomTest, notSkipBom) {
   const std::string with_bom = "\xEF\xBB\xBF{\"key\" : \"value\"}";
   Json::Value root;
   JSONCPP_STRING errs;
   std::istringstream iss(with_bom);
   Json::CharReaderBuilder b;
-  b.settings_["allowBom"] = true;
+  b.settings_["skipBom"] = false;
   bool ok = parseFromStream(b, iss, &root, &errs);
   // Detect the BOM, and failed on it.
   JSONTEST_ASSERT(!ok);
