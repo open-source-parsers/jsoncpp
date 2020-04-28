@@ -3580,15 +3580,28 @@ JSONTEST_FIXTURE_LOCAL(BuilderTest, settings) {
 
 struct BomTest : JsonTest::TestCase {};
 
-JSONTEST_FIXTURE_LOCAL(BomTest, withBom) {
+JSONTEST_FIXTURE_LOCAL(BomTest, skipBom) {
   const std::string with_bom = "\xEF\xBB\xBF{\"key\" : \"value\"}";
   Json::Value root;
   JSONCPP_STRING errs;
   std::istringstream iss(with_bom);
   bool ok = parseFromStream(Json::CharReaderBuilder(), iss, &root, &errs);
+  // The default behavior is to skip the BOM, so we can parse it normally.
   JSONTEST_ASSERT(ok);
   JSONTEST_ASSERT(errs.empty());
   JSONTEST_ASSERT_STRING_EQUAL(root["key"].asString(), "value");
+}
+JSONTEST_FIXTURE_LOCAL(BomTest, allowBom) {
+  const std::string with_bom = "\xEF\xBB\xBF{\"key\" : \"value\"}";
+  Json::Value root;
+  JSONCPP_STRING errs;
+  std::istringstream iss(with_bom);
+  Json::CharReaderBuilder b;
+  b.settings_["allowBom"] = true;
+  bool ok = parseFromStream(b, iss, &root, &errs);
+  // Detect the BOM, and failed on it.
+  JSONTEST_ASSERT(!ok);
+  JSONTEST_ASSERT(!errs.empty());
 }
 
 struct IteratorTest : JsonTest::TestCase {};
