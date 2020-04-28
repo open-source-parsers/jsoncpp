@@ -871,6 +871,7 @@ public:
   bool failIfExtra_;
   bool rejectDupKeys_;
   bool allowSpecialFloats_;
+  bool allowBom_;
   size_t stackLimit_;
 }; // OurFeatures
 
@@ -939,6 +940,7 @@ private:
 
   bool readToken(Token& token);
   void skipSpaces();
+  void skipBom(bool allowBom);
   bool match(const Char* pattern, int patternLength);
   bool readComment();
   bool readCStyleComment(bool* containsNewLineResult);
@@ -1022,6 +1024,8 @@ bool OurReader::parse(const char* beginDoc, const char* endDoc, Value& root,
     nodes_.pop();
   nodes_.push(&root);
 
+  // skip byte order mark if it exists at the beginning of the UTF-8 text.
+  skipBom(features_.allowBom_);
   bool successful = readValue();
   nodes_.pop();
   Token token;
@@ -1265,6 +1269,17 @@ void OurReader::skipSpaces() {
       ++current_;
     else
       break;
+  }
+}
+
+void OurReader::skipBom(bool allowBom) {
+  // If BOM is not allowed, then skip it.
+  // The default value is: false
+  if (!allowBom) {
+    if (strncmp(begin_, "\xEF\xBB\xBF", 3) == 0) {
+      begin_ += 3;
+      current_ = begin_;
+    }
   }
 }
 
@@ -1885,6 +1900,7 @@ CharReader* CharReaderBuilder::newCharReader() const {
   features.failIfExtra_ = settings_["failIfExtra"].asBool();
   features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
+  features.allowBom_ = settings_["allowBom"].asBool();
   return new OurCharReader(collectComments, features);
 }
 static void getValidReaderKeys(std::set<String>* valid_keys) {
@@ -1900,6 +1916,7 @@ static void getValidReaderKeys(std::set<String>* valid_keys) {
   valid_keys->insert("failIfExtra");
   valid_keys->insert("rejectDupKeys");
   valid_keys->insert("allowSpecialFloats");
+  valid_keys->insert("allowBom");
 }
 bool CharReaderBuilder::validate(Json::Value* invalid) const {
   Json::Value my_invalid;
@@ -1934,6 +1951,7 @@ void CharReaderBuilder::strictMode(Json::Value* settings) {
   (*settings)["failIfExtra"] = true;
   (*settings)["rejectDupKeys"] = true;
   (*settings)["allowSpecialFloats"] = false;
+  (*settings)["allowBom"] = false;
   //! [CharReaderBuilderStrictMode]
 }
 // static
@@ -1950,6 +1968,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings) {
   (*settings)["failIfExtra"] = false;
   (*settings)["rejectDupKeys"] = false;
   (*settings)["allowSpecialFloats"] = false;
+  (*settings)["allowBom"] = false;
   //! [CharReaderBuilderDefaults]
 }
 
