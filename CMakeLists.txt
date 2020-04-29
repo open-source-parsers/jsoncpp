@@ -53,19 +53,47 @@ if(CCACHE_EXECUTABLE)
     set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}" CACHE PATH "ccache" FORCE)
 endif()
 
+# Note: project(VERSION XX) - the VERSION here is number, but VERSION in meson is string.
+# Thus, it is better to be consistent.
 project(JSONCPP
-        # Note: version must be updated in three places when doing a release. This
-        # annoying process ensures that amalgamate, CMake, and meson all report the
-        # correct version.
-        # 1. ./meson.build
-        # 2. ./include/json/version.h
-        # 3. ./CMakeLists.txt
-        # IMPORTANT: also update the JSONCPP_SOVERSION!!
-        VERSION 00.11.0 # <major>[.<minor>[.<patch>[.<tweak>]]]
         LANGUAGES CXX)
+		
+# Set variable named ${VAR_NAME} to value ${VALUE}
+function(set_using_dynamic_name VAR_NAME VALUE)
+    set( "${VAR_NAME}" "${VALUE}" PARENT_SCOPE)
+endfunction()
 
-message(STATUS "JsonCpp Version: 00.11.0")
-set(JSONCPP_SOVERSION 24)
+# Extract major, minor, patch from version text
+# Parse a version string "X.Y.Z" and outputs
+# version parts in ${OUPUT_PREFIX}_MAJOR, _MINOR, _PATCH.
+# If parse succeeds then ${OUPUT_PREFIX}_FOUND is TRUE.
+macro(jsoncpp_parse_version VERSION_TEXT OUPUT_PREFIX)
+    set(VERSION_REGEX "[0-9]+\\.[0-9]+\\.[0-9]+(-[a-zA-Z0-9_]+)?")
+    if( ${VERSION_TEXT} MATCHES ${VERSION_REGEX} )
+        string(REGEX MATCHALL "[0-9]+|-([A-Za-z0-9_]+)" VERSION_PARTS ${VERSION_TEXT})
+        list(GET VERSION_PARTS 0 ${OUPUT_PREFIX}_MAJOR)
+        list(GET VERSION_PARTS 1 ${OUPUT_PREFIX}_MINOR)
+        list(GET VERSION_PARTS 2 ${OUPUT_PREFIX}_PATCH)
+        set_using_dynamic_name( "${OUPUT_PREFIX}_FOUND" TRUE )
+    else( ${VERSION_TEXT} MATCHES ${VERSION_REGEX} )
+        set_using_dynamic_name( "${OUPUT_PREFIX}_FOUND" FALSE )
+    endif()
+endmacro()
+
+# Note: version must be updated in three places when doing a release. This
+# annoying process ensures that amalgamate, CMake, and meson all report the
+# correct version.
+# 1. ./meson.build
+# 2. ./include/json/version.h
+# 3. ./CMakeLists.txt
+# IMPORTANT: also update the JSONCPP_SOVERSION!!
+set( JSONCPP_VERSION 00.11.0 )
+message(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
+jsoncpp_parse_version( ${JSONCPP_VERSION} JSONCPP_VERSION )
+#if(NOT JSONCPP_VERSION_FOUND)
+#    message(FATAL_ERROR "Failed to parse version string properly. Expect X.Y.Z")
+#endif(NOT JSONCPP_VERSION_FOUND)
+set( JSONCPP_SOVERSION 24 )
 
 option(JSONCPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executables" ON)
 option(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)
@@ -219,26 +247,14 @@ if(JSONCPP_WITH_PKGCONFIG_SUPPORT)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pkg-config/jsoncpp.pc"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()
-if (CMAKE_CXX_STANDARD EQUAL 11)
-if(JSONCPP_WITH_CMAKE_PACKAGE)
-    include(CMakePackageConfigHelpers)
-    install(EXPORT jsoncpp
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp
-        FILE        jsoncppConfig.cmake)
-    write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake"
-        VERSION ${PROJECT_VERSION}
-        COMPATIBILITY SameMajorVersion)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp)
-endif()
-else()
+
 if(JSONCPP_WITH_CMAKE_PACKAGE)
     install(EXPORT jsoncpp
             DESTINATION ${PACKAGE_INSTALL_DIR}/jsoncpp
             FILE jsoncppConfig.cmake)
 
 endif()
-endif()
+
 if(JSONCPP_WITH_TESTS)
     enable_testing()
     include(CTest)
