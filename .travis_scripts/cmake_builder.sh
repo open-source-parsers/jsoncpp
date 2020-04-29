@@ -99,10 +99,11 @@ else
 fi
 
 # Language standard
-if [ "${LANGUAGE_STANDARD}" = "11" ]; then
-  _BUILD_WITH_CXX_11=ON
-else
+# Set default to ON
+if [ "${LANGUAGE_STANDARD}" = "98" ]; then
   _BUILD_WITH_CXX_11=OFF
+else
+  _BUILD_WITH_CXX_11=ON
 fi
 
 _BUILD_DIR_NAME="build-cmake_${BUILD_TYPE}_${LIB_TYPE}_${_COMPILER_NAME}_${_BUILD_EXE}"

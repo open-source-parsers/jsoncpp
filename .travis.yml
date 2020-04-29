@@ -55,13 +55,13 @@ matrix:
     - name: Linux xenial gcc-4.6 meson static release with C++03 testing
       os: linux
       dist: xenial
+      compiler: gcc
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.6
-            - valgrind
       env:
         CC=gcc-4.6
         CXX=g++-4.6
@@ -77,13 +77,13 @@ matrix:
     - name: Linux xenial gcc-4.6 meson static release with C++98 testing
       os: linux
       dist: xenial
+      compiler: gcc
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.6
-            - valgrind
       env:
         CC=gcc-4.6
         CXX=g++-4.6
@@ -118,6 +118,7 @@ matrix:
     - name: Linux xenial gcc-4.6 cmake-3.12 with C++98 testing
       os: linux
       dist: xenial
+      compiler: gcc
       addons:
         apt:
           sources:
@@ -141,9 +142,38 @@ matrix:
     - name: Linux xenial gcc-5.4 cmake-3.12 with C++98 testing
       os: linux
       dist: xenial
+      compiler: gcc
       env:
         CC=gcc
         CXX=g++
+        DO_MemCheck=ON
+        BUILD_TOOL="Unix Makefiles"
+        LIB_TYPE=static
+        BUILD_TYPE=release
+        DESTDIR=/tmp/cmake_json_cpp
+        LANGUAGE_STANDARD="98"
+      script: ./.travis_scripts/cmake_builder.sh
+    - name: Linux xenial clang cmake-3.12 with C++11 testing
+      os: linux
+      dist: xenial
+      compiler: clang
+      env:
+        CC=clang
+        CXX=clang++
+        DO_MemCheck=ON
+        BUILD_TOOL="Unix Makefiles"
+        LIB_TYPE=static
+        BUILD_TYPE=release
+        DESTDIR=/tmp/cmake_json_cpp
+        LANGUAGE_STANDARD="11"
+      script: ./.travis_scripts/cmake_builder.sh
+    - name: Linux xenial clang cmake-3.12 with C++98 testing
+      os: linux
+      dist: xenial
+      compiler: gcc
+      env:
+        CC=clang
+        CXX=clang++
         DO_MemCheck=ON
         BUILD_TOOL="Unix Makefiles"
         LIB_TYPE=static

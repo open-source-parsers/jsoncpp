@@ -64,7 +64,7 @@ project(JSONCPP
         VERSION 00.11.0 # <major>[.<minor>[.<patch>[.<tweak>]]]
         LANGUAGES CXX)
 
-message(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
+message(STATUS "JsonCpp Version: 00.11.0")
 set(JSONCPP_SOVERSION 24)
 
 option(JSONCPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executables" ON)
@@ -93,6 +93,16 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   else()
       set(CMAKE_CXX_STANDARD 98)
       message(STATUS "Compiled with C++0x standard!")
+  endif()
+endif()
+
+if (NOT CMAKE_CXX_STANDARD)
+  if (BUILD_WITH_CXX_11)
+    set(CMAKE_CXX_STANDARD 11)
+    message(STATUS "Compiled with C++1x standard!")
+  else()
+    set(CMAKE_CXX_STANDARD 98)
+    message(STATUS "Compiled with C++0x standard!")
   endif()
 endif()
 
