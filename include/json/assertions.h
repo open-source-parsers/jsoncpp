@@ -21,19 +21,19 @@
 
 // @todo <= add detail about condition in exception
 #define JSON_ASSERT(condition)                                                 \
-  {                                                                            \
+  do {                                                                         \
     if (!(condition)) {                                                        \
       Json::throwLogicError("assert json failed");                             \
     }                                                                          \
-  }
+  } while (0)
 
 #define JSON_FAIL_MESSAGE(message)                                             \
-  {                                                                            \
+  do {                                                                         \
     OStringStream oss;                                                         \
     oss << message;                                                            \
     Json::throwLogicError(oss.str());                                          \
     abort();                                                                   \
-  }
+  } while (0)
 
 #else // JSON_USE_EXCEPTION
 
@@ -52,9 +52,11 @@
 #endif
 
 #define JSON_ASSERT_MESSAGE(condition, message)                                \
-  if (!(condition)) {                                                          \
-    JSON_FAIL_MESSAGE(message);                                                \
-  }
+  do {                                                                         \
+    if (!(condition)) {                                                        \
+      JSON_FAIL_MESSAGE(message);                                              \
+    }                                                                          \
+  } while (0)
 
 #if JSONCPP_CXX_STD_11
 #define JSONCPP_STATIC_ASSERT static_assert

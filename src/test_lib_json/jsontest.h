@@ -209,7 +209,7 @@ TestResult& checkStringEqual(TestResult& result, const Json::String& expected,
 /// The predicate may do other assertions and be a member function of the
 /// fixture.
 #define JSONTEST_ASSERT_PRED(expr)                                             \
-  {                                                                            \
+  do {                                                                         \
     JsonTest::PredicateContext _minitest_Context = {                           \
         result_->predicateId_, __FILE__, __LINE__, #expr, NULL, NULL};         \
     result_->predicateStackTail_->next_ = &_minitest_Context;                  \
@@ -217,7 +217,7 @@ TestResult& checkStringEqual(TestResult& result, const Json::String& expected,
     result_->predicateStackTail_ = &_minitest_Context;                         \
     (expr);                                                                    \
     result_->popPredicateContext();                                            \
-  }
+  } while (0)
 
 /// \brief Asserts that two values are equals.
 #define JSONTEST_ASSERT_EQUAL(expected, actual)                                \
@@ -232,7 +232,7 @@ TestResult& checkStringEqual(TestResult& result, const Json::String& expected,
 
 /// \brief Asserts that a given expression throws an exception
 #define JSONTEST_ASSERT_THROWS(expr)                                           \
-  {                                                                            \
+  do {                                                                         \
     bool _threw = false;                                                       \
     try {                                                                      \
       expr;                                                                    \
@@ -242,7 +242,7 @@ TestResult& checkStringEqual(TestResult& result, const Json::String& expected,
     if (!_threw)                                                               \
       result_->addFailure(__FILE__, __LINE__,                                  \
                           "expected exception thrown: " #expr);                \
-  }
+  } while (0)
 
 /// \brief Begin a fixture test case.
 #define JSONTEST_FIXTURE(FixtureType, name)                                    \
