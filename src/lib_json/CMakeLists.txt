@@ -1,13 +1,6 @@
-if(CMAKE_COMPILER_IS_GNUCXX)
-    #Get compiler version.
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion
-        OUTPUT_VARIABLE GNUCXX_VERSION
-    )
-
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.1.2)
     #-Werror=* was introduced -after- GCC 4.1.2
-    if(GNUCXX_VERSION VERSION_GREATER 4.1.2)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=strict-aliasing")
-    endif()
+    add_compile_options("-Werror=strict-aliasing")
 endif()
 
 include(CheckIncludeFileCXX)
@@ -81,12 +74,13 @@ if(BUILD_SHARED_LIBS)
     endif()
 endif()
 
-
 add_library(jsoncpp_lib ${PUBLIC_HEADERS} ${jsoncpp_sources})
-set_target_properties(jsoncpp_lib PROPERTIES VERSION ${JSONCPP_VERSION} SOVERSION ${JSONCPP_SOVERSION})
-set_target_properties(jsoncpp_lib PROPERTIES OUTPUT_NAME jsoncpp
-                        DEBUG_OUTPUT_NAME jsoncpp${DEBUG_LIBNAME_SUFFIX})
-set_target_properties(jsoncpp_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties( jsoncpp_lib PROPERTIES
+    OUTPUT_NAME jsoncpp
+    VERSION ${JSONCPP_VERSION}
+    SOVERSION ${JSONCPP_SOVERSION}
+    POSITION_INDEPENDENT_CODE ON
+)
 
 # Set library's runtime search path on OSX
 if(APPLE)

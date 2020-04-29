@@ -1,6 +1,4 @@
 #vim: et ts =4 sts = 4 sw = 4 tw = 0
-cmake_minimum_required(VERSION 3.1)
-
 set(EXAMPLES
     readFromString
     readFromStream
@@ -8,11 +6,10 @@ set(EXAMPLES
     streamWrite
 )
 add_definitions(-D_GLIBCXX_USE_CXX11_ABI)
-set_property(DIRECTORY PROPERTY COMPILE_OPTIONS ${EXTRA_CXX_FLAGS})
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra ")
-else()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_compile_options(-Wall -Wextra)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_definitions(
         -D_SCL_SECURE_NO_WARNINGS
         -D_CRT_SECURE_NO_WARNINGS
