@@ -64,11 +64,15 @@ ninja --version
 _COMPILER_NAME=`basename ${CXX}`
 _BUILD_DIR_NAME="build-${BUILD_TYPE}_${LIB_TYPE}_${_COMPILER_NAME}"
 
+# if LANGUAGE_STANDARD not set or null, set it to 11
+_CPP_STD=${LANGUAGE_STANDARD:="11"}
+
 ./.travis_scripts/run-clang-format.sh
 meson --fatal-meson-warnings --werror --buildtype ${BUILD_TYPE} --default-library ${LIB_TYPE} . "${_BUILD_DIR_NAME}"
-ninja -v -j 2 -C "${_BUILD_DIR_NAME}"
 
 cd "${_BUILD_DIR_NAME}"
+  meson configure -Dcpp_std="c++${_CPP_STD}"
+  ninja -v -j 2 -C ./
   meson test --no-rebuild --print-errorlogs
 
   if [ "${DESTDIR}" != "/usr/local" ]; then

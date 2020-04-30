@@ -37,12 +37,6 @@ foreach(pold "") # Currently Empty
     endif()
 endforeach()
 
-# Build the library with C++11 standard support, independent from other including
-# software which may use a different CXX_STANDARD or CMAKE_CXX_STANDARD.
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 # Ensure that CMAKE_BUILD_TYPE has a value specified for single configuration generators.
 if(NOT DEFINED CMAKE_BUILD_TYPE AND NOT DEFINED CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING
@@ -59,19 +53,47 @@ if(CCACHE_EXECUTABLE)
     set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}" CACHE PATH "ccache" FORCE)
 endif()
 
+# Note: project(VERSION XX) - the VERSION here is number, but VERSION in meson is string.
+# Thus, it is better to be consistent.
 project(JSONCPP
-        # Note: version must be updated in three places when doing a release. This
-        # annoying process ensures that amalgamate, CMake, and meson all report the
-        # correct version.
-        # 1. ./meson.build
-        # 2. ./include/json/version.h
-        # 3. ./CMakeLists.txt
-        # IMPORTANT: also update the JSONCPP_SOVERSION!!
-        VERSION 1.9.3 # <major>[.<minor>[.<patch>[.<tweak>]]]
         LANGUAGES CXX)
 
+# Set variable named ${VAR_NAME} to value ${VALUE}
+function(set_using_dynamic_name VAR_NAME VALUE)
+    set( "${VAR_NAME}" "${VALUE}" PARENT_SCOPE)
+endfunction()
+
+# Extract major, minor, patch from version text
+# Parse a version string "X.Y.Z" and outputs
+# version parts in ${OUPUT_PREFIX}_MAJOR, _MINOR, _PATCH.
+# If parse succeeds then ${OUPUT_PREFIX}_FOUND is TRUE.
+macro(jsoncpp_parse_version VERSION_TEXT OUPUT_PREFIX)
+    set(VERSION_REGEX "[0-9]+\\.[0-9]+\\.[0-9]+(-[a-zA-Z0-9_]+)?")
+    if( ${VERSION_TEXT} MATCHES ${VERSION_REGEX} )
+        string(REGEX MATCHALL "[0-9]+|-([A-Za-z0-9_]+)" VERSION_PARTS ${VERSION_TEXT})
+        list(GET VERSION_PARTS 0 ${OUPUT_PREFIX}_MAJOR)
+        list(GET VERSION_PARTS 1 ${OUPUT_PREFIX}_MINOR)
+        list(GET VERSION_PARTS 2 ${OUPUT_PREFIX}_PATCH)
+        set_using_dynamic_name( "${OUPUT_PREFIX}_FOUND" TRUE )
+    else( ${VERSION_TEXT} MATCHES ${VERSION_REGEX} )
+        set_using_dynamic_name( "${OUPUT_PREFIX}_FOUND" FALSE )
+    endif()
+endmacro()
+
+# Note: version must be updated in three places when doing a release. This
+# annoying process ensures that amalgamate, CMake, and meson all report the
+# correct version.
+# 1. ./meson.build
+# 2. ./include/json/version.h
+# 3. ./CMakeLists.txt
+# IMPORTANT: also update the JSONCPP_SOVERSION!!
+set( JSONCPP_VERSION 00.11.0 )
+set( JSONCPP_SOVERSION 23 )
+jsoncpp_parse_version( ${JSONCPP_VERSION} JSONCPP_VERSION )
 message(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
-set(JSONCPP_SOVERSION 23)
+#if(NOT JSONCPP_VERSION_FOUND)
+#    message(FATAL_ERROR "Failed to parse version string properly. Expect X.Y.Z")
+#endif(NOT JSONCPP_VERSION_FOUND)
 
 option(JSONCPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executables" ON)
 option(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)
@@ -81,6 +103,36 @@ option(JSONCPP_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" ON)
 option(JSONCPP_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ON)
 option(JSONCPP_WITH_EXAMPLE "Compile JsonCpp example" OFF)
 option(BUILD_SHARED_LIBS "Build jsoncpp_lib as a shared library." OFF)
+option(BUILD_WITH_CXX_11 "Build jsoncpp_lib with C++11 standard." ON)
+
+##  To compatible with C++0x and C++1x
+set(CMAKE_MINIMUN_CXX_STANDARD 98)
+if(CMAKE_COMPILER_IS_GNUCXX)
+  set(CMAKE_CXX_COMPILER "/usr/bin/g++")
+  execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE CXX_VERSION)
+  if(CXX_VERSION VERSION_GREATER 4.8.0)
+      if(BUILD_WITH_CXX_11)
+          set(CMAKE_CXX_STANDARD 11)
+          message(STATUS "Compiled with C++11(or newer) standard!")
+      else()
+          set(CMAKE_CXX_STANDARD 98)
+          message(STATUS "Compiled with C++0x standard!")
+      endif()
+  else()
+      set(CMAKE_CXX_STANDARD 98)
+      message(STATUS "Compiled with C++0x standard!")
+  endif()
+endif()
+
+if (NOT CMAKE_CXX_STANDARD)
+  if (BUILD_WITH_CXX_11)
+    set(CMAKE_CXX_STANDARD 11)
+    message(STATUS "Compiled with C++1x standard!")
+  else()
+    set(CMAKE_CXX_STANDARD 98)
+    message(STATUS "Compiled with C++0x standard!")
+  endif()
+endif()
 
 # Adhere to GNU filesystem layout conventions
 include(GNUInstallDirs)
@@ -127,7 +179,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # not yet ready for -Wsign-conversion
 
     if(JSONCPP_WITH_STRICT_ISO)
-        add_compile_options(-Wpedantic)
+        add_compile_options(-Wall)
     endif()
     if(JSONCPP_WITH_WARNING_AS_ERROR)
         add_compile_options(-Werror=conversion)
@@ -160,7 +212,7 @@ if(JSONCPP_WITH_CMAKE_PACKAGE)
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp
         FILE        jsoncppConfig.cmake)
     write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake"
-        VERSION ${PROJECT_VERSION}
+        VERSION ${JSONCPP_VERSION}
         COMPATIBILITY SameMajorVersion)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp)
