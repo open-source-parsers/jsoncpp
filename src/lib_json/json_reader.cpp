@@ -51,18 +51,15 @@ static size_t const stackLimit_g =
 
 namespace Json {
 
-#if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
-using CharReaderPtr = std::unique_ptr<CharReader>;
-#else
-using CharReaderPtr = std::auto_ptr<CharReader>;
-#endif
+typedef CharReader* CharReaderPtr;
 
 // Implementation of class Features
 // ////////////////////////////////
 
-Features::Features() = default;
-
-Features Features::all() { return {}; }
+Features::Features()
+    : allowComments_(true), strictRoot_(false),
+      allowDroppedNullPlaceholders_(false), allowNumericKeys_(false) {}
+Features Features::all() { return Features(); }
 
 Features Features::strictMode() {
   Features features;
@@ -86,9 +83,15 @@ bool Reader::containsNewLine(Reader::Location begin, Reader::Location end) {
 // Class Reader
 // //////////////////////////////////////////////////////////////////
 
-Reader::Reader() : features_(Features::all()) {}
+Reader::Reader()
+    : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
+      lastValue_(), commentsBefore_(), features_(Features::all()),
+      collectComments_() {}
 
-Reader::Reader(const Features& features) : features_(features) {}
+Reader::Reader(const Features& features)
+    : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(),
+      lastValue_(), commentsBefore_(), features_(features), collectComments_() {
+}
 
 bool Reader::parse(const std::string& document, Value& root,
                    bool collectComments) {
@@ -121,8 +124,8 @@ bool Reader::parse(const char* beginDoc, const char* endDoc, Value& root,
   end_ = endDoc;
   collectComments_ = collectComments;
   current_ = begin_;
-  lastValueEnd_ = nullptr;
-  lastValue_ = nullptr;
+  lastValueEnd_ = JSONCPP_NULL;
+  lastValue_ = JSONCPP_NULL;
   commentsBefore_.clear();
   errors_.clear();
   while (!nodes_.empty())
@@ -376,7 +379,7 @@ void Reader::addComment(Location begin, Location end,
   assert(collectComments_);
   const String& normalized = normalizeEOL(begin, end);
   if (placement == commentAfterOnSameLine) {
-    assert(lastValue_ != nullptr);
+    assert(lastValue_ != JSONCPP_NULL);
     lastValue_->setComment(normalized, placement);
   } else {
     commentsBefore_ += normalized;
@@ -565,7 +568,7 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
     Char c = *current++;
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
-    auto digit(static_cast<Value::UInt>(c - '0'));
+    Value::UInt digit(static_cast<Value::UInt>(c - '0'));
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, b) this is the last digit, and
@@ -798,7 +801,9 @@ String Reader::getFormatedErrorMessages() const {
 
 String Reader::getFormattedErrorMessages() const {
   String formattedMessage;
-  for (const auto& error : errors_) {
+  for (Errors::const_iterator itError = errors_.begin();
+       itError != errors_.end(); ++itError) {
+    const ErrorInfo& error = *itError;
     formattedMessage +=
         "* " + getLocationLineAndColumn(error.token_.start_) + "\n";
     formattedMessage += "  " + error.message_ + "\n";
@@ -811,7 +816,9 @@ String Reader::getFormattedErrorMessages() const {
 
 std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
   std::vector<Reader::StructuredError> allErrors;
-  for (const auto& error : errors_) {
+  for (Errors::const_iterator itError = errors_.begin();
+       itError != errors_.end(); ++itError) {
+    const ErrorInfo& error = *itError;
     Reader::StructuredError structured;
     structured.offset_start = error.token_.start_ - begin_;
     structured.offset_limit = error.token_.end_ - begin_;
@@ -832,7 +839,7 @@ bool Reader::pushError(const Value& value, const String& message) {
   ErrorInfo info;
   info.token_ = token;
   info.message_ = message;
-  info.extra_ = nullptr;
+  info.extra_ = JSONCPP_NULL;
   errors_.push_back(info);
   return true;
 }
@@ -875,7 +882,7 @@ public:
   size_t stackLimit_;
 }; // OurFeatures
 
-OurFeatures OurFeatures::all() { return {}; }
+OurFeatures OurFeatures::all() { return OurFeatures(); }
 
 // Implementation of class Reader
 // ////////////////////////////////
@@ -884,15 +891,15 @@ OurFeatures OurFeatures::all() { return {}; }
 // for implementing JSON reading.
 class OurReader {
 public:
-  using Char = char;
-  using Location = const Char*;
+  typedef char Char;
+  typedef const Char* Location;
   struct StructuredError {
     ptrdiff_t offset_start;
     ptrdiff_t offset_limit;
     String message;
   };
 
-  explicit OurReader(OurFeatures const& features);
+  JSONCPP_OP_EXPLICIT OurReader(OurFeatures const& features);
   bool parse(const char* beginDoc, const char* endDoc, Value& root,
              bool collectComments = true);
   String getFormattedErrorMessages() const;
@@ -936,7 +943,7 @@ private:
     Location extra_;
   };
 
-  using Errors = std::deque<ErrorInfo>;
+  typedef std::deque<ErrorInfo> Errors;
 
   bool readToken(Token& token);
   void skipSpaces();
@@ -961,7 +968,8 @@ private:
                               unsigned int& unicode);
   bool decodeUnicodeEscapeSequence(Token& token, Location& current,
                                    Location end, unsigned int& unicode);
-  bool addError(const String& message, Token& token, Location extra = nullptr);
+  bool addError(const String& message, Token& token,
+                Location extra = JSONCPP_NULL);
   bool recoverFromError(TokenType skipUntilToken);
   bool addErrorAndRecover(const String& message, Token& token,
                           TokenType skipUntilToken);
@@ -977,21 +985,21 @@ private:
   static String normalizeEOL(Location begin, Location end);
   static bool containsNewLine(Location begin, Location end);
 
-  using Nodes = std::stack<Value*>;
+  typedef std::stack<Value*> Nodes;
 
-  Nodes nodes_{};
-  Errors errors_{};
-  String document_{};
-  Location begin_ = nullptr;
-  Location end_ = nullptr;
-  Location current_ = nullptr;
-  Location lastValueEnd_ = nullptr;
-  Value* lastValue_ = nullptr;
-  bool lastValueHasAComment_ = false;
-  String commentsBefore_{};
+  Nodes nodes_;
+  Errors errors_;
+  String document_;
+  Location begin_;
+  Location end_;
+  Location current_;
+  Location lastValueEnd_;
+  Value* lastValue_;
+  bool lastValueHasAComment_;
+  String commentsBefore_;
 
   OurFeatures const features_;
-  bool collectComments_ = false;
+  bool collectComments_;
 }; // OurReader
 
 // complete copy of Read impl, for OurReader
@@ -1004,7 +1012,11 @@ bool OurReader::containsNewLine(OurReader::Location begin,
   return false;
 }
 
-OurReader::OurReader(OurFeatures const& features) : features_(features) {}
+OurReader::OurReader(OurFeatures const& features)
+    : errors_(), document_(), begin_(JSONCPP_NULL), end_(JSONCPP_NULL),
+      current_(JSONCPP_NULL), lastValueEnd_(JSONCPP_NULL),
+      lastValue_(JSONCPP_NULL), lastValueHasAComment_(false), commentsBefore_(),
+      features_(features), collectComments_(false) {}
 
 bool OurReader::parse(const char* beginDoc, const char* endDoc, Value& root,
                       bool collectComments) {
@@ -1016,8 +1028,8 @@ bool OurReader::parse(const char* beginDoc, const char* endDoc, Value& root,
   end_ = endDoc;
   collectComments_ = collectComments;
   current_ = begin_;
-  lastValueEnd_ = nullptr;
-  lastValue_ = nullptr;
+  lastValueEnd_ = JSONCPP_NULL;
+  lastValue_ = JSONCPP_NULL;
   commentsBefore_.clear();
   errors_.clear();
   while (!nodes_.empty())
@@ -1352,7 +1364,7 @@ void OurReader::addComment(Location begin, Location end,
   assert(collectComments_);
   const String& normalized = normalizeEOL(begin, end);
   if (placement == commentAfterOnSameLine) {
-    assert(lastValue_ != nullptr);
+    assert(lastValue_ != JSONCPP_NULL);
     lastValue_->setComment(normalized, placement);
   } else {
     commentsBefore_ += normalized;
@@ -1568,32 +1580,36 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
   // We assume we can represent the largest and smallest integer types as
   // unsigned integers with separate sign. This is only true if they can fit
   // into an unsigned integer.
-  static_assert(Value::maxLargestInt <= Value::maxLargestUInt,
-                "Int must be smaller than UInt");
-
+  JSONCPP_STATIC_ASSERT(LargestUInt(Value::maxLargestInt) <=
+                            Value::maxLargestUInt,
+                        "Int must be smaller than Uint");
   // We need to convert minLargestInt into a positive number. The easiest way
   // to do this conversion is to assume our "threshold" value of minLargestInt
   // divided by 10 can fit in maxLargestInt when absolute valued. This should
   // be a safe assumption.
-  static_assert(Value::minLargestInt <= -Value::maxLargestInt,
-                "The absolute value of minLargestInt must be greater than or "
-                "equal to maxLargestInt");
-  static_assert(Value::minLargestInt / 10 >= -Value::maxLargestInt,
-                "The absolute value of minLargestInt must be only 1 magnitude "
-                "larger than maxLargest Int");
+  JSONCPP_STATIC_ASSERT(
+      Value::minLargestInt <= -Value::maxLargestInt,
+      "The absolute value of minLargestInt must ve greater than or"
+      "equal to maxLargestInt");
 
-  static constexpr Value::LargestUInt positive_threshold =
+  JSONCPP_STATIC_ASSERT(
+      Value::minLargestInt / 10 >= -Value::maxLargestInt,
+      "The absolute value of minLargestInt must be only 1 magnitude"
+      "larger than maxLargestInt");
+
+  static JSONCPP_CONST Value::LargestUInt positive_threshold =
       Value::maxLargestUInt / 10;
-  static constexpr Value::UInt positive_last_digit = Value::maxLargestUInt % 10;
+  static JSONCPP_CONST Value::UInt positive_last_digit =
+      Value::maxLargestUInt % 10;
 
   // For the negative values, we have to be more careful. Since typically
   // -Value::minLargestInt will cause an overflow, we first divide by 10 and
   // then take the inverse. This assumes that minLargestInt is only a single
   // power of 10 different in magnitude, which we check above. For the last
   // digit, we take the modulus before negating for the same reason.
-  static constexpr auto negative_threshold =
+  static JSONCPP_CONST Value::LargestUInt negative_threshold =
       Value::LargestUInt(-(Value::minLargestInt / 10));
-  static constexpr auto negative_last_digit =
+  static JSONCPP_CONST Value::UInt negative_last_digit =
       Value::UInt(-(Value::minLargestInt % 10));
 
   const Value::LargestUInt threshold =
@@ -1607,7 +1623,7 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
     if (c < '0' || c > '9')
       return decodeDouble(token, decoded);
 
-    const auto digit(static_cast<Value::UInt>(c - '0'));
+    const Value::UInt digit(static_cast<Value::UInt>(c - '0'));
     if (value >= threshold) {
       // We've hit or exceeded the max value divided by 10 (rounded down). If
       // a) we've only just touched the limit, meaing value == threshold,
@@ -1624,7 +1640,7 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
 
   if (isNegative) {
     // We use the same magnitude assumption here, just in case.
-    const auto last_digit = static_cast<Value::UInt>(value % 10);
+    const Value::UInt last_digit = static_cast<Value::UInt>(value % 10);
     decoded = -Value::LargestInt(value / 10) * 10 - last_digit;
   } else if (value <= Value::LargestUInt(Value::maxLargestInt)) {
     decoded = Value::LargestInt(value);
@@ -1840,7 +1856,9 @@ String OurReader::getLocationLineAndColumn(Location location) const {
 
 String OurReader::getFormattedErrorMessages() const {
   String formattedMessage;
-  for (const auto& error : errors_) {
+  for (Errors::const_iterator itError = errors_.begin();
+       itError != errors_.end(); ++itError) {
+    const ErrorInfo& error = *itError;
     formattedMessage +=
         "* " + getLocationLineAndColumn(error.token_.start_) + "\n";
     formattedMessage += "  " + error.message_ + "\n";
@@ -1853,7 +1871,9 @@ String OurReader::getFormattedErrorMessages() const {
 
 std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
   std::vector<OurReader::StructuredError> allErrors;
-  for (const auto& error : errors_) {
+  for (Errors::const_iterator itError = errors_.begin();
+       itError != errors_.end(); ++itError) {
+    const ErrorInfo& error = *itError;
     OurReader::StructuredError structured;
     structured.offset_start = error.token_.start_ - begin_;
     structured.offset_limit = error.token_.end_ - begin_;
@@ -1871,7 +1891,7 @@ public:
   OurCharReader(bool collectComments, OurFeatures const& features)
       : collectComments_(collectComments), reader_(features) {}
   bool parse(char const* beginDoc, char const* endDoc, Value* root,
-             String* errs) override {
+             String* errs) JSONCPP_OVERRIDE {
     bool ok = reader_.parse(beginDoc, endDoc, *root, collectComments_);
     if (errs) {
       *errs = reader_.getFormattedErrorMessages();
@@ -1881,7 +1901,7 @@ public:
 };
 
 CharReaderBuilder::CharReaderBuilder() { setDefaults(&settings_); }
-CharReaderBuilder::~CharReaderBuilder() = default;
+CharReaderBuilder::~CharReaderBuilder() {}
 CharReader* CharReaderBuilder::newCharReader() const {
   bool collectComments = settings_["collectComments"].asBool();
   OurFeatures features = OurFeatures::all();
@@ -1983,7 +2003,9 @@ bool parseFromStream(CharReader::Factory const& fact, IStream& sin, Value* root,
   char const* end = begin + doc.size();
   // Note that we do not actually need a null-terminator.
   CharReaderPtr const reader(fact.newCharReader());
-  return reader->parse(begin, end, root, errs);
+  bool ret = reader->parse(begin, end, root, errs);
+  delete reader;
+  return ret;
 }
 
 IStream& operator>>(IStream& sin, Value& root) {

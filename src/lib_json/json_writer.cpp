@@ -83,11 +83,7 @@
 
 namespace Json {
 
-#if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
-using StreamWriterPtr = std::unique_ptr<StreamWriter>;
-#else
-using StreamWriterPtr = std::auto_ptr<StreamWriter>;
-#endif
+typedef StreamWriter* StreamWriterPtr;
 
 String valueToString(LargestInt value) {
   UIntToStringBuffer buffer;
@@ -136,12 +132,12 @@ String valueToString(double value, bool useSpecialFloats,
 
   String buffer(size_t(36), '\0');
   while (true) {
-    int len = jsoncpp_snprintf(
-        &*buffer.begin(), buffer.size(),
-        (precisionType == PrecisionType::significantDigits) ? "%.*g" : "%.*f",
-        precision, value);
+    int len =
+        jsoncpp_snprintf(&*buffer.begin(), buffer.size(),
+                         (precisionType == significantDigits) ? "%.*g" : "%.*f",
+                         precision, value);
     assert(len >= 0);
-    auto wouldPrint = static_cast<size_t>(len);
+    size_t wouldPrint = static_cast<size_t>(len);
     if (wouldPrint >= buffer.size()) {
       buffer.resize(wouldPrint + 1);
       continue;
@@ -153,7 +149,7 @@ String valueToString(double value, bool useSpecialFloats,
   buffer.erase(fixNumericLocale(buffer.begin(), buffer.end()), buffer.end());
 
   // strip the zero padding from the right
-  if (precisionType == PrecisionType::decimalPlaces) {
+  if (precisionType == decimalPlaces) {
     buffer.erase(fixZerosInTheEnd(buffer.begin(), buffer.end()), buffer.end());
   }
 
@@ -267,7 +263,7 @@ static String toHex16Bit(unsigned int x) {
 
 static String valueToQuotedStringN(const char* value, unsigned length,
                                    bool emitUTF8 = false) {
-  if (value == nullptr)
+  if (value == JSONCPP_NULL)
     return "";
 
   if (!isAnyCharRequiredQuoting(value, length))
@@ -351,14 +347,14 @@ String valueToQuotedString(const char* value) {
 
 // Class Writer
 // //////////////////////////////////////////////////////////////////
-Writer::~Writer() = default;
+Writer::~Writer() {}
 
 // Class FastWriter
 // //////////////////////////////////////////////////////////////////
 
 FastWriter::FastWriter()
-
-    = default;
+    : yamlCompatibilityEnabled_(false), dropNullPlaceholders_(false),
+      omitEndingLineFeed_(false) {}
 
 void FastWriter::enableYAMLCompatibility() { yamlCompatibilityEnabled_ = true; }
 
@@ -414,7 +410,8 @@ void FastWriter::writeValue(const Value& value) {
   case objectValue: {
     Value::Members members(value.getMemberNames());
     document_ += '{';
-    for (auto it = members.begin(); it != members.end(); ++it) {
+    for (Value::Members::const_iterator it = members.begin();
+         it != members.end(); ++it) {
       const String& name = *it;
       if (it != members.begin())
         document_ += ',';
@@ -431,7 +428,8 @@ void FastWriter::writeValue(const Value& value) {
 // Class StyledWriter
 // //////////////////////////////////////////////////////////////////
 
-StyledWriter::StyledWriter() = default;
+StyledWriter::StyledWriter()
+    : rightMargin_(74), indentSize_(3), addChildValues_() {}
 
 String StyledWriter::write(const Value& root) {
   document_.clear();
@@ -482,7 +480,7 @@ void StyledWriter::writeValue(const Value& value) {
     else {
       writeWithIndent("{");
       indent();
-      auto it = members.begin();
+      Value::Members::const_iterator it = members.begin();
       for (;;) {
         const String& name = *it;
         const Value& childValue = value[name];
@@ -644,8 +642,9 @@ bool StyledWriter::hasCommentForValue(const Value& value) {
 // //////////////////////////////////////////////////////////////////
 
 StyledStreamWriter::StyledStreamWriter(String indentation)
-    : document_(nullptr), indentation_(std::move(indentation)),
-      addChildValues_(), indented_(false) {}
+    : document_(JSONCPP_NULL), rightMargin_(74),
+      indentation_(JSONCPP_MOVE(indentation)), addChildValues_(),
+      indented_(false) {}
 
 void StyledStreamWriter::write(OStream& out, const Value& root) {
   document_ = &out;
@@ -659,7 +658,7 @@ void StyledStreamWriter::write(OStream& out, const Value& root) {
   writeValue(root);
   writeCommentAfterValueOnSameLine(root);
   *document_ << "\n";
-  document_ = nullptr; // Forget the stream, for safety.
+  document_ = JSONCPP_NULL; // Forget the stream, for safety.
 }
 
 void StyledStreamWriter::writeValue(const Value& value) {
@@ -700,7 +699,7 @@ void StyledStreamWriter::writeValue(const Value& value) {
     else {
       writeWithIndent("{");
       indent();
-      auto it = members.begin();
+      Value::Members::const_iterator it = members.begin();
       for (;;) {
         const String& name = *it;
         const Value& childValue = value[name];
@@ -878,7 +877,7 @@ struct BuiltStyledStreamWriter : public StreamWriter {
                           String endingLineFeedSymbol, bool useSpecialFloats,
                           bool emitUTF8, unsigned int precision,
                           PrecisionType precisionType);
-  int write(Value const& root, OStream* sout) override;
+  int write(Value const& root, OStream* sout) JSONCPP_OVERRIDE;
 
 private:
   void writeValue(Value const& value);
@@ -893,7 +892,7 @@ private:
   void writeCommentAfterValueOnSameLine(Value const& root);
   static bool hasCommentForValue(const Value& value);
 
-  using ChildValues = std::vector<String>;
+  typedef std::vector<String> ChildValues;
 
   ChildValues childValues_;
   String indentString_;
@@ -914,9 +913,10 @@ BuiltStyledStreamWriter::BuiltStyledStreamWriter(
     String indentation, CommentStyle::Enum cs, String colonSymbol,
     String nullSymbol, String endingLineFeedSymbol, bool useSpecialFloats,
     bool emitUTF8, unsigned int precision, PrecisionType precisionType)
-    : rightMargin_(74), indentation_(std::move(indentation)), cs_(cs),
-      colonSymbol_(std::move(colonSymbol)), nullSymbol_(std::move(nullSymbol)),
-      endingLineFeedSymbol_(std::move(endingLineFeedSymbol)),
+    : rightMargin_(74), indentation_(JSONCPP_MOVE(indentation)), cs_(cs),
+      colonSymbol_(JSONCPP_MOVE(colonSymbol)),
+      nullSymbol_(JSONCPP_MOVE(nullSymbol)),
+      endingLineFeedSymbol_(JSONCPP_MOVE(endingLineFeedSymbol)),
       addChildValues_(false), indented_(false),
       useSpecialFloats_(useSpecialFloats), emitUTF8_(emitUTF8),
       precision_(precision), precisionType_(precisionType) {}
@@ -932,7 +932,7 @@ int BuiltStyledStreamWriter::write(Value const& root, OStream* sout) {
   writeValue(root);
   writeCommentAfterValueOnSameLine(root);
   *sout_ << endingLineFeedSymbol_;
-  sout_ = nullptr;
+  sout_ = JSONCPP_NULL;
   return 0;
 }
 void BuiltStyledStreamWriter::writeValue(Value const& value) {
@@ -975,7 +975,7 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
     else {
       writeWithIndent("{");
       indent();
-      auto it = members.begin();
+      Value::Members::const_iterator it = members.begin();
       for (;;) {
         String const& name = *it;
         Value const& childValue = value[name];
@@ -1151,11 +1151,11 @@ bool BuiltStyledStreamWriter::hasCommentForValue(const Value& value) {
 ///////////////
 // StreamWriter
 
-StreamWriter::StreamWriter() : sout_(nullptr) {}
-StreamWriter::~StreamWriter() = default;
-StreamWriter::Factory::~Factory() = default;
+StreamWriter::StreamWriter() : sout_(JSONCPP_NULL) {}
+StreamWriter::~StreamWriter() {}
+StreamWriter::Factory::~Factory() {}
 StreamWriterBuilder::StreamWriterBuilder() { setDefaults(&settings_); }
-StreamWriterBuilder::~StreamWriterBuilder() = default;
+StreamWriterBuilder::~StreamWriterBuilder() {}
 StreamWriter* StreamWriterBuilder::newStreamWriter() const {
   const String indentation = settings_["indentation"].asString();
   const String cs_str = settings_["commentStyle"].asString();
@@ -1175,9 +1175,9 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const {
   }
   PrecisionType precisionType(significantDigits);
   if (pt_str == "significant") {
-    precisionType = PrecisionType::significantDigits;
+    precisionType = significantDigits;
   } else if (pt_str == "decimal") {
-    precisionType = PrecisionType::decimalPlaces;
+    precisionType = decimalPlaces;
   } else {
     throwRuntimeError("precisionType must be 'significant' or 'decimal'");
   }
@@ -1247,6 +1247,7 @@ String writeString(StreamWriter::Factory const& factory, Value const& root) {
   OStringStream sout;
   StreamWriterPtr const writer(factory.newStreamWriter());
   writer->write(root, &sout);
+  delete writer;
   return sout.str();
 }
 
@@ -1254,6 +1255,7 @@ OStream& operator<<(OStream& sout, Value const& root) {
   StreamWriterBuilder builder;
   StreamWriterPtr const writer(builder.newStreamWriter());
   writer->write(root, &sout);
+  delete writer;
   return sout;
 }
 

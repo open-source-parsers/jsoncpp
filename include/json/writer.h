@@ -119,12 +119,12 @@ public:
   Json::Value settings_;
 
   StreamWriterBuilder();
-  ~StreamWriterBuilder() override;
+  ~StreamWriterBuilder() JSONCPP_OVERRIDE;
 
   /**
    * \throw std::exception if something goes wrong (e.g. invalid settings)
    */
-  StreamWriter* newStreamWriter() const override;
+  StreamWriter* newStreamWriter() const JSONCPP_OVERRIDE;
 
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
@@ -169,7 +169,7 @@ class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API FastWriter
     : public Writer {
 public:
   FastWriter();
-  ~FastWriter() override = default;
+  ~FastWriter() JSONCPP_OVERRIDE {}
 
   void enableYAMLCompatibility();
 
@@ -183,15 +183,15 @@ public:
   void omitEndingLineFeed();
 
 public: // overridden from Writer
-  String write(const Value& root) override;
+  String write(const Value& root) JSONCPP_OVERRIDE;
 
 private:
   void writeValue(const Value& value);
 
   String document_;
-  bool yamlCompatibilityEnabled_{false};
-  bool dropNullPlaceholders_{false};
-  bool omitEndingLineFeed_{false};
+  bool yamlCompatibilityEnabled_;
+  bool dropNullPlaceholders_;
+  bool omitEndingLineFeed_;
 };
 #if defined(_MSC_VER)
 #pragma warning(pop)
@@ -229,14 +229,14 @@ class JSONCPP_DEPRECATED("Use StreamWriterBuilder instead") JSON_API
     StyledWriter : public Writer {
 public:
   StyledWriter();
-  ~StyledWriter() override = default;
+  ~StyledWriter() JSONCPP_OVERRIDE {}
 
 public: // overridden from Writer
   /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
    * \param root Value to serialize.
    * \return String containing the JSON document that represents the root value.
    */
-  String write(const Value& root) override;
+  String write(const Value& root) JSONCPP_OVERRIDE;
 
 private:
   void writeValue(const Value& value);
@@ -252,14 +252,14 @@ private:
   static bool hasCommentForValue(const Value& value);
   static String normalizeEOL(const String& text);
 
-  using ChildValues = std::vector<String>;
+  typedef std::vector<String> ChildValues;
 
   ChildValues childValues_;
   String document_;
   String indentString_;
-  unsigned int rightMargin_{74};
-  unsigned int indentSize_{3};
-  bool addChildValues_{false};
+  unsigned int rightMargin_;
+  unsigned int indentSize_;
+  bool addChildValues_;
 };
 #if defined(_MSC_VER)
 #pragma warning(pop)
@@ -301,7 +301,7 @@ public:
    * \param indentation Each level will be indented by this amount extra.
    */
   StyledStreamWriter(String indentation = "\t");
-  ~StyledStreamWriter() = default;
+  ~StyledStreamWriter() {}
 
 public:
   /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
@@ -326,12 +326,12 @@ private:
   static bool hasCommentForValue(const Value& value);
   static String normalizeEOL(const String& text);
 
-  using ChildValues = std::vector<String>;
+  typedef std::vector<String> ChildValues;
 
   ChildValues childValues_;
   OStream* document_;
   String indentString_;
-  unsigned int rightMargin_{74};
+  unsigned int rightMargin_;
   String indentation_;
   bool addChildValues_ : 1;
   bool indented_ : 1;
@@ -348,7 +348,7 @@ String JSON_API valueToString(LargestInt value);
 String JSON_API valueToString(LargestUInt value);
 String JSON_API valueToString(
     double value, unsigned int precision = Value::defaultRealPrecision,
-    PrecisionType precisionType = PrecisionType::significantDigits);
+    PrecisionType precisionType = significantDigits);
 String JSON_API valueToString(bool value);
 String JSON_API valueToQuotedString(const char* value);
 

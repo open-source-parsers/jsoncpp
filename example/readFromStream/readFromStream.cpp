@@ -1,4 +1,5 @@
 #include "json/json.h"
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 /** \brief Parse from stream, collect comments and capture error info.

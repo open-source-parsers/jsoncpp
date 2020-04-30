@@ -1,4 +1,5 @@
 #include "json/json.h"
+#include <cstdlib>
 #include <iostream>
 /** \brief Write a Value object to a string.
  * Example Usage:
@@ -15,7 +16,7 @@
 int main() {
   Json::Value root;
   Json::Value data;
-  constexpr bool shouldUseOldWay = false;
+  JSONCPP_CONST bool shouldUseOldWay = false;
   root["action"] = "run";
   data["number"] = 1;
   root["data"] = data;
