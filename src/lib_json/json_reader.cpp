@@ -10,6 +10,7 @@
 #include <json/reader.h>
 #include <json/value.h>
 #endif // if !defined(JSON_IS_AMALGAMATION)
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <iostream>
@@ -77,10 +78,7 @@ Features Features::strictMode() {
 // ////////////////////////////////
 
 bool Reader::containsNewLine(Reader::Location begin, Reader::Location end) {
-  for (; begin < end; ++begin)
-    if (*begin == '\n' || *begin == '\r')
-      return true;
-  return false;
+  return std::any_of(begin, end, [](char b) { return b == '\n' || b == '\r'; });
 }
 
 // Class Reader
@@ -998,10 +996,7 @@ private:
 
 bool OurReader::containsNewLine(OurReader::Location begin,
                                 OurReader::Location end) {
-  for (; begin < end; ++begin)
-    if (*begin == '\n' || *begin == '\r')
-      return true;
-  return false;
+  return std::any_of(begin, end, [](char b) { return b == '\n' || b == '\r'; });
 }
 
 OurReader::OurReader(OurFeatures const& features) : features_(features) {}

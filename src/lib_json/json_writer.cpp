@@ -7,7 +7,9 @@
 #include "json_tool.h"
 #include <json/writer.h>
 #endif // if !defined(JSON_IS_AMALGAMATION)
+#include <algorithm>
 #include <cassert>
+#include <cctype>
 #include <cstring>
 #include <iomanip>
 #include <memory>
@@ -176,14 +178,9 @@ String valueToString(bool value) { return value ? "true" : "false"; }
 static bool isAnyCharRequiredQuoting(char const* s, size_t n) {
   assert(s || !n);
 
-  char const* const end = s + n;
-  for (char const* cur = s; cur < end; ++cur) {
-    if (*cur == '\\' || *cur == '\"' ||
-        static_cast<unsigned char>(*cur) < ' ' ||
-        static_cast<unsigned char>(*cur) >= 0x80)
-      return true;
-  }
-  return false;
+  return std::any_of(s, s + n, [](int c) {
+    return c == '\\' || c == '"' || !std::isprint(c);
+  });
 }
 
 static unsigned int utf8ToCodepoint(const char*& s, const char* e) {
