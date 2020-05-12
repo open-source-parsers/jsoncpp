@@ -3286,11 +3286,11 @@ struct CharReaderAllowDropNullTest : JsonTest::TestCase {
     return [=](const Value& root) { JSONTEST_ASSERT_EQUAL(root, v); };
   }
 
-  ValueCheck objGetAnd(std::string idx, ValueCheck f) {
+  static ValueCheck objGetAnd(std::string idx, ValueCheck f) {
     return [=](const Value& root) { f(root.get(idx, true)); };
   }
 
-  ValueCheck arrGetAnd(int idx, ValueCheck f) {
+  static ValueCheck arrGetAnd(int idx, ValueCheck f) {
     return [=](const Value& root) { f(root[idx]); };
   }
 };
