@@ -178,7 +178,7 @@ String valueToString(bool value) { return value ? "true" : "false"; }
 static bool isAnyCharRequiredQuoting(char const* s, size_t n) {
   assert(s || !n);
 
-  return std::any_of(s, s + n, [](int c) {
+  return std::any_of(s, s + n, [](unsigned char c) {
     return c == '\\' || c == '"' || !std::isprint(c);
   });
 }
