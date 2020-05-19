@@ -2640,6 +2640,30 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, unicode) {
                   "\"\\t\\n\\ud806\\udca1=\\u0133\\ud82c\\udd1b\\uff67\"\n}");
 }
 
+JSONTEST_FIXTURE_LOCAL(StreamWriterTest, controlChars) {
+  // Create a Json value containing UTF-8 string with some chars that need
+  // escape (tab,newline, control chars).
+  const Json::String expected(
+      "{\n\t\"test\" : "
+      "\"\\u0001\\u0002\\u0003\\u0004\\u0005\\u0006\\u0007\\b\\t\\n\\u000b\\f\\"
+      "r\\u000e\\u000f\\u0010\\u0011\\u0012\\u0013\\u0014\\u0015\\u0016\\u0017"
+      "\\u0018\\u0019\\u001a\\u001b\\u001c\\u001d\\u001e\\u001f\"\n}");
+
+  // Create a Json value containing string with controls chars that need escape.
+  Json::Value root;
+  root["test"] = "\x1\x2\x3\x4\x5\x6\x7\b\t\n\xB\f\r\xE\xF\x10\x11\x12\x13\x14"
+                 "\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F";
+
+  Json::StreamWriterBuilder b;
+  JSONTEST_ASSERT(Json::writeString(b, root) == expected);
+
+  b.settings_["emitUTF8"] = true;
+  JSONTEST_ASSERT(Json::writeString(b, root) == expected);
+
+  b.settings_["emitUTF8"] = false;
+  JSONTEST_ASSERT(Json::writeString(b, root) == expected);
+}
+
 struct ReaderTest : JsonTest::TestCase {
   void setStrictMode() {
     reader = std::unique_ptr<Json::Reader>(

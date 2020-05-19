@@ -310,7 +310,12 @@ static String valueToQuotedStringN(const char* value, unsigned length,
     // sequence from occurring.
     default: {
       if (emitUTF8) {
-        result += *c;
+        if (isControlCharacter(*c)) {
+          result += "\\u";
+          result += toHex16Bit(*c);
+        } else {
+          result += *c;
+        }
       } else {
         unsigned int codepoint = utf8ToCodepoint(c, end);
         const unsigned int FIRST_NON_CONTROL_CODEPOINT = 0x20;
