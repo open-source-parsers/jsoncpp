@@ -639,7 +639,7 @@ private:
     ObjectValues* map_;
   } value_;
 
-  struct {
+  struct Bits {
     // Really a ValueType, but types should agree for bitfield packing.
     unsigned int value_type_ : 8;
     // Unless allocated_, string_ must be null-terminated.
