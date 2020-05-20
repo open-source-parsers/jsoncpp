@@ -2642,7 +2642,7 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, unicode) {
 
 JSONTEST_FIXTURE_LOCAL(StreamWriterTest, controlChars) {
   // Create a Json value containing UTF-8 string with some chars that need
-  // escape (tab,newline, control chars).
+  // escape (tab,newline,control chars).
   const Json::String expected(
       "{\n\t\"test\" : "
       "\"\\u0001\\u0002\\u0003\\u0004\\u0005\\u0006\\u0007\\b\\t\\n\\u000b\\f\\"

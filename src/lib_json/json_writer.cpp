@@ -309,36 +309,28 @@ static String valueToQuotedStringN(const char* value, unsigned length,
     // Should add a flag to allow this compatibility mode and prevent this
     // sequence from occurring.
     default: {
-      if (emitUTF8) {
-        if (isControlCharacter(*c)) {
-          result += "\\u";
-          result += toHex16Bit(*c);
+      unsigned int codepoint =
+          emitUTF8 ? static_cast<unsigned char>(*c) : utf8ToCodepoint(c, end);
+      const unsigned int FIRST_NON_CONTROL_CODEPOINT = 0x20;
+      const unsigned int LAST_NON_CONTROL_CODEPOINT = 0x7F;
+      const unsigned int FIRST_SURROGATE_PAIR_CODEPOINT = 0x10000;
+
+      if ((codepoint < FIRST_NON_CONTROL_CODEPOINT) ||
+          (!emitUTF8 && (codepoint >= LAST_NON_CONTROL_CODEPOINT))) {
+        auto appendHexChar = [&result](unsigned ch) {
+          result.append("\\u").append(toHex16Bit(ch));
+        };
+        if (codepoint < FIRST_SURROGATE_PAIR_CODEPOINT) {
+          // codepoint is in Basic Multilingual Plane
+          appendHexChar(codepoint);
         } else {
-          result += *c;
+          // codepoint is not in Basic Multilingual Plane
+          codepoint -= FIRST_SURROGATE_PAIR_CODEPOINT;
+          appendHexChar(0xD800 + (codepoint >> 10));
+          appendHexChar(0xDC00 + (codepoint & 0x3FF));
         }
       } else {
-        unsigned int codepoint = utf8ToCodepoint(c, end);
-        const unsigned int FIRST_NON_CONTROL_CODEPOINT = 0x20;
-        const unsigned int LAST_NON_CONTROL_CODEPOINT = 0x7F;
-        const unsigned int FIRST_SURROGATE_PAIR_CODEPOINT = 0x10000;
-        // don't escape non-control characters
-        // (short escape sequence are applied above)
-        if (FIRST_NON_CONTROL_CODEPOINT <= codepoint &&
-            codepoint <= LAST_NON_CONTROL_CODEPOINT) {
-          result += static_cast<char>(codepoint);
-        } else if (codepoint <
-                   FIRST_SURROGATE_PAIR_CODEPOINT) { // codepoint is in Basic
-                                                     // Multilingual Plane
-          result += "\\u";
-          result += toHex16Bit(codepoint);
-        } else { // codepoint is not in Basic Multilingual Plane
-                 // convert to surrogate pair first
-          codepoint -= FIRST_SURROGATE_PAIR_CODEPOINT;
-          result += "\\u";
-          result += toHex16Bit((codepoint >> 10) + 0xD800);
-          result += "\\u";
-          result += toHex16Bit((codepoint & 0x3FF) + 0xDC00);
-        }
+        result += *c;
       }
     } break;
     }
