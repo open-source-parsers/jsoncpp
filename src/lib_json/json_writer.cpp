@@ -309,23 +309,28 @@ static String valueToQuotedStringN(const char* value, unsigned length,
     // Should add a flag to allow this compatibility mode and prevent this
     // sequence from occurring.
     default: {
+      const unsigned int FIRST_NON_CONTROL_CODEPOINT = 0x20;
+      const unsigned int LAST_NON_CONTROL_CODEPOINT = 0x7F;
+      const unsigned int FIRST_SURROGATE_PAIR_CODEPOINT = 0x10000;
+
       const auto appendHexChar = [&result](unsigned ch) {
         result.append("\\u").append(toHex16Bit(ch));
       };
 
-      unsigned codepoint = static_cast<unsigned>(*c);
-      if (codepoint > 0x7F && !emitUTF8) {
+      unsigned int codepoint = static_cast<unsigned>(*c);
+      if (codepoint > LAST_NON_CONTROL_CODEPOINT && !emitUTF8) {
         codepoint = utf8ToCodepoint(c, end);
-        if (codepoint < 0x10000) {
+        if (codepoint < FIRST_SURROGATE_PAIR_CODEPOINT) {
           // codepoint is in Basic Multilingual Plane
           appendHexChar(codepoint);
         } else {
           // codepoint is not in Basic Multilingual Plane
-          codepoint -= 0x10000;
+          // convert to surrogate pair first
+          codepoint -= FIRST_SURROGATE_PAIR_CODEPOINT;
           appendHexChar(0xD800 + (codepoint >> 10));
           appendHexChar(0xDC00 + (codepoint & 0x3FF));
         }
-      } else if (codepoint < 0x20) {
+      } else if (codepoint < FIRST_NON_CONTROL_CODEPOINT) {
         appendHexChar(codepoint);
       } else {
         result += static_cast<char>(codepoint);
