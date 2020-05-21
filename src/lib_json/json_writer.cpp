@@ -317,25 +317,28 @@ static String valueToQuotedStringN(const char* value, unsigned length,
     // Should add a flag to allow this compatibility mode and prevent this
     // sequence from occurring.
     default: {
-      unsigned codepoint;
       if (emitUTF8) {
-        codepoint = static_cast<unsigned char>(*c);
+        unsigned codepoint = static_cast<unsigned char>(*c);
+        if (codepoint < 0x20) {
+          appendHex(result, codepoint);
+        } else {
+          appendRaw(result, codepoint);
+        }
       } else {
-        codepoint = utf8ToCodepoint(c, end); // modifies `c`
-      }
-
-      if (codepoint < 0x20) {
-        appendHex(result, codepoint);
-      } else if (codepoint < 0x80 || emitUTF8) {
-        appendRaw(result, codepoint);
-      } else if (codepoint < 0x10000) {
-        // Basic Multilingual Plane
-        appendHex(result, codepoint);
-      } else {
-        // Extended Unicode. Encode 20 bits as a surrogate pair.
-        codepoint -= 0x10000;
-        appendHex(result, 0xd800 + ((codepoint >> 10) & 0x3ff));
-        appendHex(result, 0xdc00 + (codepoint & 0x3ff));
+        unsigned codepoint = utf8ToCodepoint(c, end); // modifies `c`
+        if (codepoint < 0x20) {
+          appendHex(result, codepoint);
+        } else if (codepoint < 0x80) {
+          appendRaw(result, codepoint);
+        } else if (codepoint < 0x10000) {
+          // Basic Multilingual Plane
+          appendHex(result, codepoint);
+        } else {
+          // Extended Unicode. Encode 20 bits as a surrogate pair.
+          codepoint -= 0x10000;
+          appendHex(result, 0xd800 + ((codepoint >> 10) & 0x3ff));
+          appendHex(result, 0xdc00 + (codepoint & 0x3ff));
+        }
       }
     } break;
     }
@@ -866,8 +869,7 @@ struct CommentStyle {
   /// Decide whether to write comments.
   enum Enum {
     None, ///< Drop all comments.
-    Most, ///< Recover odd behavior of previous versions (not implemented
-          ///< yet).
+    Most, ///< Recover odd behavior of previous versions (not implemented yet).
     All   ///< Keep all comments.
   };
 };
