@@ -2678,20 +2678,26 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, escapeControlCharacters) {
     b.settings_["emitUTF8"] = emitUTF8;
 
     for (unsigned i = 0; i != 0x100; ++i) {
+      if (!emitUTF8 && i >= 0x80)
+        break; // The algorithm would try to parse UTF-8, so stop here.
+
       std::string raw({static_cast<char>(i)});
       std::string esc = raw;
       if (i < 0x20)
         esc = uEscape(i);
       if (const char* shEsc = shortEscape(i))
         esc = shEsc;
-      if (!emitUTF8 && i >= 0x80)
-        esc = uEscape(i);
+
+      // std::cout << "emit=" << emitUTF8 << ", i=" << std::hex << i << std::dec
+      //          << std::endl;
 
       Json::Value root;
       root["test"] = raw;
       JSONTEST_ASSERT_STRING_EQUAL(
           std::string("{\n\t\"test\" : \"").append(esc).append("\"\n}"),
-          Json::writeString(b, root));
+          Json::writeString(b, root))
+          << ", emit=" << emitUTF8 << ", i=" << i << ", raw=\"" << raw << "\""
+          << ", esc=\"" << esc << "\"";
     }
   }
 }
