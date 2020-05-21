@@ -2640,6 +2640,68 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, unicode) {
                   "\"\\t\\n\\ud806\\udca1=\\u0133\\ud82c\\udd1b\\uff67\"\n}");
 }
 
+// Control chars should be escaped regardless of UTF-8 input encoding.
+JSONTEST_FIXTURE_LOCAL(StreamWriterTest, escapeControlCharacters) {
+  auto uEscape = [](unsigned ch) {
+    static const char h[] = "0123456789abcdef";
+    std::string r = "\\u";
+    r += h[(ch >> (3 * 4)) & 0xf];
+    r += h[(ch >> (2 * 4)) & 0xf];
+    r += h[(ch >> (1 * 4)) & 0xf];
+    r += h[(ch >> (0 * 4)) & 0xf];
+    return r;
+  };
+  auto shortEscape = [](unsigned ch) -> const char* {
+    switch (ch) {
+    case '\"':
+      return "\\\"";
+    case '\\':
+      return "\\\\";
+    case '\b':
+      return "\\b";
+    case '\f':
+      return "\\f";
+    case '\n':
+      return "\\n";
+    case '\r':
+      return "\\r";
+    case '\t':
+      return "\\t";
+    default:
+      return nullptr;
+    }
+  };
+
+  Json::StreamWriterBuilder b;
+
+  for (bool emitUTF8 : {true, false}) {
+    b.settings_["emitUTF8"] = emitUTF8;
+
+    for (unsigned i = 0; i != 0x100; ++i) {
+      if (!emitUTF8 && i >= 0x80)
+        break; // The algorithm would try to parse UTF-8, so stop here.
+
+      std::string raw({static_cast<char>(i)});
+      std::string esc = raw;
+      if (i < 0x20)
+        esc = uEscape(i);
+      if (const char* shEsc = shortEscape(i))
+        esc = shEsc;
+
+      // std::cout << "emit=" << emitUTF8 << ", i=" << std::hex << i << std::dec
+      //          << std::endl;
+
+      Json::Value root;
+      root["test"] = raw;
+      JSONTEST_ASSERT_STRING_EQUAL(
+          std::string("{\n\t\"test\" : \"").append(esc).append("\"\n}"),
+          Json::writeString(b, root))
+          << ", emit=" << emitUTF8 << ", i=" << i << ", raw=\"" << raw << "\""
+          << ", esc=\"" << esc << "\"";
+    }
+  }
+}
+
 struct ReaderTest : JsonTest::TestCase {
   void setStrictMode() {
     reader = std::unique_ptr<Json::Reader>(

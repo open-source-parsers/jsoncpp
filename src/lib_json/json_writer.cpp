@@ -262,6 +262,14 @@ static String toHex16Bit(unsigned int x) {
   return result;
 }
 
+static void appendRaw(String& result, unsigned ch) {
+  result += static_cast<char>(ch);
+}
+
+static void appendHex(String& result, unsigned ch) {
+  result.append("\\u").append(toHex16Bit(ch));
+}
+
 static String valueToQuotedStringN(const char* value, unsigned length,
                                    bool emitUTF8 = false) {
   if (value == nullptr)
@@ -310,29 +318,26 @@ static String valueToQuotedStringN(const char* value, unsigned length,
     // sequence from occurring.
     default: {
       if (emitUTF8) {
-        result += *c;
+        unsigned codepoint = static_cast<unsigned char>(*c);
+        if (codepoint < 0x20) {
+          appendHex(result, codepoint);
+        } else {
+          appendRaw(result, codepoint);
+        }
       } else {
-        unsigned int codepoint = utf8ToCodepoint(c, end);
-        const unsigned int FIRST_NON_CONTROL_CODEPOINT = 0x20;
-        const unsigned int LAST_NON_CONTROL_CODEPOINT = 0x7F;
-        const unsigned int FIRST_SURROGATE_PAIR_CODEPOINT = 0x10000;
-        // don't escape non-control characters
-        // (short escape sequence are applied above)
-        if (FIRST_NON_CONTROL_CODEPOINT <= codepoint &&
-            codepoint <= LAST_NON_CONTROL_CODEPOINT) {
-          result += static_cast<char>(codepoint);
-        } else if (codepoint <
-                   FIRST_SURROGATE_PAIR_CODEPOINT) { // codepoint is in Basic
-                                                     // Multilingual Plane
-          result += "\\u";
-          result += toHex16Bit(codepoint);
-        } else { // codepoint is not in Basic Multilingual Plane
-                 // convert to surrogate pair first
-          codepoint -= FIRST_SURROGATE_PAIR_CODEPOINT;
-          result += "\\u";
-          result += toHex16Bit((codepoint >> 10) + 0xD800);
-          result += "\\u";
-          result += toHex16Bit((codepoint & 0x3FF) + 0xDC00);
+        unsigned codepoint = utf8ToCodepoint(c, end); // modifies `c`
+        if (codepoint < 0x20) {
+          appendHex(result, codepoint);
+        } else if (codepoint < 0x80) {
+          appendRaw(result, codepoint);
+        } else if (codepoint < 0x10000) {
+          // Basic Multilingual Plane
+          appendHex(result, codepoint);
+        } else {
+          // Extended Unicode. Encode 20 bits as a surrogate pair.
+          codepoint -= 0x10000;
+          appendHex(result, 0xd800 + ((codepoint >> 10) & 0x3ff));
+          appendHex(result, 0xdc00 + (codepoint & 0x3ff));
         }
       }
     } break;
