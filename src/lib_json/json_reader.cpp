@@ -1287,7 +1287,7 @@ void OurReader::skipSpaces() {
 void OurReader::skipBom(bool skipBom) {
   // The default behavior is to skip BOM.
   if (skipBom) {
-    if (strncmp(begin_, "\xEF\xBB\xBF", 3) == 0) {
+    if ((end_ - begin_) >= 3 && strncmp(begin_, "\xEF\xBB\xBF", 3) == 0) {
       begin_ += 3;
       current_ = begin_;
     }
