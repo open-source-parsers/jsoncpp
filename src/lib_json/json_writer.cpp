@@ -179,7 +179,7 @@ static bool doesAnyCharRequireEscaping(char const* s, size_t n) {
   assert(s || !n);
 
   return std::any_of(s, s + n, [](unsigned char c) {
-    return c == '\\' || c == '"' || c < 0x20 || c > 0x7F
+    return c == '\\' || c == '"' || c < 0x20 || c > 0x7F;
   });
 }
 
