@@ -2702,6 +2702,34 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, escapeControlCharacters) {
   }
 }
 
+#ifdef _WIN32
+JSONTEST_FIXTURE_LOCAL(StreamWriterTest, escapeTabCharacterWindows) {
+  // Get the current locale before changing it
+  std::string currentLocale = setlocale(LC_ALL, NULL);
+  setlocale(LC_ALL, "English_United States.1252");
+
+  Json::Value root;
+  root["test"] = "\tTabTesting\t";
+
+  Json::StreamWriterBuilder b;
+
+  JSONTEST_ASSERT(Json::writeString(b, root) == "{\n\t\"test\" : "
+                                                "\"\\tTabTesting\\t\"\n}");
+
+  b.settings_["emitUTF8"] = true;
+  JSONTEST_ASSERT(Json::writeString(b, root) == "{\n\t\"test\" : "
+                                                "\"\\tTabTesting\\t\"\n}");
+
+  b.settings_["emitUTF8"] = false;
+  JSONTEST_ASSERT(Json::writeString(b, root) == "{\n\t\"test\" : "
+                                                "\"\\tTabTesting\\t\"\n}");
+
+  // Restore the locale
+  if (!currentLocale.empty())
+    setlocale(LC_ALL, currentLocale.c_str());
+}
+#endif
+
 struct ReaderTest : JsonTest::TestCase {
   void setStrictMode() {
     reader = std::unique_ptr<Json::Reader>(
