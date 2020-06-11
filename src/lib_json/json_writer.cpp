@@ -175,11 +175,11 @@ String valueToString(double value, unsigned int precision,
 
 String valueToString(bool value) { return value ? "true" : "false"; }
 
-static bool isAnyCharRequiredQuoting(char const* s, size_t n) {
+static bool doesAnyCharRequireEscaping(char const* s, size_t n) {
   assert(s || !n);
 
   return std::any_of(s, s + n, [](unsigned char c) {
-    return c == '\\' || c == '"' || !std::isprint(c);
+    return c == '\\' || c == '"' || c < 0x20 || c > 0x7F;
   });
 }
 
@@ -275,7 +275,7 @@ static String valueToQuotedStringN(const char* value, unsigned length,
   if (value == nullptr)
     return "";
 
-  if (!isAnyCharRequiredQuoting(value, length))
+  if (!doesAnyCharRequireEscaping(value, length))
     return String("\"") + value + "\"";
   // We have to walk value and escape any special characters.
   // Appending to String is not efficient, but this should be rare.
