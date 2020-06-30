@@ -19,8 +19,10 @@ if(BUILD_SHARED_LIBS)
     else()
         add_definitions(-DJSON_DLL)
     endif()
+    target_link_libraries(jsontestrunner_exe jsoncpp_lib)
+else()
+    target_link_libraries(jsontestrunner_exe jsoncpp_static)
 endif()
-target_link_libraries(jsontestrunner_exe jsoncpp_lib)
 
 set_target_properties(jsontestrunner_exe PROPERTIES OUTPUT_NAME jsontestrunner_exe)
 
