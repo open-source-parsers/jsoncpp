@@ -49,6 +49,8 @@ if(NOT DEFINED CMAKE_BUILD_TYPE AND NOT DEFINED CMAKE_CONFIGURATION_TYPES)
         "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Coverage.")
 endif()
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 # ---------------------------------------------------------------------------
 # use ccache if found, has to be done before project()
 # ---------------------------------------------------------------------------
@@ -146,6 +148,11 @@ if(JSONCPP_WITH_WARNING_AS_ERROR)
 endif()
 
 if(JSONCPP_WITH_PKGCONFIG_SUPPORT)
+    include(JoinPaths)
+
+    join_paths(libdir_for_pc_file "\${exec_prefix}" "${CMAKE_INSTALL_LIBDIR}")
+    join_paths(includedir_for_pc_file "\${prefix}" "${CMAKE_INSTALL_INCLUDEDIR}")
+
     configure_file(
         "pkg-config/jsoncpp.pc.in"
         "pkg-config/jsoncpp.pc"
