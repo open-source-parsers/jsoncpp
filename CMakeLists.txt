@@ -59,19 +59,19 @@ if(CCACHE_EXECUTABLE)
     set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}" CACHE PATH "ccache" FORCE)
 endif()
 
-project(JSONCPP
+project(jsoncpp
         # Note: version must be updated in three places when doing a release. This
         # annoying process ensures that amalgamate, CMake, and meson all report the
         # correct version.
         # 1. ./meson.build
         # 2. ./include/json/version.h
         # 3. ./CMakeLists.txt
-        # IMPORTANT: also update the JSONCPP_SOVERSION!!
+        # IMPORTANT: also update the PROJECT_SOVERSION!!
         VERSION 1.9.3 # <major>[.<minor>[.<patch>[.<tweak>]]]
         LANGUAGES CXX)
 
-message(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
-set(JSONCPP_SOVERSION 24)
+message(STATUS "JsonCpp Version: ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+set(PROJECT_SOVERSION 24)
 
 option(JSONCPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executables" ON)
 option(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)
@@ -80,7 +80,9 @@ option(JSONCPP_WITH_STRICT_ISO "Issue all the warnings demanded by strict ISO C 
 option(JSONCPP_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" ON)
 option(JSONCPP_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ON)
 option(JSONCPP_WITH_EXAMPLE "Compile JsonCpp example" OFF)
-option(BUILD_SHARED_LIBS "Build jsoncpp_lib as a shared library." OFF)
+option(BUILD_SHARED_LIBS "Build jsoncpp_lib as a shared library." ON)
+option(BUILD_STATIC_LIBS "Build jsoncpp_lib as a static library." ON)
+option(BUILD_OBJECT_LIBS "Build jsoncpp_lib as a object library." ON)
 
 # Adhere to GNU filesystem layout conventions
 include(GNUInstallDirs)
