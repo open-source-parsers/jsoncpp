@@ -2080,8 +2080,8 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, searchValueByPath) {
     const Json::String expected("{"
                                 "\"property1\":[0,1,null],"
                                 "\"property2\":{"
-                                "\"hello\":null,"
-                                "\"object\":\"object\"}}\n");
+                                "\"object\":\"object\","
+                                "\"hello\":null}}\n");
     Json::Path path1(".property1.[%]", 2);
     Json::Value& value1 = path1.make(root);
     JSONTEST_ASSERT_EQUAL(Json::nullValue, value1);
@@ -2168,8 +2168,8 @@ JSONTEST_FIXTURE_LOCAL(FastWriterTest, writeNestedObjects) {
   Json::FastWriter writer;
   const Json::String expected("{"
                               "\"object1\":{"
-                              "\"bool\":true,"
-                              "\"nested\":123"
+                              "\"nested\":123,"
+                              "\"bool\":true"
                               "},"
                               "\"object2\":{}"
                               "}\n");
@@ -2226,8 +2226,8 @@ JSONTEST_FIXTURE_LOCAL(StyledWriterTest, writeNestedObjects) {
   Json::StyledWriter writer;
   const Json::String expected("{\n"
                               "   \"object1\" : {\n"
-                              "      \"bool\" : true,\n"
-                              "      \"nested\" : 123\n"
+                              "      \"nested\" : 123,\n"
+                              "      \"bool\" : true\n"
                               "   },\n"
                               "   \"object2\" : {}\n"
                               "}\n");
@@ -2346,8 +2346,8 @@ JSONTEST_FIXTURE_LOCAL(StyledStreamWriterTest, writeNestedObjects) {
                               "\t\"object1\" : \n"
                               "\t"
                               "{\n"
-                              "\t\t\"bool\" : true,\n"
-                              "\t\t\"nested\" : 123\n"
+                              "\t\t\"nested\" : 123,\n"
+                              "\t\t\"bool\" : true\n"
                               "\t},\n"
                               "\t\"object2\" : {}\n"
                               "}\n");
@@ -2491,8 +2491,8 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, writeNestedObjects) {
   const Json::String expected("{\n"
                               "\t\"object1\" : \n"
                               "\t{\n"
-                              "\t\t\"bool\" : true,\n"
-                              "\t\t\"nested\" : 123\n"
+                              "\t\t\"nested\" : 123,\n"
+                              "\t\t\"bool\" : true\n"
                               "\t},\n"
                               "\t\"object2\" : {}\n"
                               "}");

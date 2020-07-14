@@ -866,12 +866,7 @@ ArrayIndex Value::size() const {
   case stringValue:
     return 0;
   case arrayValue: // size of the array is highest index + 1
-    if (!value_.map_->empty()) {
-      ObjectValues::const_iterator itLast = value_.map_->end();
-      --itLast;
-      return (*itLast).first.index() + 1;
-    }
-    return 0;
+    return value_.map_->empty() ? 0 : value_.map_->max_key()->first.index() + 1;
   case objectValue:
     return ArrayIndex(value_.map_->size());
   }

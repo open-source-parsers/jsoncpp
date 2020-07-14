@@ -45,6 +45,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "historic_map.h"
 
 // Disable warning C4251: <data member>: <type> needs to have dll-interface to
 // be used by...
@@ -292,7 +293,7 @@ private:
   };
 
 public:
-  typedef std::map<CZString, Value> ObjectValues;
+  typedef historic_map<CZString, Value> ObjectValues;
 #endif // ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
 
 public:
