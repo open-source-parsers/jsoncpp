@@ -169,7 +169,7 @@ if(BUILD_STATIC_LIBS)
         set_target_properties(${STATIC_LIB} PROPERTIES INSTALL_RPATH "@loader_path/.")
     endif()
 
-    target_compile_features(${SHARED_LIB} PUBLIC ${REQUIRED_FEATURES})
+    target_compile_features(${STATIC_LIB} PUBLIC ${REQUIRED_FEATURES})
 
     if(NOT CMAKE_VERSION VERSION_LESS 2.8.11)
         target_include_directories(${STATIC_LIB} PUBLIC
