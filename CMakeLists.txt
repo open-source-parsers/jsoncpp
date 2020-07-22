@@ -55,7 +55,7 @@ endif()
 
 # Note: project(VERSION XX) - the VERSION here is number, but VERSION in meson is string.
 # Thus, it is better to be consistent.
-project(JSONCPP
+project(jsoncpp
         LANGUAGES CXX)
 
 # Set variable named ${VAR_NAME} to value ${VALUE}
@@ -102,7 +102,9 @@ option(JSONCPP_WITH_STRICT_ISO "Issue all the warnings demanded by strict ISO C 
 option(JSONCPP_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" ON)
 option(JSONCPP_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ON)
 option(JSONCPP_WITH_EXAMPLE "Compile JsonCpp example" OFF)
-option(BUILD_SHARED_LIBS "Build jsoncpp_lib as a shared library." OFF)
+option(BUILD_SHARED_LIBS "Build jsoncpp_lib as a shared library." ON)
+option(BUILD_STATIC_LIBS "Build jsoncpp_lib as a static library." ON)
+option(BUILD_OBJECT_LIBS "Build jsoncpp_lib as a object library." ON)
 option(BUILD_WITH_CXX_11 "Build jsoncpp_lib with C++11 standard." ON)
 
 ##  To compatible with C++0x and C++1x
