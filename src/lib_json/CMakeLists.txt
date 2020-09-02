@@ -151,7 +151,11 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 if(BUILD_STATIC_LIBS)
-    set(STATIC_LIB ${PROJECT_NAME}_static)
+    if (BUILD_SHARED_LIBS)
+        set(STATIC_LIB ${PROJECT_NAME}_static)
+    else()
+        set(STATIC_LIB ${PROJECT_NAME}_lib)
+    endif()
     add_library(${STATIC_LIB} STATIC ${PUBLIC_HEADERS} ${JSONCPP_SOURCES})
 
     # avoid name clashes on windows as the shared import lib is alse named jsoncpp.lib
@@ -160,7 +164,7 @@ if(BUILD_STATIC_LIBS)
     endif()
 
     set_target_properties(${STATIC_LIB} PROPERTIES
-        OUTPUT_NAME jsoncpp${STATIC_SUFFIX}
+        OUTPUT_NAME jsoncpp
         VERSION ${PROJECT_VERSION}
     )
 
