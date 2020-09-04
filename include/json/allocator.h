@@ -38,7 +38,7 @@ public:
    * The pointer argument is tagged as "volatile" to prevent the
    * compiler optimizing out this critical step.
    */
-  void deallocate(volatile pointer p, size_type n) {
+  void deallocate(pointer p, size_type n) {
     std::memset(p, 0, n * sizeof(T));
     // free using "global operator delete"
     ::operator delete(p);
