@@ -3723,8 +3723,8 @@ JSONTEST_FIXTURE_LOCAL(IteratorTest, reverseIterator) {
   std::vector<std::string> values;
   using Iter = decltype(json.begin());
   auto re = std::reverse_iterator<Iter>(json.begin());
-  for (auto it = std::reverse_iterator<Iter>(json.end()); it != re; ++it) {
-    values.push_back(it->asString());
+  for (std::reverse_iterator<Iter> it = std::reverse_iterator<Iter>(json.end()); it != re; ++it) {
+    values.push_back((*it).asString());
   }
   JSONTEST_ASSERT((values == std::vector<std::string>{"b", "a"}));
 }
