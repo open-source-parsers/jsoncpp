@@ -253,7 +253,7 @@ void Runner::runTestAt(size_t index, TestResult& result) const {
 
 bool Runner::runAllTest(bool printSummary) const {
   size_t const count = testCount();
-  std::deque<TestResult> failures;
+  std::vector<TestResult> failures;
   for (size_t index = 0; index < count; ++index) {
     TestResult result;
     runTestAt(index, result);
@@ -408,7 +408,7 @@ Json::String ToJsonString(const char* toConvert) {
   return Json::String(toConvert);
 }
 
-Json::String ToJsonString(Json::String in) { return in; }
+Json::String ToJsonString(const Json::String& in) { return in; }
 
 #if JSONCPP_USING_SECURE_MEMORY
 Json::String ToJsonString(std::string in) {

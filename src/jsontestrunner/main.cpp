@@ -335,6 +335,7 @@ int main(int argc, const char* argv[]) {
     std::cerr << "Unhandled exception:" << std::endl << e.what() << std::endl;
     return 1;
   }
+  return 0;
 }
 
 #if defined(__GNUC__)
