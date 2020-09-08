@@ -2732,11 +2732,12 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, escapeTabCharacterWindows) {
 
 struct ReaderTest : JsonTest::TestCase {
   void setStrictMode() {
-    reader = std::make_unique<Json::Reader>(Json::Features{}.strictMode());
+    reader = std::unique_ptr<Json::Reader>(
+        new Json::Reader(Json::Features{}.strictMode()));
   }
 
   void setFeatures(Json::Features& features) {
-    reader = std::make_unique<Json::Reader>(features);
+    reader = std::unique_ptr<Json::Reader>(new Json::Reader(features));
   }
 
   void checkStructuredErrors(

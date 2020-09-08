@@ -52,7 +52,7 @@ template <typename T>
 static std::unique_ptr<T> cloneUnique(const std::unique_ptr<T>& p) {
   std::unique_ptr<T> r;
   if (p) {
-    r = std::make_unique<T>(*p);
+    r = std::unique_ptr<T>(new T(*p));
   }
   return r;
 }
@@ -840,6 +840,7 @@ bool Value::isConvertibleTo(ValueType other) const {
            (type() == realValue && InRange(value_.real_, 0, maxUInt)) ||
            type() == booleanValue || type() == nullValue;
   case realValue:
+    return isNumeric() || type() == booleanValue || type() == nullValue;
   case booleanValue:
     return isNumeric() || type() == booleanValue || type() == nullValue;
   case stringValue:
@@ -1239,7 +1240,7 @@ Value::Members Value::getMemberNames() const {
   ObjectValues::const_iterator it = value_.map_->begin();
   ObjectValues::const_iterator itEnd = value_.map_->end();
   for (; it != itEnd; ++it) {
-    members.emplace_back(String((*it).first.data(), (*it).first.length()));
+    members.push_back(String((*it).first.data(), (*it).first.length()));
   }
   return members;
 }
@@ -1396,7 +1397,7 @@ String Value::Comments::get(CommentPlacement slot) const {
 
 void Value::Comments::set(CommentPlacement slot, String comment) {
   if (!ptr_) {
-    ptr_ = std::make_unique<Array>();
+    ptr_ = std::unique_ptr<Array>(new Array());
   }
   // check comments array boundry.
   if (slot < CommentPlacement::numberOfCommentPlacement) {
@@ -1548,7 +1549,7 @@ void Path::makePath(const String& path, const InArgs& in) {
       const char* beginName = current;
       while (current != end && !strchr("[.", *current))
         ++current;
-      args_.emplace_back(String(beginName, current));
+      args_.push_back(String(beginName, current));
     }
   }
 }
