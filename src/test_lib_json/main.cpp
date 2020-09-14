@@ -2906,7 +2906,7 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, strictModeParseNumber) {
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, parseChineseWithOneError) {
   checkParse(R"({ "pr)"
-             "佐藤" // 佐藤
+             u8"\u4f50\u85e4" // 佐藤
              R"(erty" :: "value" })",
              {{18, 19, "Syntax error: value, object or array expected."}},
              "* Line 1, Column 19\n  Syntax error: value, object or array "
@@ -3008,7 +3008,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseString) {
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
     JSONTEST_ASSERT(errs.empty());
-    JSONTEST_ASSERT_EQUAL("訪", root[0].asString()); // "訪"
+    JSONTEST_ASSERT_EQUAL(u8"\u8A2a", root[0].asString()); // "訪"
   }
   {
     char const doc[] = R"([ "\uD801" ])";
