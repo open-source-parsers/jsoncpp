@@ -4,7 +4,7 @@ WarningsAsErrors: ''
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
 FormatStyle:     none
-CheckOptions:    
+CheckOptions:
   - key:             modernize-use-using.IgnoreMacros
     value:           '0'
 ...

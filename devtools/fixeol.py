@@ -32,8 +32,8 @@ def fix_source_eol(path, is_dry_run = True, verbose = True, eol = '\n'):
         if verbose:
             print(is_dry_run and ' NEED FIX' or ' FIXED')
     return True
-##    
-##    
+##
+##
 ##
 ##def _do_fix(is_dry_run = True):
 ##    from waftools import antglob

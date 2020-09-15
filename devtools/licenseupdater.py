@@ -20,7 +20,7 @@ def update_license(path, dry_run, show_diff):
       dry_run: if True, just print the path of the file that would be updated,
                but don't change it.
       show_diff: if True, print the path of the file that would be modified,
-                 as well as the change made to the file. 
+                 as well as the change made to the file.
     """
     with open(path, 'rt') as fin:
         original_text = fin.read().replace('\r\n','\n')
@@ -51,7 +51,7 @@ def update_license_in_source_directories(source_dirs, dry_run, show_diff):
       dry_run: if True, just print the path of the file that would be updated,
                but don't change it.
       show_diff: if True, print the path of the file that would be modified,
-                 as well as the change made to the file. 
+                 as well as the change made to the file.
     """
     from devtools import antglob
     prune_dirs = antglob.prune_dirs + 'scons-local* ./build* ./libs ./dist'
