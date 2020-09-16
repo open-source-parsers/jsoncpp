@@ -1968,16 +1968,27 @@ void CharReaderBuilder::setDefaults(Json::Value* settings) {
 //////////////////////////////////
 // global functions
 
+bool parseFromString(CharReader::Factory const& fact, char const* str, size_t len, Value* root,
+                     String* errs) {
+    char const* begin = str;
+    char const* end = str + len;
+    // Note that we do not actually need a null-terminator.
+    CharReaderPtr const reader(fact.newCharReader());
+    return reader->parse(begin, end, root, errs);
+}
+
+bool parseFromString(CharReader::Factory const& fact, const String& doc, Value* root,
+                     String* errs) {
+  // Note that we do not actually need a null-terminator.
+  return parseFromString(fact, doc.data(), doc.size(), root, errs);
+}
+
 bool parseFromStream(CharReader::Factory const& fact, IStream& sin, Value* root,
                      String* errs) {
   OStringStream ssin;
   ssin << sin.rdbuf();
   String doc = ssin.str();
-  char const* begin = doc.data();
-  char const* end = begin + doc.size();
-  // Note that we do not actually need a null-terminator.
-  CharReaderPtr const reader(fact.newCharReader());
-  return reader->parse(begin, end, root, errs);
+  return parseFromString(fact, doc, root, errs);
 }
 
 IStream& operator>>(IStream& sin, Value& root) {

@@ -359,6 +359,20 @@ public:
   static void strictMode(Json::Value* settings);
 };
 
+/** Consume entire string and use its begin/end.
+ * Someday we might have a real StreamReader, but for now this
+ * is convenient.
+ */
+bool JSON_API parseFromString(CharReader::Factory const&, char const* str, size_t len, Value* root,
+                                 String* errs);
+
+/** Consume entire string and use its begin/end.
+ * Someday we might have a real StreamReader, but for now this
+ * is convenient.
+ */
+bool JSON_API parseFromString(CharReader::Factory const&,const String&, Value* root,
+                              String* errs);
+
 /** Consume entire stream and use its begin/end.
  * Someday we might have a real StreamReader, but for now this
  * is convenient.
