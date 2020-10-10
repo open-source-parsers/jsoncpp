@@ -22,8 +22,6 @@ addons:
     - clang-8
     - valgrind
 matrix:
-  allow_failures:
-    - os: osx
   include:
     - name: Mac clang meson static release testing
       os: osx
