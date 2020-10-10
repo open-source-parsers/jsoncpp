@@ -3920,8 +3920,7 @@ class VersionTest : public JsonTest::TestCase {};
 
 JSONTEST_FIXTURE_LOCAL(VersionTest, VersionNumbersMatch) {
   std::ostringstream vstr;
-  vstr << JSONCPP_VERSION_MAJOR << '.'
-       << JSONCPP_VERSION_MINOR << '.'
+  vstr << JSONCPP_VERSION_MAJOR << '.' << JSONCPP_VERSION_MINOR << '.'
        << JSONCPP_VERSION_PATCH;
   JSONTEST_ASSERT_EQUAL(vstr.str(), std::string(JSONCPP_VERSION_STRING));
 }
