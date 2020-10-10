@@ -44,6 +44,8 @@ matrix:
          CC="clang"
          LIB_TYPE=static
          BUILD_TYPE=release
+         PYTHONUSERBASE="$(pwd)/LOCAL"
+         PATH="$PYTHONUSERBASE/bin:$PATH"
       # before_install and install steps only needed for linux meson builds
       before_install:
           - source ./.travis_scripts/travis.before_install.${TRAVIS_OS_NAME}.sh
