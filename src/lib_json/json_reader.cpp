@@ -1417,6 +1417,8 @@ bool OurReader::readString() {
   Char c = 0;
   while (current_ != end_) {
     c = getNextChar();
+    if (c < 0)
+      current_++;
     if (c == '\\')
       getNextChar();
     else if (c == '"')
@@ -1714,6 +1716,8 @@ bool OurReader::decodeString(Token& token, String& decoded) {
       }
     } else {
       decoded += c;
+      if (c < 0)
+        decoded += *current++;
     }
   }
   return true;
