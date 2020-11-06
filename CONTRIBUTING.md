@@ -19,7 +19,7 @@ If you wish to install to a directory other than /usr/local, set an environment 
     DESTDIR=/path/to/install/dir
 
 Then,
-
+```sh
     cd jsoncpp/
     BUILD_TYPE=debug
     #BUILD_TYPE=release
@@ -30,6 +30,7 @@ Then,
     cd build-${LIB_TYPE}
     meson test --no-rebuild --print-errorlogs
     sudo ninja install
+```
 
 ## Building and testing with other build systems
 See https://github.com/open-source-parsers/jsoncpp/wiki/Building
