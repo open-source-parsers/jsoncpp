@@ -1,6 +1,7 @@
 clone_folder: c:\projects\jsoncpp
 
 environment:
+
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       CMAKE_GENERATOR: Visual Studio 14 2015
@@ -13,9 +14,12 @@ environment:
 
 build_script:
   - cmake --version
-  - mkdir -p '{clone_folder}\build\release'
-  - cd '{clone_folder}\build\release'
-  - cmake -G "%CMAKE_GENERATOR%" -DCMAKE_INSTALL_PREFIX:PATH=%CD:\=/%/install -DBUILD_SHARED_LIBS:BOOL=ON '{clone_folder}'
+  # The build script starts in root.
+  - set JSONCPP_FOLDER=%cd%
+  - set JSONCPP_BUILD_FOLDER=%JSONCPP_FOLDER%\build\release
+  - mkdir -p %JSONCPP_BUILD_FOLDER%
+  - cd %JSONCPP_BUILD_FOLDER%
+  - cmake -G "%CMAKE_GENERATOR%" -DCMAKE_INSTALL_PREFIX:PATH=%CD:\=/%/install -DBUILD_SHARED_LIBS:BOOL=ON %JSONCPP_FOLDER%
   # Use ctest to make a dashboard build:
   # - ctest -D Experimental(Start|Update|Configure|Build|Test|Coverage|MemCheck|Submit)
   # NOTE: Testing on windows is not yet finished:
