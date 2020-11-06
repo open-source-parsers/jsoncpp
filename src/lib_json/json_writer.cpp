@@ -1217,7 +1217,7 @@ bool StreamWriterBuilder::validate(Json::Value* invalid) const {
     if (valid_keys.count(key))
       continue;
     if (invalid)
-      (*invalid)[std::move(key)] = *si;
+      (*invalid)[key] = *si;
     else
       return false;
   }
