@@ -144,7 +144,9 @@ bool Reader::decodeNumber(Token& token) {
 ```
 
 Before submitting your code, ensure that you meet the versioning requirements above, follow the style guide of the file you are modifying (or the above rules for new files), and run clang format. Meson exposes clang format with the following command:
-
 ```
 ninja -v -C build-${LIB_TYPE}/ clang-format
 ```
+
+For convenience, you can also run the `reformat.sh` script located in the root directory.
+
