@@ -9,7 +9,6 @@
 #include <json/config.h>
 #include <json/json.h>
 #include <memory>
-#include <stdint.h>
 #include <string>
 
 namespace Json {
@@ -40,11 +39,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   builder.settings_["rejectDupKeys_"] = hash_settings & (1 << 7);
   builder.settings_["allowSpecialFloats_"] = hash_settings & (1 << 8);
   builder.settings_["collectComments"] = hash_settings & (1 << 9);
+  builder.settings_["allowTrailingCommas_"] = hash_settings & (1 << 10);
 
   std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
 
   Json::Value root;
-  const char* data_str = reinterpret_cast<const char*>(data);
+  const auto data_str = reinterpret_cast<const char*>(data);
   try {
     reader->parse(data_str, data_str + size, &root, nullptr);
   } catch (Json::Exception const&) {

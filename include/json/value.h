@@ -3,8 +3,8 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#ifndef CPPTL_JSON_H_INCLUDED
-#define CPPTL_JSON_H_INCLUDED
+#ifndef JSON_H_INCLUDED
+#define JSON_H_INCLUDED
 
 #if !defined(JSON_IS_AMALGAMATION)
 #include "forwards.h"
@@ -21,20 +21,30 @@
 #endif
 #endif
 
+// Support for '= delete' with template declarations was a late addition
+// to the c++11 standard and is rejected by clang 3.8 and Apple clang 8.2
+// even though these declare themselves to be c++11 compilers.
+#if !defined(JSONCPP_TEMPLATE_DELETE)
+#if defined(__clang__) && defined(__apple_build_version__)
+#if __apple_build_version__ <= 8000042
+#define JSONCPP_TEMPLATE_DELETE
+#endif
+#elif defined(__clang__)
+#if __clang_major__ == 3 && __clang_minor__ <= 8
+#define JSONCPP_TEMPLATE_DELETE
+#endif
+#endif
+#if !defined(JSONCPP_TEMPLATE_DELETE)
+#define JSONCPP_TEMPLATE_DELETE = delete
+#endif
+#endif
+
 #include <array>
 #include <exception>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
-
-#ifndef JSON_USE_CPPTL_SMALLMAP
-#include <map>
-#else
-#include <cpptl/smallmap.h>
-#endif
-#ifdef JSON_USE_CPPTL
-#include <cpptl/forwards.h>
-#endif
 
 // Disable warning C4251: <data member>: <type> needs to have dll-interface to
 // be used by...
@@ -57,8 +67,8 @@ namespace Json {
 class JSON_API Exception : public std::exception {
 public:
   Exception(String msg);
-  ~Exception() JSONCPP_NOEXCEPT override;
-  char const* what() const JSONCPP_NOEXCEPT override;
+  ~Exception() noexcept override;
+  char const* what() const noexcept override;
 
 protected:
   String msg_;
@@ -119,11 +129,6 @@ enum PrecisionType {
   significantDigits = 0, ///< we set max number of significant digits in string
   decimalPlaces          ///< we set max number of digits after "." in string
 };
-
-//# ifdef JSON_USE_CPPTL
-//   typedef CppTL::AnyEnumerator<const char *> EnumMemberNames;
-//   typedef CppTL::AnyEnumerator<const Value &> EnumValues;
-//# endif
 
 /** \brief Lightweight wrapper to tag static string.
  *
@@ -189,21 +194,21 @@ class JSON_API Value {
   friend class ValueIteratorBase;
 
 public:
-  typedef std::vector<String> Members;
-  typedef ValueIterator iterator;
-  typedef ValueConstIterator const_iterator;
-  typedef Json::UInt UInt;
-  typedef Json::Int Int;
+  using Members = std::vector<String>;
+  using iterator = ValueIterator;
+  using const_iterator = ValueConstIterator;
+  using UInt = Json::UInt;
+  using Int = Json::Int;
 #if defined(JSON_HAS_INT64)
-  typedef Json::UInt64 UInt64;
-  typedef Json::Int64 Int64;
+  using UInt64 = Json::UInt64;
+  using Int64 = Json::Int64;
 #endif // defined(JSON_HAS_INT64)
-  typedef Json::LargestInt LargestInt;
-  typedef Json::LargestUInt LargestUInt;
-  typedef Json::ArrayIndex ArrayIndex;
+  using LargestInt = Json::LargestInt;
+  using LargestUInt = Json::LargestUInt;
+  using ArrayIndex = Json::ArrayIndex;
 
   // Required for boost integration, e. g. BOOST_TEST
-  typedef std::string value_type;
+  using value_type = std::string;
 
 #if JSON_USE_NULLREF
   // Binary compatibility kludges, do not use.
@@ -287,11 +292,7 @@ private:
   };
 
 public:
-#ifndef JSON_USE_CPPTL_SMALLMAP
   typedef std::map<CZString, Value> ObjectValues;
-#else
-  typedef CppTL::SmallMap<CZString, Value> ObjectValues;
-#endif // ifndef JSON_USE_CPPTL_SMALLMAP
 #endif // ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
 
 public:
@@ -340,10 +341,8 @@ public:
    */
   Value(const StaticString& value);
   Value(const String& value);
-#ifdef JSON_USE_CPPTL
-  Value(const CppTL::ConstString& value);
-#endif
   Value(bool value);
+  Value(std::nullptr_t ptr) = delete;
   Value(const Value& other);
   Value(Value&& other);
   ~Value();
@@ -384,9 +383,6 @@ public:
    *  \return false if !string. (Seg-fault if str or end are NULL.)
    */
   bool getString(char const** begin, char const** end) const;
-#ifdef JSON_USE_CPPTL
-  CppTL::ConstString asConstString() const;
-#endif
   Int asInt() const;
   UInt asUInt() const;
 #if defined(JSON_HAS_INT64)
@@ -412,6 +408,10 @@ public:
   bool isArray() const;
   bool isObject() const;
 
+  /// The `as<T>` and `is<T>` member function templates and specializations.
+  template <typename T> T as() const JSONCPP_TEMPLATE_DELETE;
+  template <typename T> bool is() const JSONCPP_TEMPLATE_DELETE;
+
   bool isConvertibleTo(ValueType other) const;
 
   /// Number of values in array or object
@@ -422,7 +422,7 @@ public:
   bool empty() const;
 
   /// Return !isNull()
-  JSONCPP_OP_EXPLICIT operator bool() const;
+  explicit operator bool() const;
 
   /// Remove all object members and array elements.
   /// \pre type() is arrayValue, objectValue, or nullValue
@@ -464,8 +464,10 @@ public:
   /// Equivalent to jsonvalue[jsonvalue.size()] = value;
   Value& append(const Value& value);
   Value& append(Value&& value);
+
   /// \brief Insert value in array at specific index
-  bool insert(ArrayIndex index, Value newValue);
+  bool insert(ArrayIndex index, const Value& newValue);
+  bool insert(ArrayIndex index, Value&& newValue);
 
   /// Access an object value by name, create a null member if it does not exist.
   /// \note Because of our implementation, keys are limited to 2^30 -1 chars.
@@ -494,13 +496,6 @@ public:
    *   \endcode
    */
   Value& operator[](const StaticString& key);
-#ifdef JSON_USE_CPPTL
-  /// Access an object value by name, create a null member if it does not exist.
-  Value& operator[](const CppTL::ConstString& key);
-  /// Access an object value by name, returns null if there is no member with
-  /// that name.
-  const Value& operator[](const CppTL::ConstString& key) const;
-#endif
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
   Value get(const char* key, const Value& defaultValue) const;
@@ -513,11 +508,6 @@ public:
   /// \note deep copy
   /// \param key may contain embedded nulls.
   Value get(const String& key, const Value& defaultValue) const;
-#ifdef JSON_USE_CPPTL
-  /// Return the member named key if it exist, defaultValue otherwise.
-  /// \note deep copy
-  Value get(const CppTL::ConstString& key, const Value& defaultValue) const;
-#endif
   /// Most general and efficient version of isMember()const, get()const,
   /// and operator[]const
   /// \note As stated elsewhere, behavior is undefined if (end-begin) >= 2^30
@@ -563,10 +553,6 @@ public:
   bool isMember(const String& key) const;
   /// Same as isMember(String const& key)const
   bool isMember(const char* begin, const char* end) const;
-#ifdef JSON_USE_CPPTL
-  /// Return true if the object has a member named key.
-  bool isMember(const CppTL::ConstString& key) const;
-#endif
 
   /// \brief Return a list of the member names.
   ///
@@ -574,11 +560,6 @@ public:
   /// \pre type() is objectValue or nullValue
   /// \post if type() was nullValue, it remains nullValue
   Members getMemberNames() const;
-
-  //# ifdef JSON_USE_CPPTL
-  //      EnumMemberNames enumMemberNames() const;
-  //      EnumValues enumValues() const;
-  //# endif
 
   /// \deprecated Always pass len.
   JSONCPP_DEPRECATED("Use setComment(String const&) instead.")
@@ -673,6 +654,36 @@ private:
   ptrdiff_t limit_;
 };
 
+template <> inline bool Value::as<bool>() const { return asBool(); }
+template <> inline bool Value::is<bool>() const { return isBool(); }
+
+template <> inline Int Value::as<Int>() const { return asInt(); }
+template <> inline bool Value::is<Int>() const { return isInt(); }
+
+template <> inline UInt Value::as<UInt>() const { return asUInt(); }
+template <> inline bool Value::is<UInt>() const { return isUInt(); }
+
+#if defined(JSON_HAS_INT64)
+template <> inline Int64 Value::as<Int64>() const { return asInt64(); }
+template <> inline bool Value::is<Int64>() const { return isInt64(); }
+
+template <> inline UInt64 Value::as<UInt64>() const { return asUInt64(); }
+template <> inline bool Value::is<UInt64>() const { return isUInt64(); }
+#endif
+
+template <> inline double Value::as<double>() const { return asDouble(); }
+template <> inline bool Value::is<double>() const { return isDouble(); }
+
+template <> inline String Value::as<String>() const { return asString(); }
+template <> inline bool Value::is<String>() const { return isString(); }
+
+/// These `as` specializations are type conversions, and do not have a
+/// corresponding `is`.
+template <> inline float Value::as<float>() const { return asFloat(); }
+template <> inline const char* Value::as<const char*>() const {
+  return asCString();
+}
+
 /** \brief Experimental and untested: represents an element of the "path" to
  * access a node.
  */
@@ -718,8 +729,8 @@ public:
   Value& make(Value& root) const;
 
 private:
-  typedef std::vector<const PathArgument*> InArgs;
-  typedef std::vector<PathArgument> Args;
+  using InArgs = std::vector<const PathArgument*>;
+  using Args = std::vector<PathArgument>;
 
   void makePath(const String& path, const InArgs& in);
   void addPathInArg(const String& path, const InArgs& in,
@@ -734,10 +745,10 @@ private:
  */
 class JSON_API ValueIteratorBase {
 public:
-  typedef std::bidirectional_iterator_tag iterator_category;
-  typedef unsigned int size_t;
-  typedef int difference_type;
-  typedef ValueIteratorBase SelfType;
+  using iterator_category = std::bidirectional_iterator_tag;
+  using size_t = unsigned int;
+  using difference_type = int;
+  using SelfType = ValueIteratorBase;
 
   bool operator==(const SelfType& other) const { return isEqual(other); }
 
@@ -810,12 +821,12 @@ class JSON_API ValueConstIterator : public ValueIteratorBase {
   friend class Value;
 
 public:
-  typedef const Value value_type;
+  using value_type = const Value;
   // typedef unsigned int size_t;
   // typedef int difference_type;
-  typedef const Value& reference;
-  typedef const Value* pointer;
-  typedef ValueConstIterator SelfType;
+  using reference = const Value&;
+  using pointer = const Value*;
+  using SelfType = ValueConstIterator;
 
   ValueConstIterator();
   ValueConstIterator(ValueIterator const& other);
@@ -861,12 +872,12 @@ class JSON_API ValueIterator : public ValueIteratorBase {
   friend class Value;
 
 public:
-  typedef Value value_type;
-  typedef unsigned int size_t;
-  typedef int difference_type;
-  typedef Value& reference;
-  typedef Value* pointer;
-  typedef ValueIterator SelfType;
+  using value_type = Value;
+  using size_t = unsigned int;
+  using difference_type = int;
+  using reference = Value&;
+  using pointer = Value*;
+  using SelfType = ValueIterator;
 
   ValueIterator();
   explicit ValueIterator(const ValueConstIterator& other);
@@ -921,4 +932,4 @@ inline void swap(Value& a, Value& b) { a.swap(b); }
 #pragma warning(pop)
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
-#endif // CPPTL_JSON_H_INCLUDED
+#endif // JSON_H_INCLUDED

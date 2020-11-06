@@ -3,8 +3,8 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#ifndef CPPTL_JSON_ALLOCATOR_H_INCLUDED
-#define CPPTL_JSON_ALLOCATOR_H_INCLUDED
+#ifndef JSON_ALLOCATOR_H_INCLUDED
+#define JSON_ALLOCATOR_H_INCLUDED
 
 #include <cstring>
 #include <memory>
@@ -35,11 +35,10 @@ public:
    * Release memory which was allocated for N items at pointer P.
    *
    * The memory block is filled with zeroes before being released.
-   * The pointer argument is tagged as "volatile" to prevent the
-   * compiler optimizing out this critical step.
    */
-  void deallocate(volatile pointer p, size_type n) {
-    std::memset(p, 0, n * sizeof(T));
+  void deallocate(pointer p, size_type n) {
+    // memset_s is used because memset may be optimized away by the compiler
+    memset_s(p, n * sizeof(T), 0, n * sizeof(T));
     // free using "global operator delete"
     ::operator delete(p);
   }
@@ -86,4 +85,4 @@ bool operator!=(const SecureAllocator<T>&, const SecureAllocator<U>&) {
 
 #pragma pack(pop)
 
-#endif // CPPTL_JSON_ALLOCATOR_H_INCLUDED
+#endif // JSON_ALLOCATOR_H_INCLUDED

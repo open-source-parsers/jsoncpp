@@ -27,8 +27,13 @@ Then,
     #LIB_TYPE=static
     meson --buildtype ${BUILD_TYPE} --default-library ${LIB_TYPE} . build-${LIB_TYPE}
     ninja -v -C build-${LIB_TYPE}
-    cd build-${LIB_TYPE}
-    meson test --no-rebuild --print-errorlogs
+
+    ninja -C build-static/ test
+
+    # Or
+    #cd build-${LIB_TYPE}
+    #meson test --no-rebuild --print-errorlogs
+
     sudo ninja install
 ```
 

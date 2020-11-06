@@ -30,8 +30,14 @@ format to store user input files.
 
 * `1.y.z` is built with C++11.
 * `0.y.z` can be used with older compilers.
+* `00.11.z` can be used both in old and new compilers.
 * Major versions maintain binary-compatibility.
 
+### Special note
+The branch `00.11.z`is a new branch, its major version number `00` is to show that it is
+different from `0.y.z` and `1.y.z`, the main purpose of this branch is to make a balance
+between the other two branches. Thus, users can use some new features in this new branch
+that introduced in 1.y.z, but can hardly applied into 0.y.z.
 
 ## Using JsonCpp in your project
 
@@ -42,7 +48,7 @@ You can download and install JsonCpp using the [vcpkg](https://github.com/Micros
     cd vcpkg
     ./bootstrap-vcpkg.sh
     ./vcpkg integrate install
-    vcpkg install jsoncpp
+    ./vcpkg install jsoncpp
 
 The JsonCpp port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 

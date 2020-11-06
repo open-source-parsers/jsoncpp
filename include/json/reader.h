@@ -3,8 +3,8 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#ifndef CPPTL_JSON_READER_H_INCLUDED
-#define CPPTL_JSON_READER_H_INCLUDED
+#ifndef JSON_READER_H_INCLUDED
+#define JSON_READER_H_INCLUDED
 
 #if !defined(JSON_IS_AMALGAMATION)
 #include "json_features.h"
@@ -36,8 +36,8 @@ namespace Json {
 class JSONCPP_DEPRECATED(
     "Use CharReader and CharReaderBuilder instead.") JSON_API Reader {
 public:
-  typedef char Char;
-  typedef const Char* Location;
+  using Char = char;
+  using Location = const Char*;
 
   /** \brief An error tagged with where in the JSON text it was encountered.
    *
@@ -187,7 +187,7 @@ private:
     Location extra_;
   };
 
-  typedef std::deque<ErrorInfo> Errors;
+  using Errors = std::deque<ErrorInfo>;
 
   bool readToken(Token& token);
   void skipSpaces();
@@ -226,7 +226,7 @@ private:
   static bool containsNewLine(Location begin, Location end);
   static String normalizeEOL(Location begin, Location end);
 
-  typedef std::stack<Value*> Nodes;
+  using Nodes = std::stack<Value*>;
   Nodes nodes_;
   Errors errors_;
   String document_;
@@ -299,6 +299,8 @@ public:
    *     if allowComments is false.
    * - `"allowComments": false or true`
    *   - true if comments are allowed.
+   * - `"allowTrailingCommas": false or true`
+   *   - true if trailing commas in objects and arrays are allowed.
    * - `"strictRoot": false or true`
    *   - true if root must be either an array or an object value
    * - `"allowDroppedNullPlaceholders": false or true`
@@ -398,4 +400,4 @@ JSON_API IStream& operator>>(IStream&, Value&);
 #pragma warning(pop)
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
-#endif // CPPTL_JSON_READER_H_INCLUDED
+#endif // JSON_READER_H_INCLUDED

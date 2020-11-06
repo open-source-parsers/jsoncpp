@@ -8,16 +8,14 @@
 #include <json/value.h>
 #include <json/writer.h>
 #endif // if !defined(JSON_IS_AMALGAMATION)
+#include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <cstring>
+#include <iostream>
 #include <sstream>
 #include <utility>
-#ifdef JSON_USE_CPPTL
-#include <cpptl/conststring.h>
-#endif
-#include <algorithm> // min()
-#include <cstddef>   // size_t
 
 // Provide implementation equivalent of std::snprintf for older _MSC compilers
 #if defined(_MSC_VER) && _MSC_VER < 1900
@@ -120,7 +118,7 @@ static inline char* duplicateStringValue(const char* value, size_t length) {
   if (length >= static_cast<size_t>(Value::maxInt))
     length = Value::maxInt - 1;
 
-  char* newString = static_cast<char*>(malloc(length + 1));
+  auto newString = static_cast<char*>(malloc(length + 1));
   if (newString == nullptr) {
     throwRuntimeError("in Json::Value::duplicateStringValue(): "
                       "Failed to allocate string value buffer");
@@ -140,8 +138,8 @@ static inline char* duplicateAndPrefixStringValue(const char* value,
                                     sizeof(unsigned) - 1U,
                       "in Json::Value::duplicateAndPrefixStringValue(): "
                       "length too big for prefixing");
-  unsigned actualLength = length + static_cast<unsigned>(sizeof(unsigned)) + 1U;
-  char* newString = static_cast<char*>(malloc(actualLength));
+  size_t actualLength = sizeof(length) + length + 1;
+  auto newString = static_cast<char*>(malloc(actualLength));
   if (newString == nullptr) {
     throwRuntimeError("in Json::Value::duplicateAndPrefixStringValue(): "
                       "Failed to allocate string value buffer");
@@ -203,8 +201,8 @@ namespace Json {
 
 #if JSON_USE_EXCEPTION
 Exception::Exception(String msg) : msg_(std::move(msg)) {}
-Exception::~Exception() JSONCPP_NOEXCEPT = default;
-char const* Exception::what() const JSONCPP_NOEXCEPT { return msg_.c_str(); }
+Exception::~Exception() noexcept = default;
+char const* Exception::what() const noexcept { return msg_.c_str(); }
 RuntimeError::RuntimeError(String const& msg) : Exception(msg) {}
 LogicError::LogicError(String const& msg) : Exception(msg) {}
 JSONCPP_NORETURN void throwRuntimeError(String const& msg) {
@@ -214,8 +212,14 @@ JSONCPP_NORETURN void throwLogicError(String const& msg) {
   throw LogicError(msg);
 }
 #else // !JSON_USE_EXCEPTION
-JSONCPP_NORETURN void throwRuntimeError(String const& msg) { abort(); }
-JSONCPP_NORETURN void throwLogicError(String const& msg) { abort(); }
+JSONCPP_NORETURN void throwRuntimeError(String const& msg) {
+  std::cerr << msg << std::endl;
+  abort();
+}
+JSONCPP_NORETURN void throwLogicError(String const& msg) {
+  std::cerr << msg << std::endl;
+  abort();
+}
 #endif
 
 // //////////////////////////////////////////////////////////////////
@@ -419,14 +423,6 @@ Value::Value(const StaticString& value) {
   value_.string_ = const_cast<char*>(value.c_str());
 }
 
-#ifdef JSON_USE_CPPTL
-Value::Value(const CppTL::ConstString& value) {
-  initBasic(stringValue, true);
-  value_.string_ = duplicateAndPrefixStringValue(
-      value, static_cast<unsigned>(value.length()));
-}
-#endif
-
 Value::Value(bool value) {
   initBasic(booleanValue);
   value_.bool_ = value;
@@ -529,9 +525,10 @@ bool Value::operator<(const Value& other) const {
   }
   case arrayValue:
   case objectValue: {
-    int delta = int(value_.map_->size() - other.value_.map_->size());
-    if (delta)
-      return delta < 0;
+    auto thisSize = value_.map_->size();
+    auto otherSize = other.value_.map_->size();
+    if (thisSize != otherSize)
+      return thisSize < otherSize;
     return (*value_.map_) < (*other.value_.map_);
   }
   default:
@@ -653,15 +650,6 @@ String Value::asString() const {
     JSON_FAIL_MESSAGE("Type is not convertible to string");
   }
 }
-
-#ifdef JSON_USE_CPPTL
-CppTL::ConstString Value::asConstString() const {
-  unsigned len;
-  char const* str;
-  decodePrefixedString(isAllocated(), value_.string_, &len, &str);
-  return CppTL::ConstString(str, len);
-}
-#endif
 
 Value::Int Value::asInt() const {
   switch (type()) {
@@ -894,8 +882,7 @@ ArrayIndex Value::size() const {
 bool Value::empty() const {
   if (isNull() || isArray() || isObject())
     return size() == 0U;
-  else
-    return false;
+  return false;
 }
 
 Value::operator bool() const { return !isNull(); }
@@ -1135,18 +1122,6 @@ Value& Value::operator[](const StaticString& key) {
   return resolveReference(key.c_str());
 }
 
-#ifdef JSON_USE_CPPTL
-Value& Value::operator[](const CppTL::ConstString& key) {
-  return resolveReference(key.c_str(), key.end_c_str());
-}
-Value const& Value::operator[](CppTL::ConstString const& key) const {
-  Value const* found = find(key.c_str(), key.end_c_str());
-  if (!found)
-    return nullSingleton();
-  return *found;
-}
-#endif
-
 Value& Value::append(const Value& value) { return append(Value(value)); }
 
 Value& Value::append(Value&& value) {
@@ -1158,19 +1133,22 @@ Value& Value::append(Value&& value) {
   return this->value_.map_->emplace(size(), std::move(value)).first->second;
 }
 
-bool Value::insert(ArrayIndex index, Value newValue) {
+bool Value::insert(ArrayIndex index, const Value& newValue) {
+  return insert(index, Value(newValue));
+}
+
+bool Value::insert(ArrayIndex index, Value&& newValue) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
                       "in Json::Value::insert: requires arrayValue");
   ArrayIndex length = size();
   if (index > length) {
     return false;
-  } else {
-    for (ArrayIndex i = length; i > index; i--) {
-      (*this)[i] = std::move((*this)[i - 1]);
-    }
-    (*this)[index] = std::move(newValue);
-    return true;
   }
+  for (ArrayIndex i = length; i > index; i--) {
+    (*this)[i] = std::move((*this)[i - 1]);
+  }
+  (*this)[index] = std::move(newValue);
+  return true;
 }
 
 Value Value::get(char const* begin, char const* end,
@@ -1240,13 +1218,6 @@ bool Value::removeIndex(ArrayIndex index, Value* removed) {
   return true;
 }
 
-#ifdef JSON_USE_CPPTL
-Value Value::get(const CppTL::ConstString& key,
-                 const Value& defaultValue) const {
-  return get(key.c_str(), key.end_c_str(), defaultValue);
-}
-#endif
-
 bool Value::isMember(char const* begin, char const* end) const {
   Value const* value = find(begin, end);
   return nullptr != value;
@@ -1257,12 +1228,6 @@ bool Value::isMember(char const* key) const {
 bool Value::isMember(String const& key) const {
   return isMember(key.data(), key.data() + key.length());
 }
-
-#ifdef JSON_USE_CPPTL
-bool Value::isMember(const CppTL::ConstString& key) const {
-  return isMember(key.c_str(), key.end_c_str());
-}
-#endif
 
 Value::Members Value::getMemberNames() const {
   JSON_ASSERT_MESSAGE(
@@ -1279,31 +1244,6 @@ Value::Members Value::getMemberNames() const {
   }
   return members;
 }
-//
-//# ifdef JSON_USE_CPPTL
-// EnumMemberNames
-// Value::enumMemberNames() const
-//{
-//   if ( type() == objectValue )
-//   {
-//      return CppTL::Enum::any(  CppTL::Enum::transform(
-//         CppTL::Enum::keys( *(value_.map_), CppTL::Type<const CZString &>() ),
-//         MemberNamesTransform() ) );
-//   }
-//   return EnumMemberNames();
-//}
-//
-//
-// EnumValues
-// Value::enumValues() const
-//{
-//   if ( type() == objectValue  ||  type() == arrayValue )
-//      return CppTL::Enum::anyValues( *(value_.map_),
-//                                     CppTL::Type<const Value &>() );
-//   return EnumValues();
-//}
-//
-//# endif
 
 static bool IsIntegral(double d) {
   double integral_part;

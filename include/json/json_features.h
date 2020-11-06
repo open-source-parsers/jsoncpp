@@ -3,8 +3,8 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#ifndef CPPTL_JSON_FEATURES_H_INCLUDED
-#define CPPTL_JSON_FEATURES_H_INCLUDED
+#ifndef JSON_FEATURES_H_INCLUDED
+#define JSON_FEATURES_H_INCLUDED
 
 #if !defined(JSON_IS_AMALGAMATION)
 #include "forwards.h"
@@ -58,4 +58,4 @@ public:
 
 #pragma pack(pop)
 
-#endif // CPPTL_JSON_FEATURES_H_INCLUDED
+#endif // JSON_FEATURES_H_INCLUDED
