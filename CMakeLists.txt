@@ -68,7 +68,7 @@ project(jsoncpp
         # 1. ./meson.build
         # 2. ./include/json/version.h
         # 3. ./CMakeLists.txt
-        # IMPORTANT: also update the PROJECT_SOVERSION!!
+        # IMPORTANT: also bump the PROJECT_SOVERSION by 1!!!
         VERSION 1.9.4 # <major>[.<minor>[.<patch>[.<tweak>]]]
         LANGUAGES CXX)
 

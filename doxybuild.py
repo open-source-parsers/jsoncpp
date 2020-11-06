@@ -46,7 +46,7 @@ def do_subst_in_file(targetfile, sourcefile, dict):
     with open(sourcefile, 'r') as f:
         contents = f.read()
     for (k,v) in list(dict.items()):
-        v = v.replace('\\','\\\\') 
+        v = v.replace('\\','\\\\')
         contents = re.sub(k, v, contents)
     with open(targetfile, 'w') as f:
         f.write(contents)
@@ -113,7 +113,7 @@ def build_doc(options,  make_release=False):
     def yesno(bool):
         return bool and 'YES' or 'NO'
     subst_keys = {
-        '%JSONCPP_VERSION%': version,
+        '%PROJECT_VERSION%': version,
         '%DOC_TOPDIR%': '',
         '%TOPDIR%': top_dir,
         '%HTML_OUTPUT%': os.path.join('..', output_dir, html_output_dirname),
@@ -158,7 +158,7 @@ def main():
     Generates doxygen documentation in build/doxygen.
     Optionally makes a tarball of the documentation to dist/.
 
-    Must be started in the project top directory.    
+    Must be started in the project top directory.
     """
     from optparse import OptionParser
     parser = OptionParser(usage=usage)

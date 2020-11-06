@@ -38,7 +38,7 @@ PROJECT_NAME           = "JsonCpp"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = %JSONCPP_VERSION%
+PROJECT_NUMBER         = %PROJECT_VERSION%
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -1215,7 +1215,7 @@ GENERATE_HTMLHELP      = %HTML_HELP%
 # written to the html output directory.
 # This tag requires that the tag GENERATE_HTMLHELP is set to YES.
 
-CHM_FILE               = jsoncpp-%JSONCPP_VERSION%.chm
+CHM_FILE               = jsoncpp-%PROJECT_VERSION%.chm
 
 # The HHC_LOCATION tag can be used to specify the location (absolute path
 # including file name) of the HTML help compiler ( hhc.exe). If non-empty

@@ -7,16 +7,17 @@
 // 1. /meson.build
 // 2. /include/json/version.h
 // 3. /CMakeLists.txt
-// IMPORTANT: also update the SOVERSION!!
+// IMPORTANT: update both the PROJECT_VERSION_STRING as well as the
+//            major, minor, and patch fields as appropriate here.
 
-#define JSONCPP_VERSION_STRING "1.9.4"
-#define JSONCPP_VERSION_MAJOR 1
-#define JSONCPP_VERSION_MINOR 9
-#define JSONCPP_VERSION_PATCH 4
-#define JSONCPP_VERSION_QUALIFIER
-#define JSONCPP_VERSION_HEXA                                                   \
-  ((JSONCPP_VERSION_MAJOR << 24) | (JSONCPP_VERSION_MINOR << 16) |             \
-   (JSONCPP_VERSION_PATCH << 8))
+#define PROJECT_VERSION_STRING "1.9.4"
+#define PROJECT_VERSION_MAJOR 1
+#define PROJECT_VERSION_MINOR 9
+#define PROJECT_VERSION_PATCH 4
+#define PROJECT_VERSION_QUALIFIER
+#define PROJECT_VERSION_HEXA                                                   \
+  ((PROJECT_VERSION_MAJOR << 24) | (PROJECT_VERSION_MINOR << 16) |             \
+   (PROJECT_VERSION_PATCH << 8))
 
 #ifdef JSONCPP_USING_SECURE_MEMORY
 #undef JSONCPP_USING_SECURE_MEMORY
