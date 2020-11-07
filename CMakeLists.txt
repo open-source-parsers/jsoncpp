@@ -69,11 +69,14 @@ project(jsoncpp
         # 2. ./include/json/version.h
         # 3. ./CMakeLists.txt
         # IMPORTANT: also update the PROJECT_SOVERSION!!
-        VERSION 1.9.3 # <major>[.<minor>[.<patch>[.<tweak>]]]
+        VERSION 1.9.4 # <major>[.<minor>[.<patch>[.<tweak>]]]
         LANGUAGES CXX)
 
 message(STATUS "JsonCpp Version: ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 set(PROJECT_SOVERSION 24)
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/include/PreventInSourceBuilds.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/include/PreventInBuildInstalls.cmake)
 
 option(JSONCPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executables" ON)
 option(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)

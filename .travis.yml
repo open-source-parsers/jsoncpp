@@ -22,8 +22,6 @@ addons:
     - clang-8
     - valgrind
 matrix:
-  allow_failures:
-    - os: osx
   include:
     - name: Mac clang meson static release testing
       os: osx
@@ -44,6 +42,8 @@ matrix:
          CC="clang"
          LIB_TYPE=static
          BUILD_TYPE=release
+         PYTHONUSERBASE="$(pwd)/LOCAL"
+         PATH="$PYTHONUSERBASE/bin:$PATH"
       # before_install and install steps only needed for linux meson builds
       before_install:
           - source ./.travis_scripts/travis.before_install.${TRAVIS_OS_NAME}.sh
