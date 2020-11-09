@@ -61,19 +61,19 @@ if(CCACHE_EXECUTABLE)
     set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}" CACHE PATH "ccache" FORCE)
 endif()
 
-project(jsoncpp
+project(JSONCPP
         # Note: version must be updated in three places when doing a release. This
         # annoying process ensures that amalgamate, CMake, and meson all report the
         # correct version.
         # 1. ./meson.build
         # 2. ./include/json/version.h
         # 3. ./CMakeLists.txt
-        # IMPORTANT: also bump the PROJECT_SOVERSION by 1!!!
+        # IMPORTANT: also bump the JSONCPP_SOVERSION by 1!!!
         VERSION 1.9.4 # <major>[.<minor>[.<patch>[.<tweak>]]]
         LANGUAGES CXX)
 
-message(STATUS "JsonCpp Version: ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
-set(PROJECT_SOVERSION 24)
+message(STATUS "JsonCpp Version: ${JSONCPP_VERSION_MAJOR}.${JSONCPP_VERSION_MINOR}.${JSONCPP_VERSION_PATCH}")
+set(JSONCPP_SOVERSION 24)
 
 option(JSONCPP_WITH_TESTS "Compile and (for jsoncpp_check) run JsonCpp test executables" ON)
 option(JSONCPP_WITH_POST_BUILD_UNITTEST "Automatically run unit-tests as a post build step" ON)
@@ -169,7 +169,7 @@ if(JSONCPP_WITH_CMAKE_PACKAGE)
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp
         FILE        jsoncppConfig.cmake)
     write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake"
-        VERSION ${PROJECT_VERSION}
+        VERSION ${JSONCPP_VERSION}
         COMPATIBILITY SameMajorVersion)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp)

@@ -127,8 +127,8 @@ if(BUILD_SHARED_LIBS)
     add_library(${SHARED_LIB} SHARED ${PUBLIC_HEADERS} ${JSONCPP_SOURCES})
     set_target_properties(${SHARED_LIB} PROPERTIES
         OUTPUT_NAME jsoncpp
-        VERSION ${PROJECT_VERSION}
-        SOVERSION ${PROJECT_SOVERSION}
+        VERSION ${JSONCPP_VERSION}
+        SOVERSION ${JSONCPP_SOVERSION}
         POSITION_INDEPENDENT_CODE ON
     )
 
@@ -161,7 +161,7 @@ if(BUILD_STATIC_LIBS)
 
     set_target_properties(${STATIC_LIB} PROPERTIES
         OUTPUT_NAME jsoncpp${STATIC_SUFFIX}
-        VERSION ${PROJECT_VERSION}
+        VERSION ${JSONCPP_VERSION}
     )
 
     # Set library's runtime search path on OSX
@@ -188,8 +188,8 @@ if(BUILD_OBJECT_LIBS)
 
     set_target_properties(${OBJECT_LIB} PROPERTIES
         OUTPUT_NAME jsoncpp
-        VERSION ${PROJECT_VERSION}
-        SOVERSION ${PROJECT_SOVERSION}
+        VERSION ${JSONCPP_VERSION}
+        SOVERSION ${JSONCPP_SOVERSION}
         POSITION_INDEPENDENT_CODE ON
     )
 

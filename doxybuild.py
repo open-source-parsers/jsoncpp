@@ -113,7 +113,7 @@ def build_doc(options,  make_release=False):
     def yesno(bool):
         return bool and 'YES' or 'NO'
     subst_keys = {
-        '%PROJECT_VERSION%': version,
+        '%JSONCPP_VERSION%': version,
         '%DOC_TOPDIR%': '',
         '%TOPDIR%': top_dir,
         '%HTML_OUTPUT%': os.path.join('..', output_dir, html_output_dirname),
