@@ -15,9 +15,9 @@ if(BUILD_SHARED_LIBS)
     else()
         add_definitions( -DJSON_DLL )
     endif()
-    target_link_libraries(jsoncpp_test jsoncpp_lib)
+    target_link_libraries(jsoncpp_test JSONCPP_lib)
 else()
-    target_link_libraries(jsoncpp_test jsoncpp_static)
+    target_link_libraries(jsoncpp_test JSONCPP_static)
 endif()
 
 # another way to solve issue #90
