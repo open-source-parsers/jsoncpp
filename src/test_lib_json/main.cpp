@@ -2005,6 +2005,34 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, precision) {
   result = Json::writeString(b, v);
   JSONTEST_ASSERT_STRING_EQUAL(expected, result);
 
+  b.settings_["precision"] = 0;
+  b.settings_["precisionType"] = "decimal";
+  v = 123.56345694873740545068;
+  expected = "124";
+  result = Json::writeString(b, v);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+
+  b.settings_["precision"] = 1;
+  b.settings_["precisionType"] = "decimal";
+  v = 1230.001;
+  expected = "1230.0";
+  result = Json::writeString(b, v);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+
+  b.settings_["precision"] = 0;
+  b.settings_["precisionType"] = "decimal";
+  v = 1230.001;
+  expected = "1230";
+  result = Json::writeString(b, v);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+
+  b.settings_["precision"] = 0;
+  b.settings_["precisionType"] = "decimal";
+  v = 1231.5;
+  expected = "1232";
+  result = Json::writeString(b, v);
+  JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+
   b.settings_["precision"] = 10;
   b.settings_["precisionType"] = "decimal";
   v = 0.23300000;
