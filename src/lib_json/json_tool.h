@@ -124,7 +124,7 @@ Iter fixZerosInTheEnd(Iter begin, Iter end, unsigned int precision) {
     }
     // Don't delete the last zero before the decimal point.
     if (begin != (end - 1) && begin != (end - 2) && *(end - 2) == '.') {
-      if(precision) {
+      if (precision) {
         return end;
       }
       return end - 2;
