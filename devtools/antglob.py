@@ -146,7 +146,7 @@ def glob(dir_path,
                     entry_type = is_file and FILE_LINK or DIR_LINK
                 else:
                     entry_type = is_file and FILE or DIR
-##                print '=> type: %d' % entry_type, 
+##                print '=> type: %d' % entry_type,
                 if (entry_type & entry_type_filter) != 0:
 ##                    print ' => KEEP'
                     yield os.path.join(dir_path, entry)
