@@ -1,9 +1,11 @@
 # This is only for jsoncpp developers/contributors.
 # We use this to sign releases, generate documentation, etc.
-VER?=$(shell cat version.txt)
+VER?=$(shell cat version)
 
 default:
 	@echo "VER=${VER}"
+update-version:
+	perl get_version.pl meson.build >| version
 sign: jsoncpp-${VER}.tar.gz
 	gpg --armor --detach-sign $<
 	gpg --verify $<.asc
