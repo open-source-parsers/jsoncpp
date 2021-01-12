@@ -4,6 +4,15 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
+#if defined(_MSC_VER)
+#if !defined(_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)
+#define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
+#endif //_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
+
+// Disable warning about strdup being deprecated.
+#pragma warning(disable : 4996)
+#endif //_MSC_VER
+
 #if !defined(JSON_IS_AMALGAMATION)
 #include "json_tool.h"
 #include <json/assertions.h>
@@ -12,6 +21,7 @@
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <algorithm>
 #include <cassert>
+#include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <istream>
@@ -20,26 +30,6 @@
 #include <set>
 #include <sstream>
 #include <utility>
-
-#include <cstdio>
-#if __cplusplus >= 201103L
-
-#if !defined(sscanf)
-#define sscanf std::sscanf
-#endif
-
-#endif //__cplusplus
-
-#if defined(_MSC_VER)
-#if !defined(_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES)
-#define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
-#endif //_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
-#endif //_MSC_VER
-
-#if defined(_MSC_VER)
-// Disable warning about strdup being deprecated.
-#pragma warning(disable : 4996)
-#endif
 
 // Define JSONCPP_DEPRECATED_STACK_LIMIT as an appropriate integer at compile
 // time to change the stack limit
@@ -52,11 +42,7 @@ static size_t const stackLimit_g =
 
 namespace Json {
 
-#if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
 using CharReaderPtr = std::unique_ptr<CharReader>;
-#else
-using CharReaderPtr = std::auto_ptr<CharReader>;
-#endif
 
 // Implementation of class Features
 // ////////////////////////////////
