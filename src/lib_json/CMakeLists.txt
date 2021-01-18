@@ -115,6 +115,11 @@ list(APPEND REQUIRED_FEATURES
         cxx_variadic_templates # Variadic templates, as defined in N2242.
 )
 
+if(JSONCPP_USE_CXX11_ABI)
+    set(GLIBCXX_USE_CXX11_ABI 1)
+else()
+    set(GLIBCXX_USE_CXX11_ABI 0)
+endif()
 
 if(BUILD_SHARED_LIBS)
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
@@ -125,6 +130,9 @@ if(BUILD_SHARED_LIBS)
 
     set(SHARED_LIB ${PROJECT_NAME}_lib)
     add_library(${SHARED_LIB} SHARED ${PUBLIC_HEADERS} ${JSONCPP_SOURCES})
+    target_compile_definitions(${SHARED_LIB} PRIVATE
+        _GLIBCXX_USE_CXX11_ABI=${GLIBCXX_USE_CXX11_ABI}
+    )
     set_target_properties(${SHARED_LIB} PROPERTIES
         OUTPUT_NAME jsoncpp
         VERSION ${PROJECT_VERSION}
@@ -153,6 +161,9 @@ endif()
 if(BUILD_STATIC_LIBS)
     set(STATIC_LIB ${PROJECT_NAME}_static)
     add_library(${STATIC_LIB} STATIC ${PUBLIC_HEADERS} ${JSONCPP_SOURCES})
+    target_compile_definitions(${SHARED_LIB} PRIVATE
+        _GLIBCXX_USE_CXX11_ABI=${GLIBCXX_USE_CXX11_ABI}
+    )
 
     # avoid name clashes on windows as the shared import lib is alse named jsoncpp.lib
     if(NOT DEFINED STATIC_SUFFIX AND BUILD_SHARED_LIBS)
@@ -185,6 +196,9 @@ endif()
 if(BUILD_OBJECT_LIBS)
     set(OBJECT_LIB ${PROJECT_NAME}_object)
     add_library(${OBJECT_LIB} OBJECT ${PUBLIC_HEADERS} ${JSONCPP_SOURCES})
+    target_compile_definitions(${SHARED_LIB} PRIVATE
+        _GLIBCXX_USE_CXX11_ABI=${GLIBCXX_USE_CXX11_ABI}
+    )
 
     set_target_properties(${OBJECT_LIB} PROPERTIES
         OUTPUT_NAME jsoncpp
