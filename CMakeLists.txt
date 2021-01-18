@@ -22,6 +22,9 @@ else()
     set(JSONCPP_CMAKE_POLICY_VERSION "${JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION}")
 endif()
 cmake_policy(VERSION ${JSONCPP_CMAKE_POLICY_VERSION})
+if(POLICY CMP0091)
+    cmake_policy(SET CMP0091 NEW)
+endif()
 #
 # Now enumerate specific policies newer than JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION
 # that may need to be individually set to NEW/OLD
@@ -85,6 +88,7 @@ option(JSONCPP_WITH_STRICT_ISO "Issue all the warnings demanded by strict ISO C 
 option(JSONCPP_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" ON)
 option(JSONCPP_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ON)
 option(JSONCPP_WITH_EXAMPLE "Compile JsonCpp example" OFF)
+option(JSONCPP_STATIC_WINDOWS_RUNTIME "Use static (MT/MTd) Windows runtime" OFF)
 option(BUILD_SHARED_LIBS "Build jsoncpp_lib as a shared library." ON)
 option(BUILD_STATIC_LIBS "Build jsoncpp_lib as a static library." ON)
 option(BUILD_OBJECT_LIBS "Build jsoncpp_lib as a object library." ON)
@@ -123,6 +127,9 @@ if(MSVC)
     # Only enabled in debug because some old versions of VS STL generate
     # unreachable code warning when compiled in release configuration.
     add_compile_options($<$<CONFIG:Debug>:/W4>)
+    if (JSONCPP_STATIC_WINDOWS_RUNTIME)
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif()
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
