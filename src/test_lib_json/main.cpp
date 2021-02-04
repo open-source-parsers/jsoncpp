@@ -351,13 +351,13 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, resizeArray) {
 }
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, resizePopulatesAllMissingElements) {
-    int n = 10;
-    Json::Value v;
-    v.resize(n);
-    JSONTEST_ASSERT_EQUAL(n, v.size());
-    JSONTEST_ASSERT_EQUAL(n, std::distance(v.begin(), v.end()));
-    for (const Json::Value& e : v)
-        JSONTEST_ASSERT_EQUAL(e, Json::Value{});
+  int n = 10;
+  Json::Value v;
+  v.resize(n);
+  JSONTEST_ASSERT_EQUAL(n, v.size());
+  JSONTEST_ASSERT_EQUAL(n, std::distance(v.begin(), v.end()));
+  for (const Json::Value& e : v)
+    JSONTEST_ASSERT_EQUAL(e, Json::Value{});
 }
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, getArrayValue) {
