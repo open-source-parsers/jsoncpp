@@ -912,7 +912,8 @@ void Value::resize(ArrayIndex newSize) {
   if (newSize == 0)
     clear();
   else if (newSize > oldSize)
-    this->operator[](newSize - 1);
+    for (ArrayIndex i = oldSize; i < newSize; ++i)
+        (*this)[i];
   else {
     for (ArrayIndex index = newSize; index < oldSize; ++index) {
       value_.map_->erase(index);
