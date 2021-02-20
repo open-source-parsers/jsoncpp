@@ -351,7 +351,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, resizeArray) {
 }
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, resizePopulatesAllMissingElements) {
-  int n = 10;
+  Json::ArrayIndex n = 10;
   Json::Value v;
   v.resize(n);
   JSONTEST_ASSERT_EQUAL(n, v.size());
