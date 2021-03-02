@@ -1251,7 +1251,7 @@ Value::Members Value::getMemberNames() const {
 
 static bool IsIntegral(double d) {
   double integral_part;
-  return modf(d, &integral_part) == 0.0;
+  return std::modf(d, &integral_part) == 0.0;
 }
 
 bool Value::isNull() const { return type() == nullValue; }
