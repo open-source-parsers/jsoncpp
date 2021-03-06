@@ -178,12 +178,14 @@ if(JSONCPP_WITH_CMAKE_PACKAGE)
     install(EXPORT jsoncpp
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp
         FILE        jsoncpp-targets.cmake)
-    configure_package_config_file(jsoncppConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfig.cmake INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp)
+    configure_package_config_file(jsoncppConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfig.cmake
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp)
 
     write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake"
         VERSION ${PROJECT_VERSION}
         COMPATIBILITY SameMajorVersion)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfig.cmake
+    install(FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfig.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp)
 endif()
 
