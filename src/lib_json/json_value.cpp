@@ -1398,7 +1398,7 @@ String Value::Comments::get(CommentPlacement slot) const {
 }
 
 void Value::Comments::set(CommentPlacement slot, String comment) {
-  if (slot < CommentPlacement::numberOfCommentPlacement)
+  if (slot >= CommentPlacement::numberOfCommentPlacement)
     return;
   if (!ptr_)
     ptr_ = std::unique_ptr<Array>(new Array());
