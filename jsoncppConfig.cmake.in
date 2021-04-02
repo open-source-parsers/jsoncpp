@@ -6,9 +6,11 @@ cmake_policy(VERSION 3.0)
 include ( "${CMAKE_CURRENT_LIST_DIR}/jsoncpp-targets.cmake" )
 
 if(TARGET jsoncpp_static)
-    add_library(JsonCpp::JsonCpp ALIAS jsoncpp_static)
+    add_library(JsonCpp::JsonCpp INTERFACE IMPORTED )
+    set_target_properties(JsonCpp::JsonCpp PROPERTIES INTERFACE_LINK_LIBRARIES "jsoncpp_static")
 elseif(TARGET jsoncpp_lib)
-    add_library(JsonCpp::JsonCpp ALIAS jsoncpp_lib)
+    add_library(JsonCpp::JsonCpp INTERFACE IMPORTED )
+    set_target_properties(JsonCpp::JsonCpp PROPERTIES INTERFACE_LINK_LIBRARIES "jsoncpp_lib")
 endif()
 
 check_required_components(JsonCpp)
