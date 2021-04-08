@@ -761,24 +761,9 @@ Reader::Char Reader::getNextChar() {
 
 void Reader::getLocationLineAndColumn(Location location, int& line,
                                       int& column) const {
-  Location current = begin_;
-  Location lastLineStart = current;
-  line = 0;
-  while (current < location && current != end_) {
-    Char c = *current++;
-    if (c == '\r') {
-      if (*current == '\n')
-        ++current;
-      lastLineStart = current;
-      ++line;
-    } else if (c == '\n') {
-      lastLineStart = current;
-      ++line;
-    }
-  }
-  // column & line start at 1
-  column = int(location - lastLineStart) + 1;
-  ++line;
+  Json::getLocationLineAndColumn(document_.data(),
+                                 document_.data() + document_.length(),
+                                 location - document_.data(), line, column);
 }
 
 String Reader::getLocationLineAndColumn(Location location) const {
@@ -1988,6 +1973,28 @@ IStream& operator>>(IStream& sin, Value& root) {
     throwRuntimeError(errs);
   }
   return sin;
+}
+
+void getLocationLineAndColumn(char const* beginDoc, char const* endDoc,
+                              ptrdiff_t location, int& line, int& column) {
+  char const* current = beginDoc;
+  char const* lastLineStart = current;
+  line = 0;
+  while (current < beginDoc + location && current < endDoc) {
+    char c = *current++;
+    if (c == '\r') {
+      if (*current == '\n')
+        ++current;
+      lastLineStart = current;
+      ++line;
+    } else if (c == '\n') {
+      lastLineStart = current;
+      ++line;
+    }
+  }
+  // column & line start at 1
+  column = int(beginDoc + location - lastLineStart) + 1;
+  ++line;
 }
 
 } // namespace Json
