@@ -186,6 +186,7 @@ if(JSONCPP_WITH_CMAKE_PACKAGE)
         COMPATIBILITY SameMajorVersion)
     install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfig.cmake
+        ${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp-namespaced-targets.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp)
 endif()
 
