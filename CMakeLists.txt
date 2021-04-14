@@ -134,7 +134,11 @@ endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     # using regular Clang or AppleClang
-    add_compile_options(-Wall -Wconversion -Wshadow -Werror=conversion -Werror=sign-compare)
+    add_compile_options(-Wall -Wconversion -Wshadow)
+
+    if(JSONCPP_WITH_WARNING_AS_ERROR)
+        add_compile_options(-Werror=conversion -Werror=sign-compare)
+    endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # using GCC
     add_compile_options(-Wall -Wconversion -Wshadow -Wextra)
@@ -148,9 +152,11 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     # using Intel compiler
-    add_compile_options(-Wall -Wconversion -Wshadow -Wextra -Werror=conversion)
+    add_compile_options(-Wall -Wconversion -Wshadow -Wextra)
 
-    if(JSONCPP_WITH_STRICT_ISO AND NOT JSONCPP_WITH_WARNING_AS_ERROR)
+    if(JSONCPP_WITH_WARNING_AS_ERROR)
+        add_compile_options(-Werror=conversion)
+    elseif(JSONCPP_WITH_STRICT_ISO)
         add_compile_options(-Wpedantic)
     endif()
 endif()
