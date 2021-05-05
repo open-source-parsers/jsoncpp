@@ -104,8 +104,7 @@ bool Reader::parse(std::istream& is, Value& root, bool collectComments) {
 
   // Since String is reference-counted, this at least does not
   // create an extra copy.
-  String doc;
-  std::getline(is, doc, static_cast<char> EOF);
+  String doc(std::istreambuf_iterator<char>(is), {});
   return parse(doc.data(), doc.data() + doc.size(), root, collectComments);
 }
 
