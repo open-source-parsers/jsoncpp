@@ -392,6 +392,12 @@ bool JSON_API parseFromStream(CharReader::Factory const&, IStream&, Value* root,
  */
 JSON_API IStream& operator>>(IStream&, Value&);
 
+/** Get the line and column of a character within a string.
+ */
+void JSON_API getLocationLineAndColumn(char const* beginDoc, char const* endDoc,
+                                       ptrdiff_t location, int& line,
+                                       int& column);
+
 } // namespace Json
 
 #pragma pack(pop)

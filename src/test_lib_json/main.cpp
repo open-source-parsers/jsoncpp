@@ -3903,6 +3903,28 @@ JSONTEST_FIXTURE_LOCAL(FuzzTest, fuzzDoesntCrash) {
                              example.size()));
 }
 
+struct GetLocationLineAndColumnTest : JsonTest::TestCase {
+  void testLineAndColumn(const std::string& doc, ptrdiff_t location, int row,
+                         int column) {
+    int actualRow;
+    int actualColumn;
+    Json::getLocationLineAndColumn(doc.data(), doc.data() + doc.length(),
+                                   location, actualRow, actualColumn);
+    JSONTEST_ASSERT_EQUAL(row, actualRow);
+    JSONTEST_ASSERT_EQUAL(column, actualColumn);
+  }
+};
+
+JSONTEST_FIXTURE_LOCAL(GetLocationLineAndColumnTest, test) {
+  const std::string example = "line 1\nline 2\r\nline 3\rline 4";
+  testLineAndColumn(example, 0, 1, 1);
+  testLineAndColumn(example, 6, 1, 7);
+  testLineAndColumn(example, 8, 2, 2);
+  testLineAndColumn(example, 14, 3, 0);
+  testLineAndColumn(example, 15, 3, 1);
+  testLineAndColumn(example, 25, 4, 4);
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
 
