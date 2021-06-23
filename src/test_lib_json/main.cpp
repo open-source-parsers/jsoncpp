@@ -3903,6 +3903,43 @@ JSONTEST_FIXTURE_LOCAL(FuzzTest, fuzzDoesntCrash) {
                              example.size()));
 }
 
+struct ParseWithStructuredErrorsTest : JsonTest::TestCase {
+  void
+  testErrors(const std::string& doc, bool success,
+             const std::vector<Json::CharReader::StructuredError>& errors) {
+    Json::CharReaderBuilder b;
+    CharReaderPtr reader(b.newCharReader());
+    Json::Value root;
+    JSONTEST_ASSERT_EQUAL(
+        success,
+        reader->parse(doc.data(), doc.data() + doc.length(), &root, nullptr));
+    auto actualErrors = reader->getStructuredErrors();
+    JSONTEST_ASSERT_EQUAL(errors.size(), actualErrors.size());
+    for (std::size_t i = 0; i < errors.size() && i < actualErrors.size(); i++) {
+      JSONTEST_ASSERT_EQUAL(errors[i].offset_start,
+                            actualErrors[i].offset_start);
+      JSONTEST_ASSERT_EQUAL(errors[i].offset_limit,
+                            actualErrors[i].offset_limit);
+      JSONTEST_ASSERT_STRING_EQUAL(errors[i].message, actualErrors[i].message);
+    }
+  }
+};
+
+JSONTEST_FIXTURE_LOCAL(ParseWithStructuredErrorsTest, success) {
+  testErrors("{}", true, {});
+}
+
+JSONTEST_FIXTURE_LOCAL(ParseWithStructuredErrorsTest, singleError) {
+  testErrors("{ 1 : 2 }", false,
+             {
+                 {
+                     /*offset_start=*/2,
+                     /*offset_limit=*/3,
+                     /*message=*/"Missing '}' or object member name",
+                 },
+             });
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
 
