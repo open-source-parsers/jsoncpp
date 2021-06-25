@@ -34,7 +34,6 @@
 #if defined(JSON_DLL_BUILD)
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #define JSON_API __declspec(dllexport)
-#define JSONCPP_DISABLE_DLL_INTERFACE_WARNING
 #elif defined(__GNUC__) || defined(__clang__)
 #define JSON_API __attribute__((visibility("default")))
 #endif // if defined(_MSC_VER)
@@ -42,9 +41,13 @@
 #elif defined(JSON_DLL)
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #define JSON_API __declspec(dllimport)
-#define JSONCPP_DISABLE_DLL_INTERFACE_WARNING
 #endif // if defined(_MSC_VER)
 #endif // ifdef JSON_DLL_BUILD
+
+// Disable MSVC specific compiler warnings
+#if defined(_MSC_VER)
+#define JSONCPP_DISABLE_DLL_INTERFACE_WARNING
+#endif
 
 #if !defined(JSON_API)
 #define JSON_API
