@@ -115,6 +115,7 @@ if(BUILD_SHARED_LIBS)
 
     set(SHARED_LIB ${PROJECT_NAME}_lib)
     add_library(${SHARED_LIB} SHARED ${PUBLIC_HEADERS} ${JSONCPP_SOURCES})
+    add_library(JsonCpp::JsonCpp ALIAS ${SHARED_LIB})
     set_target_properties(${SHARED_LIB} PROPERTIES
         OUTPUT_NAME jsoncpp
         VERSION ${PROJECT_VERSION}
@@ -141,6 +142,7 @@ endif()
 if(BUILD_STATIC_LIBS)
     set(STATIC_LIB ${PROJECT_NAME}_static)
     add_library(${STATIC_LIB} STATIC ${PUBLIC_HEADERS} ${JSONCPP_SOURCES})
+    add_library(JsonCpp::JsonCpp ALIAS ${STATIC_LIB})
 
     # avoid name clashes on windows as the shared import lib is alse named jsoncpp.lib
     if(NOT DEFINED STATIC_SUFFIX AND BUILD_SHARED_LIBS)
