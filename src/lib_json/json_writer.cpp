@@ -878,9 +878,10 @@ struct CommentStyle {
 struct BuiltStyledStreamWriter : public StreamWriter {
   BuiltStyledStreamWriter(String indentation, CommentStyle::Enum cs,
                           String colonSymbol, String nullSymbol,
-                          String endingLineFeedSymbol, bool useSpecialFloats,
-                          bool emitUTF8, unsigned int precision,
-                          PrecisionType precisionType);
+                          String endingLineFeedSymbol,
+                          WhitespaceOptions whitespaceOptions,
+                          bool useSpecialFloats, bool emitUTF8,
+                          unsigned int precision, PrecisionType precisionType);
   int write(Value const& root, OStream* sout) override;
 
 private:
@@ -906,6 +907,7 @@ private:
   String colonSymbol_;
   String nullSymbol_;
   String endingLineFeedSymbol_;
+  WhitespaceOptions whitespaceOptions_;
   bool addChildValues_ : 1;
   bool indented_ : 1;
   bool useSpecialFloats_ : 1;
@@ -915,11 +917,13 @@ private:
 };
 BuiltStyledStreamWriter::BuiltStyledStreamWriter(
     String indentation, CommentStyle::Enum cs, String colonSymbol,
-    String nullSymbol, String endingLineFeedSymbol, bool useSpecialFloats,
-    bool emitUTF8, unsigned int precision, PrecisionType precisionType)
+    String nullSymbol, String endingLineFeedSymbol,
+    WhitespaceOptions whitespaceOptions, bool useSpecialFloats, bool emitUTF8,
+    unsigned int precision, PrecisionType precisionType)
     : rightMargin_(74), indentation_(std::move(indentation)), cs_(cs),
       colonSymbol_(std::move(colonSymbol)), nullSymbol_(std::move(nullSymbol)),
       endingLineFeedSymbol_(std::move(endingLineFeedSymbol)),
+      whitespaceOptions_(whitespaceOptions),
       addChildValues_(false), indented_(false),
       useSpecialFloats_(useSpecialFloats), emitUTF8_(emitUTF8),
       precision_(precision), precisionType_(precisionType) {}
@@ -986,7 +990,11 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
         writeWithIndent(
             valueToQuotedStringN(name.data(), name.length(), emitUTF8_));
         *sout_ << colonSymbol_;
+        if (whitespaceOptions_ & WhitespaceOptions::colonBraceSameLine)
+          indented_ = true;
         writeValue(childValue);
+        if (whitespaceOptions_ & WhitespaceOptions::colonBraceSameLine)
+          indented_ = false;
         if (++it == members.end()) {
           writeCommentAfterValueOnSameLine(childValue);
           break;
@@ -1164,6 +1172,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const {
   const String cs_str = settings_["commentStyle"].asString();
   const String pt_str = settings_["precisionType"].asString();
   const bool eyc = settings_["enableYAMLCompatibility"].asBool();
+  const Value& wo_array = settings_["whitespaceOptions"];
   const bool dnp = settings_["dropNullPlaceholders"].asBool();
   const bool usf = settings_["useSpecialFloats"].asBool();
   const bool emitUTF8 = settings_["emitUTF8"].asBool();
@@ -1190,6 +1199,15 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const {
   } else if (indentation.empty()) {
     colonSymbol = ":";
   }
+  WhitespaceOptions whitespaceOptions = static_cast<WhitespaceOptions>(0);
+  for (auto wi = wo_array.begin(); wi != wo_array.end(); ++wi) {
+    const String& option = wi->asString();
+    if (option == "colonBraceSameLine") {
+      whitespaceOptions |= WhitespaceOptions::colonBraceSameLine;
+    } else {
+      throwRuntimeError("unknown option passed to whitespaceOptions");
+    }
+  }
   String nullSymbol = "null";
   if (dnp) {
     nullSymbol.clear();
@@ -1198,8 +1216,8 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const {
     pre = 17;
   String endingLineFeedSymbol;
   return new BuiltStyledStreamWriter(indentation, cs, colonSymbol, nullSymbol,
-                                     endingLineFeedSymbol, usf, emitUTF8, pre,
-                                     precisionType);
+                                     endingLineFeedSymbol, whitespaceOptions,
+                                     usf, emitUTF8, pre, precisionType);
 }
 
 bool StreamWriterBuilder::validate(Json::Value* invalid) const {
@@ -1207,6 +1225,7 @@ bool StreamWriterBuilder::validate(Json::Value* invalid) const {
       "indentation",
       "commentStyle",
       "enableYAMLCompatibility",
+      "whitespaceOptions",
       "dropNullPlaceholders",
       "useSpecialFloats",
       "emitUTF8",
@@ -1234,6 +1253,7 @@ void StreamWriterBuilder::setDefaults(Json::Value* settings) {
   (*settings)["commentStyle"] = "All";
   (*settings)["indentation"] = "\t";
   (*settings)["enableYAMLCompatibility"] = false;
+  (*settings)["whitespaceOptions"] = Value(arrayValue);
   (*settings)["dropNullPlaceholders"] = false;
   (*settings)["useSpecialFloats"] = false;
   (*settings)["emitUTF8"] = false;

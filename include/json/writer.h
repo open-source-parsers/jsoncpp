@@ -94,25 +94,28 @@ public:
   /** Configuration of this builder.
    *  Available settings (case-sensitive):
    *  - "commentStyle": "None" or "All"
-   *  - "indentation":  "<anything>".
-   *  - Setting this to an empty string also omits newline characters.
+   *  - "indentation": "<anything>".
+   *      Setting this to an empty string also omits newline characters.
    *  - "enableYAMLCompatibility": false or true
    *  - slightly change the whitespace around colons
+   *  - "whitespaceOptions": array of any combination of the following:
+   *      "colonBraceSameLine" - when an object or an array appears as a value
+   *        inside an object, keep the opening brace on the same line
    *  - "dropNullPlaceholders": false or true
-   *  - Drop the "null" string from the writer's output for nullValues.
-   *    Strictly speaking, this is not valid JSON. But when the output is being
-   *    fed to a browser's JavaScript, it makes for smaller output and the
-   *    browser can handle the output just fine.
+   *      Drop the "null" string from the writer's output for nullValues.
+   *      Strictly speaking, this is not valid JSON. But when the output is being
+   *      fed to a browser's JavaScript, it makes for smaller output and the
+   *      browser can handle the output just fine.
    *  - "useSpecialFloats": false or true
-   *  - If true, outputs non-finite floating point values in the following way:
-   *    NaN values as "NaN", positive infinity as "Infinity", and negative
-   *  infinity as "-Infinity".
+   *      If true, outputs non-finite floating point values in the following way:
+   *      NaN values as "NaN", positive infinity as "Infinity", and negative
+   *      infinity as "-Infinity".
    *  - "precision": int
-   *  - Number of precision digits for formatting of real values.
+   *      Number of precision digits for formatting of real values.
    *  - "precisionType": "significant"(default) or "decimal"
-   *  - Type of precision for formatting of real values.
+   *      Type of precision for formatting of real values.
    *  - "emitUTF8": false or true
-   *  - If true, outputs raw UTF8 strings instead of escaping them.
+   *      If true, outputs raw UTF8 strings instead of escaping them.
 
    *  You can examine 'settings_` yourself
    *  to see the defaults. You can also write and read them just like any
