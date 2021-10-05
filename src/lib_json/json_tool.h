@@ -86,18 +86,17 @@ static inline void uintToString(LargestUInt value, char*& current) {
   } while (value != 0);
 }
 
-/** Change ',' to '.' everywhere in buffer.
+/** Change decimal point from current locale (i.e. ',') to '.' everywhere in buffer.
  *
  * We had a sophisticated way, but it did not work in WinCE.
  * @see https://github.com/open-source-parsers/jsoncpp/pull/9
  */
 template <typename Iter> Iter fixNumericLocale(Iter begin, Iter end) {
-  for (; begin != end; ++begin) {
-    if (*begin == ',') {
-      *begin = '.';
-    }
+  const char decimalPoint = getDecimalPoint();
+  if (decimalPoint != '\0' && decimalPoint != '.') {
+    std::replace(begin, end, decimalPoint, '.');
   }
-  return begin;
+  return end;
 }
 
 template <typename Iter> void fixNumericLocaleInput(Iter begin, Iter end) {
@@ -105,11 +104,7 @@ template <typename Iter> void fixNumericLocaleInput(Iter begin, Iter end) {
   if (decimalPoint == '\0' || decimalPoint == '.') {
     return;
   }
-  for (; begin != end; ++begin) {
-    if (*begin == '.') {
-      *begin = decimalPoint;
-    }
-  }
+  std::replace(begin, end, '.', decimalPoint);
 }
 
 /**
