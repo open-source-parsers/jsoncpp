@@ -1128,6 +1128,8 @@ Value& Value::append(const Value& value) { return append(Value(value)); }
 Value& Value::append(Value&& value) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
                       "in Json::Value::append: requires arrayValue");
+  JSON_ASSERT_MESSAGE(&value != this,
+                      "in Json::Value::append: appending self using move constructor is forbidden.");
   if (type() == nullValue) {
     *this = Value(arrayValue);
   }

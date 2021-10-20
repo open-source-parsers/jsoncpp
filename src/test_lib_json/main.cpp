@@ -2136,6 +2136,10 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, searchValueByPath) {
     JSONTEST_ASSERT_STRING_EQUAL(expected, outcome);
   }
 }
+JSONTEST_FIXTURE_LOCAL(ValueTest, valueAppendingSelf) {
+  Json::Value value1{Json::ValueType::nullValue}, value2;
+  JSONTEST_ASSERT_THROWS(value2 = value1.append(std::move(value1)));
+}
 struct FastWriterTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE_LOCAL(FastWriterTest, dropNullPlaceholders) {
