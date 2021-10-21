@@ -1538,7 +1538,7 @@ void Path::makePath(const String& path, const InArgs& in) {
           index = index * 10 + ArrayIndex(*current - '0');
         args_.push_back(index);
       }
-      if (current == end || *++current != ']')
+      if (current == end || *current != ']')
         invalidPath(path, int(current - path.c_str()));
     } else if (*current == '%') {
       addPathInArg(path, in, itInArg, PathArgument::kindKey);
