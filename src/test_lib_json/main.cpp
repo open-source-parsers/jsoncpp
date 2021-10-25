@@ -2059,6 +2059,10 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, searchValueByPath) {
   root["property1"][1] = 1;
   subroot["object"] = "object";
   root["property2"] = subroot;
+  root["property3"][0][0] = 0;
+  root["property3"][0][1] = 1;
+  root["property3"][1][0] = 2;
+  root["property3"][1][1] = 3;
 
   const Json::Value defaultValue("error");
   Json::FastWriter writer;
@@ -2066,7 +2070,8 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, searchValueByPath) {
   {
     const Json::String expected("{"
                                 "\"property1\":[0,1],"
-                                "\"property2\":{\"object\":\"object\"}"
+                                "\"property2\":{\"object\":\"object\"},"
+                                "\"property3\":[[0,1],[2,3]]"
                                 "}\n");
     Json::String outcome = writer.write(root);
     JSONTEST_ASSERT_STRING_EQUAL(expected, outcome);
@@ -2113,6 +2118,20 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, searchValueByPath) {
     result = path6.resolve(root, defaultValue);
     JSONTEST_ASSERT_EQUAL(defaultValue, result);
 
+    // Nested array member exists.
+    const Json::Path path7(".property3[0][1]");
+    result = path7.resolve(root);
+    JSONTEST_ASSERT_EQUAL(Json::Value(1), result);
+    result = path7.resolve(root, defaultValue);
+    JSONTEST_ASSERT_EQUAL(Json::Value(1), result);
+
+    // Access nested array member which exists by parameter.
+    const Json::Path path8(".property3[%][%]", 1,1);
+    result = path8.resolve(root);
+    JSONTEST_ASSERT_EQUAL(Json::Value(3), result);
+    result = path8.resolve(root, defaultValue);
+    JSONTEST_ASSERT_EQUAL(Json::Value(3), result);
+
     // resolve will not change the value
     outcome = writer.write(root);
     JSONTEST_ASSERT_STRING_EQUAL(expected, outcome);
@@ -2121,8 +2140,10 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, searchValueByPath) {
     const Json::String expected("{"
                                 "\"property1\":[0,1,null],"
                                 "\"property2\":{"
-                                "\"hello\":null,"
-                                "\"object\":\"object\"}}\n");
+                                  "\"hello\":null,"
+                                  "\"object\":\"object\"},"
+                                "\"property3\":[[0,1,null],[2,3]]"
+                                "}\n");
     Json::Path path1(".property1.[%]", 2);
     Json::Value& value1 = path1.make(root);
     JSONTEST_ASSERT_EQUAL(Json::nullValue, value1);
@@ -2130,6 +2151,10 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, searchValueByPath) {
     Json::Path path2(".property2.%", "hello");
     Json::Value& value2 = path2.make(root);
     JSONTEST_ASSERT_EQUAL(Json::nullValue, value2);
+
+    Json::Path path3(".property3[0][%]", 2);
+    Json::Value& value3 = path3.make(root);
+    JSONTEST_ASSERT_EQUAL(Json::nullValue, value3);
 
     // make will change the value
     const Json::String outcome = writer.write(root);
