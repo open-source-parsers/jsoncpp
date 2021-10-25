@@ -1530,7 +1530,7 @@ void Path::makePath(const String& path, const InArgs& in) {
   while (current != end) {
     if (*current == '[') {
       ++current;
-      if (*current == '%') {
+      if (current != end && *current == '%') {
         addPathInArg(path, in, itInArg, PathArgument::kindIndex);
         ++current;
       } else {

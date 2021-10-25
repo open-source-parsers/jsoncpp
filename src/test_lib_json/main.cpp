@@ -2140,8 +2140,8 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, searchValueByPath) {
     const Json::String expected("{"
                                 "\"property1\":[0,1,null],"
                                 "\"property2\":{"
-                                  "\"hello\":null,"
-                                  "\"object\":\"object\"},"
+                                "\"hello\":null,"
+                                "\"object\":\"object\"},"
                                 "\"property3\":[[0,1,null],[2,3]]"
                                 "}\n");
     Json::Path path1(".property1.[%]", 2);
