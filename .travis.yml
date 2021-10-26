@@ -1,5 +1,5 @@
 # Build matrix / environment variables are explained on:
-# http://about.travis-ci.org/docs/user/build-configuration/
+# http://about.travis-ci.com/docs/user/build-configuration/
 # This file can be validated on: http://www.yamllint.com/
 # Or using the Ruby based travel command line tool:
 # gem install travis --no-rdoc --no-ri
