@@ -142,7 +142,7 @@ if(BUILD_STATIC_LIBS)
     set(STATIC_LIB ${PROJECT_NAME}_static)
     add_library(${STATIC_LIB} STATIC ${PUBLIC_HEADERS} ${JSONCPP_SOURCES})
 
-    # avoid name clashes on windows as the shared import lib is alse named jsoncpp.lib
+    # avoid name clashes on windows as the shared import lib is also named jsoncpp.lib
     if(NOT DEFINED STATIC_SUFFIX AND BUILD_SHARED_LIBS)
         if (MSVC)
             set(STATIC_SUFFIX "_static")

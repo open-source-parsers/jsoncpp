@@ -6,7 +6,7 @@
 # policies that provide successful builds. By setting JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION
 # to a value greater than the oldest policies, all policies between
 # JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION and CMAKE_VERSION (used for this build)
-# are set to their NEW behaivor, thereby suppressing policy warnings related to policies
+# are set to their NEW behavior, thereby suppressing policy warnings related to policies
 # between the JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION and CMAKE_VERSION.
 #
 # CMake versions greater than the JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION policies will
