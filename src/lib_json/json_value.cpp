@@ -1535,6 +1535,8 @@ void Path::makePath(const String& path, const InArgs& in) {
         ++current;
       } else {
         ArrayIndex index = 0;
+        if (current == end || *current < '0' || *current > '9')
+          invalidPath(path, int(current - path.c_str()));
         for (; current != end && *current >= '0' && *current <= '9'; ++current)
           index = index * 10 + ArrayIndex(*current - '0');
         args_.push_back(index);

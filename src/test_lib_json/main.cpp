@@ -2138,23 +2138,21 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, searchValueByPath) {
   }
   {
     const Json::String expected("{"
-                                "\"property1\":[0,1,null],"
-                                "\"property2\":{"
-                                "\"hello\":null,"
-                                "\"object\":\"object\"},"
-                                "\"property3\":[[0,1,null],[2,3]]"
+                                "\"property1\":[0,1],"
+                                "\"property2\":{\"object\":\"object\"},"
+                                "\"property3\":[[0,1],[2,3]]"
                                 "}\n");
-    Json::Path path1(".property1.[%]", 2);
-    Json::Value& value1 = path1.make(root);
-    JSONTEST_ASSERT_EQUAL(Json::nullValue, value1);
-
-    Json::Path path2(".property2.%", "hello");
-    Json::Value& value2 = path2.make(root);
-    JSONTEST_ASSERT_EQUAL(Json::nullValue, value2);
-
-    Json::Path path3(".property3[0][%]", 2);
-    Json::Value& value3 = path3.make(root);
-    JSONTEST_ASSERT_EQUAL(Json::nullValue, value3);
+    Json::Path cases[] = {
+        Json::Path(".property1.[%]", 2),
+        Json::Path(".property2.%", "hello"),
+        Json::Path(".property3.[0][%]", 2),
+    };
+    for (const auto& path : cases) {
+        Json::Value rootCopy(root);
+        Json::Value v(12345);
+        path.make(rootCopy) = v;
+        JSONTEST_ASSERT_EQUAL(path.resolve(rootCopy), v);
+    };
 
     // make will change the value
     const Json::String outcome = writer.write(root);
