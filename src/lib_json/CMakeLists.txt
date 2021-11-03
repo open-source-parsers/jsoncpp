@@ -119,7 +119,7 @@ if(BUILD_SHARED_LIBS)
         OUTPUT_NAME jsoncpp
         VERSION ${PROJECT_VERSION}
         SOVERSION ${PROJECT_SOVERSION}
-        POSITION_INDEPENDENT_CODE ON
+        POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS}
     )
 
     # Set library's runtime search path on OSX
@@ -180,7 +180,7 @@ if(BUILD_OBJECT_LIBS)
         OUTPUT_NAME jsoncpp
         VERSION ${PROJECT_VERSION}
         SOVERSION ${PROJECT_SOVERSION}
-        POSITION_INDEPENDENT_CODE ON
+        POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS}
     )
 
     # Set library's runtime search path on OSX
