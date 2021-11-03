@@ -72,11 +72,11 @@ project(jsoncpp
         # 2. ./include/json/version.h
         # 3. ./CMakeLists.txt
         # IMPORTANT: also update the PROJECT_SOVERSION!!
-        VERSION 1.9.4 # <major>[.<minor>[.<patch>[.<tweak>]]]
+        VERSION 1.9.5 # <major>[.<minor>[.<patch>[.<tweak>]]]
         LANGUAGES CXX)
 
 message(STATUS "JsonCpp Version: ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
-set(PROJECT_SOVERSION 24)
+set(PROJECT_SOVERSION 25)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/include/PreventInSourceBuilds.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/include/PreventInBuildInstalls.cmake)
