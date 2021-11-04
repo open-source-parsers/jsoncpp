@@ -19,6 +19,8 @@
 #include <clocale>
 #endif
 
+#include <algorithm>
+
 /* This header provides common string manipulation support, such as UTF-8,
  * portable conversion from/to string...
  *
