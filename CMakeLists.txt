@@ -6,7 +6,7 @@
 # policies that provide successful builds. By setting JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION
 # to a value greater than the oldest policies, all policies between
 # JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION and CMAKE_VERSION (used for this build)
-# are set to their NEW behaivor, thereby suppressing policy warnings related to policies
+# are set to their NEW behavior, thereby suppressing policy warnings related to policies
 # between the JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION and CMAKE_VERSION.
 #
 # CMake versions greater than the JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION policies will
@@ -72,11 +72,11 @@ project(jsoncpp
         # 2. ./include/json/version.h
         # 3. ./CMakeLists.txt
         # IMPORTANT: also update the PROJECT_SOVERSION!!
-        VERSION 1.9.4 # <major>[.<minor>[.<patch>[.<tweak>]]]
+        VERSION 1.9.5 # <major>[.<minor>[.<patch>[.<tweak>]]]
         LANGUAGES CXX)
 
 message(STATUS "JsonCpp Version: ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
-set(PROJECT_SOVERSION 24)
+set(PROJECT_SOVERSION 25)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/include/PreventInSourceBuilds.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/include/PreventInBuildInstalls.cmake)
@@ -134,7 +134,11 @@ endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     # using regular Clang or AppleClang
-    add_compile_options(-Wall -Wconversion -Wshadow -Werror=conversion -Werror=sign-compare)
+    add_compile_options(-Wall -Wconversion -Wshadow)
+
+    if(JSONCPP_WITH_WARNING_AS_ERROR)
+        add_compile_options(-Werror=conversion -Werror=sign-compare)
+    endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # using GCC
     add_compile_options(-Wall -Wconversion -Wshadow -Wextra)
@@ -148,9 +152,11 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     # using Intel compiler
-    add_compile_options(-Wall -Wconversion -Wshadow -Wextra -Werror=conversion)
+    add_compile_options(-Wall -Wconversion -Wshadow -Wextra)
 
-    if(JSONCPP_WITH_STRICT_ISO AND NOT JSONCPP_WITH_WARNING_AS_ERROR)
+    if(JSONCPP_WITH_WARNING_AS_ERROR)
+        add_compile_options(-Werror=conversion)
+    elseif(JSONCPP_WITH_STRICT_ISO)
         add_compile_options(-Wpedantic)
     endif()
 endif()
@@ -177,11 +183,16 @@ if(JSONCPP_WITH_CMAKE_PACKAGE)
     include(CMakePackageConfigHelpers)
     install(EXPORT jsoncpp
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp
-        FILE        jsoncppConfig.cmake)
+        FILE        jsoncpp-targets.cmake)
+    configure_package_config_file(jsoncppConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfig.cmake
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp)
+
     write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake"
         VERSION ${PROJECT_VERSION}
         COMPATIBILITY SameMajorVersion)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake
+    install(FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfig.cmake
+        ${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp-namespaced-targets.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp)
 endif()
 

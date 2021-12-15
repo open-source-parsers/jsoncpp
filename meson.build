@@ -50,7 +50,7 @@ jsoncpp_lib = library(
     'src/lib_json/json_value.cpp',
     'src/lib_json/json_writer.cpp',
   ]),
-  soversion : 24,
+  soversion : 25,
   install : true,
   include_directories : jsoncpp_include_directories,
   cpp_args: dll_export_flag)
