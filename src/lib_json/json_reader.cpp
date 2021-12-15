@@ -12,6 +12,7 @@
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstring>
 #include <iostream>
 #include <istream>
@@ -600,9 +601,15 @@ bool Reader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
   String buffer(token.start_, token.end_);
   IStringStream is(buffer);
-  if (!(is >> value))
-    return addError(
+  if (!(is >> value)) {
+    if (value == std::numeric_limits<double>::max())
+      value = std::numeric_limits<double>::infinity();
+    else if (value == std::numeric_limits<double>::lowest())
+      value = -std::numeric_limits<double>::infinity();
+    else if (!std::isinf(value))
+      return addError(
         "'" + String(token.start_, token.end_) + "' is not a number.", token);
+  }
   decoded = value;
   return true;
 }
@@ -1647,7 +1654,12 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
   const String buffer(token.start_, token.end_);
   IStringStream is(buffer);
   if (!(is >> value)) {
-    return addError(
+    if (value == std::numeric_limits<double>::max())
+      value = std::numeric_limits<double>::infinity();
+    else if (value == std::numeric_limits<double>::lowest())
+      value = -std::numeric_limits<double>::infinity();
+    else if (!std::isinf(value))
+      return addError(
         "'" + String(token.start_, token.end_) + "' is not a number.", token);
   }
   decoded = value;
