@@ -74,7 +74,7 @@ public:
 
   /// Removes the last PredicateContext added to the predicate stack
   /// chained list.
-  /// Next messages will be targed at the PredicateContext that was removed.
+  /// Next messages will be targeted at the PredicateContext that was removed.
   TestResult& popPredicateContext();
 
   bool failed() const;
