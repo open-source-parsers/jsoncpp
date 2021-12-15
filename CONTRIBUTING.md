@@ -77,7 +77,7 @@ See `doxybuild.py --help` for options.
 To add a test, you need to create two files in test/data:
 
 * a `TESTNAME.json` file, that contains the input document in JSON format.
-* a `TESTNAME.expected` file, that contains a flatened representation of the
+* a `TESTNAME.expected` file, that contains a flattened representation of the
   input document.
 
 The `TESTNAME.expected` file format is as follows:
