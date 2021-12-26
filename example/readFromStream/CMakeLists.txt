@@ -1,3 +1,2 @@
-add_executable(readFromStream readFromStream.cpp)
-target_include_directories(readFromStream PUBLIC ${CMAKE_SOURCE_DIR}/include)
-target_link_libraries(readFromStream jsoncpp_lib)
+ADD_EXECUTABLE(readFromStream readFromStream.cpp)
+TARGET_LINK_LIBRARIES(readFromStream PRIVATE jsoncpp::framework)
