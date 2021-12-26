@@ -113,6 +113,7 @@ if (JSONCPP_BUILD_SHARED_LIBS)
 
     # Needed for legacy code
     target_compile_definitions(jsoncpp.framework PUBLIC JSON_DLL_BUILD)
+    target_compile_definitions(jsoncpp.framework PUBLIC JSON_DLL)
 
 else ()
 
