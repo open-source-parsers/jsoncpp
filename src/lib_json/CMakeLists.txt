@@ -75,6 +75,14 @@ list(APPEND REQUIRED_FEATURES
         cxx_variadic_templates # Variadic templates, as defined in N2242.
 )
 
+# The OBJECT's can be used to compile the sources in the list given to add_library
+# to object files, but then neither archiving them into a static library nor
+# linking them into a shared object. The use of object libraries is
+# particularly useful if one needs to create both static and shared libraries
+# in one go.
+
+# Property: OBJECT
+
 
 ADD_LIBRARY(jsoncpp.framework.object OBJECT
         json_reader.cpp
@@ -96,7 +104,14 @@ IF (JSONCPP_BUILD_SHARED_LIBS)
     # Ref: https://stackoverflow.com/a/41618677
     SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
+    # The POSITION_INDEPENDENT_CODE property determines whether position independent executables or
+    # shared libraries will be created. This property is True by default for SHARED and MODULE library
+    # targets and False otherwise.
+
+    # Property: SHARED, POSITION_INDEPENDENT_CODE
     ADD_LIBRARY(jsoncpp.framework SHARED $<TARGET_OBJECTS:jsoncpp.framework.object>)
+
+    # Needed for legacy code
     TARGET_COMPILE_DEFINITIONS(jsoncpp.framework PUBLIC JSON_DLL_BUILD)
 
 ELSE ()
@@ -111,4 +126,6 @@ SET_TARGET_PROPERTIES(jsoncpp.framework PROPERTIES VERSION ${PROJECT_VERSION})
 SET_TARGET_PROPERTIES(jsoncpp.framework PROPERTIES SOVERSION ${PROJECT_SOVERSION})
 
 TARGET_COMPILE_FEATURES(jsoncpp.framework PUBLIC ${REQUIRED_FEATURES})
+# It is necessary to repeat these instructions again, in case of not doing it, the executables
+# will be unable to locate the Headers needed to perform the linking
 TARGET_INCLUDE_DIRECTORIES(jsoncpp.framework PUBLIC $<BUILD_INTERFACE:${JSONCPP_ROOT_DIR}/include>)
