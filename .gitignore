@@ -46,6 +46,7 @@ compile_commands.json
 *.a
 
 # eclipse project files
+.idea/
 .project
 .cproject
 /.settings/
@@ -55,3 +56,4 @@ compile_commands.json
 
 # temps
 /version
+cmake-build-*/
