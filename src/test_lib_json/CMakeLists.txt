@@ -5,8 +5,7 @@ add_executable(jsoncpp_test
         jsontest.h
         fuzz.cpp
         fuzz.h
-        main.cpp
-        )
+        main.cpp)
 
 target_link_libraries(jsoncpp_test PRIVATE jsoncpp::framework)
 
@@ -15,8 +14,7 @@ target_link_libraries(jsoncpp_test PRIVATE jsoncpp::framework)
 
 ## Create tests for dashboard submission, allows easy review of CI results https://my.cdash.org/index.php?project=jsoncpp
 add_test(NAME jsoncpp_test
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:jsoncpp_test>
-        )
+        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:jsoncpp_test>)
 set_target_properties(jsoncpp_test PROPERTIES OUTPUT_NAME jsoncpp_test)
 
 # Run unit tests in post-build
@@ -24,6 +22,5 @@ set_target_properties(jsoncpp_test PROPERTIES OUTPUT_NAME jsoncpp_test)
 if (JSONCPP_WITH_POST_BUILD_UNITTEST)
     add_custom_command(TARGET jsoncpp_test
             POST_BUILD
-            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:jsoncpp_test>
-            )
+            COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:jsoncpp_test>)
 endif ()
