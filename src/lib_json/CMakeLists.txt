@@ -84,48 +84,48 @@ list(APPEND REQUIRED_FEATURES
 # Property: OBJECT
 
 
-ADD_LIBRARY(jsoncpp.framework.object OBJECT
+add_library(jsoncpp.framework.object OBJECT
         json_reader.cpp
         json_value.cpp
         json_writer.cpp
         )
 
-SET_TARGET_PROPERTIES(jsoncpp.framework.object PROPERTIES CXX_STANDARD 11)
-SET_TARGET_PROPERTIES(jsoncpp.framework.object PROPERTIES VERSION ${PROJECT_VERSION})
-SET_TARGET_PROPERTIES(jsoncpp.framework.object PROPERTIES SOVERSION ${PROJECT_SOVERSION})
+set_target_properties(jsoncpp.framework.object PROPERTIES CXX_STANDARD 11)
+set_target_properties(jsoncpp.framework.object PROPERTIES VERSION ${PROJECT_VERSION})
+set_target_properties(jsoncpp.framework.object PROPERTIES SOVERSION ${PROJECT_SOVERSION})
 
-TARGET_COMPILE_FEATURES(jsoncpp.framework.object PUBLIC ${REQUIRED_FEATURES})
-TARGET_INCLUDE_DIRECTORIES(jsoncpp.framework.object PUBLIC $<BUILD_INTERFACE:${JSONCPP_ROOT_DIR}/include>)
+target_compile_features(jsoncpp.framework.object PUBLIC ${REQUIRED_FEATURES})
+target_include_directories(jsoncpp.framework.object PUBLIC $<BUILD_INTERFACE:${JSONCPP_ROOT_DIR}/include>)
 
 
-IF (JSONCPP_BUILD_SHARED_LIBS)
+if (JSONCPP_BUILD_SHARED_LIBS)
 
     # CMake link shared library on Windows
     # Ref: https://stackoverflow.com/a/41618677
-    SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
     # The POSITION_INDEPENDENT_CODE property determines whether position independent executables or
     # shared libraries will be created. This property is True by default for SHARED and MODULE library
     # targets and False otherwise.
 
     # Property: SHARED, POSITION_INDEPENDENT_CODE
-    ADD_LIBRARY(jsoncpp.framework SHARED $<TARGET_OBJECTS:jsoncpp.framework.object>)
+    add_library(jsoncpp.framework SHARED $<TARGET_OBJECTS:jsoncpp.framework.object>)
 
     # Needed for legacy code
-    TARGET_COMPILE_DEFINITIONS(jsoncpp.framework PUBLIC JSON_DLL_BUILD)
+    target_compile_definitions(jsoncpp.framework PUBLIC JSON_DLL_BUILD)
 
-ELSE ()
+else ()
 
-    ADD_LIBRARY(jsoncpp.framework STATIC $<TARGET_OBJECTS:jsoncpp.framework.object>)
+    add_library(jsoncpp.framework STATIC $<TARGET_OBJECTS:jsoncpp.framework.object>)
 
-ENDIF ()
+endif ()
 
-ADD_LIBRARY(jsoncpp::framework ALIAS jsoncpp.framework)
-SET_TARGET_PROPERTIES(jsoncpp.framework PROPERTIES CXX_STANDARD 11)
-SET_TARGET_PROPERTIES(jsoncpp.framework PROPERTIES VERSION ${PROJECT_VERSION})
-SET_TARGET_PROPERTIES(jsoncpp.framework PROPERTIES SOVERSION ${PROJECT_SOVERSION})
+add_library(jsoncpp::framework ALIAS jsoncpp.framework)
+set_target_properties(jsoncpp.framework PROPERTIES CXX_STANDARD 11)
+set_target_properties(jsoncpp.framework PROPERTIES VERSION ${PROJECT_VERSION})
+set_target_properties(jsoncpp.framework PROPERTIES SOVERSION ${PROJECT_SOVERSION})
 
-TARGET_COMPILE_FEATURES(jsoncpp.framework PUBLIC ${REQUIRED_FEATURES})
+target_compile_features(jsoncpp.framework PUBLIC ${REQUIRED_FEATURES})
 # It is necessary to repeat these instructions again, in case of not doing it, the executables
 # will be unable to locate the Headers needed to perform the linking
-TARGET_INCLUDE_DIRECTORIES(jsoncpp.framework PUBLIC $<BUILD_INTERFACE:${JSONCPP_ROOT_DIR}/include>)
+target_include_directories(jsoncpp.framework PUBLIC $<BUILD_INTERFACE:${JSONCPP_ROOT_DIR}/include>)

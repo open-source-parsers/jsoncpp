@@ -1,2 +1,2 @@
-ADD_EXECUTABLE(readFromString readFromString.cpp)
-TARGET_LINK_LIBRARIES(readFromString PRIVATE jsoncpp::framework)
+add_executable(readFromString readFromString.cpp)
+target_link_libraries(readFromString PRIVATE jsoncpp::framework)

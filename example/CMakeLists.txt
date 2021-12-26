@@ -1,6 +1,6 @@
 #vim: et ts =4 sts = 4 sw = 4 tw = 0
 
-ADD_SUBDIRECTORY(readFromStream/)
-ADD_SUBDIRECTORY(readFromString/)
-ADD_SUBDIRECTORY(streamWrite/)
-ADD_SUBDIRECTORY(stringWrite/)
+add_subdirectory(readFromStream/)
+add_subdirectory(readFromString/)
+add_subdirectory(streamWrite/)
+add_subdirectory(stringWrite/)

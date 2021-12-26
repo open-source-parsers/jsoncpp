@@ -73,7 +73,7 @@ message(STATUS "JsonCpp Version: ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINO
 set(PROJECT_SOVERSION 25)
 
 # Defines the project root to be used throughout all scripts.
-SET(JSONCPP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(JSONCPP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/include/PreventInSourceBuilds.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/include/PreventInBuildInstalls.cmake)

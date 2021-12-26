@@ -1,2 +1,2 @@
-ADD_EXECUTABLE(stringWrite stringWrite.cpp)
-TARGET_LINK_LIBRARIES(stringWrite PRIVATE jsoncpp::framework)
+add_executable(stringWrite stringWrite.cpp)
+target_link_libraries(stringWrite PRIVATE jsoncpp::framework)
