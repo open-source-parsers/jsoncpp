@@ -1,11 +1,11 @@
 # The new Python3 module is much more robust than the previous PythonInterp
-FIND_PACKAGE(Python3 COMPONENTS Interpreter)
+find_package(Python3 COMPONENTS Interpreter)
 # Set variables for backwards compatibility with cmake < 3.12.0
-SET(PYTHONINTERP_FOUND ${Python3_Interpreter_FOUND})
-SET(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
+set(PYTHONINTERP_FOUND ${Python3_Interpreter_FOUND})
+set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
 
-ADD_EXECUTABLE(jsontestrunner_exe main.cpp)
-TARGET_LINK_LIBRARIES(jsontestrunner_exe PRIVATE jsoncpp::framework)
+add_executable(jsontestrunner_exe main.cpp)
+target_link_libraries(jsontestrunner_exe PRIVATE jsoncpp::framework)
 
 set_target_properties(jsontestrunner_exe PROPERTIES OUTPUT_NAME jsontestrunner_exe)
 
