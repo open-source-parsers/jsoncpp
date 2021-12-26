@@ -77,9 +77,7 @@ list(APPEND REQUIRED_FEATURES
 
 
 ADD_LIBRARY(jsoncpp.framework.object OBJECT
-        json_tool.h
         json_reader.cpp
-        json_valueiterator.inl
         json_value.cpp
         json_writer.cpp
         )
