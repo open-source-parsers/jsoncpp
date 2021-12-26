@@ -91,6 +91,8 @@ add_library(jsoncpp.framework.object OBJECT
         )
 
 set_target_properties(jsoncpp.framework.object PROPERTIES CXX_STANDARD 11)
+set_target_properties(jsoncpp.framework.object PROPERTIES CXX_EXTENSIONS OFF)
+set_target_properties(jsoncpp.framework.object PROPERTIES CXX_STANDARD_REQUIRED ON)
 set_target_properties(jsoncpp.framework.object PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(jsoncpp.framework.object PROPERTIES SOVERSION ${PROJECT_SOVERSION})
 
@@ -123,6 +125,8 @@ endif ()
 
 add_library(jsoncpp::framework ALIAS jsoncpp.framework)
 set_target_properties(jsoncpp.framework PROPERTIES CXX_STANDARD 11)
+set_target_properties(jsoncpp.framework PROPERTIES CXX_EXTENSIONS OFF)
+set_target_properties(jsoncpp.framework PROPERTIES CXX_STANDARD_REQUIRED ON)
 set_target_properties(jsoncpp.framework PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(jsoncpp.framework PROPERTIES SOVERSION ${PROJECT_SOVERSION})
 
