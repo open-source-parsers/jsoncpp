@@ -1,0 +1,3 @@
+add_executable(readFromString readFromString.cpp)
+target_include_directories(readFromString PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(readFromString jsoncpp_lib)
