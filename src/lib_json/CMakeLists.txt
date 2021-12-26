@@ -91,11 +91,6 @@ SET_TARGET_PROPERTIES(jsoncpp.framework.object PROPERTIES SOVERSION ${PROJECT_SO
 TARGET_COMPILE_FEATURES(jsoncpp.framework.object PUBLIC ${REQUIRED_FEATURES})
 TARGET_INCLUDE_DIRECTORIES(jsoncpp.framework.object PUBLIC $<BUILD_INTERFACE:${JSONCPP_ROOT_DIR}/include>)
 
-# Set library's runtime search path on OSX
-IF (APPLE)
-    SET_TARGET_PROPERTIES(jsoncpp.framework.object PROPERTIES INSTALL_RPATH "@loader_path/.")
-ENDIF ()
-
 
 IF (JSONCPP_BUILD_SHARED_LIBS)
 
