@@ -53,7 +53,8 @@
 #pragma warning(disable : 4251 4275)
 #endif // if defined(JSONCPP_DISABLE_DLL_INTERFACE_WARNING)
 
-#pragma pack(push, 8)
+#pragma pack(push)
+#pragma pack()
 
 /** \brief JSON (JavaScript Object Notation).
  */
