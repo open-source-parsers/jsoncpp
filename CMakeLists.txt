@@ -40,12 +40,6 @@ foreach(pold "") # Currently Empty
     endif()
 endforeach()
 
-# Build the library with C++11 standard support, independent from other including
-# software which may use a different CXX_STANDARD or CMAKE_CXX_STANDARD.
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 # Ensure that CMAKE_BUILD_TYPE has a value specified for single configuration generators.
 if(NOT DEFINED CMAKE_BUILD_TYPE AND NOT DEFINED CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING
@@ -78,6 +72,9 @@ project(jsoncpp
 message(STATUS "JsonCpp Version: ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 set(PROJECT_SOVERSION 25)
 
+# Defines the project root to be used throughout all scripts.
+set(JSONCPP_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/include/PreventInSourceBuilds.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/include/PreventInBuildInstalls.cmake)
 
@@ -89,17 +86,11 @@ option(JSONCPP_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" ON)
 option(JSONCPP_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ON)
 option(JSONCPP_WITH_EXAMPLE "Compile JsonCpp example" OFF)
 option(JSONCPP_STATIC_WINDOWS_RUNTIME "Use static (MT/MTd) Windows runtime" OFF)
-option(BUILD_SHARED_LIBS "Build jsoncpp_lib as a shared library." ON)
-option(BUILD_STATIC_LIBS "Build jsoncpp_lib as a static library." ON)
-option(BUILD_OBJECT_LIBS "Build jsoncpp_lib as a object library." ON)
+
+option(JSONCPP_BUILD_SHARED_LIBS "Build jsoncpp_lib as a shared library." OFF)
 
 # Adhere to GNU filesystem layout conventions
 include(GNUInstallDirs)
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib" CACHE PATH "Archive output dir.")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib" CACHE PATH "Library output dir.")
-set(CMAKE_PDB_OUTPUT_DIRECTORY     "${CMAKE_BINARY_DIR}/bin" CACHE PATH "PDB (MSVC debug symbol)output dir.")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" CACHE PATH "Executable/dll output dir.")
 
 set(JSONCPP_USE_SECURE_MEMORY "0" CACHE STRING "-D...=1 to use memory-wiping allocator for STL")
 
@@ -119,9 +110,6 @@ macro(use_compilation_warning_as_error)
         endif()
     endif()
 endmacro()
-
-# Include our configuration header
-include_directories(${jsoncpp_SOURCE_DIR}/include)
 
 if(MSVC)
     # Only enabled in debug because some old versions of VS STL generate
@@ -179,22 +167,6 @@ if(JSONCPP_WITH_PKGCONFIG_SUPPORT)
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()
 
-if(JSONCPP_WITH_CMAKE_PACKAGE)
-    include(CMakePackageConfigHelpers)
-    install(EXPORT jsoncpp
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp
-        FILE        jsoncpp-targets.cmake)
-    configure_package_config_file(jsoncppConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfig.cmake
-        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp)
-
-    write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake"
-        VERSION ${PROJECT_VERSION}
-        COMPATIBILITY SameMajorVersion)
-    install(FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfig.cmake
-        ${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp-namespaced-targets.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp)
-endif()
 
 if(JSONCPP_WITH_TESTS)
     enable_testing()
@@ -203,9 +175,6 @@ endif()
 
 # Build the different applications
 add_subdirectory(src)
-
-#install the includes
-add_subdirectory(include)
 
 #install the example
 if(JSONCPP_WITH_EXAMPLE)

@@ -25,41 +25,11 @@ if(NOT (HAVE_CLOCALE AND HAVE_LCONV_SIZE AND HAVE_DECIMAL_POINT AND HAVE_LOCALEC
     endif()
 endif()
 
-set(JSONCPP_INCLUDE_DIR ../../include)
-
-set(PUBLIC_HEADERS
-    ${JSONCPP_INCLUDE_DIR}/json/config.h
-    ${JSONCPP_INCLUDE_DIR}/json/forwards.h
-    ${JSONCPP_INCLUDE_DIR}/json/json_features.h
-    ${JSONCPP_INCLUDE_DIR}/json/value.h
-    ${JSONCPP_INCLUDE_DIR}/json/reader.h
-    ${JSONCPP_INCLUDE_DIR}/json/version.h
-    ${JSONCPP_INCLUDE_DIR}/json/writer.h
-    ${JSONCPP_INCLUDE_DIR}/json/assertions.h
-)
-
-source_group("Public API" FILES ${PUBLIC_HEADERS})
-
-set(JSONCPP_SOURCES
-    json_tool.h
-    json_reader.cpp
-    json_valueiterator.inl
-    json_value.cpp
-    json_writer.cpp
-)
-
-# Install instructions for this target
-if(JSONCPP_WITH_CMAKE_PACKAGE)
-    set(INSTALL_EXPORT EXPORT jsoncpp)
-else()
-    set(INSTALL_EXPORT)
-endif()
 
 # Specify compiler features required when compiling a given target.
 # See https://cmake.org/cmake/help/v3.1/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html#prop_gbl:CMAKE_CXX_KNOWN_FEATURES
 # for complete list of features available
 list(APPEND REQUIRED_FEATURES
-        cxx_std_11 # Compiler mode is aware of C++ 11.
         #MSVC 1900 cxx_alignas # Alignment control alignas, as defined in N2341.
         #MSVC 1900 cxx_alignof # Alignment control alignof, as defined in N2341.
         #MSVC 1900 cxx_attributes # Generic attributes, as defined in N2761.
@@ -105,104 +75,62 @@ list(APPEND REQUIRED_FEATURES
         cxx_variadic_templates # Variadic templates, as defined in N2242.
 )
 
+# The OBJECT's can be used to compile the sources in the list given to add_library
+# to object files, but then neither archiving them into a static library nor
+# linking them into a shared object. The use of object libraries is
+# particularly useful if one needs to create both static and shared libraries
+# in one go.
 
-if(BUILD_SHARED_LIBS)
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
-        add_compile_definitions(JSON_DLL_BUILD)
-    else()
-        add_definitions(-DJSON_DLL_BUILD)
-    endif()
+# Property: OBJECT
 
-    set(SHARED_LIB ${PROJECT_NAME}_lib)
-    add_library(${SHARED_LIB} SHARED ${PUBLIC_HEADERS} ${JSONCPP_SOURCES})
-    set_target_properties(${SHARED_LIB} PROPERTIES
-        OUTPUT_NAME jsoncpp
-        VERSION ${PROJECT_VERSION}
-        SOVERSION ${PROJECT_SOVERSION}
-        POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS}
-    )
 
-    # Set library's runtime search path on OSX
-    if(APPLE)
-        set_target_properties(${SHARED_LIB} PROPERTIES INSTALL_RPATH "@loader_path/.")
-    endif()
+add_library(jsoncpp.framework.object OBJECT
+        json_reader.cpp
+        json_value.cpp
+        json_writer.cpp
+        )
 
-    target_compile_features(${SHARED_LIB} PUBLIC ${REQUIRED_FEATURES})
+set_target_properties(jsoncpp.framework.object PROPERTIES CXX_STANDARD 11)
+set_target_properties(jsoncpp.framework.object PROPERTIES CXX_EXTENSIONS OFF)
+set_target_properties(jsoncpp.framework.object PROPERTIES CXX_STANDARD_REQUIRED ON)
+set_target_properties(jsoncpp.framework.object PROPERTIES VERSION ${PROJECT_VERSION})
+set_target_properties(jsoncpp.framework.object PROPERTIES SOVERSION ${PROJECT_SOVERSION})
 
-    target_include_directories(${SHARED_LIB} PUBLIC
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>
-        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/json>
-    )
+target_compile_features(jsoncpp.framework.object PUBLIC ${REQUIRED_FEATURES})
+target_include_directories(jsoncpp.framework.object PUBLIC $<BUILD_INTERFACE:${JSONCPP_ROOT_DIR}/include>)
 
-    list(APPEND CMAKE_TARGETS ${SHARED_LIB})
-endif()
 
-if(BUILD_STATIC_LIBS)
-    set(STATIC_LIB ${PROJECT_NAME}_static)
-    add_library(${STATIC_LIB} STATIC ${PUBLIC_HEADERS} ${JSONCPP_SOURCES})
+if (JSONCPP_BUILD_SHARED_LIBS)
 
-    # avoid name clashes on windows as the shared import lib is also named jsoncpp.lib
-    if(NOT DEFINED STATIC_SUFFIX AND BUILD_SHARED_LIBS)
-        if (MSVC)
-            set(STATIC_SUFFIX "_static")
-        else()
-            set(STATIC_SUFFIX "")
-        endif()
-    endif()
+    # CMake link shared library on Windows
+    # Ref: https://stackoverflow.com/a/41618677
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
-    set_target_properties(${STATIC_LIB} PROPERTIES
-        OUTPUT_NAME jsoncpp${STATIC_SUFFIX}
-        VERSION ${PROJECT_VERSION}
-    )
+    # The POSITION_INDEPENDENT_CODE property determines whether position independent executables or
+    # shared libraries will be created. This property is True by default for SHARED and MODULE library
+    # targets and False otherwise.
 
-    # Set library's runtime search path on OSX
-    if(APPLE)
-        set_target_properties(${STATIC_LIB} PROPERTIES INSTALL_RPATH "@loader_path/.")
-    endif()
+    # Property: SHARED, POSITION_INDEPENDENT_CODE
+    add_library(jsoncpp.framework SHARED $<TARGET_OBJECTS:jsoncpp.framework.object>)
 
-    target_compile_features(${STATIC_LIB} PUBLIC ${REQUIRED_FEATURES})
+    # Needed for legacy code
+    target_compile_definitions(jsoncpp.framework PUBLIC JSON_DLL_BUILD)
+    target_compile_definitions(jsoncpp.framework PUBLIC JSON_DLL)
 
-    target_include_directories(${STATIC_LIB} PUBLIC
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>
-        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/json>
-    )
+else ()
 
-    list(APPEND CMAKE_TARGETS ${STATIC_LIB})
-endif()
+    add_library(jsoncpp.framework STATIC $<TARGET_OBJECTS:jsoncpp.framework.object>)
 
-if(BUILD_OBJECT_LIBS)
-    set(OBJECT_LIB ${PROJECT_NAME}_object)
-    add_library(${OBJECT_LIB} OBJECT ${PUBLIC_HEADERS} ${JSONCPP_SOURCES})
+endif ()
 
-    set_target_properties(${OBJECT_LIB} PROPERTIES
-        OUTPUT_NAME jsoncpp
-        VERSION ${PROJECT_VERSION}
-        SOVERSION ${PROJECT_SOVERSION}
-        POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS}
-    )
+add_library(jsoncpp::framework ALIAS jsoncpp.framework)
+set_target_properties(jsoncpp.framework PROPERTIES CXX_STANDARD 11)
+set_target_properties(jsoncpp.framework PROPERTIES CXX_EXTENSIONS OFF)
+set_target_properties(jsoncpp.framework PROPERTIES CXX_STANDARD_REQUIRED ON)
+set_target_properties(jsoncpp.framework PROPERTIES VERSION ${PROJECT_VERSION})
+set_target_properties(jsoncpp.framework PROPERTIES SOVERSION ${PROJECT_SOVERSION})
 
-    # Set library's runtime search path on OSX
-    if(APPLE)
-        set_target_properties(${OBJECT_LIB} PROPERTIES INSTALL_RPATH "@loader_path/.")
-    endif()
-
-    target_compile_features(${OBJECT_LIB} PUBLIC ${REQUIRED_FEATURES})
-
-    target_include_directories(${OBJECT_LIB} PUBLIC
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>
-        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/json>
-    )
-
-    list(APPEND CMAKE_TARGETS ${OBJECT_LIB})
-endif()
-
-install(TARGETS ${CMAKE_TARGETS} ${INSTALL_EXPORT}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    OBJECTS DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
-
+target_compile_features(jsoncpp.framework PUBLIC ${REQUIRED_FEATURES})
+# It is necessary to repeat these instructions again, in case of not doing it, the executables
+# will be unable to locate the Headers needed to perform the linking
+target_include_directories(jsoncpp.framework PUBLIC $<BUILD_INTERFACE:${JSONCPP_ROOT_DIR}/include>)

@@ -1,0 +1,2 @@
+add_executable(readFromStream readFromStream.cpp)
+target_link_libraries(readFromStream PRIVATE jsoncpp::framework)
