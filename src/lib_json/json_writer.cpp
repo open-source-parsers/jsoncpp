@@ -353,6 +353,10 @@ String valueToQuotedString(const char* value) {
   return valueToQuotedStringN(value, strlen(value));
 }
 
+String valueToQuotedString(const char* value, size_t length) {
+  return valueToQuotedStringN(value, length);
+}
+
 // Class Writer
 // //////////////////////////////////////////////////////////////////
 Writer::~Writer() = default;
@@ -490,7 +494,7 @@ void StyledWriter::writeValue(const Value& value) {
         const String& name = *it;
         const Value& childValue = value[name];
         writeCommentBeforeValue(childValue);
-        writeWithIndent(valueToQuotedString(name.c_str()));
+        writeWithIndent(valueToQuotedString(name.c_str(),name.size()));
         document_ += " : ";
         writeValue(childValue);
         if (++it == members.end()) {
@@ -708,7 +712,7 @@ void StyledStreamWriter::writeValue(const Value& value) {
         const String& name = *it;
         const Value& childValue = value[name];
         writeCommentBeforeValue(childValue);
-        writeWithIndent(valueToQuotedString(name.c_str()));
+        writeWithIndent(valueToQuotedString(name.c_str(),name.size()));
         *document_ << " : ";
         writeValue(childValue);
         if (++it == members.end()) {
