@@ -1909,8 +1909,7 @@ std::unique_ptr<CharReader> CharReaderBuilder::newCharReader() const {
   features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
   features.skipBom_ = settings_["skipBom"].asBool();
-  CharReader* preader = new OurCharReader(collectComments, features);
-  return std::make_unique<CharReader>(preader);
+  return std::make_unique<OurCharReader>(collectComments, features);
 }
 
 bool CharReaderBuilder::validate(Json::Value* invalid) const {
