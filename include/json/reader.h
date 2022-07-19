@@ -270,7 +270,7 @@ public:
     /** \brief Allocate a CharReader via operator new().
      * \throw std::exception if something goes wrong (e.g. invalid settings)
      */
-    virtual CharReader* newCharReader() const = 0;
+    virtual std::unique_ptr<CharReader> newCharReader() const = 0;
   }; // Factory
 };   // CharReader
 
@@ -337,7 +337,7 @@ public:
   CharReaderBuilder();
   ~CharReaderBuilder() override;
 
-  CharReader* newCharReader() const override;
+  std::unique_ptr<CharReader> newCharReader() const override;
 
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.

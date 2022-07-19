@@ -138,7 +138,7 @@ static int parseAndSaveValueTree(const Json::String& input,
         features.allowDroppedNullPlaceholders_;
     builder.settings_["allowNumericKeys"] = features.allowNumericKeys_;
 
-    std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+    std::unique_ptr<Json::CharReader> reader = builder.newCharReader();
     Json::String errors;
     const bool parsingSuccessful =
         reader->parse(input.data(), input.data() + input.size(), root, &errors);

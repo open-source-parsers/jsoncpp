@@ -22,7 +22,7 @@ int main() {
     reader.parse(rawJson, root);
   } else {
     Json::CharReaderBuilder builder;
-    const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+    const std::unique_ptr<Json::CharReader> reader = builder.newCharReader();
     if (!reader->parse(rawJson.c_str(), rawJson.c_str() + rawJsonLength, &root,
                        &err)) {
       std::cout << "error" << std::endl;
