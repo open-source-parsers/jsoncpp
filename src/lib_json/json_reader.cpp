@@ -1909,7 +1909,7 @@ std::unique_ptr<CharReader> CharReaderBuilder::newCharReader() const {
   features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
   features.skipBom_ = settings_["skipBom"].asBool();
-  CharReader* preader = OurCharReader(collectComments, features);
+  CharReader* preader = new OurCharReader(collectComments, features);
   return std::make_unique<CharReader>(preader);
 }
 
