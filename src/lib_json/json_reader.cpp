@@ -608,7 +608,7 @@ bool Reader::decodeDouble(Token& token, Value& decoded) {
       value = -std::numeric_limits<double>::infinity();
     else if (!std::isinf(value))
       return addError(
-        "'" + String(token.start_, token.end_) + "' is not a number.", token);
+          "'" + String(token.start_, token.end_) + "' is not a number.", token);
   }
   decoded = value;
   return true;
@@ -1660,7 +1660,7 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
       value = -std::numeric_limits<double>::infinity();
     else if (!std::isinf(value))
       return addError(
-        "'" + String(token.start_, token.end_) + "' is not a number.", token);
+          "'" + String(token.start_, token.end_) + "' is not a number.", token);
   }
   decoded = value;
   return true;
@@ -1909,7 +1909,8 @@ std::unique_ptr<CharReader> CharReaderBuilder::newCharReader() const {
   features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
   features.skipBom_ = settings_["skipBom"].asBool();
-  return std::unique_ptr<OurCharReader>(new OurCharReader(collectComments, features));
+  return std::unique_ptr<OurCharReader>(
+      new OurCharReader(collectComments, features));
 }
 
 bool CharReaderBuilder::validate(Json::Value* invalid) const {
