@@ -608,7 +608,7 @@ bool Reader::decodeDouble(Token& token, Value& decoded) {
       value = -std::numeric_limits<double>::infinity();
     else if (!std::isinf(value))
       return addError(
-        "'" + String(token.start_, token.end_) + "' is not a number.", token);
+          "'" + String(token.start_, token.end_) + "' is not a number.", token);
   }
   decoded = value;
   return true;
@@ -767,24 +767,9 @@ Reader::Char Reader::getNextChar() {
 
 void Reader::getLocationLineAndColumn(Location location, int& line,
                                       int& column) const {
-  Location current = begin_;
-  Location lastLineStart = current;
-  line = 0;
-  while (current < location && current != end_) {
-    Char c = *current++;
-    if (c == '\r') {
-      if (*current == '\n')
-        ++current;
-      lastLineStart = current;
-      ++line;
-    } else if (c == '\n') {
-      lastLineStart = current;
-      ++line;
-    }
-  }
-  // column & line start at 1
-  column = int(location - lastLineStart) + 1;
-  ++line;
+  auto loc = locateInDocument(document_.data(), location - document_.data());
+  line = loc.line;
+  column = loc.column;
 }
 
 String Reader::getLocationLineAndColumn(Location location) const {
@@ -1660,7 +1645,7 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
       value = -std::numeric_limits<double>::infinity();
     else if (!std::isinf(value))
       return addError(
-        "'" + String(token.start_, token.end_) + "' is not a number.", token);
+          "'" + String(token.start_, token.end_) + "' is not a number.", token);
   }
   decoded = value;
   return true;
@@ -1989,6 +1974,28 @@ bool parseFromStream(CharReader::Factory const& fact, IStream& sin, Value* root,
   // Note that we do not actually need a null-terminator.
   CharReaderPtr const reader(fact.newCharReader());
   return reader->parse(begin, end, root, errs);
+}
+
+DocumentLocation locateInDocument(char const* beginDoc, size_t offset) {
+  int line = 1;
+  int col = 1;
+  const char* last = beginDoc + offset;
+  for (; beginDoc != last; ++beginDoc) {
+    switch (*beginDoc) {
+    case '\r':
+      if (beginDoc + 1 != last && beginDoc[1] == '\n')
+        continue;      // consume CRLF as a single token.
+      [[fallthrough]]; // CR without a following LF is same as LF
+    case '\n':
+      col = 1;
+      ++line;
+      break;
+    default:
+      ++col;
+      break;
+    }
+  }
+  return {line, col};
 }
 
 IStream& operator>>(IStream& sin, Value& root) {

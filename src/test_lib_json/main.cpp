@@ -3903,6 +3903,36 @@ JSONTEST_FIXTURE_LOCAL(FuzzTest, fuzzDoesntCrash) {
                              example.size()));
 }
 
+struct LocateInDocumentTest : JsonTest::TestCase {
+  void testLocateInDocument(const char* doc, size_t location, int row,
+                            int column) {
+    Json::DocumentLocation actualLocation =
+        Json::locateInDocument(doc, location);
+    JSONTEST_ASSERT_EQUAL(row, actualLocation.line);
+    JSONTEST_ASSERT_EQUAL(column, actualLocation.column);
+  }
+};
+
+JSONTEST_FIXTURE_LOCAL(LocateInDocumentTest, locateInDocTest) {
+  const std::string example1 = "line 1\nline 2\r\nline 3\rline 4";
+  const char* example2 = "\nline 2\r\r\n\nline 5\0 \n\rline 7\r\n";
+  struct TestSpec {
+    const char* doc;
+    size_t offset;
+    int line;
+    int column;
+  };
+  const TestSpec specs[] = {
+      {example1.data(), example1.find("line 1"), 1, 1},
+      {example1.data(), example1.find("e 4"), 4, 4},
+      // string terminates at \0, can't use find()
+      {example2, 21, 7, 1},
+  };
+  for (const auto& spec : specs) {
+    testLocateInDocument(spec.doc, spec.offset, spec.line, spec.column);
+  }
+}
+
 int main(int argc, const char* argv[]) {
   JsonTest::Runner runner;
 

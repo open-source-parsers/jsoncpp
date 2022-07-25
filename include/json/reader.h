@@ -395,6 +395,14 @@ bool JSON_API parseFromStream(CharReader::Factory const&, IStream&, Value* root,
  */
 JSON_API IStream& operator>>(IStream&, Value&);
 
+/** Line and column within a document (1-based). */
+struct DocumentLocation {
+  int line;
+  int column;
+};
+
+/** Return the location of a character within a string. */
+DocumentLocation JSON_API locateInDocument(char const* beginDoc, size_t offset);
 } // namespace Json
 
 #pragma pack(pop)
