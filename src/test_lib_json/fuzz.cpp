@@ -41,7 +41,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   builder.settings_["collectComments"] = hash_settings & (1 << 9);
   builder.settings_["allowTrailingCommas_"] = hash_settings & (1 << 10);
 
-  std::unique_ptr<Json::CharReader> reader = builder.makeCharReader();
+  std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
 
   Json::Value root;
   const auto data_str = reinterpret_cast<const char*>(data);

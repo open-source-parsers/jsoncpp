@@ -116,7 +116,7 @@ CharReaders and StreamWriters are not thread-safe, but they are re-usable.
 \code
 Json::CharReaderBuilder rbuilder;
 cfg >> rbuilder.settings_;
-std::unique_ptr<Json::CharReader> const reader = rbuilder.newCharReader();
+std::unique_ptr<Json::CharReader> const reader = rbuilder.makeCharReader();
 reader->parse(start, stop, &value1, &errs);
 // ...
 reader->parse(start, stop, &value2, &errs);

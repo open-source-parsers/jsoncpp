@@ -1895,9 +1895,6 @@ std::unique_ptr<CharReader> CharReaderBuilder::makeCharReader() const {
   return std::unique_ptr<CharReader>(newCharReader());
 }
 
-/*
- * \deprecated Use makeCharReader.
- */
 CharReader* CharReaderBuilder::newCharReader() const {
   bool collectComments = settings_["collectComments"].asBool();
   OurFeatures features = OurFeatures::all();
@@ -1994,7 +1991,7 @@ bool parseFromStream(CharReader::Factory const& fact, IStream& sin, Value* root,
   char const* begin = doc.data();
   char const* end = begin + doc.size();
   // Note that we do not actually need a null-terminator.
-  CharReaderPtr const reader = fact.makeCharReader();
+  CharReaderPtr const reader(fact.newCharReader());
   return reader->parse(begin, end, root, errs);
 }
 

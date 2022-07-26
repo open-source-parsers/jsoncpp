@@ -338,6 +338,9 @@ public:
   CharReaderBuilder();
   ~CharReaderBuilder() override;
 
+  /*
+   * \deprecated Use makeCharReader.
+   */
   CharReader* newCharReader() const override;
   std::unique_ptr<CharReader> makeCharReader() const override;
   /** \return true if 'settings' are legal and consistent;
