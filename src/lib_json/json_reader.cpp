@@ -1891,7 +1891,14 @@ public:
 
 CharReaderBuilder::CharReaderBuilder() { setDefaults(&settings_); }
 CharReaderBuilder::~CharReaderBuilder() = default;
-std::unique_ptr<CharReader> CharReaderBuilder::newCharReader() const {
+std::unique_ptr<CharReader> CharReaderBuilder::makeCharReader() const {
+  return std::unique_ptr<CharReader>(newCharReader());
+}
+
+/*
+ * \deprecated Use makeCharReader.
+ */
+CharReader* CharReaderBuilder::newCharReader() const {
   bool collectComments = settings_["collectComments"].asBool();
   OurFeatures features = OurFeatures::all();
   features.allowComments_ = settings_["allowComments"].asBool();
@@ -1909,8 +1916,7 @@ std::unique_ptr<CharReader> CharReaderBuilder::newCharReader() const {
   features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
   features.skipBom_ = settings_["skipBom"].asBool();
-  return std::unique_ptr<OurCharReader>(
-      new OurCharReader(collectComments, features));
+  return new OurCharReader(collectComments, features);
 }
 
 bool CharReaderBuilder::validate(Json::Value* invalid) const {
@@ -1988,7 +1994,7 @@ bool parseFromStream(CharReader::Factory const& fact, IStream& sin, Value* root,
   char const* begin = doc.data();
   char const* end = begin + doc.size();
   // Note that we do not actually need a null-terminator.
-  CharReaderPtr const reader = fact.newCharReader();
+  CharReaderPtr const reader = fact.makeCharReader();
   return reader->parse(begin, end, root, errs);
 }
 
