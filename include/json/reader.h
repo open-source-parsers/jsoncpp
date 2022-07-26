@@ -271,7 +271,7 @@ public:
      * \throw std::exception if something goes wrong (e.g. invalid settings)
      */
     virtual CharReader* newCharReader() const = 0;
-    virtual std::unique_ptr<CharReader> makeCharReader() const = 0;
+    std::unique_ptr<CharReader> makeCharReader() const;
   }; // Factory
 };   // CharReader
 
@@ -342,7 +342,6 @@ public:
    * \deprecated Use makeCharReader.
    */
   CharReader* newCharReader() const override;
-  std::unique_ptr<CharReader> makeCharReader() const override;
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
    */

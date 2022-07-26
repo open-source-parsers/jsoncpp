@@ -1872,6 +1872,10 @@ std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
   return allErrors;
 }
 
+std::unique_ptr<CharReader> CharReader::Factory::makeCharReader() const {
+  return std::unique_ptr<CharReader>(newCharReader());
+}
+
 class OurCharReader : public CharReader {
   bool const collectComments_;
   OurReader reader_;
@@ -1891,9 +1895,6 @@ public:
 
 CharReaderBuilder::CharReaderBuilder() { setDefaults(&settings_); }
 CharReaderBuilder::~CharReaderBuilder() = default;
-std::unique_ptr<CharReader> CharReaderBuilder::makeCharReader() const {
-  return std::unique_ptr<CharReader>(newCharReader());
-}
 
 CharReader* CharReaderBuilder::newCharReader() const {
   bool collectComments = settings_["collectComments"].asBool();
