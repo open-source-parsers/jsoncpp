@@ -271,6 +271,7 @@ public:
      * \throw std::exception if something goes wrong (e.g. invalid settings)
      */
     virtual CharReader* newCharReader() const = 0;
+
     /** \brief Allocate a CharReader via newCharReader(). 
      *   wrap the object in std::unique_ptr<CharReader> to esnure deletion.
      * \throw std::exception if something goes wrong (e.g. invalid settings)
@@ -346,6 +347,7 @@ public:
    * \deprecated Use makeCharReader.
    */
   CharReader* newCharReader() const override;
+
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
    */
