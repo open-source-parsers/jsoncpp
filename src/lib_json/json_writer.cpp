@@ -132,9 +132,8 @@ String valueToString(double value, bool useSpecialFloats,
   if (!isfinite(value)) {
     static const char* const reps[2][3] = {{"NaN", "-Infinity", "Infinity"},
                                            {"null", "-1e+9999", "1e+9999"}};
-    return reps[useSpecialFloats ? 0 : 1][isnan(value)  ? 0
-                                          : (value < 0) ? 1
-                                                        : 2];
+    return reps[useSpecialFloats ? 0 : 1]
+               [isnan(value) ? 0 : (value < 0) ? 1 : 2];
   }
 
   String buffer(size_t(36), '\0');

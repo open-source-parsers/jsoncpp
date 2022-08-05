@@ -271,6 +271,10 @@ public:
      * \throw std::exception if something goes wrong (e.g. invalid settings)
      */
     virtual CharReader* newCharReader() const = 0;
+    /** \brief Allocate a CharReader via newCharReader(). 
+     *   wrap the object in std::unique_ptr<CharReader> to esnure deletion.
+     * \throw std::exception if something goes wrong (e.g. invalid settings)
+     */
     std::unique_ptr<CharReader> makeCharReader() const;
   }; // Factory
 };   // CharReader

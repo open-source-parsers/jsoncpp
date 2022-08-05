@@ -608,7 +608,7 @@ bool Reader::decodeDouble(Token& token, Value& decoded) {
       value = -std::numeric_limits<double>::infinity();
     else if (!std::isinf(value))
       return addError(
-          "'" + String(token.start_, token.end_) + "' is not a number.", token);
+        "'" + String(token.start_, token.end_) + "' is not a number.", token);
   }
   decoded = value;
   return true;
@@ -1660,7 +1660,7 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
       value = -std::numeric_limits<double>::infinity();
     else if (!std::isinf(value))
       return addError(
-          "'" + String(token.start_, token.end_) + "' is not a number.", token);
+        "'" + String(token.start_, token.end_) + "' is not a number.", token);
   }
   decoded = value;
   return true;
@@ -1895,7 +1895,6 @@ public:
 
 CharReaderBuilder::CharReaderBuilder() { setDefaults(&settings_); }
 CharReaderBuilder::~CharReaderBuilder() = default;
-
 CharReader* CharReaderBuilder::newCharReader() const {
   bool collectComments = settings_["collectComments"].asBool();
   OurFeatures features = OurFeatures::all();
