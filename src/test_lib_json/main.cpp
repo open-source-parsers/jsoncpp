@@ -2990,6 +2990,19 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, allowNumericKeysTest) {
   checkParse(R"({ 123 : "abc" })");
 }
 
+struct UniqueReaderTest : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE_LOCAL(UniqueReaderTest, parseWithNoErrors) {
+  Json::CharReaderBuilder b;
+  CharReaderPtr reader = b.makeCharReader();
+  Json::String errs;
+  Json::Value root;
+  char const doc[] = R"({ "property" : "value" })";
+  bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
+  JSONTEST_ASSERT(ok);
+  JSONTEST_ASSERT(errs.empty());
+}
+
 struct CharReaderTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithNoErrors) {
