@@ -105,7 +105,7 @@ JSONCPP_NORETURN void throwLogicError(String const& msg);
 
 /** \brief Type of the value held by a Value object.
  */
-enum ValueType {
+enum class ValueType {
   nullValue = 0, ///< 'null' value
   intValue,      ///< signed integer value
   uintValue,     ///< unsigned integer value
@@ -116,7 +116,7 @@ enum ValueType {
   objectValue    ///< object value (collection of name/value pairs).
 };
 
-enum CommentPlacement {
+enum class CommentPlacement {
   commentBefore = 0,      ///< a comment placed on the line before a value
   commentAfterOnSameLine, ///< a comment just after a value on the same line
   commentAfter, ///< a comment on the line after a value (only make sense for
@@ -126,7 +126,7 @@ enum CommentPlacement {
 
 /** \brief Type of precision for formatting of real values.
  */
-enum PrecisionType {
+enum class PrecisionType {
   significantDigits = 0, ///< we set max number of significant digits in string
   decimalPlaces          ///< we set max number of digits after "." in string
 };
@@ -260,7 +260,11 @@ private:
 #ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
   class CZString {
   public:
-    enum DuplicationPolicy { noDuplication = 0, duplicate, duplicateOnCopy };
+    enum class DuplicationPolicy {
+        noDuplication = 0, 
+        duplicate, 
+        duplicateOnCopy 
+    };
     CZString(ArrayIndex index);
     CZString(char const* str, unsigned length, DuplicationPolicy allocate);
     CZString(CZString const& other);
@@ -313,7 +317,7 @@ public:
    *   Json::Value obj_value(Json::objectValue); // {}
    *   \endcode
    */
-  Value(ValueType type = nullValue);
+  Value(ValueType type = ValueType::nullValue);
   Value(Int value);
   Value(UInt value);
 #if defined(JSON_HAS_INT64)
@@ -644,7 +648,7 @@ private:
     void set(CommentPlacement slot, String comment);
 
   private:
-    using Array = std::array<String, numberOfCommentPlacement>;
+    using Array = std::array<String, (size_t)(CommentPlacement::numberOfCommentPlacement)>;
     std::unique_ptr<Array> ptr_;
   };
   Comments comments_;
@@ -698,10 +702,14 @@ public:
   PathArgument(String key);
 
 private:
-  enum Kind { kindNone = 0, kindIndex, kindKey };
+  enum class Kind { 
+      kindNone = 0,
+      kindIndex,
+      kindKey 
+  };
   String key_;
   ArrayIndex index_{};
-  Kind kind_{kindNone};
+  Kind kind_{Kind::kindNone};
 };
 
 /** \brief Experimental and untested: represents a "path" to access a node.

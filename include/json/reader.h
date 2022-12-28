@@ -156,7 +156,7 @@ public:
   bool good() const;
 
 private:
-  enum TokenType {
+  enum class TokenType {
     tokenEndOfStream = 0,
     tokenObjectBegin,
     tokenObjectEnd,

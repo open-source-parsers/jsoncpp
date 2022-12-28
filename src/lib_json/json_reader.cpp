@@ -131,12 +131,12 @@ bool Reader::parse(const char* beginDoc, const char* endDoc, Value& root,
   Token token;
   skipCommentTokens(token);
   if (collectComments_ && !commentsBefore_.empty())
-    root.setComment(commentsBefore_, commentAfter);
+    root.setComment(commentsBefore_, CommentPlacement::commentAfter);
   if (features_.strictRoot_) {
     if (!root.isArray() && !root.isObject()) {
       // Set error location to start of doc, ideally should be first token found
       // in doc
-      token.type_ = tokenError;
+      token.type_ = TokenType::tokenError;
       token.start_ = beginDoc;
       token.end_ = endDoc;
       addError(
@@ -161,46 +161,46 @@ bool Reader::readValue() {
   bool successful = true;
 
   if (collectComments_ && !commentsBefore_.empty()) {
-    currentValue().setComment(commentsBefore_, commentBefore);
+    currentValue().setComment(commentsBefore_, CommentPlacement::commentBefore);
     commentsBefore_.clear();
   }
 
   switch (token.type_) {
-  case tokenObjectBegin:
+  case TokenType::tokenObjectBegin:
     successful = readObject(token);
     currentValue().setOffsetLimit(current_ - begin_);
     break;
-  case tokenArrayBegin:
+  case TokenType::tokenArrayBegin:
     successful = readArray(token);
     currentValue().setOffsetLimit(current_ - begin_);
     break;
-  case tokenNumber:
+  case TokenType::tokenNumber:
     successful = decodeNumber(token);
     break;
-  case tokenString:
+  case TokenType::tokenString:
     successful = decodeString(token);
     break;
-  case tokenTrue: {
+  case TokenType::tokenTrue: {
     Value v(true);
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
   } break;
-  case tokenFalse: {
+  case TokenType::tokenFalse: {
     Value v(false);
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
   } break;
-  case tokenNull: {
+  case TokenType::tokenNull: {
     Value v;
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
   } break;
-  case tokenArraySeparator:
-  case tokenObjectEnd:
-  case tokenArrayEnd:
+  case TokenType::tokenArraySeparator:
+  case TokenType::tokenObjectEnd:
+  case TokenType::tokenArrayEnd:
     if (features_.allowDroppedNullPlaceholders_) {
       // "Un-read" the current token and mark the current value as a null
       // token.
@@ -210,7 +210,8 @@ bool Reader::readValue() {
       currentValue().setOffsetStart(current_ - begin_ - 1);
       currentValue().setOffsetLimit(current_ - begin_);
       break;
-    } // Else, fall through...
+    }
+    [[fallthrough]]; // Else, fall through...
   default:
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -229,7 +230,7 @@ void Reader::skipCommentTokens(Token& token) {
   if (features_.allowComments_) {
     do {
       readToken(token);
-    } while (token.type_ == tokenComment);
+    } while (token.type_ == TokenType::tokenComment);
   } else {
     readToken(token);
   }
@@ -242,23 +243,23 @@ bool Reader::readToken(Token& token) {
   bool ok = true;
   switch (c) {
   case '{':
-    token.type_ = tokenObjectBegin;
+    token.type_ = TokenType::tokenObjectBegin;
     break;
   case '}':
-    token.type_ = tokenObjectEnd;
+    token.type_ = TokenType::tokenObjectEnd;
     break;
   case '[':
-    token.type_ = tokenArrayBegin;
+    token.type_ = TokenType::tokenArrayBegin;
     break;
   case ']':
-    token.type_ = tokenArrayEnd;
+    token.type_ = TokenType::tokenArrayEnd;
     break;
   case '"':
-    token.type_ = tokenString;
+    token.type_ = TokenType::tokenString;
     ok = readString();
     break;
   case '/':
-    token.type_ = tokenComment;
+    token.type_ = TokenType::tokenComment;
     ok = readComment();
     break;
   case '0':
@@ -272,36 +273,36 @@ bool Reader::readToken(Token& token) {
   case '8':
   case '9':
   case '-':
-    token.type_ = tokenNumber;
+    token.type_ = TokenType::tokenNumber;
     readNumber();
     break;
   case 't':
-    token.type_ = tokenTrue;
+    token.type_ = TokenType::tokenTrue;
     ok = match("rue", 3);
     break;
   case 'f':
-    token.type_ = tokenFalse;
+    token.type_ = TokenType::tokenFalse;
     ok = match("alse", 4);
     break;
   case 'n':
-    token.type_ = tokenNull;
+    token.type_ = TokenType::tokenNull;
     ok = match("ull", 3);
     break;
   case ',':
-    token.type_ = tokenArraySeparator;
+    token.type_ = TokenType::tokenArraySeparator;
     break;
   case ':':
-    token.type_ = tokenMemberSeparator;
+    token.type_ = TokenType::tokenMemberSeparator;
     break;
   case 0:
-    token.type_ = tokenEndOfStream;
+    token.type_ = TokenType::tokenEndOfStream;
     break;
   default:
     ok = false;
     break;
   }
   if (!ok)
-    token.type_ = tokenError;
+    token.type_ = TokenType::tokenError;
   token.end_ = current_;
   return ok;
 }
@@ -339,10 +340,10 @@ bool Reader::readComment() {
     return false;
 
   if (collectComments_) {
-    CommentPlacement placement = commentBefore;
+    CommentPlacement placement = CommentPlacement::commentBefore;
     if (lastValueEnd_ && !containsNewLine(lastValueEnd_, commentBegin)) {
       if (c != '*' || !containsNewLine(commentBegin, current_))
-        placement = commentAfterOnSameLine;
+        placement = CommentPlacement::commentAfterOnSameLine;
     }
 
     addComment(commentBegin, current_, placement);
@@ -373,7 +374,7 @@ void Reader::addComment(Location begin, Location end,
                         CommentPlacement placement) {
   assert(collectComments_);
   const String& normalized = normalizeEOL(begin, end);
-  if (placement == commentAfterOnSameLine) {
+  if (placement == CommentPlacement::commentAfterOnSameLine) {
     assert(lastValue_ != nullptr);
     lastValue_->setComment(normalized, placement);
   } else {
@@ -443,61 +444,61 @@ bool Reader::readString() {
 bool Reader::readObject(Token& token) {
   Token tokenName;
   String name;
-  Value init(objectValue);
+  Value init(ValueType::objectValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(token.start_ - begin_);
   while (readToken(tokenName)) {
     bool initialTokenOk = true;
-    while (tokenName.type_ == tokenComment && initialTokenOk)
+    while (tokenName.type_ == TokenType::tokenComment && initialTokenOk)
       initialTokenOk = readToken(tokenName);
     if (!initialTokenOk)
       break;
-    if (tokenName.type_ == tokenObjectEnd && name.empty()) // empty object
+    if (tokenName.type_ == TokenType::tokenObjectEnd && name.empty()) // empty object
       return true;
     name.clear();
-    if (tokenName.type_ == tokenString) {
+    if (tokenName.type_ == TokenType::tokenString) {
       if (!decodeString(tokenName, name))
-        return recoverFromError(tokenObjectEnd);
-    } else if (tokenName.type_ == tokenNumber && features_.allowNumericKeys_) {
+        return recoverFromError(TokenType::tokenObjectEnd);
+    } else if (tokenName.type_ == TokenType::tokenNumber && features_.allowNumericKeys_) {
       Value numberName;
       if (!decodeNumber(tokenName, numberName))
-        return recoverFromError(tokenObjectEnd);
+        return recoverFromError(TokenType::tokenObjectEnd);
       name = numberName.asString();
     } else {
       break;
     }
 
     Token colon;
-    if (!readToken(colon) || colon.type_ != tokenMemberSeparator) {
+    if (!readToken(colon) || colon.type_ != TokenType::tokenMemberSeparator) {
       return addErrorAndRecover("Missing ':' after object member name", colon,
-                                tokenObjectEnd);
+                                TokenType::tokenObjectEnd);
     }
     Value& value = currentValue()[name];
     nodes_.push(&value);
     bool ok = readValue();
     nodes_.pop();
     if (!ok) // error already set
-      return recoverFromError(tokenObjectEnd);
+      return recoverFromError(TokenType::tokenObjectEnd);
 
     Token comma;
     if (!readToken(comma) ||
-        (comma.type_ != tokenObjectEnd && comma.type_ != tokenArraySeparator &&
-         comma.type_ != tokenComment)) {
+        (comma.type_ != TokenType::tokenObjectEnd && comma.type_ != TokenType::tokenArraySeparator &&
+         comma.type_ != TokenType::tokenComment)) {
       return addErrorAndRecover("Missing ',' or '}' in object declaration",
-                                comma, tokenObjectEnd);
+                                comma, TokenType::tokenObjectEnd);
     }
     bool finalizeTokenOk = true;
-    while (comma.type_ == tokenComment && finalizeTokenOk)
+    while (comma.type_ == TokenType::tokenComment && finalizeTokenOk)
       finalizeTokenOk = readToken(comma);
-    if (comma.type_ == tokenObjectEnd)
+    if (comma.type_ == TokenType::tokenObjectEnd)
       return true;
   }
   return addErrorAndRecover("Missing '}' or object member name", tokenName,
-                            tokenObjectEnd);
+                            TokenType::tokenObjectEnd);
 }
 
 bool Reader::readArray(Token& token) {
-  Value init(arrayValue);
+  Value init(ValueType::arrayValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(token.start_ - begin_);
   skipSpaces();
@@ -514,21 +515,21 @@ bool Reader::readArray(Token& token) {
     bool ok = readValue();
     nodes_.pop();
     if (!ok) // error already set
-      return recoverFromError(tokenArrayEnd);
+      return recoverFromError(TokenType::tokenArrayEnd);
 
     Token currentToken;
     // Accept Comment after last item in the array.
     ok = readToken(currentToken);
-    while (currentToken.type_ == tokenComment && ok) {
+    while (currentToken.type_ == TokenType::tokenComment && ok) {
       ok = readToken(currentToken);
     }
-    bool badTokenType = (currentToken.type_ != tokenArraySeparator &&
-                         currentToken.type_ != tokenArrayEnd);
+    bool badTokenType = (currentToken.type_ != TokenType::tokenArraySeparator &&
+                         currentToken.type_ != TokenType::tokenArrayEnd);
     if (!ok || badTokenType) {
       return addErrorAndRecover("Missing ',' or ']' in array declaration",
-                                currentToken, tokenArrayEnd);
+                                currentToken, TokenType::tokenArrayEnd);
     }
-    if (currentToken.type_ == tokenArrayEnd)
+    if (currentToken.type_ == TokenType::tokenArrayEnd)
       break;
   }
   return true;
@@ -744,7 +745,7 @@ bool Reader::recoverFromError(TokenType skipUntilToken) {
   for (;;) {
     if (!readToken(skip))
       errors_.resize(errorCount); // discard errors caused by recovery
-    if (skip.type_ == skipUntilToken || skip.type_ == tokenEndOfStream)
+    if (skip.type_ == skipUntilToken || skip.type_ == TokenType::tokenEndOfStream)
       break;
   }
   errors_.resize(errorCount);
@@ -830,7 +831,7 @@ bool Reader::pushError(const Value& value, const String& message) {
   if (value.getOffsetStart() > length || value.getOffsetLimit() > length)
     return false;
   Token token;
-  token.type_ = tokenError;
+  token.type_ = TokenType::tokenError;
   token.start_ = begin_ + value.getOffsetStart();
   token.end_ = begin_ + value.getOffsetLimit();
   ErrorInfo info;
@@ -848,7 +849,7 @@ bool Reader::pushError(const Value& value, const String& message,
       extra.getOffsetLimit() > length)
     return false;
   Token token;
-  token.type_ = tokenError;
+  token.type_ = TokenType::tokenError;
   token.start_ = begin_ + value.getOffsetStart();
   token.end_ = begin_ + value.getOffsetLimit();
   ErrorInfo info;
@@ -906,7 +907,7 @@ private:
   OurReader(OurReader const&);      // no impl
   void operator=(OurReader const&); // no impl
 
-  enum TokenType {
+  enum class TokenType {
     tokenEndOfStream = 0,
     tokenObjectBegin,
     tokenObjectEnd,
@@ -1031,17 +1032,17 @@ bool OurReader::parse(const char* beginDoc, const char* endDoc, Value& root,
   nodes_.pop();
   Token token;
   skipCommentTokens(token);
-  if (features_.failIfExtra_ && (token.type_ != tokenEndOfStream)) {
+  if (features_.failIfExtra_ && (token.type_ != TokenType::tokenEndOfStream)) {
     addError("Extra non-whitespace after JSON value.", token);
     return false;
   }
   if (collectComments_ && !commentsBefore_.empty())
-    root.setComment(commentsBefore_, commentAfter);
+    root.setComment(commentsBefore_, CommentPlacement::commentAfter);
   if (features_.strictRoot_) {
     if (!root.isArray() && !root.isObject()) {
       // Set error location to start of doc, ideally should be first token found
       // in doc
-      token.type_ = tokenError;
+      token.type_ = TokenType::tokenError;
       token.start_ = beginDoc;
       token.end_ = endDoc;
       addError(
@@ -1062,64 +1063,64 @@ bool OurReader::readValue() {
   bool successful = true;
 
   if (collectComments_ && !commentsBefore_.empty()) {
-    currentValue().setComment(commentsBefore_, commentBefore);
+    currentValue().setComment(commentsBefore_, CommentPlacement::commentBefore);
     commentsBefore_.clear();
   }
 
   switch (token.type_) {
-  case tokenObjectBegin:
+  case TokenType::tokenObjectBegin:
     successful = readObject(token);
     currentValue().setOffsetLimit(current_ - begin_);
     break;
-  case tokenArrayBegin:
+  case TokenType::tokenArrayBegin:
     successful = readArray(token);
     currentValue().setOffsetLimit(current_ - begin_);
     break;
-  case tokenNumber:
+  case TokenType::tokenNumber:
     successful = decodeNumber(token);
     break;
-  case tokenString:
+  case TokenType::tokenString:
     successful = decodeString(token);
     break;
-  case tokenTrue: {
+  case TokenType::tokenTrue: {
     Value v(true);
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
   } break;
-  case tokenFalse: {
+  case TokenType::tokenFalse: {
     Value v(false);
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
   } break;
-  case tokenNull: {
+  case TokenType::tokenNull: {
     Value v;
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
   } break;
-  case tokenNaN: {
+  case TokenType::tokenNaN: {
     Value v(std::numeric_limits<double>::quiet_NaN());
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
   } break;
-  case tokenPosInf: {
+  case TokenType::tokenPosInf: {
     Value v(std::numeric_limits<double>::infinity());
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
   } break;
-  case tokenNegInf: {
+  case TokenType::tokenNegInf: {
     Value v(-std::numeric_limits<double>::infinity());
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
   } break;
-  case tokenArraySeparator:
-  case tokenObjectEnd:
-  case tokenArrayEnd:
+  case TokenType::tokenArraySeparator:
+  case TokenType::tokenObjectEnd:
+  case TokenType::tokenArrayEnd:
     if (features_.allowDroppedNullPlaceholders_) {
       // "Un-read" the current token and mark the current value as a null
       // token.
@@ -1129,7 +1130,8 @@ bool OurReader::readValue() {
       currentValue().setOffsetStart(current_ - begin_ - 1);
       currentValue().setOffsetLimit(current_ - begin_);
       break;
-    } // else, fall through ...
+    }
+    [[fallthrough]]; // Else, fall through...
   default:
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -1149,7 +1151,7 @@ void OurReader::skipCommentTokens(Token& token) {
   if (features_.allowComments_) {
     do {
       readToken(token);
-    } while (token.type_ == tokenComment);
+    } while (token.type_ == TokenType::tokenComment);
   } else {
     readToken(token);
   }
@@ -1162,24 +1164,24 @@ bool OurReader::readToken(Token& token) {
   bool ok = true;
   switch (c) {
   case '{':
-    token.type_ = tokenObjectBegin;
+    token.type_ = TokenType::tokenObjectBegin;
     break;
   case '}':
-    token.type_ = tokenObjectEnd;
+    token.type_ = TokenType::tokenObjectEnd;
     break;
   case '[':
-    token.type_ = tokenArrayBegin;
+    token.type_ = TokenType::tokenArrayBegin;
     break;
   case ']':
-    token.type_ = tokenArrayEnd;
+    token.type_ = TokenType::tokenArrayEnd;
     break;
   case '"':
-    token.type_ = tokenString;
+    token.type_ = TokenType::tokenString;
     ok = readString();
     break;
   case '\'':
     if (features_.allowSingleQuotes_) {
-      token.type_ = tokenString;
+      token.type_ = TokenType::tokenString;
       ok = readStringSingleQuote();
     } else {
       // If we don't allow single quotes, this is a failure case.
@@ -1187,7 +1189,7 @@ bool OurReader::readToken(Token& token) {
     }
     break;
   case '/':
-    token.type_ = tokenComment;
+    token.type_ = TokenType::tokenComment;
     ok = readComment();
     break;
   case '0':
@@ -1200,40 +1202,40 @@ bool OurReader::readToken(Token& token) {
   case '7':
   case '8':
   case '9':
-    token.type_ = tokenNumber;
+    token.type_ = TokenType::tokenNumber;
     readNumber(false);
     break;
   case '-':
     if (readNumber(true)) {
-      token.type_ = tokenNumber;
+      token.type_ = TokenType::tokenNumber;
     } else {
-      token.type_ = tokenNegInf;
+      token.type_ = TokenType::tokenNegInf;
       ok = features_.allowSpecialFloats_ && match("nfinity", 7);
     }
     break;
   case '+':
     if (readNumber(true)) {
-      token.type_ = tokenNumber;
+      token.type_ = TokenType::tokenNumber;
     } else {
-      token.type_ = tokenPosInf;
+      token.type_ = TokenType::tokenPosInf;
       ok = features_.allowSpecialFloats_ && match("nfinity", 7);
     }
     break;
   case 't':
-    token.type_ = tokenTrue;
+    token.type_ = TokenType::tokenTrue;
     ok = match("rue", 3);
     break;
   case 'f':
-    token.type_ = tokenFalse;
+    token.type_ = TokenType::tokenFalse;
     ok = match("alse", 4);
     break;
   case 'n':
-    token.type_ = tokenNull;
+    token.type_ = TokenType::tokenNull;
     ok = match("ull", 3);
     break;
   case 'N':
     if (features_.allowSpecialFloats_) {
-      token.type_ = tokenNaN;
+      token.type_ = TokenType::tokenNaN;
       ok = match("aN", 2);
     } else {
       ok = false;
@@ -1241,27 +1243,27 @@ bool OurReader::readToken(Token& token) {
     break;
   case 'I':
     if (features_.allowSpecialFloats_) {
-      token.type_ = tokenPosInf;
+      token.type_ = TokenType::tokenPosInf;
       ok = match("nfinity", 7);
     } else {
       ok = false;
     }
     break;
   case ',':
-    token.type_ = tokenArraySeparator;
+    token.type_ = TokenType::tokenArraySeparator;
     break;
   case ':':
-    token.type_ = tokenMemberSeparator;
+    token.type_ = TokenType::tokenMemberSeparator;
     break;
   case 0:
-    token.type_ = tokenEndOfStream;
+    token.type_ = TokenType::tokenEndOfStream;
     break;
   default:
     ok = false;
     break;
   }
   if (!ok)
-    token.type_ = tokenError;
+    token.type_ = TokenType::tokenError;
   token.end_ = current_;
   return ok;
 }
@@ -1315,12 +1317,12 @@ bool OurReader::readComment() {
     return false;
 
   if (collectComments_) {
-    CommentPlacement placement = commentBefore;
+    CommentPlacement placement = CommentPlacement::commentBefore;
 
     if (!lastValueHasAComment_) {
       if (lastValueEnd_ && !containsNewLine(lastValueEnd_, commentBegin)) {
         if (isCppStyleComment || !cStyleWithEmbeddedNewline) {
-          placement = commentAfterOnSameLine;
+          placement = CommentPlacement::commentAfterOnSameLine;
           lastValueHasAComment_ = true;
         }
       }
@@ -1355,7 +1357,7 @@ void OurReader::addComment(Location begin, Location end,
                            CommentPlacement placement) {
   assert(collectComments_);
   const String& normalized = normalizeEOL(begin, end);
-  if (placement == commentAfterOnSameLine) {
+  if (placement == CommentPlacement::commentAfterOnSameLine) {
     assert(lastValue_ != nullptr);
     lastValue_->setComment(normalized, placement);
   } else {
@@ -1446,27 +1448,27 @@ bool OurReader::readStringSingleQuote() {
 bool OurReader::readObject(Token& token) {
   Token tokenName;
   String name;
-  Value init(objectValue);
+  Value init(ValueType::objectValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(token.start_ - begin_);
   while (readToken(tokenName)) {
     bool initialTokenOk = true;
-    while (tokenName.type_ == tokenComment && initialTokenOk)
+    while (tokenName.type_ == TokenType::tokenComment && initialTokenOk)
       initialTokenOk = readToken(tokenName);
     if (!initialTokenOk)
       break;
-    if (tokenName.type_ == tokenObjectEnd &&
+    if (tokenName.type_ == TokenType::tokenObjectEnd &&
         (name.empty() ||
          features_.allowTrailingCommas_)) // empty object or trailing comma
       return true;
     name.clear();
-    if (tokenName.type_ == tokenString) {
+    if (tokenName.type_ == TokenType::tokenString) {
       if (!decodeString(tokenName, name))
-        return recoverFromError(tokenObjectEnd);
-    } else if (tokenName.type_ == tokenNumber && features_.allowNumericKeys_) {
+        return recoverFromError(TokenType::tokenObjectEnd);
+    } else if (tokenName.type_ == TokenType::tokenNumber && features_.allowNumericKeys_) {
       Value numberName;
       if (!decodeNumber(tokenName, numberName))
-        return recoverFromError(tokenObjectEnd);
+        return recoverFromError(TokenType::tokenObjectEnd);
       name = numberName.asString();
     } else {
       break;
@@ -1475,40 +1477,40 @@ bool OurReader::readObject(Token& token) {
       throwRuntimeError("keylength >= 2^30");
     if (features_.rejectDupKeys_ && currentValue().isMember(name)) {
       String msg = "Duplicate key: '" + name + "'";
-      return addErrorAndRecover(msg, tokenName, tokenObjectEnd);
+      return addErrorAndRecover(msg, tokenName, TokenType::tokenObjectEnd);
     }
 
     Token colon;
-    if (!readToken(colon) || colon.type_ != tokenMemberSeparator) {
+    if (!readToken(colon) || colon.type_ != TokenType::tokenMemberSeparator) {
       return addErrorAndRecover("Missing ':' after object member name", colon,
-                                tokenObjectEnd);
+                                TokenType::tokenObjectEnd);
     }
     Value& value = currentValue()[name];
     nodes_.push(&value);
     bool ok = readValue();
     nodes_.pop();
     if (!ok) // error already set
-      return recoverFromError(tokenObjectEnd);
+      return recoverFromError(TokenType::tokenObjectEnd);
 
     Token comma;
     if (!readToken(comma) ||
-        (comma.type_ != tokenObjectEnd && comma.type_ != tokenArraySeparator &&
-         comma.type_ != tokenComment)) {
+        (comma.type_ != TokenType::tokenObjectEnd && comma.type_ != TokenType::tokenArraySeparator &&
+         comma.type_ != TokenType::tokenComment)) {
       return addErrorAndRecover("Missing ',' or '}' in object declaration",
-                                comma, tokenObjectEnd);
+                                comma, TokenType::tokenObjectEnd);
     }
     bool finalizeTokenOk = true;
-    while (comma.type_ == tokenComment && finalizeTokenOk)
+    while (comma.type_ == TokenType::tokenComment && finalizeTokenOk)
       finalizeTokenOk = readToken(comma);
-    if (comma.type_ == tokenObjectEnd)
+    if (comma.type_ == TokenType::tokenObjectEnd)
       return true;
   }
   return addErrorAndRecover("Missing '}' or object member name", tokenName,
-                            tokenObjectEnd);
+                            TokenType::tokenObjectEnd);
 }
 
 bool OurReader::readArray(Token& token) {
-  Value init(arrayValue);
+  Value init(ValueType::arrayValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(token.start_ - begin_);
   int index = 0;
@@ -1529,21 +1531,21 @@ bool OurReader::readArray(Token& token) {
     bool ok = readValue();
     nodes_.pop();
     if (!ok) // error already set
-      return recoverFromError(tokenArrayEnd);
+      return recoverFromError(TokenType::tokenArrayEnd);
 
     Token currentToken;
     // Accept Comment after last item in the array.
     ok = readToken(currentToken);
-    while (currentToken.type_ == tokenComment && ok) {
+    while (currentToken.type_ == TokenType::tokenComment && ok) {
       ok = readToken(currentToken);
     }
-    bool badTokenType = (currentToken.type_ != tokenArraySeparator &&
-                         currentToken.type_ != tokenArrayEnd);
+    bool badTokenType = (currentToken.type_ != TokenType::tokenArraySeparator &&
+                         currentToken.type_ != TokenType::tokenArrayEnd);
     if (!ok || badTokenType) {
       return addErrorAndRecover("Missing ',' or ']' in array declaration",
-                                currentToken, tokenArrayEnd);
+                                currentToken, TokenType::tokenArrayEnd);
     }
-    if (currentToken.type_ == tokenArrayEnd)
+    if (currentToken.type_ == TokenType::tokenArrayEnd)
       break;
   }
   return true;
@@ -1796,7 +1798,7 @@ bool OurReader::recoverFromError(TokenType skipUntilToken) {
   for (;;) {
     if (!readToken(skip))
       errors_.resize(errorCount); // discard errors caused by recovery
-    if (skip.type_ == skipUntilToken || skip.type_ == tokenEndOfStream)
+    if (skip.type_ == skipUntilToken || skip.type_ == TokenType::tokenEndOfStream)
       break;
   }
   errors_.resize(errorCount);

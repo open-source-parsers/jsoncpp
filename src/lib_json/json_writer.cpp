@@ -380,20 +380,20 @@ String FastWriter::write(const Value& root) {
 
 void FastWriter::writeValue(const Value& value) {
   switch (value.type()) {
-  case nullValue:
+  case ValueType::nullValue:
     if (!dropNullPlaceholders_)
       document_ += "null";
     break;
-  case intValue:
+  case ValueType::intValue:
     document_ += valueToString(value.asLargestInt());
     break;
-  case uintValue:
+  case ValueType::uintValue:
     document_ += valueToString(value.asLargestUInt());
     break;
-  case realValue:
+  case ValueType::realValue:
     document_ += valueToString(value.asDouble());
     break;
-  case stringValue: {
+  case ValueType::stringValue: {
     // Is NULL possible for value.string_? No.
     char const* str;
     char const* end;
@@ -402,10 +402,10 @@ void FastWriter::writeValue(const Value& value) {
       document_ += valueToQuotedStringN(str, static_cast<size_t>(end - str));
     break;
   }
-  case booleanValue:
+  case ValueType::booleanValue:
     document_ += valueToString(value.asBool());
     break;
-  case arrayValue: {
+  case ValueType::arrayValue: {
     document_ += '[';
     ArrayIndex size = value.size();
     for (ArrayIndex index = 0; index < size; ++index) {
@@ -415,7 +415,7 @@ void FastWriter::writeValue(const Value& value) {
     }
     document_ += ']';
   } break;
-  case objectValue: {
+  case ValueType::objectValue: {
     Value::Members members(value.getMemberNames());
     document_ += '{';
     for (auto it = members.begin(); it != members.end(); ++it) {
@@ -449,19 +449,19 @@ String StyledWriter::write(const Value& root) {
 
 void StyledWriter::writeValue(const Value& value) {
   switch (value.type()) {
-  case nullValue:
+  case ValueType::nullValue:
     pushValue("null");
     break;
-  case intValue:
+  case ValueType::intValue:
     pushValue(valueToString(value.asLargestInt()));
     break;
-  case uintValue:
+  case ValueType::uintValue:
     pushValue(valueToString(value.asLargestUInt()));
     break;
-  case realValue:
+  case ValueType::realValue:
     pushValue(valueToString(value.asDouble()));
     break;
-  case stringValue: {
+  case ValueType::stringValue: {
     // Is NULL possible for value.string_? No.
     char const* str;
     char const* end;
@@ -472,13 +472,13 @@ void StyledWriter::writeValue(const Value& value) {
       pushValue("");
     break;
   }
-  case booleanValue:
+  case ValueType::booleanValue:
     pushValue(valueToString(value.asBool()));
     break;
-  case arrayValue:
+  case ValueType::arrayValue:
     writeArrayValue(value);
     break;
-  case objectValue: {
+  case ValueType::objectValue: {
     Value::Members members(value.getMemberNames());
     if (members.empty())
       pushValue("{}");
@@ -608,12 +608,12 @@ void StyledWriter::unindent() {
 }
 
 void StyledWriter::writeCommentBeforeValue(const Value& root) {
-  if (!root.hasComment(commentBefore))
+  if (!root.hasComment(CommentPlacement::commentBefore))
     return;
 
   document_ += '\n';
   writeIndent();
-  const String& comment = root.getComment(commentBefore);
+  const String& comment = root.getComment(CommentPlacement::commentBefore);
   String::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
     document_ += *iter;
@@ -627,20 +627,21 @@ void StyledWriter::writeCommentBeforeValue(const Value& root) {
 }
 
 void StyledWriter::writeCommentAfterValueOnSameLine(const Value& root) {
-  if (root.hasComment(commentAfterOnSameLine))
-    document_ += " " + root.getComment(commentAfterOnSameLine);
+  if (root.hasComment(CommentPlacement::commentAfterOnSameLine))
+    document_ +=
+        " " + root.getComment(CommentPlacement::commentAfterOnSameLine);
 
-  if (root.hasComment(commentAfter)) {
+  if (root.hasComment(CommentPlacement::commentAfter)) {
     document_ += '\n';
-    document_ += root.getComment(commentAfter);
+    document_ += root.getComment(CommentPlacement::commentAfter);
     document_ += '\n';
   }
 }
 
 bool StyledWriter::hasCommentForValue(const Value& value) {
-  return value.hasComment(commentBefore) ||
-         value.hasComment(commentAfterOnSameLine) ||
-         value.hasComment(commentAfter);
+  return value.hasComment(CommentPlacement::commentBefore) ||
+         value.hasComment(CommentPlacement::commentAfterOnSameLine) ||
+         value.hasComment(CommentPlacement::commentAfter);
 }
 
 // Class StyledStreamWriter
@@ -667,19 +668,19 @@ void StyledStreamWriter::write(OStream& out, const Value& root) {
 
 void StyledStreamWriter::writeValue(const Value& value) {
   switch (value.type()) {
-  case nullValue:
+  case ValueType::nullValue:
     pushValue("null");
     break;
-  case intValue:
+  case ValueType::intValue:
     pushValue(valueToString(value.asLargestInt()));
     break;
-  case uintValue:
+  case ValueType::uintValue:
     pushValue(valueToString(value.asLargestUInt()));
     break;
-  case realValue:
+  case ValueType::realValue:
     pushValue(valueToString(value.asDouble()));
     break;
-  case stringValue: {
+  case ValueType::stringValue: {
     // Is NULL possible for value.string_? No.
     char const* str;
     char const* end;
@@ -690,13 +691,13 @@ void StyledStreamWriter::writeValue(const Value& value) {
       pushValue("");
     break;
   }
-  case booleanValue:
+  case ValueType::booleanValue:
     pushValue(valueToString(value.asBool()));
     break;
-  case arrayValue:
+  case ValueType::arrayValue:
     writeArrayValue(value);
     break;
-  case objectValue: {
+  case ValueType::objectValue: {
     Value::Members members(value.getMemberNames());
     if (members.empty())
       pushValue("{}");
@@ -828,12 +829,12 @@ void StyledStreamWriter::unindent() {
 }
 
 void StyledStreamWriter::writeCommentBeforeValue(const Value& root) {
-  if (!root.hasComment(commentBefore))
+  if (!root.hasComment(CommentPlacement::commentBefore))
     return;
 
   if (!indented_)
     writeIndent();
-  const String& comment = root.getComment(commentBefore);
+  const String& comment = root.getComment(CommentPlacement::commentBefore);
   String::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
     *document_ << *iter;
@@ -846,20 +847,21 @@ void StyledStreamWriter::writeCommentBeforeValue(const Value& root) {
 }
 
 void StyledStreamWriter::writeCommentAfterValueOnSameLine(const Value& root) {
-  if (root.hasComment(commentAfterOnSameLine))
-    *document_ << ' ' << root.getComment(commentAfterOnSameLine);
+  if (root.hasComment(CommentPlacement::commentAfterOnSameLine))
+    *document_ << ' '
+               << root.getComment(CommentPlacement::commentAfterOnSameLine);
 
-  if (root.hasComment(commentAfter)) {
+  if (root.hasComment(CommentPlacement::commentAfter)) {
     writeIndent();
-    *document_ << root.getComment(commentAfter);
+    *document_ << root.getComment(CommentPlacement::commentAfter);
   }
   indented_ = false;
 }
 
 bool StyledStreamWriter::hasCommentForValue(const Value& value) {
-  return value.hasComment(commentBefore) ||
-         value.hasComment(commentAfterOnSameLine) ||
-         value.hasComment(commentAfter);
+  return value.hasComment(CommentPlacement::commentBefore) ||
+         value.hasComment(CommentPlacement::commentAfterOnSameLine) ||
+         value.hasComment(CommentPlacement::commentAfter);
 }
 
 //////////////////////////
@@ -868,7 +870,7 @@ bool StyledStreamWriter::hasCommentForValue(const Value& value) {
 /// Scoped enums are not available until C++11.
 struct CommentStyle {
   /// Decide whether to write comments.
-  enum Enum {
+  enum class Enum {
     None, ///< Drop all comments.
     Most, ///< Recover odd behavior of previous versions (not implemented yet).
     All   ///< Keep all comments.
@@ -940,20 +942,20 @@ int BuiltStyledStreamWriter::write(Value const& root, OStream* sout) {
 }
 void BuiltStyledStreamWriter::writeValue(Value const& value) {
   switch (value.type()) {
-  case nullValue:
+  case ValueType::nullValue:
     pushValue(nullSymbol_);
     break;
-  case intValue:
+  case ValueType::intValue:
     pushValue(valueToString(value.asLargestInt()));
     break;
-  case uintValue:
+  case ValueType::uintValue:
     pushValue(valueToString(value.asLargestUInt()));
     break;
-  case realValue:
+  case ValueType::realValue:
     pushValue(valueToString(value.asDouble(), useSpecialFloats_, precision_,
                             precisionType_));
     break;
-  case stringValue: {
+  case ValueType::stringValue: {
     // Is NULL is possible for value.string_? No.
     char const* str;
     char const* end;
@@ -965,13 +967,13 @@ void BuiltStyledStreamWriter::writeValue(Value const& value) {
       pushValue("");
     break;
   }
-  case booleanValue:
+  case ValueType::booleanValue:
     pushValue(valueToString(value.asBool()));
     break;
-  case arrayValue:
+  case ValueType::arrayValue:
     writeArrayValue(value);
     break;
-  case objectValue: {
+  case ValueType::objectValue: {
     Value::Members members(value.getMemberNames());
     if (members.empty())
       pushValue("{}");
@@ -1006,7 +1008,7 @@ void BuiltStyledStreamWriter::writeArrayValue(Value const& value) {
   if (size == 0)
     pushValue("[]");
   else {
-    bool isMultiLine = (cs_ == CommentStyle::All) || isMultilineArray(value);
+    bool isMultiLine = (cs_ == CommentStyle::Enum::All) || isMultilineArray(value);
     if (isMultiLine) {
       writeWithIndent("[");
       indent();
@@ -1112,14 +1114,14 @@ void BuiltStyledStreamWriter::unindent() {
 }
 
 void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
-  if (cs_ == CommentStyle::None)
+  if (cs_ == CommentStyle::Enum::None)
     return;
-  if (!root.hasComment(commentBefore))
+  if (!root.hasComment(CommentPlacement::commentBefore))
     return;
 
   if (!indented_)
     writeIndent();
-  const String& comment = root.getComment(commentBefore);
+  const String& comment = root.getComment(CommentPlacement::commentBefore);
   String::const_iterator iter = comment.begin();
   while (iter != comment.end()) {
     *sout_ << *iter;
@@ -1133,22 +1135,22 @@ void BuiltStyledStreamWriter::writeCommentBeforeValue(Value const& root) {
 
 void BuiltStyledStreamWriter::writeCommentAfterValueOnSameLine(
     Value const& root) {
-  if (cs_ == CommentStyle::None)
+  if (cs_ == CommentStyle::Enum::None)
     return;
-  if (root.hasComment(commentAfterOnSameLine))
-    *sout_ << " " + root.getComment(commentAfterOnSameLine);
+  if (root.hasComment(CommentPlacement::commentAfterOnSameLine))
+    *sout_ << " " + root.getComment(CommentPlacement::commentAfterOnSameLine);
 
-  if (root.hasComment(commentAfter)) {
+  if (root.hasComment(CommentPlacement::commentAfter)) {
     writeIndent();
-    *sout_ << root.getComment(commentAfter);
+    *sout_ << root.getComment(CommentPlacement::commentAfter);
   }
 }
 
 // static
 bool BuiltStyledStreamWriter::hasCommentForValue(const Value& value) {
-  return value.hasComment(commentBefore) ||
-         value.hasComment(commentAfterOnSameLine) ||
-         value.hasComment(commentAfter);
+  return value.hasComment(CommentPlacement::commentBefore) ||
+         value.hasComment(CommentPlacement::commentAfterOnSameLine) ||
+         value.hasComment(CommentPlacement::commentAfter);
 }
 
 ///////////////
@@ -1168,15 +1170,15 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const {
   const bool usf = settings_["useSpecialFloats"].asBool();
   const bool emitUTF8 = settings_["emitUTF8"].asBool();
   unsigned int pre = settings_["precision"].asUInt();
-  CommentStyle::Enum cs = CommentStyle::All;
+  CommentStyle::Enum cs = CommentStyle::Enum::All;
   if (cs_str == "All") {
-    cs = CommentStyle::All;
+    cs = CommentStyle::Enum::All;
   } else if (cs_str == "None") {
-    cs = CommentStyle::None;
+    cs = CommentStyle::Enum::None;
   } else {
     throwRuntimeError("commentStyle must be 'All' or 'None'");
   }
-  PrecisionType precisionType(significantDigits);
+  PrecisionType precisionType(PrecisionType::significantDigits);
   if (pt_str == "significant") {
     precisionType = PrecisionType::significantDigits;
   } else if (pt_str == "decimal") {
