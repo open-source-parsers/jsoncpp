@@ -1495,6 +1495,14 @@ Value::iterator Value::end() {
   return iterator();
 }
 
+Value const& Value::front() const { return *begin(); }
+
+Value& Value::front() { return *begin(); }
+
+Value const& Value::back() const { return *(--end()); }
+
+Value& Value::back() { return *(--end()); }
+
 // class PathArgument
 // //////////////////////////////////////////////////////////////////
 

@@ -310,10 +310,14 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, arrays) {
   const Json::Value& constArray = array1_;
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), constArray[index0]);
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), constArray[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value(1234), constArray.front());
+  JSONTEST_ASSERT_EQUAL(Json::Value(1234), constArray.back());
 
   // Access through non-const reference
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), array1_[index0]);
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), array1_[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value(1234), array1_.front());
+  JSONTEST_ASSERT_EQUAL(Json::Value(1234), array1_.back());
 
   array1_[2] = Json::Value(17);
   JSONTEST_ASSERT_EQUAL(Json::Value(), array1_[1]);
@@ -356,6 +360,8 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, resizePopulatesAllMissingElements) {
   v.resize(n);
   JSONTEST_ASSERT_EQUAL(n, v.size());
   JSONTEST_ASSERT_EQUAL(n, std::distance(v.begin(), v.end()));
+  JSONTEST_ASSERT_EQUAL(v.front(), Json::Value{});
+  JSONTEST_ASSERT_EQUAL(v.back(), Json::Value{});
   for (const Json::Value& e : v)
     JSONTEST_ASSERT_EQUAL(e, Json::Value{});
 }
@@ -406,6 +412,8 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, arrayInsertAtRandomIndex) {
   JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[0]); // check append
   JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[1]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[2]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array.front());
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array.back());
 
   // insert lvalue at the head
   JSONTEST_ASSERT(array.insert(0, str1));
@@ -413,6 +421,8 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, arrayInsertAtRandomIndex) {
   JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[1]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[2]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[3]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array.front());
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array.back());
   // checking address
   for (Json::ArrayIndex i = 0; i < 3; i++) {
     JSONTEST_ASSERT_EQUAL(vec[i], &array[i]);
@@ -425,6 +435,8 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, arrayInsertAtRandomIndex) {
   JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[2]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[3]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[4]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array.front());
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array.back());
   // checking address
   for (Json::ArrayIndex i = 0; i < 4; i++) {
     JSONTEST_ASSERT_EQUAL(vec[i], &array[i]);
@@ -438,6 +450,8 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, arrayInsertAtRandomIndex) {
   JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[3]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[4]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index5"), array[5]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array.front());
+  JSONTEST_ASSERT_EQUAL(Json::Value("index5"), array.back());
   // checking address
   for (Json::ArrayIndex i = 0; i < 5; i++) {
     JSONTEST_ASSERT_EQUAL(vec[i], &array[i]);
