@@ -599,8 +599,7 @@ bool Reader::decodeDouble(Token& token) {
 
 bool Reader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
-  String buffer(token.start_, token.end_);
-  IStringStream is(buffer);
+  IStringStream is(String(token.start_, token.end_));
   if (!(is >> value)) {
     if (value == std::numeric_limits<double>::max())
       value = std::numeric_limits<double>::infinity();
@@ -1651,8 +1650,7 @@ bool OurReader::decodeDouble(Token& token) {
 
 bool OurReader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
-  const String buffer(token.start_, token.end_);
-  IStringStream is(buffer);
+  IStringStream is(String(token.start_, token.end_));
   if (!(is >> value)) {
     if (value == std::numeric_limits<double>::max())
       value = std::numeric_limits<double>::infinity();
@@ -1983,7 +1981,7 @@ bool parseFromStream(CharReader::Factory const& fact, IStream& sin, Value* root,
                      String* errs) {
   OStringStream ssin;
   ssin << sin.rdbuf();
-  String doc = ssin.str();
+  String doc = std::move(ssin).str();
   char const* begin = doc.data();
   char const* end = begin + doc.size();
   // Note that we do not actually need a null-terminator.
