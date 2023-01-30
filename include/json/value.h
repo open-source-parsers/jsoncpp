@@ -585,20 +585,20 @@ public:
   iterator begin();
   iterator end();
 
-  /// @brief Returns a reference to the first element in the container.
-  /// Calling front on an empty container is undefined behavior.
-  Value const& front() const;
+  /// \brief Returns a reference to the first element in the `Value`.
+  /// Requires that this value holds an array or json object, with at least one element.
+  const Value& front() const;
 
-  /// @brief Returns a reference to the last element in the container.
-  /// Calling back on an empty container is undefined behavior.
-  Value const& back() const;
-
-  /// @brief Returns a reference to the first element in the container.
-  /// Calling front on an empty container is undefined behavior.
+  /// \brief Returns a reference to the first element in the `Value`.
+  /// Requires that this value holds an array or json object, with at least one element.
   Value& front();
 
-  /// @brief Returns a reference to the last element in the container.
-  /// Calling back on an empty container is undefined behavior.
+  /// \brief Returns a reference to the last element in the `Value`.
+  /// Requires that value holds an array or json object, with at least one element.
+  const Value& back() const;
+
+  /// \brief Returns a reference to the last element in the `Value`.
+  /// Requires that this value holds an array or json object, with at least one element.
   Value& back();
 
   // Accessors for the [start, limit) range of bytes within the JSON text from
@@ -940,6 +940,14 @@ public:
 };
 
 inline void swap(Value& a, Value& b) { a.swap(b); }
+
+inline const Value& Value::front() const { return *begin(); }
+
+inline Value& Value::front() { return *begin(); }
+
+inline const Value& Value::back() const { return *(--end()); }
+
+inline Value& Value::back() { return *(--end()); }
 
 } // namespace Json
 
