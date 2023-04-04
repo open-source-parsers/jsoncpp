@@ -103,6 +103,12 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" CACHE PATH "Executable/dll output dir.")
 endif()
 
+include(CheckFunctionExists)
+check_function_exists(memset_s HAVE_MEMSET_S)
+if(HAVE_MEMSET_S)
+    add_definitions("-DHAVE_MEMSET_S=1")
+endif()
+
 set(JSONCPP_USE_SECURE_MEMORY "0" CACHE STRING "-D...=1 to use memory-wiping allocator for STL")
 
 configure_file("${PROJECT_SOURCE_DIR}/version.in"
