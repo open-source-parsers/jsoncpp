@@ -62,6 +62,13 @@ import('pkgconfig').generate(
   filebase : 'jsoncpp',
   description : 'A C++ library for interacting with JSON')
 
+cmakeconf = configuration_data()
+
+import('cmake').configure_package_config_file(
+  name: 'jsoncpp',
+  input: 'jsoncppConfig.cmake.meson.in',
+  configuration: cmakeconf)
+
 # for libraries bundling jsoncpp
 jsoncpp_dep = declare_dependency(
   include_directories : jsoncpp_include_directories,

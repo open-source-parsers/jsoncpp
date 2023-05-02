@@ -1,0 +1,6 @@
+@PACKAGE_INIT@
+
+add_library(jsoncpp_lib IMPORTED SHARED)
+set_target_properties(jsoncpp_lib PROPERTIES
+  IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/lib/libjsoncpp.so"
+  INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/include")
