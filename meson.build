@@ -15,7 +15,7 @@ project(
     'cpp_std=c++11',
     'warning_level=1'],
   license : 'Public Domain',
-  meson_version : '>= 0.49.0')
+  meson_version : '>= 0.54.0')
 
 
 jsoncpp_headers = files([
@@ -63,11 +63,41 @@ import('pkgconfig').generate(
   description : 'A C++ library for interacting with JSON')
 
 cmakeconf = configuration_data()
+cmakeconf.set('MESON_LIB_DIR', get_option('libdir'))
+cmakeconf.set('MESON_INCLUDE_DIR', get_option('includedir'))
+
+fs = import('fs')
+if get_option('default_library') == 'shared'
+  shared_name = fs.name(jsoncpp_lib.full_path())
+endif
+if get_option('default_library') == 'static'
+  static_name = fs.name(jsoncpp_lib.full_path())
+endif
+if get_option('default_library') == 'both'
+  shared_name = fs.name(jsoncpp_lib.get_shared_lib().full_path())
+  static_name = fs.name(jsoncpp_lib.get_static_lib().full_path())
+endif
+
+if get_option('default_library') == 'shared' or get_option('default_library') == 'both'
+   cmakeconf.set('MESON_SHARED_TARGET', '''
+add_library(jsoncpp_lib IMPORTED SHARED)
+set_target_properties(jsoncpp_lib PROPERTIES
+  IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/''' + get_option('libdir') + '/' + shared_name + '''"
+  INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/''' + get_option('includedir') + '")')
+endif
+if get_option('default_library') == 'static' or get_option('default_library') == 'both'
+   cmakeconf.set('MESON_STATIC_TARGET', '''
+add_library(jsoncpp_static IMPORTED STATIC)
+set_target_properties(jsoncpp_static PROPERTIES
+  IMPORTED_LOCATION "${PACKAGE_PREFIX_DIR}/''' + get_option('libdir') + '/' + static_name + '''"
+  INTERFACE_INCLUDE_DIRECTORIES "${PACKAGE_PREFIX_DIR}/''' + get_option('includedir') + '")')
+endif
 
 import('cmake').configure_package_config_file(
   name: 'jsoncpp',
   input: 'jsoncppConfig.cmake.meson.in',
   configuration: cmakeconf)
+install_data('jsoncpp-namespaced-targets.cmake', install_dir : get_option('libdir') + '/cmake/' + jsoncpp_lib.name())
 
 # for libraries bundling jsoncpp
 jsoncpp_dep = declare_dependency(
