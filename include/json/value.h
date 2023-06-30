@@ -3,8 +3,8 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#ifndef JSON_H_INCLUDED
-#define JSON_H_INCLUDED
+#ifndef JSON_VALUE_H_INCLUDED
+#define JSON_VALUE_H_INCLUDED
 
 #if !defined(JSON_IS_AMALGAMATION)
 #include "forwards.h"
