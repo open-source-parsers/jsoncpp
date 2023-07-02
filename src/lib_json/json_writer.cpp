@@ -1246,7 +1246,7 @@ String writeString(StreamWriter::Factory const& factory, Value const& root) {
   OStringStream sout;
   StreamWriterPtr const writer(factory.newStreamWriter());
   writer->write(root, &sout);
-  return sout.str();
+  return std::move(sout).str();
 }
 
 OStream& operator<<(OStream& sout, Value const& root) {
