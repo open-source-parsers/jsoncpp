@@ -1530,15 +1530,18 @@ void Path::makePath(const String& path, const InArgs& in) {
   while (current != end) {
     if (*current == '[') {
       ++current;
-      if (*current == '%')
+      if (current != end && *current == '%') {
         addPathInArg(path, in, itInArg, PathArgument::kindIndex);
-      else {
+        ++current;
+      } else {
         ArrayIndex index = 0;
+        if (current == end || *current < '0' || *current > '9')
+          invalidPath(path, int(current - path.c_str()));
         for (; current != end && *current >= '0' && *current <= '9'; ++current)
           index = index * 10 + ArrayIndex(*current - '0');
         args_.push_back(index);
       }
-      if (current == end || *++current != ']')
+      if (current == end || *current != ']')
         invalidPath(path, int(current - path.c_str()));
     } else if (*current == '%') {
       addPathInArg(path, in, itInArg, PathArgument::kindKey);
