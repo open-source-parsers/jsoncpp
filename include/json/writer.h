@@ -354,6 +354,7 @@ String JSON_API valueToString(
     PrecisionType precisionType = PrecisionType::significantDigits);
 String JSON_API valueToString(bool value);
 String JSON_API valueToQuotedString(const char* value);
+String JSON_API valueToQuotedString(const char* value, size_t length);
 
 /// \brief Output using the StyledStreamWriter.
 /// \see Json::operator>>()
