@@ -480,15 +480,15 @@ bool Reader::readObject(Token& token) {
       return recoverFromError(tokenObjectEnd);
 
     Token comma;
-    if (!readToken(comma) ||
-        (comma.type_ != tokenObjectEnd && comma.type_ != tokenArraySeparator &&
-         comma.type_ != tokenComment)) {
+    bool finalizeTokenOk = readToken(comma);
+    while (comma.type_ == tokenComment && finalizeTokenOk) {
+      finalizeTokenOk = readToken(comma);
+    }
+    if (!finalizeTokenOk ||
+        (comma.type_ != tokenObjectEnd && comma.type_ != tokenArraySeparator)) {
       return addErrorAndRecover("Missing ',' or '}' in object declaration",
                                 comma, tokenObjectEnd);
     }
-    bool finalizeTokenOk = true;
-    while (comma.type_ == tokenComment && finalizeTokenOk)
-      finalizeTokenOk = readToken(comma);
     if (comma.type_ == tokenObjectEnd)
       return true;
   }
@@ -1491,15 +1491,15 @@ bool OurReader::readObject(Token& token) {
       return recoverFromError(tokenObjectEnd);
 
     Token comma;
-    if (!readToken(comma) ||
-        (comma.type_ != tokenObjectEnd && comma.type_ != tokenArraySeparator &&
-         comma.type_ != tokenComment)) {
+    bool finalizeTokenOk = readToken(comma);
+    while (comma.type_ == tokenComment && finalizeTokenOk) {
+      finalizeTokenOk = readToken(comma);
+    }
+    if (!finalizeTokenOk ||
+        (comma.type_ != tokenObjectEnd && comma.type_ != tokenArraySeparator)) {
       return addErrorAndRecover("Missing ',' or '}' in object declaration",
                                 comma, tokenObjectEnd);
     }
-    bool finalizeTokenOk = true;
-    while (comma.type_ == tokenComment && finalizeTokenOk)
-      finalizeTokenOk = readToken(comma);
     if (comma.type_ == tokenObjectEnd)
       return true;
   }
