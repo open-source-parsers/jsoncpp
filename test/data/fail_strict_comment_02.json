@@ -1,0 +1,4 @@
+{
+  "a": "aaa", // comments not allowed in strict mode
+  "b": "bbb"
+}
