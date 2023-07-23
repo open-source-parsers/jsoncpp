@@ -124,6 +124,22 @@ enum CommentPlacement {
   numberOfCommentPlacement
 };
 
+enum WhitespaceOptions {
+  colonBraceSameLine = 1 << 0, ///< braces just after colons on the same line
+};
+inline WhitespaceOptions operator|(
+  WhitespaceOptions left, WhitespaceOptions right) {
+    return static_cast<WhitespaceOptions>(static_cast<int>(left) | static_cast<int>(right));
+}
+inline void operator|=(
+  WhitespaceOptions& left, WhitespaceOptions right) {
+    left = left | right;
+}
+inline WhitespaceOptions operator&(
+  WhitespaceOptions left, WhitespaceOptions right) {
+    return static_cast<WhitespaceOptions>(static_cast<int>(left) & static_cast<int>(right));
+}
+
 /** \brief Type of precision for formatting of real values.
  */
 enum PrecisionType {
