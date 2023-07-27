@@ -25,7 +25,7 @@ int main() {
     const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
     if (!reader->parse(rawJson.c_str(), rawJson.c_str() + rawJsonLength, &root,
                        &err)) {
-      std::cout << "error" << std::endl;
+      std::cout << "error: " << err << std::endl;
       return EXIT_FAILURE;
     }
   }
