@@ -244,6 +244,13 @@ private:
  */
 class JSON_API CharReader {
 public:
+  class JSON_API StructuredError {
+  public:
+    ptrdiff_t offset_start;
+    ptrdiff_t offset_limit;
+    String message;
+  };
+
   virtual ~CharReader() = default;
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
    * document. The document must be a UTF-8 encoded string containing the
@@ -263,6 +270,12 @@ public:
    */
   virtual bool parse(char const* beginDoc, char const* endDoc, Value* root,
                      String* errs) = 0;
+
+  /** \brief Get a list of structured error messages from parsing the document.
+   *
+   * \return list of error messages.
+   */
+  virtual std::vector<StructuredError> getStructuredErrors() const = 0;
 
   class JSON_API Factory {
   public:
