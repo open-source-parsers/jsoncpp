@@ -1169,9 +1169,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const {
   const bool emitUTF8 = settings_["emitUTF8"].asBool();
   unsigned int pre = settings_["precision"].asUInt();
   CommentStyle::Enum cs = CommentStyle::All;
-  if (cs_str == "All") {
-    cs = CommentStyle::All;
-  } else if (cs_str == "None") {
+  if (cs_str == "None") {
     cs = CommentStyle::None;
   } else {
     throwRuntimeError("commentStyle must be 'All' or 'None'");
