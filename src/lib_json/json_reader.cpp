@@ -1083,6 +1083,9 @@ bool OurReader::readValue() {
   case tokenNumber:
     successful = decodeNumber(token);
     break;
+  case tokenHexadecimal:
+    successful = decodeHexadecimal(token);
+    break;
   case tokenString:
     successful = decodeString(token);
     break;
@@ -1969,7 +1972,7 @@ CharReader* CharReaderBuilder::newCharReader() const {
   features.failIfExtra_ = settings_["failIfExtra"].asBool();
   features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
-  features.allowHexadecimal_ = settings_["allowHexacecimal"].asBool();
+  features.allowHexadecimal_ = settings_["allowHexadecimal"].asBool();
   features.skipBom_ = settings_["skipBom"].asBool();
   return new OurCharReader(collectComments, features);
 }
@@ -1987,7 +1990,7 @@ bool CharReaderBuilder::validate(Json::Value* invalid) const {
       "failIfExtra",
       "rejectDupKeys",
       "allowSpecialFloats",
-      "allowHexacecimal",
+      "allowHexadecimal",
       "skipBom",
   };
   for (auto si = settings_.begin(); si != settings_.end(); ++si) {

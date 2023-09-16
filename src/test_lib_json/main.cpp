@@ -3577,6 +3577,8 @@ JSONTEST_FIXTURE_LOCAL(CharReaderAllowHexadecimal, disallowHex) {
 JSONTEST_FIXTURE_LOCAL(CharReaderAllowHexadecimal, hexObject) {
   Json::CharReaderBuilder b;
   b.settings_["allowHexadecimal"] = true;
+  Json::Value invalid;
+  JSONTEST_ASSERT(b.validate(&invalid)) << invalid;
   CharReaderPtr reader(b.newCharReader());
   {
     Json::Value root;
@@ -3622,7 +3624,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderAllowHexadecimal, hexNumbers) {
     const char* c0 = td.in.c_str();
     const char* c1 = c0 + td.in.size();
     bool ok = reader->parse(c0, c1, &root, &errs);
-    JSONTEST_ASSERT_EQUAL(td.ok, ok);
+    JSONTEST_ASSERT(td.ok == ok) << "in: " << td.in;
     if (td.ok)
     {
       JSONTEST_ASSERT_EQUAL(0u, errs.size());
