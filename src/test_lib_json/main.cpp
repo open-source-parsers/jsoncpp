@@ -3564,7 +3564,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderAllowHexadecimal, disallowHex) {
   Json::Value root;
   Json::String errs;
   {
-    char const doc[] = R"({"a": 0x01})";
+    char const doc[] = R"({ "a":0x9, "b":0xf, "c":0xF })";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(!ok);
     JSONTEST_ASSERT_STRING_EQUAL(
@@ -3583,11 +3583,7 @@ JSONTEST_FIXTURE_LOCAL(CharReaderAllowHexadecimal, hexObject) {
   {
     Json::Value root;
     Json::String errs;
-    char const doc[] = R"({
-      "a":0x9,
-      "b":0xf,
-      "c":0xF
-    })";
+    char const doc[] = R"({ "a":0x9, "b":0xf, "c":0xF })";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(ok);
     JSONTEST_ASSERT_STRING_EQUAL("", errs);
@@ -3605,18 +3601,31 @@ JSONTEST_FIXTURE_LOCAL(CharReaderAllowHexadecimal, hexNumbers) {
 
   struct TestData {
     bool ok;
-    Json::String in;
     Json::LargestUInt out;
+    Json::String in;
   };
+  constexpr int _ = 0; // ignored
   const TestData test_data[] = {
-      {true, "9", 9}, // regular number
-      {true, "0x00", 0x00}, // zero
-      {true, "0x0123456789", 0x0123456789}, // numeric hex
-      {true, "0xABCDEF", 0xABCDEF}, // uppercase-letter hex
-      {true, "0xabcdef", 0xabcdef}, // lowercase-letter hex
-      {false, "x", 0 }, // leading x
-      {false, "0xx", 0 }, // extra x
-      {false, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 0} // too long
+      {true, 99, "99"}, // regular number
+      {true, 0x99, "0x99"}, // hexadecimal number
+      {false, _, "AA"}, // missing prefix
+      {false, _, "xAA"}, // partial prefix
+      {true, 0xAA, "0xAA"}, // with prefix
+      {true, 0x00, "0x00"}, // zero
+      {true, 0x0123456789, "0x0123456789"}, // numeric hex
+      {true, 0xABCDEF, "0xABCDEF"}, // uppercase-letter hex
+      {true, 0xabcdef, "0xabcdef"}, // lowercase-letter hex
+#ifdef JSON_HAS_INT64
+      {true, 0xFfffFfffFfffFfff, "0xFfffFfffFfffFfff"}, // max
+      {false, _, "0x1FfffFfffFfffFfff"}, // too long
+#else
+      {true, 0xFfffFfff, "0xFfffFfff"}, // max
+      {false, _, "0x1FfffFfff"}, // too long
+#endif
+      {false, _, "0x000000000000000000000000000000000000000"}, // too long
+      {false, _, "x"}, // leading x
+      {false, _, "0x"}, // empty number
+      {false, _, "0xx"} // extra x
   };
   for (const auto& td : test_data) {
     Json::Value root;
@@ -3627,10 +3636,10 @@ JSONTEST_FIXTURE_LOCAL(CharReaderAllowHexadecimal, hexNumbers) {
     JSONTEST_ASSERT(td.ok == ok) << "in: " << td.in;
     if (td.ok)
     {
-      JSONTEST_ASSERT_EQUAL(0u, errs.size());
-      JSONTEST_ASSERT(root.isConvertibleTo(Json::ValueType::uintValue));
-      if (root.isConvertibleTo(Json::ValueType::uintValue))
-        JSONTEST_ASSERT_EQUAL(root.asLargestUInt(), td.out);
+      JSONTEST_ASSERT_STRING_EQUAL("", errs);
+      JSONTEST_ASSERT(root.isUInt64());
+      if (root.isUInt64())
+        JSONTEST_ASSERT_EQUAL(td.out, root.asLargestUInt());
     }
     else
     {

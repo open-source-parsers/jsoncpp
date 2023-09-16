@@ -1440,12 +1440,14 @@ bool OurReader::readNumber(bool checkInf) {
 
 bool OurReader::readHexadecimal(void) {
   Location p = current_;
-  char c = '0'; // stopgap for already consumed character
-  // integral part
-  while ((c >= '0' && c <= '9')
-    || (c >= 'a' && c <= 'f')
-    || (c >= 'A' && c <= 'F'))
-    c = (current_ = p) < end_ ? *p++ : '\0';
+  for (; p < end_; ++p)
+  {
+    char c = *p;
+    if ( (c < '0' || c > '9')
+      && (c < 'a' || c > 'f')
+      && (c < 'A' || c > 'F') ) break;
+  }
+  current_ = p;
   return true;
 }
 
@@ -1680,23 +1682,24 @@ bool OurReader::decodeHexadecimal(Token& token) {
 }
 
 bool OurReader::decodeHexadecimal(Token& token, Value& decoded) {
+  Location current = token.start_;
+  if (current < token.end_ && *current == '0') ++current;
+  if (current < token.end_ && *current == 'x') ++current;
   Json::LargestUInt value = 0;
-  constexpr Json::LargestUInt top =
-    Json::LargestUInt(0xF) << ((sizeof(top) * 8) - 4); 
-
-  Location current = token.start_ + 2;
-  while (current < token.end_) {
-    Char c = *current++;
+  if (current >= token.end_)
+    return addError("Zero hexadecimal digits.", token);
+  if (current + (sizeof(value) * 2) < token.end_)
+    return addError("Token too long to be unsigned integer.", token, current);
+  for (; current < token.end_; ++current) {
+    Char c = *current;
     if (c >= 'a')
       c -= 'a' - 10;
     else if (c >= 'A')
       c -= 'A' - 10;
     else if (c >= '0')
       c -= '0';
-    else return addError(
-        "Contains non-hexadecimal digits.", token, current);
-    if (value & top) return addError(
-        "Number is too large for unsigned integer.", token, current);
+    else
+      return addError("Contains non-hexadecimal digits.", token, current);
     value = value << 4 | static_cast<Value::UInt>(c);
   }
   decoded = value;
