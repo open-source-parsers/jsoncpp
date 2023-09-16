@@ -1200,8 +1200,12 @@ bool OurReader::readToken(Token& token) {
       token.type_ = tokenHexadecimal;
       ok = features_.allowHexadecimal_;
       readHexadecimal();
-      break;
     }
+    else {
+      token.type_ = tokenNumber;
+      readNumber(false);
+    }
+    break;
   case '1':
   case '2':
   case '3':
@@ -1675,16 +1679,12 @@ bool OurReader::decodeHexadecimal(Token& token) {
 bool OurReader::decodeHexadecimal(Token& token, Value& decoded) {
   Json::LargestUInt value = 0;
   constexpr Json::LargestUInt top =
-    Json::LargestUInt(0xF) << (sizeof(top) * 8) - 4; 
+    Json::LargestUInt(0xF) << ((sizeof(top) * 8) - 4); 
 
-  Location current = token.start_;
+  Location current = token.start_ + 2;
   while (current < token.end_) {
     Char c = *current++;
-    static_assert('A' < 'a');
-    static_assert('0' < 'A');
-    if (c == 'x')
-      continue;
-    else if (c >= 'a')
+    if (c >= 'a')
       c -= 'a' - 10;
     else if (c >= 'A')
       c -= 'A' - 10;
