@@ -875,6 +875,7 @@ public:
   bool failIfExtra_;
   bool rejectDupKeys_;
   bool allowSpecialFloats_;
+  bool allowHexadecimal_;
   bool skipBom_;
   size_t stackLimit_;
 }; // OurFeatures
@@ -914,6 +915,7 @@ private:
     tokenArrayEnd,
     tokenString,
     tokenNumber,
+    tokenHexadecimal,
     tokenTrue,
     tokenFalse,
     tokenNull,
@@ -952,11 +954,14 @@ private:
   bool readString();
   bool readStringSingleQuote();
   bool readNumber(bool checkInf);
+  bool readHexadecimal();
   bool readValue();
   bool readObject(Token& token);
   bool readArray(Token& token);
   bool decodeNumber(Token& token);
   bool decodeNumber(Token& token, Value& decoded);
+  bool decodeHexadecimal(Token& token);
+  bool decodeHexadecimal(Token& token, Value& decoded);
   bool decodeString(Token& token);
   bool decodeString(Token& token, String& decoded);
   bool decodeDouble(Token& token);
@@ -1078,6 +1083,9 @@ bool OurReader::readValue() {
   case tokenNumber:
     successful = decodeNumber(token);
     break;
+  case tokenHexadecimal:
+    successful = decodeHexadecimal(token);
+    break;
   case tokenString:
     successful = decodeString(token);
     break;
@@ -1191,6 +1199,16 @@ bool OurReader::readToken(Token& token) {
     ok = readComment();
     break;
   case '0':
+    if(match("x", 1)) {
+      token.type_ = tokenHexadecimal;
+      ok = features_.allowHexadecimal_;
+      readHexadecimal();
+    }
+    else {
+      token.type_ = tokenNumber;
+      readNumber(false);
+    }
+    break;
   case '1':
   case '2':
   case '3':
@@ -1419,6 +1437,20 @@ bool OurReader::readNumber(bool checkInf) {
   }
   return true;
 }
+
+bool OurReader::readHexadecimal(void) {
+  Location p = current_;
+  for (; p < end_; ++p)
+  {
+    char c = *p;
+    if ( (c < '0' || c > '9')
+      && (c < 'a' || c > 'f')
+      && (c < 'A' || c > 'F') ) break;
+  }
+  current_ = p;
+  return true;
+}
+
 bool OurReader::readString() {
   Char c = 0;
   while (current_ != end_) {
@@ -1636,6 +1668,41 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
     decoded = value;
   }
 
+  return true;
+}
+
+bool OurReader::decodeHexadecimal(Token& token) {
+  Value decoded;
+  if (!decodeHexadecimal(token, decoded))
+    return false;
+  currentValue().swapPayload(decoded);
+  currentValue().setOffsetStart(token.start_ - begin_);
+  currentValue().setOffsetLimit(token.end_ - begin_);
+  return true;
+}
+
+bool OurReader::decodeHexadecimal(Token& token, Value& decoded) {
+  Location current = token.start_;
+  if (current < token.end_ && *current == '0') ++current;
+  if (current < token.end_ && *current == 'x') ++current;
+  Json::LargestUInt value = 0;
+  if (current >= token.end_)
+    return addError("Zero hexadecimal digits.", token);
+  if (current + (sizeof(value) * 2) < token.end_)
+    return addError("Token too long to be unsigned integer.", token, current);
+  for (; current < token.end_; ++current) {
+    Char c = *current;
+    if (c >= 'a')
+      c -= 'a' - 10;
+    else if (c >= 'A')
+      c -= 'A' - 10;
+    else if (c >= '0')
+      c -= '0';
+    else
+      return addError("Contains non-hexadecimal digits.", token, current);
+    value = value << 4 | static_cast<Value::UInt>(c);
+  }
+  decoded = value;
   return true;
 }
 
@@ -1908,6 +1975,7 @@ CharReader* CharReaderBuilder::newCharReader() const {
   features.failIfExtra_ = settings_["failIfExtra"].asBool();
   features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
+  features.allowHexadecimal_ = settings_["allowHexadecimal"].asBool();
   features.skipBom_ = settings_["skipBom"].asBool();
   return new OurCharReader(collectComments, features);
 }
@@ -1925,6 +1993,7 @@ bool CharReaderBuilder::validate(Json::Value* invalid) const {
       "failIfExtra",
       "rejectDupKeys",
       "allowSpecialFloats",
+      "allowHexadecimal",
       "skipBom",
   };
   for (auto si = settings_.begin(); si != settings_.end(); ++si) {
