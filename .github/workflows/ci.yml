@@ -1,0 +1,31 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  # Generally speaking the idiom for open source projects is to support
+  # the version of CMake supported by the oldest LTS release.
+  #
+  # Example: Ubuntu-20.04 and Ubuntu-22.04
+  # Ubuntu-20.04's package manager comes with 3.16.3 by default.
+  # This makes boostrapping the build easier for open source development.
+  #
+  # This idiom really only applies to Linux development. Windows/Mac/Android developers
+  # tend to use newer CMake versions due to Visual Studio / Xcode / Android NDK requirements.
+  #
+  # EX: Visual Studio 2022 requires CMake 3.21
+  test-cmake-minimum:
+    name: Test CMake minimum
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.16.3
+      - run: cmake -S . -B out/ -G Ninja
+      - run: cmake --build out/
+      - run: cmake --install out/ --prefix /tmp

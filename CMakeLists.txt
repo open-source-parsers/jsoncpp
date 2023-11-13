@@ -1,44 +1,5 @@
 # vim: et ts=4 sts=4 sw=4 tw=0
-
-# ==== Define cmake build policies that affect compilation and linkage default behaviors
-#
-# Set the JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION string to the newest cmake version
-# policies that provide successful builds. By setting JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION
-# to a value greater than the oldest policies, all policies between
-# JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION and CMAKE_VERSION (used for this build)
-# are set to their NEW behavior, thereby suppressing policy warnings related to policies
-# between the JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION and CMAKE_VERSION.
-#
-# CMake versions greater than the JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION policies will
-# continue to generate policy warnings "CMake Warning (dev)...Policy CMP0XXX is not set:"
-#
-set(JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION "3.8.0")
-set(JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION "3.13.2")
-cmake_minimum_required(VERSION ${JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION})
-if("${CMAKE_VERSION}" VERSION_LESS "${JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION}")
-    #Set and use the newest available cmake policies that are validated to work
-    set(JSONCPP_CMAKE_POLICY_VERSION "${CMAKE_VERSION}")
-else()
-    set(JSONCPP_CMAKE_POLICY_VERSION "${JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION}")
-endif()
-cmake_policy(VERSION ${JSONCPP_CMAKE_POLICY_VERSION})
-if(POLICY CMP0091)
-    cmake_policy(SET CMP0091 NEW)
-endif()
-#
-# Now enumerate specific policies newer than JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION
-# that may need to be individually set to NEW/OLD
-#
-foreach(pnew "") # Currently Empty
-    if(POLICY ${pnew})
-        cmake_policy(SET ${pnew} NEW)
-    endif()
-endforeach()
-foreach(pold "") # Currently Empty
-    if(POLICY ${pold})
-        cmake_policy(SET ${pold} OLD)
-    endif()
-endforeach()
+cmake_minimum_required(VERSION 3.16)
 
 # Build the library with C++11 standard support, independent from other including
 # software which may use a different CXX_STANDARD or CMAKE_CXX_STANDARD.
