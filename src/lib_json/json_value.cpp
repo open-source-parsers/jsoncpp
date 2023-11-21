@@ -103,7 +103,7 @@ template <typename T> static inline double integerToDouble(T value) {
 template <typename T, typename U>
 static inline bool InRange(double d, T min, U max) {
   return d >= integerToDouble(min) && d <= integerToDouble(max) &&
-         !(static_cast<T>(d) == min && d != integerToDouble(min));
+         !(static_cast<T>(d) == min || d != integerToDouble(min));
 }
 #endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 
