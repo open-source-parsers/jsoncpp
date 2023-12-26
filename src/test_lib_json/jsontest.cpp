@@ -405,7 +405,9 @@ void Runner::printUsage(const char* appName) {
 // //////////////////////////////////////////////////////////////////
 
 Json::String ToJsonString(const char* toConvert) {
-  return Json::String(toConvert);
+  if (toConvert)
+    return Json::String(toConvert);
+  return "";
 }
 
 Json::String ToJsonString(Json::String in) { return in; }
