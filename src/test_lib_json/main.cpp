@@ -3556,6 +3556,98 @@ JSONTEST_FIXTURE_LOCAL(CharReaderAllowZeroesTest, issue176) {
   }
 }
 
+struct CharReaderAllowHexadecimal : JsonTest::TestCase {};
+
+JSONTEST_FIXTURE_LOCAL(CharReaderAllowHexadecimal, disallowHex) {
+  Json::CharReaderBuilder b;
+  CharReaderPtr reader(b.newCharReader());
+  Json::Value root;
+  Json::String errs;
+  {
+    char const doc[] = R"({ "a":0x9, "b":0xf, "c":0xF })";
+    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
+    JSONTEST_ASSERT(!ok);
+    JSONTEST_ASSERT_STRING_EQUAL(
+        "* Line 1, Column 7\n"
+        "  Syntax error: value, object or array expected.\n",
+        errs);
+  }
+}
+
+JSONTEST_FIXTURE_LOCAL(CharReaderAllowHexadecimal, hexObject) {
+  Json::CharReaderBuilder b;
+  b.settings_["allowHexadecimal"] = true;
+  Json::Value invalid;
+  JSONTEST_ASSERT(b.validate(&invalid)) << invalid;
+  CharReaderPtr reader(b.newCharReader());
+  {
+    Json::Value root;
+    Json::String errs;
+    char const doc[] = R"({ "a":0x9, "b":0xf, "c":0xF })";
+    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_STRING_EQUAL("", errs);
+    JSONTEST_ASSERT_EQUAL(3u, root.size());
+    JSONTEST_ASSERT_EQUAL(0x9u, root.get("a", 0).asUInt());
+    JSONTEST_ASSERT_EQUAL(0xfu, root.get("b", 0).asUInt());
+    JSONTEST_ASSERT_EQUAL(0xFu, root.get("c", 0).asUInt());
+  }
+}
+
+JSONTEST_FIXTURE_LOCAL(CharReaderAllowHexadecimal, hexNumbers) {
+  Json::CharReaderBuilder b;
+  b.settings_["allowHexadecimal"] = true;
+  CharReaderPtr reader(b.newCharReader());
+
+  struct TestData {
+    bool ok;
+    Json::LargestUInt out;
+    Json::String in;
+  };
+  constexpr int _ = 0; // ignored
+  const TestData test_data[] = {
+      {true, 99, "99"}, // regular number
+      {true, 0x99, "0x99"}, // hexadecimal number
+      {false, _, "AA"}, // missing prefix
+      {false, _, "xAA"}, // partial prefix
+      {true, 0xAA, "0xAA"}, // with prefix
+      {true, 0x00, "0x00"}, // zero
+      {true, 0x0123456789, "0x0123456789"}, // numeric hex
+      {true, 0xABCDEF, "0xABCDEF"}, // uppercase-letter hex
+      {true, 0xabcdef, "0xabcdef"}, // lowercase-letter hex
+#ifdef JSON_HAS_INT64
+      {true, 0xFfffFfffFfffFfff, "0xFfffFfffFfffFfff"}, // max
+      {false, _, "0x1FfffFfffFfffFfff"}, // too long
+#else
+      {true, 0xFfffFfff, "0xFfffFfff"}, // max
+      {false, _, "0x1FfffFfff"}, // too long
+#endif
+      {false, _, "0x000000000000000000000000000000000000000"}, // too long
+      {false, _, "x"}, // leading x
+      {false, _, "0x"}, // empty number
+      {false, _, "0xx"} // extra x
+  };
+  for (const auto& td : test_data) {
+    Json::Value root;
+    Json::String errs;
+    const char* c0 = td.in.c_str();
+    const char* c1 = c0 + td.in.size();
+    bool ok = reader->parse(c0, c1, &root, &errs);
+    JSONTEST_ASSERT(td.ok == ok) << "in: " << td.in;
+    if (td.ok)
+    {
+      JSONTEST_ASSERT_STRING_EQUAL("", errs);
+      JSONTEST_ASSERT(root.isUInt64());
+      if (root.isUInt64())
+        JSONTEST_ASSERT_EQUAL(td.out, root.asLargestUInt());
+    }
+    else
+    {
+      JSONTEST_ASSERT(errs.size() > 0);
+    }
+  }
+}
+
 struct CharReaderAllowSpecialFloatsTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE_LOCAL(CharReaderAllowSpecialFloatsTest, specialFloat) {

@@ -11,6 +11,7 @@
 /doc/doxyfile
 /dist/
 /.cache/
+/.vscode/
 
 # MSVC project files:
 *.sln

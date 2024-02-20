@@ -324,6 +324,8 @@ public:
    * - `"allowSpecialFloats": false or true`
    *   - If true, special float values (NaNs and infinities) are allowed and
    *     their values are lossfree restorable.
+   * - `"allowHexadecimal": false or true`
+   *   - If true, allow hexadecimal (eg 0xFFFF) to be used as unsigned integers.
    * - `"skipBom": false or true`
    *   - If true, if the input starts with the Unicode byte order mark (BOM),
    *     it is skipped.
