@@ -1692,11 +1692,11 @@ bool OurReader::decodeHexadecimal(Token& token, Value& decoded) {
     return addError("Token too long to be unsigned integer.", token, current);
   for (; current < token.end_; ++current) {
     Char c = *current;
-    if (c >= 'a')
+    if (c >= 'a' && c <= 'f')
       c -= 'a' - 10;
-    else if (c >= 'A')
+    else if (c >= 'A' && c <= 'F')
       c -= 'A' - 10;
-    else if (c >= '0')
+    else if (c >= '0' && c <= '9')
       c -= '0';
     else
       return addError("Contains non-hexadecimal digits.", token, current);
