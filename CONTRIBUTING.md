@@ -28,7 +28,7 @@ Then,
     meson --buildtype ${BUILD_TYPE} --default-library ${LIB_TYPE} . build-${LIB_TYPE}
     ninja -v -C build-${LIB_TYPE}
 
-    ninja -C build-static/ test
+    ninja -C build-shared/ test
 
     # Or
     #cd build-${LIB_TYPE}
