@@ -334,6 +334,16 @@ bool Value::CZString::isStaticString() const {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
+#if JSONCPP_CXX_STD_11
+
+#else
+// In-class initializer for static data member of type 'const double' is a GNU
+// extension. JSONCPP_CONST == const, if C++0x.
+// So initialization has to be done in json_value.cpp to make this project
+// compileable with e.g. VS2013.
+JSONCPP_CONST double Value::maxUInt64AsDouble = 18446744073709551615.0;
+#endif
+
 /*! \internal Default constructor initialization must be equivalent to:
  * memset( this, 0, sizeof(Value) )
  * This optimization is used in ValueInternalMap fast allocator.
