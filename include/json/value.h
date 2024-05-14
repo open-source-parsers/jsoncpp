@@ -131,9 +131,10 @@ inline WhitespaceOptions operator|(
   WhitespaceOptions left, WhitespaceOptions right) {
     return static_cast<WhitespaceOptions>(static_cast<int>(left) | static_cast<int>(right));
 }
-inline void operator|=(
+inline WhitespaceOptions& operator|=(
   WhitespaceOptions& left, WhitespaceOptions right) {
     left = left | right;
+    return left;
 }
 inline WhitespaceOptions operator&(
   WhitespaceOptions left, WhitespaceOptions right) {
