@@ -41,7 +41,3 @@ jobs:
           meson-version: 1.5.1
           ninja-version: 1.11.1.1
           action: test
-          
-      - name: clang-format
-        run: ninja -C build clang-format-check
-
