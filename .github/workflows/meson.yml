@@ -4,18 +4,21 @@ run-name: ${{ github.actor }} is testing out replacing Travis with Github Action
 on: [push]
 
 jobs:
-  Validate-Pull-Request:
+  publish:
     runs-on: ubuntu-latest
     steps:     
       - run: echo " The job was automatically triggered by a ${{ github.event_name }} event."
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
+      
       - uses: BSFishy/meson-build@v1.0.3
         with:
           action: build
+  
       - uses: BSFishy/meson-build@v1.0.3
         with:
           action: test
-      - uses: BSFishy/meson-build@v1.0.3
-        with:
-          action: clang-format
+          
+      - uses: seanmiddleditch/gha-setup-ninja@master
+      - run: ninja -C build clang-format
+
