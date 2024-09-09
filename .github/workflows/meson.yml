@@ -1,6 +1,6 @@
 name: Meson
     
-run-name: ${{ github.actor }} is testing out replacing Travis with Github Actions!
+run-name: ${{ github.actor }} is testing out replacing Travis with Github Actions
 on: [push]
 
 jobs:
