@@ -1,5 +1,4 @@
 name: meson
-    
 run-name: ${{ github.ref }}
 on: [push]
 
