@@ -13,9 +13,12 @@ jobs:
       - uses: BSFishy/meson-build@v1.0.3
         with:
           action: build
+      - uses: BSFishy/meson-build@v1.0.3
+        with:
           action: test
+      - uses: BSFishy/meson-build@v1.0.3
+        with:
           action: tidy
-          
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
