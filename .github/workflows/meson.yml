@@ -20,5 +20,5 @@ jobs:
           action: test
           
       - uses: seanmiddleditch/gha-setup-ninja@master
-      - run: ninja -C build clang-format
+      - run: ninja -C build clang-format-check
 
