@@ -1,7 +1,6 @@
-name: Meson Build
-uses: BSFishy/meson-build@v1.0.3
+name: Meson
     
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+run-name: ${{ github.actor }} is testing out replacing Travis with Github Actions!
 on: [push]
 
 jobs:
