@@ -16,11 +16,13 @@ jobs:
       - name: meson build
         uses: BSFishy/meson-build@v1.0.3
         with:
+          meson-version: 1.5.1
           action: build
   
       - name: meson test
         uses: BSFishy/meson-build@v1.0.3
         with:
+          meson-version: 1.5.1
           action: test
           
       - name: clang-format
