@@ -1,5 +1,5 @@
 name: meson
-run-name: ${{ github.ref }}
+run-name: update pushed to ${{ github.ref }}
 on: [push]
 
 jobs:
