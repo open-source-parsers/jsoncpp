@@ -15,5 +15,5 @@ jobs:
     - name: runs clang-format style check for C/C++/Protobuf programs.
       uses: jidicula/clang-format-action@v4.13.0
       with:
-        clang-format-version: '13'
+        clang-format-version: '18'
         check-path: ${{ matrix.path }}
