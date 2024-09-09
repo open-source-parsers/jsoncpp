@@ -18,4 +18,4 @@ jobs:
           action: test
       - uses: BSFishy/meson-build@v1.0.3
         with:
-          action: tidy
+          action: clang-format
