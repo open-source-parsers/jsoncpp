@@ -144,7 +144,7 @@ if(BUILD_STATIC_LIBS)
 
     # avoid name clashes on windows as the shared import lib is also named jsoncpp.lib
     if(NOT DEFINED STATIC_SUFFIX AND BUILD_SHARED_LIBS)
-        if (MSVC)
+        if (WIN32)
             set(STATIC_SUFFIX "_static")
         else()
             set(STATIC_SUFFIX "")

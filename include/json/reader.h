@@ -190,6 +190,7 @@ private:
   using Errors = std::deque<ErrorInfo>;
 
   bool readToken(Token& token);
+  bool readTokenSkippingComments(Token& token);
   void skipSpaces();
   bool match(const Char* pattern, int patternLength);
   bool readComment();
@@ -221,7 +222,6 @@ private:
                                 int& column) const;
   String getLocationLineAndColumn(Location location) const;
   void addComment(Location begin, Location end, CommentPlacement placement);
-  void skipCommentTokens(Token& token);
 
   static bool containsNewLine(Location begin, Location end);
   static String normalizeEOL(Location begin, Location end);
@@ -244,6 +244,12 @@ private:
  */
 class JSON_API CharReader {
 public:
+  struct JSON_API StructuredError {
+    ptrdiff_t offset_start;
+    ptrdiff_t offset_limit;
+    String message;
+  };
+
   virtual ~CharReader() = default;
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
    * document. The document must be a UTF-8 encoded string containing the
@@ -262,7 +268,12 @@ public:
    * error occurred.
    */
   virtual bool parse(char const* beginDoc, char const* endDoc, Value* root,
-                     String* errs) = 0;
+                     String* errs);
+
+  /** \brief Returns a vector of structured errors encountered while parsing.
+   * Each parse call resets the stored list of errors.
+   */
+  std::vector<StructuredError> getStructuredErrors() const;
 
   class JSON_API Factory {
   public:
@@ -272,6 +283,20 @@ public:
      */
     virtual CharReader* newCharReader() const = 0;
   }; // Factory
+
+protected:
+  class Impl {
+  public:
+    virtual ~Impl() = default;
+    virtual bool parse(char const* beginDoc, char const* endDoc, Value* root,
+                       String* errs) = 0;
+    virtual std::vector<StructuredError> getStructuredErrors() const = 0;
+  };
+
+  explicit CharReader(std::unique_ptr<Impl> impl) : _impl(std::move(impl)) {}
+
+private:
+  std::unique_ptr<Impl> _impl;
 }; // CharReader
 
 /** \brief Build a CharReader implementation.
