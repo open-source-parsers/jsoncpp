@@ -3,8 +3,8 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
-#ifndef JSON_H_INCLUDED
-#define JSON_H_INCLUDED
+#ifndef JSON_VALUE_H_INCLUDED
+#define JSON_VALUE_H_INCLUDED
 
 #if !defined(JSON_IS_AMALGAMATION)
 #include "forwards.h"
@@ -513,6 +513,9 @@ public:
   /// and operator[]const
   /// \note As stated elsewhere, behavior is undefined if (end-begin) >= 2^30
   Value const* find(char const* begin, char const* end) const;
+  /// Most general and efficient version of isMember()const, get()const,
+  /// and operator[]const
+  Value const* find(const String& key) const;
   /// Most general and efficient version of object-mutators.
   /// \note As stated elsewhere, behavior is undefined if (end-begin) >= 2^30
   /// \return non-zero, but JSON_ASSERT if this is neither object nor nullValue.
@@ -586,19 +589,23 @@ public:
   iterator end();
 
   /// \brief Returns a reference to the first element in the `Value`.
-  /// Requires that this value holds an array or json object, with at least one element.
+  /// Requires that this value holds an array or json object, with at least one
+  /// element.
   const Value& front() const;
 
   /// \brief Returns a reference to the first element in the `Value`.
-  /// Requires that this value holds an array or json object, with at least one element.
+  /// Requires that this value holds an array or json object, with at least one
+  /// element.
   Value& front();
 
   /// \brief Returns a reference to the last element in the `Value`.
-  /// Requires that value holds an array or json object, with at least one element.
+  /// Requires that value holds an array or json object, with at least one
+  /// element.
   const Value& back() const;
 
   /// \brief Returns a reference to the last element in the `Value`.
-  /// Requires that this value holds an array or json object, with at least one element.
+  /// Requires that this value holds an array or json object, with at least one
+  /// element.
   Value& back();
 
   // Accessors for the [start, limit) range of bytes within the JSON text from
