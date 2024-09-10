@@ -54,16 +54,6 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-# ---------------------------------------------------------------------------
-# use ccache if found, has to be done before project()
-# ---------------------------------------------------------------------------
-find_program(CCACHE_EXECUTABLE "ccache" HINTS /usr/local/bin /opt/local/bin)
-if(CCACHE_EXECUTABLE)
-    message(STATUS "use ccache")
-    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}" CACHE PATH "ccache" FORCE)
-    set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}" CACHE PATH "ccache" FORCE)
-endif()
-
 project(jsoncpp
         # Note: version must be updated in three places when doing a release. This
         # annoying process ensures that amalgamate, CMake, and meson all report the
@@ -103,7 +93,9 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" CACHE PATH "Executable/dll output dir.")
 endif()
 
-set(JSONCPP_USE_SECURE_MEMORY "0" CACHE STRING "-D...=1 to use memory-wiping allocator for STL")
+if(JSONCPP_USE_SECURE_MEMORY)
+    add_definitions("-DJSONCPP_USE_SECURE_MEMORY=1")
+endif()
 
 configure_file("${PROJECT_SOURCE_DIR}/version.in"
     "${PROJECT_BINARY_DIR}/version"
