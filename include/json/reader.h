@@ -51,12 +51,12 @@ public:
   };
 
   /** \brief Constructs a Reader allowing all features for parsing.
-    * \deprecated Use CharReader and CharReaderBuilder.
+   * \deprecated Use CharReader and CharReaderBuilder.
    */
   Reader();
 
   /** \brief Constructs a Reader allowing the specified feature set for parsing.
-    * \deprecated Use CharReader and CharReaderBuilder.
+   * \deprecated Use CharReader and CharReaderBuilder.
    */
   Reader(const Features& features);
 
@@ -190,6 +190,7 @@ private:
   using Errors = std::deque<ErrorInfo>;
 
   bool readToken(Token& token);
+  bool readTokenSkippingComments(Token& token);
   void skipSpaces();
   bool match(const Char* pattern, int patternLength);
   bool readComment();
@@ -221,7 +222,6 @@ private:
                                 int& column) const;
   String getLocationLineAndColumn(Location location) const;
   void addComment(Location begin, Location end, CommentPlacement placement);
-  void skipCommentTokens(Token& token);
 
   static bool containsNewLine(Location begin, Location end);
   static String normalizeEOL(Location begin, Location end);
@@ -272,7 +272,7 @@ public:
      */
     virtual CharReader* newCharReader() const = 0;
   }; // Factory
-};   // CharReader
+}; // CharReader
 
 /** \brief Build a CharReader implementation.
  *
