@@ -97,14 +97,17 @@ def runAllTests(jsontest_executable_path, input_dir = None,
     valgrind_path = use_valgrind and VALGRIND_CMD or ''
     for input_path in tests + test_jsonchecker:
         expect_failure = os.path.basename(input_path).startswith('fail')
-        is_json_checker_test = (input_path in test_jsonchecker) or expect_failure
+        is_json_checker_test = input_path in test_jsonchecker
+        is_parse_only = is_json_checker_test or expect_failure
+        is_strict_test = ('_strict_' in os.path.basename(input_path)) or is_json_checker_test
         print('TESTING:', input_path, end=' ')
-        options = is_json_checker_test and '--json-checker' or ''
+        options = is_parse_only and '--parse-only' or ''
+        options += is_strict_test and ' --strict' or ''
         options += ' --json-writer %s'%writerClass
         cmd = '%s%s %s "%s"' % (            valgrind_path, jsontest_executable_path, options,
             input_path)
         status, process_output = getStatusOutput(cmd)
-        if is_json_checker_test:
+        if is_parse_only:
             if expect_failure:
                 if not status:
                     print('FAILED')
