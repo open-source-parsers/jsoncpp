@@ -1,4 +1,4 @@
-name: meson
+name: meson build and test
 run-name: update pushed to ${{ github.ref }}
 on: [push]
 
