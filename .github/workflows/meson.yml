@@ -35,7 +35,7 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     
-    steps:     
+    steps:
       - name: checkout repository
         uses: actions/checkout@v4
         
@@ -60,6 +60,6 @@ jobs:
 
       - name: generate code coverage report
         uses: threeal/gcovr-action@v1.0.0
-          with:
-           coveralls-send: true
-           github-token: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          coveralls-send: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
