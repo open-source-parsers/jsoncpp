@@ -32,5 +32,5 @@ jobs:
           ninja-version: 1.11.1.1
           action: test
 
-      - name: Generate a code coverage report
+      - name: generate code coverage report
         uses: threeal/gcovr-action@v1.0.0
