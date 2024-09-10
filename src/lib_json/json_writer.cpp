@@ -132,8 +132,9 @@ String valueToString(double value, bool useSpecialFloats,
   if (!isfinite(value)) {
     static const char* const reps[2][3] = {{"NaN", "-Infinity", "Infinity"},
                                            {"null", "-1e+9999", "1e+9999"}};
-    return reps[useSpecialFloats ? 0 : 1]
-               [isnan(value) ? 0 : (value < 0) ? 1 : 2];
+    return reps[useSpecialFloats ? 0 : 1][isnan(value)  ? 0
+                                          : (value < 0) ? 1
+                                                        : 2];
   }
 
   String buffer(size_t(36), '\0');
@@ -353,6 +354,10 @@ String valueToQuotedString(const char* value) {
   return valueToQuotedStringN(value, strlen(value));
 }
 
+String valueToQuotedString(const char* value, size_t length) {
+  return valueToQuotedStringN(value, length);
+}
+
 // Class Writer
 // //////////////////////////////////////////////////////////////////
 Writer::~Writer() = default;
@@ -490,7 +495,7 @@ void StyledWriter::writeValue(const Value& value) {
         const String& name = *it;
         const Value& childValue = value[name];
         writeCommentBeforeValue(childValue);
-        writeWithIndent(valueToQuotedString(name.c_str()));
+        writeWithIndent(valueToQuotedString(name.c_str(), name.size()));
         document_ += " : ";
         writeValue(childValue);
         if (++it == members.end()) {
@@ -708,7 +713,7 @@ void StyledStreamWriter::writeValue(const Value& value) {
         const String& name = *it;
         const Value& childValue = value[name];
         writeCommentBeforeValue(childValue);
-        writeWithIndent(valueToQuotedString(name.c_str()));
+        writeWithIndent(valueToQuotedString(name.c_str(), name.size()));
         *document_ << " : ";
         writeValue(childValue);
         if (++it == members.end()) {
