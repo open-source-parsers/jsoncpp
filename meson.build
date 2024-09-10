@@ -110,7 +110,7 @@ if meson.is_subproject() or not get_option('tests')
   subdir_done()
 endif
 
-python = import('python').find_installation()
+python = find_program('python3')
 
 jsoncpp_test = executable(
   'jsoncpp_test', files([
