@@ -23,8 +23,31 @@ jobs:
         with:
           meson-version: 1.5.1
           ninja-version: 1.11.1.1
+          action: build 
+  
+      - name: meson test
+        uses: BSFishy/meson-build@v1.0.3
+        with:
+          meson-version: 1.5.1
+          ninja-version: 1.11.1.1
+          action: test
+
+  coverage:
+    runs-on: ubuntu-latest
+    
+    steps:     
+      - name: checkout repository
+        uses: actions/checkout@v4
+        
+      - name: setup python
+        uses: actions/setup-python@v5
+      
+      - name: meson build
+        uses: BSFishy/meson-build@v1.0.3
+        with:
+          meson-version: 1.5.1
+          ninja-version: 1.11.1.1
           setup-options: -Db_coverage=true
-          options: --verbose
           action: build 
   
       - name: meson test
@@ -33,7 +56,6 @@ jobs:
           meson-version: 1.5.1
           ninja-version: 1.11.1.1
           setup-options: -Db_coverage=true
-          options: --verbose
           action: test
 
       - name: generate code coverage report
