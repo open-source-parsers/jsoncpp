@@ -437,7 +437,7 @@ public:
   /// \post type() is arrayValue
   void resize(ArrayIndex newSize);
 
-  //@{
+  ///@{
   /// Access an array element (zero based index). If the array contains less
   /// than index element, then null value are inserted in the array so that
   /// its size is index+1.
@@ -445,15 +445,15 @@ public:
   /// this from the operator[] which takes a string.)
   Value& operator[](ArrayIndex index);
   Value& operator[](int index);
-  //@}
+  ///@}
 
-  //@{
+  ///@{
   /// Access an array element (zero based index).
   /// (You may need to say 'value[0u]' to get your compiler to distinguish
   /// this from the operator[] which takes a string.)
   const Value& operator[](ArrayIndex index) const;
   const Value& operator[](int index) const;
-  //@}
+  ///@}
 
   /// If the array contains at least index+1 elements, returns the element
   /// value, otherwise returns defaultValue.
@@ -584,6 +584,26 @@ public:
 
   iterator begin();
   iterator end();
+
+  /// \brief Returns a reference to the first element in the `Value`.
+  /// Requires that this value holds an array or json object, with at least one
+  /// element.
+  const Value& front() const;
+
+  /// \brief Returns a reference to the first element in the `Value`.
+  /// Requires that this value holds an array or json object, with at least one
+  /// element.
+  Value& front();
+
+  /// \brief Returns a reference to the last element in the `Value`.
+  /// Requires that value holds an array or json object, with at least one
+  /// element.
+  const Value& back() const;
+
+  /// \brief Returns a reference to the last element in the `Value`.
+  /// Requires that this value holds an array or json object, with at least one
+  /// element.
+  Value& back();
 
   // Accessors for the [start, limit) range of bytes within the JSON text from
   // which this value was parsed, if any.
@@ -924,6 +944,14 @@ public:
 };
 
 inline void swap(Value& a, Value& b) { a.swap(b); }
+
+inline const Value& Value::front() const { return *begin(); }
+
+inline Value& Value::front() { return *begin(); }
+
+inline const Value& Value::back() const { return *(--end()); }
+
+inline Value& Value::back() { return *(--end()); }
 
 } // namespace Json
 
