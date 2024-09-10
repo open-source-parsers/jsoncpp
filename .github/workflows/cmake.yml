@@ -1,9 +1,14 @@
 name: cmake
 on: [push]
 jobs:
-  cmake:
-    name: build
-    runs-on: ubuntu-latest
+  publish:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        
     steps:
       - name: checkout project
         uses: actions/checkout@v4
