@@ -1,14 +1,13 @@
-name: Build
-on:
-  push:
+name: cmake
+on: [push]
 jobs:
-  build-project:
-    name: Build Project
+  cmake:
+    name: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Project
+      - name: checkout project
         uses: actions/checkout@v4
 
-      - name: Build Project
+      - name: build project
         uses: threeal/cmake-action@v2.0.0
         
