@@ -1,9 +1,9 @@
 name: meson build and test
 run-name: update pushed to ${{ github.ref }}
-on: [check_run, push]
+on: [check_run, push, pull_request]
 
 jobs:
-  publish:
+  meson-publish:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -32,7 +32,7 @@ jobs:
           ninja-version: 1.11.1.1
           action: test
 
-  coverage:
+  meson-coverage:
     runs-on: ubuntu-latest
     
     steps:
