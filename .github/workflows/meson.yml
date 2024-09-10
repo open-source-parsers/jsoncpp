@@ -1,6 +1,6 @@
 name: meson build and test
 run-name: update pushed to ${{ github.ref }}
-on: [push]
+on: [check_run, pull_request, push]
 
 jobs:
   publish:
