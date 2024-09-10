@@ -1,5 +1,5 @@
 cmake_policy(PUSH)
-cmake_policy(VERSION 3.0)
+cmake_policy(VERSION 3.0...3.26)
 
 @PACKAGE_INIT@
 
