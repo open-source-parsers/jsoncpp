@@ -1208,7 +1208,7 @@ bool Value::removeIndex(ArrayIndex index, Value* removed) {
     return false;
   }
   if (removed)
-    *removed = it->second;
+    *removed = std::move(it->second);
   ArrayIndex oldSize = size();
   // shift left all items left, into the place of the "removed"
   for (ArrayIndex i = index; i < (oldSize - 1); ++i) {

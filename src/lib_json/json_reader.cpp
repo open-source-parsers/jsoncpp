@@ -587,8 +587,7 @@ bool Reader::decodeDouble(Token& token) {
 
 bool Reader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
-  String buffer(token.start_, token.end_);
-  IStringStream is(buffer);
+  IStringStream is(String(token.start_, token.end_));
   if (!(is >> value)) {
     if (value == std::numeric_limits<double>::max())
       value = std::numeric_limits<double>::infinity();
@@ -878,17 +877,12 @@ class OurReader {
 public:
   using Char = char;
   using Location = const Char*;
-  struct StructuredError {
-    ptrdiff_t offset_start;
-    ptrdiff_t offset_limit;
-    String message;
-  };
 
   explicit OurReader(OurFeatures const& features);
   bool parse(const char* beginDoc, const char* endDoc, Value& root,
              bool collectComments = true);
   String getFormattedErrorMessages() const;
-  std::vector<StructuredError> getStructuredErrors() const;
+  std::vector<CharReader::StructuredError> getStructuredErrors() const;
 
 private:
   OurReader(OurReader const&);      // no impl
@@ -1627,8 +1621,7 @@ bool OurReader::decodeDouble(Token& token) {
 
 bool OurReader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
-  const String buffer(token.start_, token.end_);
-  IStringStream is(buffer);
+  IStringStream is(String(token.start_, token.end_));
   if (!(is >> value)) {
     if (value == std::numeric_limits<double>::max())
       value = std::numeric_limits<double>::infinity();
@@ -1836,10 +1829,11 @@ String OurReader::getFormattedErrorMessages() const {
   return formattedMessage;
 }
 
-std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
-  std::vector<OurReader::StructuredError> allErrors;
+std::vector<CharReader::StructuredError>
+OurReader::getStructuredErrors() const {
+  std::vector<CharReader::StructuredError> allErrors;
   for (const auto& error : errors_) {
-    OurReader::StructuredError structured;
+    CharReader::StructuredError structured;
     structured.offset_start = error.token_.start_ - begin_;
     structured.offset_limit = error.token_.end_ - begin_;
     structured.message = error.message_;
@@ -1849,20 +1843,36 @@ std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
 }
 
 class OurCharReader : public CharReader {
-  bool const collectComments_;
-  OurReader reader_;
 
 public:
   OurCharReader(bool collectComments, OurFeatures const& features)
-      : collectComments_(collectComments), reader_(features) {}
-  bool parse(char const* beginDoc, char const* endDoc, Value* root,
-             String* errs) override {
-    bool ok = reader_.parse(beginDoc, endDoc, *root, collectComments_);
-    if (errs) {
-      *errs = reader_.getFormattedErrorMessages();
+      : CharReader(
+            std::unique_ptr<OurImpl>(new OurImpl(collectComments, features))) {}
+
+protected:
+  class OurImpl : public Impl {
+  public:
+    OurImpl(bool collectComments, OurFeatures const& features)
+        : collectComments_(collectComments), reader_(features) {}
+
+    bool parse(char const* beginDoc, char const* endDoc, Value* root,
+               String* errs) override {
+      bool ok = reader_.parse(beginDoc, endDoc, *root, collectComments_);
+      if (errs) {
+        *errs = reader_.getFormattedErrorMessages();
+      }
+      return ok;
     }
-    return ok;
-  }
+
+    std::vector<CharReader::StructuredError>
+    getStructuredErrors() const override {
+      return reader_.getStructuredErrors();
+    }
+
+  private:
+    bool const collectComments_;
+    OurReader reader_;
+  };
 };
 
 CharReaderBuilder::CharReaderBuilder() { setDefaults(&settings_); }
@@ -1951,6 +1961,32 @@ void CharReaderBuilder::setDefaults(Json::Value* settings) {
   (*settings)["skipBom"] = true;
   //! [CharReaderBuilderDefaults]
 }
+// static
+void CharReaderBuilder::ecma404Mode(Json::Value* settings) {
+  //! [CharReaderBuilderECMA404Mode]
+  (*settings)["allowComments"] = false;
+  (*settings)["allowTrailingCommas"] = false;
+  (*settings)["strictRoot"] = false;
+  (*settings)["allowDroppedNullPlaceholders"] = false;
+  (*settings)["allowNumericKeys"] = false;
+  (*settings)["allowSingleQuotes"] = false;
+  (*settings)["stackLimit"] = 1000;
+  (*settings)["failIfExtra"] = true;
+  (*settings)["rejectDupKeys"] = false;
+  (*settings)["allowSpecialFloats"] = false;
+  (*settings)["skipBom"] = false;
+  //! [CharReaderBuilderECMA404Mode]
+}
+
+std::vector<CharReader::StructuredError>
+CharReader::getStructuredErrors() const {
+  return _impl->getStructuredErrors();
+}
+
+bool CharReader::parse(char const* beginDoc, char const* endDoc, Value* root,
+                       String* errs) {
+  return _impl->parse(beginDoc, endDoc, root, errs);
+}
 
 //////////////////////////////////
 // global functions
@@ -1959,7 +1995,7 @@ bool parseFromStream(CharReader::Factory const& fact, IStream& sin, Value* root,
                      String* errs) {
   OStringStream ssin;
   ssin << sin.rdbuf();
-  String doc = ssin.str();
+  String doc = std::move(ssin).str();
   char const* begin = doc.data();
   char const* end = begin + doc.size();
   // Note that we do not actually need a null-terminator.
