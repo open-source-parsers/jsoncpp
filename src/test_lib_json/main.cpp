@@ -3632,12 +3632,12 @@ JSONTEST_FIXTURE_LOCAL(CharReaderAllowSpecialFloatsTest, issue209) {
   for (const auto& td : test_data) {
     bool ok = reader->parse(&*td.in.begin(), &*td.in.begin() + td.in.size(),
                             &root, &errs);
-    JSONTEST_ASSERT(td.ok == ok) << "line:" << td.line << "\n"
-                                 << "  expected: {"
-                                 << "ok:" << td.ok << ", in:\'" << td.in << "\'"
-                                 << "}\n"
-                                 << "  actual: {"
-                                 << "ok:" << ok << "}\n";
+    // clang-format off
+    JSONTEST_ASSERT(td.ok == ok) <<
+        "line:" << td.line << "\n  " <<
+        "expected: {ok:" << td.ok << ", in:\'" << td.in << "\'}\n " <<
+        "actual: {ok:" << ok << "}\n";
+    // clang-format on
   }
 
   {
