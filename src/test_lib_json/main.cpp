@@ -220,10 +220,19 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, objects) {
   JSONTEST_ASSERT(foundId != nullptr);
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), *foundId);
 
+  const std::string stringIdKey = "id";
+  const Json::Value* stringFoundId = object1_.find(stringIdKey);
+  JSONTEST_ASSERT(stringFoundId != nullptr);
+  JSONTEST_ASSERT_EQUAL(Json::Value(1234), *stringFoundId);
+
   const char unknownIdKey[] = "unknown id";
   const Json::Value* foundUnknownId =
       object1_.find(unknownIdKey, unknownIdKey + strlen(unknownIdKey));
   JSONTEST_ASSERT_EQUAL(nullptr, foundUnknownId);
+
+  const std::string stringUnknownIdKey = "unknown id";
+  const Json::Value* stringFoundUnknownId = object1_.find(stringUnknownIdKey);
+  JSONTEST_ASSERT_EQUAL(nullptr, stringFoundUnknownId);
 
   // Access through demand()
   const char yetAnotherIdKey[] = "yet another id";
@@ -310,10 +319,14 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, arrays) {
   const Json::Value& constArray = array1_;
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), constArray[index0]);
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), constArray[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value(1234), constArray.front());
+  JSONTEST_ASSERT_EQUAL(Json::Value(1234), constArray.back());
 
   // Access through non-const reference
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), array1_[index0]);
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), array1_[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value(1234), array1_.front());
+  JSONTEST_ASSERT_EQUAL(Json::Value(1234), array1_.back());
 
   array1_[2] = Json::Value(17);
   JSONTEST_ASSERT_EQUAL(Json::Value(), array1_[1]);
@@ -356,6 +369,8 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, resizePopulatesAllMissingElements) {
   v.resize(n);
   JSONTEST_ASSERT_EQUAL(n, v.size());
   JSONTEST_ASSERT_EQUAL(n, std::distance(v.begin(), v.end()));
+  JSONTEST_ASSERT_EQUAL(v.front(), Json::Value{});
+  JSONTEST_ASSERT_EQUAL(v.back(), Json::Value{});
   for (const Json::Value& e : v)
     JSONTEST_ASSERT_EQUAL(e, Json::Value{});
 }
@@ -406,6 +421,8 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, arrayInsertAtRandomIndex) {
   JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[0]); // check append
   JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[1]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[2]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array.front());
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array.back());
 
   // insert lvalue at the head
   JSONTEST_ASSERT(array.insert(0, str1));
@@ -413,6 +430,8 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, arrayInsertAtRandomIndex) {
   JSONTEST_ASSERT_EQUAL(Json::Value("index0"), array[1]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[2]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[3]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array.front());
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array.back());
   // checking address
   for (Json::ArrayIndex i = 0; i < 3; i++) {
     JSONTEST_ASSERT_EQUAL(vec[i], &array[i]);
@@ -425,6 +444,8 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, arrayInsertAtRandomIndex) {
   JSONTEST_ASSERT_EQUAL(Json::Value("index4"), array[2]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[3]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[4]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array.front());
+  JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array.back());
   // checking address
   for (Json::ArrayIndex i = 0; i < 4; i++) {
     JSONTEST_ASSERT_EQUAL(vec[i], &array[i]);
@@ -438,6 +459,8 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, arrayInsertAtRandomIndex) {
   JSONTEST_ASSERT_EQUAL(Json::Value("index1"), array[3]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index2"), array[4]);
   JSONTEST_ASSERT_EQUAL(Json::Value("index5"), array[5]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("index3"), array.front());
+  JSONTEST_ASSERT_EQUAL(Json::Value("index5"), array.back());
   // checking address
   for (Json::ArrayIndex i = 0; i < 5; i++) {
     JSONTEST_ASSERT_EQUAL(vec[i], &array[i]);
@@ -3618,12 +3641,12 @@ JSONTEST_FIXTURE_LOCAL(CharReaderAllowSpecialFloatsTest, issue209) {
   for (const auto& td : test_data) {
     bool ok = reader->parse(&*td.in.begin(), &*td.in.begin() + td.in.size(),
                             &root, &errs);
-    JSONTEST_ASSERT(td.ok == ok) << "line:" << td.line << "\n"
-                                 << "  expected: {"
-                                 << "ok:" << td.ok << ", in:\'" << td.in << "\'"
-                                 << "}\n"
-                                 << "  actual: {"
-                                 << "ok:" << ok << "}\n";
+    // clang-format off
+    JSONTEST_ASSERT(td.ok == ok) <<
+        "line:" << td.line << "\n  " <<
+        "expected: {ok:" << td.ok << ", in:\'" << td.in << "\'}\n " <<
+        "actual: {ok:" << ok << "}\n";
+    // clang-format on
   }
 
   {
@@ -3901,6 +3924,36 @@ JSONTEST_FIXTURE_LOCAL(FuzzTest, fuzzDoesntCrash) {
       0,
       LLVMFuzzerTestOneInput(reinterpret_cast<const uint8_t*>(example.c_str()),
                              example.size()));
+}
+
+struct ParseWithStructuredErrorsTest : JsonTest::TestCase {
+  void testErrors(
+      const std::string& doc, bool success,
+      const std::vector<Json::CharReader::StructuredError>& expectedErrors) {
+    Json::CharReaderBuilder b;
+    CharReaderPtr reader(b.newCharReader());
+    Json::Value root;
+    JSONTEST_ASSERT_EQUAL(
+        reader->parse(doc.data(), doc.data() + doc.length(), &root, nullptr),
+        success);
+    auto actualErrors = reader->getStructuredErrors();
+    JSONTEST_ASSERT_EQUAL(expectedErrors.size(), actualErrors.size());
+    for (std::size_t i = 0; i < actualErrors.size(); i++) {
+      const auto& a = actualErrors[i];
+      const auto& e = expectedErrors[i];
+      JSONTEST_ASSERT_EQUAL(a.offset_start, e.offset_start);
+      JSONTEST_ASSERT_EQUAL(a.offset_limit, e.offset_limit);
+      JSONTEST_ASSERT_STRING_EQUAL(a.message, e.message);
+    }
+  }
+};
+
+JSONTEST_FIXTURE_LOCAL(ParseWithStructuredErrorsTest, success) {
+  testErrors("{}", true, {});
+}
+
+JSONTEST_FIXTURE_LOCAL(ParseWithStructuredErrorsTest, singleError) {
+  testErrors("{ 1 : 2 }", false, {{2, 3, "Missing '}' or object member name"}});
 }
 
 int main(int argc, const char* argv[]) {
