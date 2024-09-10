@@ -586,19 +586,23 @@ public:
   iterator end();
 
   /// \brief Returns a reference to the first element in the `Value`.
-  /// Requires that this value holds an array or json object, with at least one element.
+  /// Requires that this value holds an array or json object, with at least one
+  /// element.
   const Value& front() const;
 
   /// \brief Returns a reference to the first element in the `Value`.
-  /// Requires that this value holds an array or json object, with at least one element.
+  /// Requires that this value holds an array or json object, with at least one
+  /// element.
   Value& front();
 
   /// \brief Returns a reference to the last element in the `Value`.
-  /// Requires that value holds an array or json object, with at least one element.
+  /// Requires that value holds an array or json object, with at least one
+  /// element.
   const Value& back() const;
 
   /// \brief Returns a reference to the last element in the `Value`.
-  /// Requires that this value holds an array or json object, with at least one element.
+  /// Requires that this value holds an array or json object, with at least one
+  /// element.
   Value& back();
 
   // Accessors for the [start, limit) range of bytes within the JSON text from
