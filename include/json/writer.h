@@ -64,7 +64,7 @@ public:
      */
     virtual StreamWriter* newStreamWriter() const = 0;
   }; // Factory
-};   // StreamWriter
+}; // StreamWriter
 
 /** \brief Write into stringstream, then return string, for convenience.
  * A StreamWriter will be created from the factory, used, and then deleted.
@@ -168,8 +168,7 @@ public:
 #pragma warning(push)
 #pragma warning(disable : 4996) // Deriving from deprecated class
 #endif
-class JSON_API FastWriter
-    : public Writer {
+class JSON_API FastWriter : public Writer {
 public:
   FastWriter();
   ~FastWriter() override = default;
@@ -228,8 +227,7 @@ private:
 #pragma warning(push)
 #pragma warning(disable : 4996) // Deriving from deprecated class
 #endif
-class JSON_API
-    StyledWriter : public Writer {
+class JSON_API StyledWriter : public Writer {
 public:
   StyledWriter();
   ~StyledWriter() override = default;
@@ -297,8 +295,7 @@ private:
 #pragma warning(push)
 #pragma warning(disable : 4996) // Deriving from deprecated class
 #endif
-class JSON_API
-    StyledStreamWriter {
+class JSON_API StyledStreamWriter {
 public:
   /**
    * \param indentation Each level will be indented by this amount extra.
@@ -354,6 +351,7 @@ String JSON_API valueToString(
     PrecisionType precisionType = PrecisionType::significantDigits);
 String JSON_API valueToString(bool value);
 String JSON_API valueToQuotedString(const char* value);
+String JSON_API valueToQuotedString(const char* value, size_t length);
 
 /// \brief Output using the StyledStreamWriter.
 /// \see Json::operator>>()
