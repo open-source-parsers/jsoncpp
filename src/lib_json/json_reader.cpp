@@ -129,7 +129,7 @@ bool Reader::parse(const char* beginDoc, const char* endDoc, Value& root,
 
   bool successful = readValue();
   Token token;
-  skipCommentTokens(token);
+  readTokenSkippingComments(token);
   if (collectComments_ && !commentsBefore_.empty())
     root.setComment(commentsBefore_, commentAfter);
   if (features_.strictRoot_) {
@@ -157,7 +157,7 @@ bool Reader::readValue() {
     throwRuntimeError("Exceeded stackLimit in readValue().");
 
   Token token;
-  skipCommentTokens(token);
+  readTokenSkippingComments(token);
   bool successful = true;
 
   if (collectComments_ && !commentsBefore_.empty()) {
@@ -225,14 +225,14 @@ bool Reader::readValue() {
   return successful;
 }
 
-void Reader::skipCommentTokens(Token& token) {
+bool Reader::readTokenSkippingComments(Token& token) {
+  bool success = readToken(token);
   if (features_.allowComments_) {
-    do {
-      readToken(token);
-    } while (token.type_ == tokenComment);
-  } else {
-    readToken(token);
+    while (success && token.type_ == tokenComment) {
+      success = readToken(token);
+    }
   }
+  return success;
 }
 
 bool Reader::readToken(Token& token) {
@@ -446,12 +446,7 @@ bool Reader::readObject(Token& token) {
   Value init(objectValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(token.start_ - begin_);
-  while (readToken(tokenName)) {
-    bool initialTokenOk = true;
-    while (tokenName.type_ == tokenComment && initialTokenOk)
-      initialTokenOk = readToken(tokenName);
-    if (!initialTokenOk)
-      break;
+  while (readTokenSkippingComments(tokenName)) {
     if (tokenName.type_ == tokenObjectEnd && name.empty()) // empty object
       return true;
     name.clear();
@@ -480,15 +475,11 @@ bool Reader::readObject(Token& token) {
       return recoverFromError(tokenObjectEnd);
 
     Token comma;
-    if (!readToken(comma) ||
-        (comma.type_ != tokenObjectEnd && comma.type_ != tokenArraySeparator &&
-         comma.type_ != tokenComment)) {
+    if (!readTokenSkippingComments(comma) ||
+        (comma.type_ != tokenObjectEnd && comma.type_ != tokenArraySeparator)) {
       return addErrorAndRecover("Missing ',' or '}' in object declaration",
                                 comma, tokenObjectEnd);
     }
-    bool finalizeTokenOk = true;
-    while (comma.type_ == tokenComment && finalizeTokenOk)
-      finalizeTokenOk = readToken(comma);
     if (comma.type_ == tokenObjectEnd)
       return true;
   }
@@ -518,10 +509,7 @@ bool Reader::readArray(Token& token) {
 
     Token currentToken;
     // Accept Comment after last item in the array.
-    ok = readToken(currentToken);
-    while (currentToken.type_ == tokenComment && ok) {
-      ok = readToken(currentToken);
-    }
+    ok = readTokenSkippingComments(currentToken);
     bool badTokenType = (currentToken.type_ != tokenArraySeparator &&
                          currentToken.type_ != tokenArrayEnd);
     if (!ok || badTokenType) {
@@ -608,7 +596,7 @@ bool Reader::decodeDouble(Token& token, Value& decoded) {
       value = -std::numeric_limits<double>::infinity();
     else if (!std::isinf(value))
       return addError(
-        "'" + String(token.start_, token.end_) + "' is not a number.", token);
+          "'" + String(token.start_, token.end_) + "' is not a number.", token);
   }
   decoded = value;
   return true;
@@ -773,7 +761,7 @@ void Reader::getLocationLineAndColumn(Location location, int& line,
   while (current < location && current != end_) {
     Char c = *current++;
     if (c == '\r') {
-      if (*current == '\n')
+      if (current != end_ && *current == '\n')
         ++current;
       lastLineStart = current;
       ++line;
@@ -938,6 +926,7 @@ private:
   using Errors = std::deque<ErrorInfo>;
 
   bool readToken(Token& token);
+  bool readTokenSkippingComments(Token& token);
   void skipSpaces();
   void skipBom(bool skipBom);
   bool match(const Char* pattern, int patternLength);
@@ -971,7 +960,6 @@ private:
                                 int& column) const;
   String getLocationLineAndColumn(Location location) const;
   void addComment(Location begin, Location end, CommentPlacement placement);
-  void skipCommentTokens(Token& token);
 
   static String normalizeEOL(Location begin, Location end);
   static bool containsNewLine(Location begin, Location end);
@@ -1025,7 +1013,7 @@ bool OurReader::parse(const char* beginDoc, const char* endDoc, Value& root,
   bool successful = readValue();
   nodes_.pop();
   Token token;
-  skipCommentTokens(token);
+  readTokenSkippingComments(token);
   if (features_.failIfExtra_ && (token.type_ != tokenEndOfStream)) {
     addError("Extra non-whitespace after JSON value.", token);
     return false;
@@ -1053,7 +1041,7 @@ bool OurReader::readValue() {
   if (nodes_.size() > features_.stackLimit_)
     throwRuntimeError("Exceeded stackLimit in readValue().");
   Token token;
-  skipCommentTokens(token);
+  readTokenSkippingComments(token);
   bool successful = true;
 
   if (collectComments_ && !commentsBefore_.empty()) {
@@ -1140,14 +1128,14 @@ bool OurReader::readValue() {
   return successful;
 }
 
-void OurReader::skipCommentTokens(Token& token) {
+bool OurReader::readTokenSkippingComments(Token& token) {
+  bool success = readToken(token);
   if (features_.allowComments_) {
-    do {
-      readToken(token);
-    } while (token.type_ == tokenComment);
-  } else {
-    readToken(token);
+    while (success && token.type_ == tokenComment) {
+      success = readToken(token);
+    }
   }
+  return success;
 }
 
 bool OurReader::readToken(Token& token) {
@@ -1444,12 +1432,7 @@ bool OurReader::readObject(Token& token) {
   Value init(objectValue);
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(token.start_ - begin_);
-  while (readToken(tokenName)) {
-    bool initialTokenOk = true;
-    while (tokenName.type_ == tokenComment && initialTokenOk)
-      initialTokenOk = readToken(tokenName);
-    if (!initialTokenOk)
-      break;
+  while (readTokenSkippingComments(tokenName)) {
     if (tokenName.type_ == tokenObjectEnd &&
         (name.empty() ||
          features_.allowTrailingCommas_)) // empty object or trailing comma
@@ -1486,15 +1469,11 @@ bool OurReader::readObject(Token& token) {
       return recoverFromError(tokenObjectEnd);
 
     Token comma;
-    if (!readToken(comma) ||
-        (comma.type_ != tokenObjectEnd && comma.type_ != tokenArraySeparator &&
-         comma.type_ != tokenComment)) {
+    if (!readTokenSkippingComments(comma) ||
+        (comma.type_ != tokenObjectEnd && comma.type_ != tokenArraySeparator)) {
       return addErrorAndRecover("Missing ',' or '}' in object declaration",
                                 comma, tokenObjectEnd);
     }
-    bool finalizeTokenOk = true;
-    while (comma.type_ == tokenComment && finalizeTokenOk)
-      finalizeTokenOk = readToken(comma);
     if (comma.type_ == tokenObjectEnd)
       return true;
   }
@@ -1528,10 +1507,7 @@ bool OurReader::readArray(Token& token) {
 
     Token currentToken;
     // Accept Comment after last item in the array.
-    ok = readToken(currentToken);
-    while (currentToken.type_ == tokenComment && ok) {
-      ok = readToken(currentToken);
-    }
+    ok = readTokenSkippingComments(currentToken);
     bool badTokenType = (currentToken.type_ != tokenArraySeparator &&
                          currentToken.type_ != tokenArrayEnd);
     if (!ok || badTokenType) {
@@ -1655,7 +1631,7 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
       value = -std::numeric_limits<double>::infinity();
     else if (!std::isinf(value))
       return addError(
-        "'" + String(token.start_, token.end_) + "' is not a number.", token);
+          "'" + String(token.start_, token.end_) + "' is not a number.", token);
   }
   decoded = value;
   return true;
@@ -1820,7 +1796,7 @@ void OurReader::getLocationLineAndColumn(Location location, int& line,
   while (current < location && current != end_) {
     Char c = *current++;
     if (c == '\r') {
-      if (*current == '\n')
+      if (current != end_ && *current == '\n')
         ++current;
       lastLineStart = current;
       ++line;

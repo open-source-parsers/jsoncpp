@@ -1,0 +1,20 @@
+name: clang-format check
+on: [check_run, pull_request, push]
+
+jobs:
+  formatting-check:
+    name: formatting check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        path:
+          - 'src'
+          - 'examples'
+          - 'include'
+    steps:
+    - uses: actions/checkout@v4
+    - name: runs clang-format style check for C/C++/Protobuf programs.
+      uses: jidicula/clang-format-action@v4.13.0
+      with:
+        clang-format-version: '18'
+        check-path: ${{ matrix.path }}

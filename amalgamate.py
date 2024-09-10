@@ -63,7 +63,7 @@ def amalgamate_source(source_top_dir=None,
     """
     print("Amalgamating header...")
     header = AmalgamationFile(source_top_dir)
-    header.add_text("/// Json-cpp amalgamated header (http://jsoncpp.sourceforge.net/).")
+    header.add_text("/// Json-cpp amalgamated header (https://github.com/open-source-parsers/jsoncpp/).")
     header.add_text('/// It is intended to be used with #include "%s"' % header_include_path)
     header.add_file("LICENSE", wrap_in_comment=True)
     header.add_text("#ifndef JSON_AMALGAMATED_H_INCLUDED")
@@ -90,7 +90,7 @@ def amalgamate_source(source_top_dir=None,
     forward_header_include_path = base + "-forwards" + ext
     print("Amalgamating forward header...")
     header = AmalgamationFile(source_top_dir)
-    header.add_text("/// Json-cpp amalgamated forward header (http://jsoncpp.sourceforge.net/).")
+    header.add_text("/// Json-cpp amalgamated forward header (https://github.com/open-source-parsers/jsoncpp/).")
     header.add_text('/// It is intended to be used with #include "%s"' % forward_header_include_path)
     header.add_text("/// This header provides forward declaration for all JsonCpp types.")
     header.add_file("LICENSE", wrap_in_comment=True)
@@ -112,7 +112,7 @@ def amalgamate_source(source_top_dir=None,
 
     print("Amalgamating source...")
     source = AmalgamationFile(source_top_dir)
-    source.add_text("/// Json-cpp amalgamated source (http://jsoncpp.sourceforge.net/).")
+    source.add_text("/// Json-cpp amalgamated source (https://github.com/open-source-parsers/jsoncpp/).")
     source.add_text('/// It is intended to be used with #include "%s"' % header_include_path)
     source.add_file("LICENSE", wrap_in_comment=True)
     source.add_text("")
