@@ -761,7 +761,7 @@ void Reader::getLocationLineAndColumn(Location location, int& line,
   while (current < location && current != end_) {
     Char c = *current++;
     if (c == '\r') {
-      if (*current == '\n')
+      if (current != end_ && *current == '\n')
         ++current;
       lastLineStart = current;
       ++line;
@@ -1801,7 +1801,7 @@ void OurReader::getLocationLineAndColumn(Location location, int& line,
   while (current < location && current != end_) {
     Char c = *current++;
     if (c == '\r') {
-      if (*current == '\n')
+      if (current != end_ && *current == '\n')
         ++current;
       lastLineStart = current;
       ++line;
