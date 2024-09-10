@@ -272,7 +272,7 @@ public:
 
   /** \brief Returns a vector of structured errors encountered while parsing.
    * Each parse call resets the stored list of errors.
-  */
+   */
   std::vector<StructuredError> getStructuredErrors() const;
 
   class JSON_API Factory {
@@ -287,17 +287,17 @@ public:
 protected:
   class Impl {
   public:
-      virtual ~Impl() = default;
-      virtual bool parse(char const* beginDoc, char const* endDoc, Value* root,
-                         String* errs) = 0;
-      virtual std::vector<StructuredError> getStructuredErrors() const = 0;
+    virtual ~Impl() = default;
+    virtual bool parse(char const* beginDoc, char const* endDoc, Value* root,
+                       String* errs) = 0;
+    virtual std::vector<StructuredError> getStructuredErrors() const = 0;
   };
 
-  explicit CharReader(std::unique_ptr<Impl> impl) : _impl(std::move(impl)) { }
+  explicit CharReader(std::unique_ptr<Impl> impl) : _impl(std::move(impl)) {}
 
 private:
   std::unique_ptr<Impl> _impl;
-};  // CharReader
+}; // CharReader
 
 /** \brief Build a CharReader implementation.
  *

@@ -1831,7 +1831,8 @@ String OurReader::getFormattedErrorMessages() const {
   return formattedMessage;
 }
 
-std::vector<CharReader::StructuredError> OurReader::getStructuredErrors() const {
+std::vector<CharReader::StructuredError>
+OurReader::getStructuredErrors() const {
   std::vector<CharReader::StructuredError> allErrors;
   for (const auto& error : errors_) {
     CharReader::StructuredError structured;
@@ -1847,7 +1848,8 @@ class OurCharReader : public CharReader {
 
 public:
   OurCharReader(bool collectComments, OurFeatures const& features)
-    : CharReader(std::unique_ptr<OurImpl>(new OurImpl(collectComments, features))) {}
+      : CharReader(
+            std::unique_ptr<OurImpl>(new OurImpl(collectComments, features))) {}
 
 protected:
   class OurImpl : public Impl {
@@ -1864,7 +1866,8 @@ protected:
       return ok;
     }
 
-    std::vector<CharReader::StructuredError> getStructuredErrors() const override {
+    std::vector<CharReader::StructuredError>
+    getStructuredErrors() const override {
       return reader_.getStructuredErrors();
     }
 
@@ -1961,13 +1964,14 @@ void CharReaderBuilder::setDefaults(Json::Value* settings) {
   //! [CharReaderBuilderDefaults]
 }
 
-std::vector<CharReader::StructuredError> CharReader::getStructuredErrors() const {
-    return _impl->getStructuredErrors();
+std::vector<CharReader::StructuredError>
+CharReader::getStructuredErrors() const {
+  return _impl->getStructuredErrors();
 }
 
 bool CharReader::parse(char const* beginDoc, char const* endDoc, Value* root,
                        String* errs) {
-    return _impl->parse(beginDoc, endDoc, root, errs);
+  return _impl->parse(beginDoc, endDoc, root, errs);
 }
 
 //////////////////////////////////

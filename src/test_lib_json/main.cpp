@@ -3918,8 +3918,9 @@ JSONTEST_FIXTURE_LOCAL(FuzzTest, fuzzDoesntCrash) {
 }
 
 struct ParseWithStructuredErrorsTest : JsonTest::TestCase {
-  void testErrors(const std::string& doc, bool success,
-                  const std::vector<Json::CharReader::StructuredError>& expectedErrors) {
+  void testErrors(
+      const std::string& doc, bool success,
+      const std::vector<Json::CharReader::StructuredError>& expectedErrors) {
     Json::CharReaderBuilder b;
     CharReaderPtr reader(b.newCharReader());
     Json::Value root;
