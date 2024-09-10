@@ -1,0 +1,33 @@
+name: meson build and test
+run-name: update pushed to ${{ github.ref }}
+on: [check_run, pull_request, push]
+
+jobs:
+  publish:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:     
+      - name: checkout repository
+        uses: actions/checkout@v4
+        
+      - name: setup python
+        uses: actions/setup-python@v5
+      
+      - name: meson build
+        uses: BSFishy/meson-build@v1.0.3
+        with:
+          meson-version: 1.5.1
+          ninja-version: 1.11.1.1
+          action: build
+  
+      - name: meson test
+        uses: BSFishy/meson-build@v1.0.3
+        with:
+          meson-version: 1.5.1
+          ninja-version: 1.11.1.1
+          action: test
