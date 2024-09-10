@@ -1,7 +1,7 @@
 name: cmake
-on: [push]
+on: [check_run, push, pull_request]
 jobs:
-  publish:
+  cmake-publish:
     runs-on: ${{ matrix.os }}
 
     strategy:
