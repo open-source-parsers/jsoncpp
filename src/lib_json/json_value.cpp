@@ -335,7 +335,6 @@ bool Value::CZString::isStaticString() const {
 // //////////////////////////////////////////////////////////////////
 
 #if JSONCPP_CXX_STD_11
-
 #else
 // In-class initializer for static data member of type 'const double' is a GNU
 // extension. JSONCPP_CONST == const, if C++0x.
