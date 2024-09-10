@@ -51,12 +51,12 @@ public:
   };
 
   /** \brief Constructs a Reader allowing all features for parsing.
-    * \deprecated Use CharReader and CharReaderBuilder.
+   * \deprecated Use CharReader and CharReaderBuilder.
    */
   Reader();
 
   /** \brief Constructs a Reader allowing the specified feature set for parsing.
-    * \deprecated Use CharReader and CharReaderBuilder.
+   * \deprecated Use CharReader and CharReaderBuilder.
    */
   Reader(const Features& features);
 
@@ -272,7 +272,7 @@ public:
      */
     virtual CharReader* newCharReader() const = 0;
   }; // Factory
-};   // CharReader
+}; // CharReader
 
 /** \brief Build a CharReader implementation.
  *
