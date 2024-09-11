@@ -220,10 +220,19 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, objects) {
   JSONTEST_ASSERT(foundId != nullptr);
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), *foundId);
 
+  const std::string stringIdKey = "id";
+  const Json::Value* stringFoundId = object1_.find(stringIdKey);
+  JSONTEST_ASSERT(stringFoundId != nullptr);
+  JSONTEST_ASSERT_EQUAL(Json::Value(1234), *stringFoundId);
+
   const char unknownIdKey[] = "unknown id";
   const Json::Value* foundUnknownId =
       object1_.find(unknownIdKey, unknownIdKey + strlen(unknownIdKey));
   JSONTEST_ASSERT_EQUAL(nullptr, foundUnknownId);
+
+  const std::string stringUnknownIdKey = "unknown id";
+  const Json::Value* stringFoundUnknownId = object1_.find(stringUnknownIdKey);
+  JSONTEST_ASSERT_EQUAL(nullptr, stringFoundUnknownId);
 
   // Access through demand()
   const char yetAnotherIdKey[] = "yet another id";

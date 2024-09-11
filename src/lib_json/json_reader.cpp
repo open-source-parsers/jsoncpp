@@ -587,8 +587,7 @@ bool Reader::decodeDouble(Token& token) {
 
 bool Reader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
-  String buffer(token.start_, token.end_);
-  IStringStream is(buffer);
+  IStringStream is(String(token.start_, token.end_));
   if (!(is >> value)) {
     if (value == std::numeric_limits<double>::max())
       value = std::numeric_limits<double>::infinity();
@@ -1622,8 +1621,7 @@ bool OurReader::decodeDouble(Token& token) {
 
 bool OurReader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
-  const String buffer(token.start_, token.end_);
-  IStringStream is(buffer);
+  IStringStream is(String(token.start_, token.end_));
   if (!(is >> value)) {
     if (value == std::numeric_limits<double>::max())
       value = std::numeric_limits<double>::infinity();
@@ -1963,6 +1961,22 @@ void CharReaderBuilder::setDefaults(Json::Value* settings) {
   (*settings)["skipBom"] = true;
   //! [CharReaderBuilderDefaults]
 }
+// static
+void CharReaderBuilder::ecma404Mode(Json::Value* settings) {
+  //! [CharReaderBuilderECMA404Mode]
+  (*settings)["allowComments"] = false;
+  (*settings)["allowTrailingCommas"] = false;
+  (*settings)["strictRoot"] = false;
+  (*settings)["allowDroppedNullPlaceholders"] = false;
+  (*settings)["allowNumericKeys"] = false;
+  (*settings)["allowSingleQuotes"] = false;
+  (*settings)["stackLimit"] = 1000;
+  (*settings)["failIfExtra"] = true;
+  (*settings)["rejectDupKeys"] = false;
+  (*settings)["allowSpecialFloats"] = false;
+  (*settings)["skipBom"] = false;
+  //! [CharReaderBuilderECMA404Mode]
+}
 
 std::vector<CharReader::StructuredError>
 CharReader::getStructuredErrors() const {
@@ -1981,7 +1995,7 @@ bool parseFromStream(CharReader::Factory const& fact, IStream& sin, Value* root,
                      String* errs) {
   OStringStream ssin;
   ssin << sin.rdbuf();
-  String doc = ssin.str();
+  String doc = std::move(ssin).str();
   char const* begin = doc.data();
   char const* end = begin + doc.size();
   // Note that we do not actually need a null-terminator.

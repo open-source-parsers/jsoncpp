@@ -385,6 +385,12 @@ public:
    * \snippet src/lib_json/json_reader.cpp CharReaderBuilderStrictMode
    */
   static void strictMode(Json::Value* settings);
+  /** ECMA-404 mode.
+   * \pre 'settings' != NULL (but Json::null is fine)
+   * \remark Defaults:
+   * \snippet src/lib_json/json_reader.cpp CharReaderBuilderECMA404Mode
+   */
+  static void ecma404Mode(Json::Value* settings);
 };
 
 /** Consume entire stream and use its begin/end.
