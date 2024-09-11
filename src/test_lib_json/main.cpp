@@ -1191,15 +1191,13 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, integers) {
   JSONTEST_ASSERT_EQUAL(true, val.asBool());
   JSONTEST_ASSERT_STRING_EQUAL("-9223372036854775808", val.asString());
 
-  // int64 min (floating point constructor). Note that kint64min *is* exactly
-  // representable as a double.
+  // int64 min (floating point constructor). Since double values in proximity of
+  // kint64min are rounded to kint64min, we don't check for conversion to int64.
   val = Json::Value(double(kint64min));
 
   JSONTEST_ASSERT_EQUAL(Json::realValue, val.type());
 
   checks = IsCheck();
-  checks.isInt64_ = true;
-  checks.isIntegral_ = true;
   checks.isDouble_ = true;
   checks.isNumeric_ = true;
   JSONTEST_ASSERT_PRED(checkIs(val, checks));
@@ -1208,8 +1206,6 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, integers) {
   JSONTEST_ASSERT(!val.isConvertibleTo(Json::intValue));
   JSONTEST_ASSERT(!val.isConvertibleTo(Json::uintValue));
 
-  JSONTEST_ASSERT_EQUAL(kint64min, val.asInt64());
-  JSONTEST_ASSERT_EQUAL(kint64min, val.asLargestInt());
   JSONTEST_ASSERT_EQUAL(-9223372036854775808.0, val.asDouble());
   JSONTEST_ASSERT_EQUAL(-9223372036854775808.0, val.asFloat());
   JSONTEST_ASSERT_EQUAL(true, val.asBool());
