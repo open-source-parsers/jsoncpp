@@ -10,6 +10,7 @@
 /libs/
 /doc/doxyfile
 /dist/
+/.cache/
 
 # MSVC project files:
 *.sln
@@ -30,6 +31,7 @@
 CMakeFiles/
 /pkg-config/jsoncpp.pc
 jsoncpp_lib_static.dir/
+compile_commands.json
 
 # In case someone runs cmake in the root-dir:
 /CMakeCache.txt
@@ -50,3 +52,6 @@ jsoncpp_lib_static.dir/
 
 # DS_Store
 .DS_Store
+
+# temps
+/version

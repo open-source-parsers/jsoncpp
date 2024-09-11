@@ -912,7 +912,8 @@ void Value::resize(ArrayIndex newSize) {
   if (newSize == 0)
     clear();
   else if (newSize > oldSize)
-    this->operator[](newSize - 1);
+    for (ArrayIndex i = oldSize; i < newSize; ++i)
+      (*this)[i];
   else {
     for (ArrayIndex index = newSize; index < oldSize; ++index) {
       value_.map_->erase(index);
@@ -1091,6 +1092,9 @@ Value const* Value::find(char const* begin, char const* end) const {
     return nullptr;
   return &(*it).second;
 }
+Value const* Value::find(const String& key) const {
+  return find(key.data(), key.data() + key.length());
+}
 Value* Value::demand(char const* begin, char const* end) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == objectValue,
                       "in Json::Value::demand(begin, end): requires "
@@ -1104,7 +1108,7 @@ const Value& Value::operator[](const char* key) const {
   return *found;
 }
 Value const& Value::operator[](const String& key) const {
-  Value const* found = find(key.data(), key.data() + key.length());
+  Value const* found = find(key);
   if (!found)
     return nullSingleton();
   return *found;
@@ -1204,7 +1208,7 @@ bool Value::removeIndex(ArrayIndex index, Value* removed) {
     return false;
   }
   if (removed)
-    *removed = it->second;
+    *removed = std::move(it->second);
   ArrayIndex oldSize = size();
   // shift left all items left, into the place of the "removed"
   for (ArrayIndex i = index; i < (oldSize - 1); ++i) {
@@ -1397,13 +1401,11 @@ String Value::Comments::get(CommentPlacement slot) const {
 }
 
 void Value::Comments::set(CommentPlacement slot, String comment) {
-  if (!ptr_) {
+  if (slot >= CommentPlacement::numberOfCommentPlacement)
+    return;
+  if (!ptr_)
     ptr_ = std::unique_ptr<Array>(new Array());
-  }
-  // check comments array boundry.
-  if (slot < CommentPlacement::numberOfCommentPlacement) {
-    (*ptr_)[slot] = std::move(comment);
-  }
+  (*ptr_)[slot] = std::move(comment);
 }
 
 void Value::setComment(String comment, CommentPlacement placement) {
@@ -1411,9 +1413,8 @@ void Value::setComment(String comment, CommentPlacement placement) {
     // Always discard trailing newline, to aid indentation.
     comment.pop_back();
   }
-  JSON_ASSERT(!comment.empty());
   JSON_ASSERT_MESSAGE(
-      comment[0] == '\0' || comment[0] == '/',
+      comment.empty() || comment[0] == '/',
       "in Json::Value::setComment(): Comments must start with /");
   comments_.set(placement, std::move(comment));
 }
