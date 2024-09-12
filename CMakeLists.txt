@@ -93,6 +93,12 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" CACHE PATH "Executable/dll output dir.")
 endif()
 
+include(CheckFunctionExists)
+check_function_exists(memset_s HAVE_MEMSET_S)
+if(HAVE_MEMSET_S)
+    add_definitions("-DHAVE_MEMSET_S=1")
+endif()
+
 if(JSONCPP_USE_SECURE_MEMORY)
     add_definitions("-DJSONCPP_USE_SECURE_MEMORY=1")
 endif()
