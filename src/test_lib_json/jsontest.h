@@ -185,7 +185,7 @@ TestResult& checkEqual(TestResult& result, T expected, U actual,
 
 Json::String ToJsonString(const char* toConvert);
 Json::String ToJsonString(Json::String in);
-#if JSONCPP_USING_SECURE_MEMORY
+#if JSONCPP_USE_SECURE_MEMORY
 Json::String ToJsonString(std::string in);
 #endif
 
