@@ -87,7 +87,8 @@ template <typename T, typename U>
 static inline bool InRange(double d, T min, U max) {
   // The casts can lose precision, but we are looking only for
   // an approximate range. Might fail on edge cases though. ~cdunn
-  return d >= static_cast<double>(min) && d <= static_cast<double>(max);
+  return d >= static_cast<double>(min) && d <= static_cast<double>(max) &&
+         !(static_cast<U>(d) == min && d != static_cast<double>(min));
 }
 #else  // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 static inline double integerToDouble(Json::UInt64 value) {
@@ -101,7 +102,8 @@ template <typename T> static inline double integerToDouble(T value) {
 
 template <typename T, typename U>
 static inline bool InRange(double d, T min, U max) {
-  return d >= integerToDouble(min) && d <= integerToDouble(max);
+  return d >= integerToDouble(min) && d <= integerToDouble(max) &&
+         !(static_cast<U>(d) == min && d != integerToDouble(min));
 }
 #endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 
@@ -705,6 +707,11 @@ Value::Int64 Value::asInt64() const {
     JSON_ASSERT_MESSAGE(isInt64(), "LargestUInt out of Int64 range");
     return Int64(value_.uint_);
   case realValue:
+    // If the double value is in proximity to minInt64, it will be rounded to
+    // minInt64. The correct value in this scenario is indeterminable
+    JSON_ASSERT_MESSAGE(
+        value_.real_ != minInt64,
+        "Double value is minInt64, precise value cannot be determined");
     JSON_ASSERT_MESSAGE(InRange(value_.real_, minInt64, maxInt64),
                         "double out of Int64 range");
     return Int64(value_.real_);
@@ -1092,6 +1099,9 @@ Value const* Value::find(char const* begin, char const* end) const {
     return nullptr;
   return &(*it).second;
 }
+Value const* Value::find(const String& key) const {
+  return find(key.data(), key.data() + key.length());
+}
 Value* Value::demand(char const* begin, char const* end) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == objectValue,
                       "in Json::Value::demand(begin, end): requires "
@@ -1105,7 +1115,7 @@ const Value& Value::operator[](const char* key) const {
   return *found;
 }
 Value const& Value::operator[](const String& key) const {
-  Value const* found = find(key.data(), key.data() + key.length());
+  Value const* found = find(key);
   if (!found)
     return nullSingleton();
   return *found;
@@ -1205,7 +1215,7 @@ bool Value::removeIndex(ArrayIndex index, Value* removed) {
     return false;
   }
   if (removed)
-    *removed = it->second;
+    *removed = std::move(it->second);
   ArrayIndex oldSize = size();
   // shift left all items left, into the place of the "removed"
   for (ArrayIndex i = index; i < (oldSize - 1); ++i) {
@@ -1308,8 +1318,12 @@ bool Value::isInt64() const {
     // Note that maxInt64 (= 2^63 - 1) is not exactly representable as a
     // double, so double(maxInt64) will be rounded up to 2^63. Therefore we
     // require the value to be strictly less than the limit.
-    return value_.real_ >= double(minInt64) &&
-           value_.real_ < double(maxInt64) && IsIntegral(value_.real_);
+    // minInt64 is -2^63 which can be represented as a double, but since double
+    // values in its proximity are also rounded to -2^63, we require the value
+    // to be strictly greater than the limit to avoid returning 'true' for
+    // values that are not in the range
+    return value_.real_ > double(minInt64) && value_.real_ < double(maxInt64) &&
+           IsIntegral(value_.real_);
   default:
     break;
   }
@@ -1347,7 +1361,11 @@ bool Value::isIntegral() const {
     // Note that maxUInt64 (= 2^64 - 1) is not exactly representable as a
     // double, so double(maxUInt64) will be rounded up to 2^64. Therefore we
     // require the value to be strictly less than the limit.
-    return value_.real_ >= double(minInt64) &&
+    // minInt64 is -2^63 which can be represented as a double, but since double
+    // values in its proximity are also rounded to -2^63, we require the value
+    // to be strictly greater than the limit to avoid returning 'true' for
+    // values that are not in the range
+    return value_.real_ > double(minInt64) &&
            value_.real_ < maxUInt64AsDouble && IsIntegral(value_.real_);
 #else
     return value_.real_ >= minInt && value_.real_ <= maxUInt &&
@@ -1410,9 +1428,8 @@ void Value::setComment(String comment, CommentPlacement placement) {
     // Always discard trailing newline, to aid indentation.
     comment.pop_back();
   }
-  JSON_ASSERT(!comment.empty());
   JSON_ASSERT_MESSAGE(
-      comment[0] == '\0' || comment[0] == '/',
+      comment.empty() || comment[0] == '/',
       "in Json::Value::setComment(): Comments must start with /");
   comments_.set(placement, std::move(comment));
 }
