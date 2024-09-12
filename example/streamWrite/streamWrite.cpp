@@ -1,5 +1,6 @@
 #include "json/json.h"
 #include <iostream>
+#include <memory>
 /** \brief Write the Value object to a stream.
  * Example Usage:
  * $g++ streamWrite.cpp -ljsoncpp -std=c++11 -o streamWrite
