@@ -869,6 +869,7 @@ public:
   bool rejectDupKeys_;
   bool allowSpecialFloats_;
   bool skipBom_;
+  bool skipEscapeString_;
   size_t stackLimit_;
 }; // OurFeatures
 
@@ -1454,8 +1455,9 @@ bool OurReader::readObject(Token& token) {
       return true;
     name.clear();
     if (tokenName.type_ == tokenString) {
-      if (!decodeString(tokenName, name))
-        return recoverFromError(tokenObjectEnd);
+      name = String(tokenName.start_ + 1, tokenName.end_-1);
+      //if (!decodeString(tokenName, name))
+      //  return recoverFromError(tokenObjectEnd);
     } else if (tokenName.type_ == tokenNumber && features_.allowNumericKeys_) {
       Value numberName;
       if (!decodeNumber(tokenName, numberName))
@@ -1669,6 +1671,10 @@ bool OurReader::decodeString(Token& token, String& decoded) {
   decoded.reserve(static_cast<size_t>(token.end_ - token.start_ - 2));
   Location current = token.start_ + 1; // skip '"'
   Location end = token.end_ - 1;       // do not include '"'
+  if (features_.skipEscapeString_) {
+      decoded = String(current, end);
+      return true;
+  }
   while (current != end) {
     Char c = *current++;
     if (c == '"')
@@ -1897,6 +1903,7 @@ CharReader* CharReaderBuilder::newCharReader() const {
   features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
   features.skipBom_ = settings_["skipBom"].asBool();
+  features.skipEscapeString_ =  settings_["skipEscapeString"].asBool();
   return new OurCharReader(collectComments, features);
 }
 
