@@ -74,7 +74,7 @@ public:
 
   /// Removes the last PredicateContext added to the predicate stack
   /// chained list.
-  /// Next messages will be targed at the PredicateContext that was removed.
+  /// Next messages will be targeted at the PredicateContext that was removed.
   TestResult& popPredicateContext();
 
   bool failed() const;
@@ -185,7 +185,7 @@ TestResult& checkEqual(TestResult& result, T expected, U actual,
 
 Json::String ToJsonString(const char* toConvert);
 Json::String ToJsonString(Json::String in);
-#if JSONCPP_USING_SECURE_MEMORY
+#if JSONCPP_USE_SECURE_MEMORY
 Json::String ToJsonString(std::string in);
 #endif
 

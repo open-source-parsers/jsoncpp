@@ -410,7 +410,7 @@ Json::String ToJsonString(const char* toConvert) {
 
 Json::String ToJsonString(Json::String in) { return in; }
 
-#if JSONCPP_USING_SECURE_MEMORY
+#if JSONCPP_USE_SECURE_MEMORY
 Json::String ToJsonString(std::string in) {
   return Json::String(in.data(), in.data() + in.length());
 }
