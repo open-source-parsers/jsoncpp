@@ -1653,8 +1653,8 @@ bool OurReader::decodeString(Token& token, String& decoded) {
   Location current = token.start_ + 1; // skip '"'
   Location end = token.end_ - 1;       // do not include '"'
   if (features_.skipEscapeString_) {
-      decoded = String(current, end);
-      return true;
+    decoded = String(current, end);
+    return true;
   }
   while (current != end) {
     Char c = *current++;
