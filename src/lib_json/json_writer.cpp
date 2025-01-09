@@ -67,11 +67,11 @@ String valueToString(double value, bool useSpecialFloats,
   // that always has a decimal point because JSON doesn't distinguish the
   // concepts of reals and integers.
   if (!std::isfinite(value)) {
-    static const char* const reps[2][3] = {{"NaN", "-Infinity", "Infinity"},
-                                           {"null", "-1e+9999", "1e+9999"}};
-    return reps[useSpecialFloats ? 0 : 1][std::isnan(value) ? 0
-                                          : (value < 0)     ? 1
-                                                            : 2];
+    if (std::isnan(value))
+      return useSpecialFloats ? "NaN" : "null";
+    if (value < 0)
+      return useSpecialFloats ? "-Infinity" : "-1e+9999";
+    return useSpecialFloats ? "Infinity" : "1e+9999";
   }
 
   String buffer(size_t(36), '\0');
