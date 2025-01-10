@@ -39,12 +39,20 @@
 #endif
 #endif
 
+#if __cplusplus >= 201703L
+#define JSONCPP_HAS_STRING_VIEW 1
+#endif
+
 #include <array>
 #include <exception>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
+
+#ifdef JSONCPP_HAS_STRING_VIEW
+#include <string_view>
+#endif
 
 // Disable warning C4251: <data member>: <type> needs to have dll-interface to
 // be used by...
@@ -342,6 +350,9 @@ public:
    */
   Value(const StaticString& value);
   Value(const String& value);
+#ifdef JSONCPP_HAS_STRING_VIEW
+  Value(std::string_view value);
+#endif
   Value(bool value);
   Value(std::nullptr_t ptr) = delete;
   Value(const Value& other);
@@ -384,6 +395,12 @@ public:
    *  \return false if !string. (Seg-fault if str or end are NULL.)
    */
   bool getString(char const** begin, char const** end) const;
+#ifdef JSONCPP_HAS_STRING_VIEW
+  /** Get string_view of string-value.
+   *  \return false if !string. (Seg-fault if str is NULL.)
+   */
+  bool getString(std::string_view* str) const;
+#endif
   Int asInt() const;
   UInt asUInt() const;
 #if defined(JSON_HAS_INT64)
@@ -470,6 +487,15 @@ public:
   bool insert(ArrayIndex index, const Value& newValue);
   bool insert(ArrayIndex index, Value&& newValue);
 
+#ifdef JSONCPP_HAS_STRING_VIEW
+  /// Access an object value by name, create a null member if it does not exist.
+  /// \param key may contain embedded nulls.
+  Value& operator[](std::string_view key);
+  /// Access an object value by name, returns null if there is no member with
+  /// that name.
+  /// \param key may contain embedded nulls.
+  const Value& operator[](std::string_view key) const;
+#else
   /// Access an object value by name, create a null member if it does not exist.
   /// \note Because of our implementation, keys are limited to 2^30 -1 chars.
   /// Exceeding that will cause an exception.
@@ -484,6 +510,7 @@ public:
   /// that name.
   /// \param key may contain embedded nulls.
   const Value& operator[](const String& key) const;
+#endif
   /** \brief Access an object value by name, create a null member if it does not
    * exist.
    *
@@ -497,18 +524,24 @@ public:
    *   \endcode
    */
   Value& operator[](const StaticString& key);
+#ifdef JSONCPP_HAS_STRING_VIEW
+  /// Return the member named key if it exist, defaultValue otherwise.
+  /// \note deep copy
+  Value get(std::string_view key, const Value& defaultValue) const;
+#else
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
   Value get(const char* key, const Value& defaultValue) const;
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
+  /// \param key may contain embedded nulls.
+  Value get(const String& key, const Value& defaultValue) const;
+#endif
+  /// Return the member named key if it exist, defaultValue otherwise.
+  /// \note deep copy
   /// \note key may contain embedded nulls.
   Value get(const char* begin, const char* end,
             const Value& defaultValue) const;
-  /// Return the member named key if it exist, defaultValue otherwise.
-  /// \note deep copy
-  /// \param key may contain embedded nulls.
-  Value get(const String& key, const Value& defaultValue) const;
   /// Most general and efficient version of isMember()const, get()const,
   /// and operator[]const
   /// \note As stated elsewhere, behavior is undefined if (end-begin) >= 2^30
@@ -548,20 +581,28 @@ public:
   /// Do nothing if it did not exist.
   /// \pre type() is objectValue or nullValue
   /// \post type() is unchanged
+#if JSONCPP_HAS_STRING_VIEW
+  void removeMember(std::string_view key);
+#else
   void removeMember(const char* key);
   /// Same as removeMember(const char*)
   /// \param key may contain embedded nulls.
   void removeMember(const String& key);
-  /// Same as removeMember(const char* begin, const char* end, Value* removed),
-  /// but 'key' is null-terminated.
-  bool removeMember(const char* key, Value* removed);
+#endif
   /** \brief Remove the named map member.
    *
    *  Update 'removed' iff removed.
    *  \param key may contain embedded nulls.
    *  \return true iff removed (no exceptions)
    */
+#if JSONCPP_HAS_STRING_VIEW
+  bool removeMember(std::string_view key, Value* removed);
+#else
   bool removeMember(String const& key, Value* removed);
+  /// Same as removeMember(const char* begin, const char* end, Value* removed),
+  /// but 'key' is null-terminated.
+  bool removeMember(const char* key, Value* removed);
+#endif
   /// Same as removeMember(String const& key, Value* removed)
   bool removeMember(const char* begin, const char* end, Value* removed);
   /** \brief Remove the indexed array element.
@@ -572,12 +613,18 @@ public:
    */
   bool removeIndex(ArrayIndex index, Value* removed);
 
+#ifdef JSONCPP_HAS_STRING_VIEW
+  /// Return true if the object has a member named key.
+  /// \param key may contain embedded nulls.
+  bool isMember(std::string_view key) const;
+#else
   /// Return true if the object has a member named key.
   /// \note 'key' must be null-terminated.
   bool isMember(const char* key) const;
   /// Return true if the object has a member named key.
   /// \param key may contain embedded nulls.
   bool isMember(const String& key) const;
+#endif
   /// Same as isMember(String const& key)const
   bool isMember(const char* begin, const char* end) const;
 
