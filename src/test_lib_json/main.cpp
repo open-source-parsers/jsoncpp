@@ -76,6 +76,8 @@ struct ValueTest : JsonTest::TestCase {
   Json::Value float_{0.00390625f};
   Json::Value array1_;
   Json::Value object1_;
+  Json::Value object2_;
+  Json::Value object3_;
   Json::Value emptyString_{""};
   Json::Value string1_{"a"};
   Json::Value string_{"sometext with space"};
@@ -85,6 +87,34 @@ struct ValueTest : JsonTest::TestCase {
   ValueTest() {
     array1_.append(1234);
     object1_["id"] = 1234;
+
+    // object2 with matching values
+    object2_["null"] = Json::nullValue;
+    object2_["bool"] = true;
+    object2_["int"] = Json::Int{Json::Value::maxInt};
+    object2_["int64"] = Json::Int64{Json::Value::maxInt64};
+    object2_["uint"] = Json::UInt{Json::Value::maxUInt};
+    object2_["uint64"] = Json::UInt64{Json::Value::maxUInt64};
+    object2_["integral"] = 1234;
+    object2_["double"] = 1234.56789;
+    object2_["numeric"] = 0.12345f;
+    object2_["string"] = "string";
+    object2_["array"] = Json::arrayValue;
+    object2_["object"] = Json::objectValue;
+
+    // object3 with not matching values
+    object3_["object"] = Json::nullValue;
+    object3_["null"] = true;
+    object3_["bool"] = Json::Int{Json::Value::maxInt};
+    object3_["int"] = "not_an_int";
+    object3_["int64"] = "not_an_int64";
+    object3_["uint"] = "not_an_uint";
+    object3_["uin64"] = "not_an_uint64";
+    object3_["integral"] = 1234.56789;
+    object3_["double"] = false;
+    object3_["numeric"] = "string";
+    object3_["string"] = Json::arrayValue;
+    object3_["array"] = Json::objectValue;
   }
 
   struct IsCheck {
@@ -233,6 +263,62 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, objects) {
   const std::string stringUnknownIdKey = "unknown id";
   const Json::Value* stringFoundUnknownId = object1_.find(stringUnknownIdKey);
   JSONTEST_ASSERT_EQUAL(nullptr, stringFoundUnknownId);
+
+  // Access through find<Type>()
+  const Json::Value* nullFound = object2_.findNull("null");
+  JSONTEST_ASSERT(nullFound != nullptr);
+  JSONTEST_ASSERT_EQUAL(Json::nullValue, *nullFound);
+  JSONTEST_ASSERT(object3_.findNull("null") == nullptr);
+
+  const Json::Value* boolFound = object2_.findBool("bool");
+  JSONTEST_ASSERT(boolFound != nullptr);
+  JSONTEST_ASSERT_EQUAL(true, *boolFound);
+  JSONTEST_ASSERT(object3_.findBool("bool") == nullptr);
+
+  const Json::Value* intFound = object2_.findInt("int");
+  JSONTEST_ASSERT(intFound != nullptr);
+  JSONTEST_ASSERT_EQUAL(Json::Int{Json::Value::maxInt}, *intFound);
+  JSONTEST_ASSERT(object3_.findInt("int") == nullptr);
+
+  const Json::Value* int64Found = object2_.findInt64("int64");
+  JSONTEST_ASSERT(int64Found != nullptr);
+  JSONTEST_ASSERT_EQUAL(Json::Int64{Json::Value::maxInt64}, *int64Found);
+  JSONTEST_ASSERT(object3_.findInt64("int64") == nullptr);
+
+  const Json::Value* uintFound = object2_.findUInt("uint");
+  JSONTEST_ASSERT(uintFound != nullptr);
+  JSONTEST_ASSERT_EQUAL(Json::UInt{Json::Value::maxUInt}, *uintFound);
+  JSONTEST_ASSERT(object3_.findUInt("uint") == nullptr);
+
+  const Json::Value* uint64Found = object2_.findUInt64("uint64");
+  JSONTEST_ASSERT(uint64Found != nullptr);
+  JSONTEST_ASSERT_EQUAL(Json::UInt64{Json::Value::maxUInt64}, *uint64Found);
+  JSONTEST_ASSERT(object3_.findUInt64("uint64") == nullptr);
+
+  const Json::Value* integralFound = object2_.findIntegral("integral");
+  JSONTEST_ASSERT(integralFound != nullptr);
+  JSONTEST_ASSERT_EQUAL(1234, *integralFound);
+  JSONTEST_ASSERT(object3_.findIntegral("integral") == nullptr);
+
+  const Json::Value* doubleFound = object2_.findDouble("double");
+  JSONTEST_ASSERT(doubleFound != nullptr);
+  JSONTEST_ASSERT_EQUAL(1234.56789, *doubleFound);
+  JSONTEST_ASSERT(object3_.findDouble("double") == nullptr);
+
+  const Json::Value* numericFound = object2_.findNumeric("numeric");
+  JSONTEST_ASSERT(numericFound != nullptr);
+  JSONTEST_ASSERT_EQUAL(0.12345f, *numericFound);
+  JSONTEST_ASSERT(object3_.findNumeric("numeric") == nullptr);
+
+  const Json::Value* stringFound = object2_.findString("string");
+  JSONTEST_ASSERT(stringFound != nullptr);
+  JSONTEST_ASSERT_EQUAL(std::string{"string"}, *stringFound);
+  JSONTEST_ASSERT(object3_.findString("string") == nullptr);
+
+  const Json::Value* arrayFound = object2_.findArray("array");
+  JSONTEST_ASSERT(arrayFound != nullptr);
+  JSONTEST_ASSERT_EQUAL(Json::arrayValue, *arrayFound);
+  JSONTEST_ASSERT(object3_.findArray("array") == nullptr);
 
   // Access through demand()
   const char yetAnotherIdKey[] = "yet another id";

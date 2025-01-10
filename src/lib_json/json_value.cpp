@@ -1129,6 +1129,44 @@ Value const* Value::find(char const* begin, char const* end) const {
 Value const* Value::find(const String& key) const {
   return find(key.data(), key.data() + key.length());
 }
+
+Value const* Value::findNull(const String& key) const {
+  return findValue<Value, &Value::isNull>(key);
+}
+Value const* Value::findBool(const String& key) const {
+  return findValue<Value, &Value::isBool>(key);
+}
+Value const* Value::findInt(const String& key) const {
+  return findValue<Value, &Value::isInt>(key);
+}
+Value const* Value::findInt64(const String& key) const {
+  return findValue<Value, &Value::isInt64>(key);
+}
+Value const* Value::findUInt(const String& key) const {
+  return findValue<Value, &Value::isUInt>(key);
+}
+Value const* Value::findUInt64(const String& key) const {
+  return findValue<Value, &Value::isUInt64>(key);
+}
+Value const* Value::findIntegral(const String& key) const {
+  return findValue<Value, &Value::isIntegral>(key);
+}
+Value const* Value::findDouble(const String& key) const {
+  return findValue<Value, &Value::isDouble>(key);
+}
+Value const* Value::findNumeric(const String& key) const {
+  return findValue<Value, &Value::isNumeric>(key);
+}
+Value const* Value::findString(const String& key) const {
+  return findValue<Value, &Value::isString>(key);
+}
+Value const* Value::findArray(const String& key) const {
+  return findValue<Value, &Value::isArray>(key);
+}
+Value const* Value::findObject(const String& key) const {
+  return findValue<Value, &Value::isObject>(key);
+}
+
 Value* Value::demand(char const* begin, char const* end) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == objectValue,
                       "in Json::Value::demand(begin, end): requires "

@@ -549,6 +549,29 @@ public:
   /// Most general and efficient version of isMember()const, get()const,
   /// and operator[]const
   Value const* find(const String& key) const;
+
+  /// Calls find and only returns a valid pointer if the type is found
+  template <typename T, bool (T::*TMemFn)() const>
+  Value const* findValue(const String& key) const {
+    Value const* found = find(key);
+    if (!found || !(found->*TMemFn)())
+      return nullptr;
+    return found;
+  }
+
+  Value const* findNull(const String& key) const;
+  Value const* findBool(const String& key) const;
+  Value const* findInt(const String& key) const;
+  Value const* findInt64(const String& key) const;
+  Value const* findUInt(const String& key) const;
+  Value const* findUInt64(const String& key) const;
+  Value const* findIntegral(const String& key) const;
+  Value const* findDouble(const String& key) const;
+  Value const* findNumeric(const String& key) const;
+  Value const* findString(const String& key) const;
+  Value const* findArray(const String& key) const;
+  Value const* findObject(const String& key) const;
+
   /// Most general and efficient version of object-mutators.
   /// \note As stated elsewhere, behavior is undefined if (end-begin) >= 2^30
   /// \return non-zero, but JSON_ASSERT if this is neither object nor nullValue.
