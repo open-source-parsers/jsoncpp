@@ -1374,123 +1374,42 @@ bool Value::isNull() const { return type() == nullValue; }
 
 bool Value::isBool() const { return type() == booleanValue; }
 
+// This is evaluated with respect to the underlying data storage type
 bool Value::isInt() const {
-  switch (type()) {
-  case intValue:
-#if defined(JSON_HAS_INT64)
-    return value_.int_ >= minInt && value_.int_ <= maxInt;
-#else
-    return true;
-#endif
-  case uintValue:
-    return value_.uint_ <= UInt(maxInt);
-  case realValue:
-    return value_.real_ >= minInt && value_.real_ <= maxInt &&
-           IsIntegral(value_.real_);
-  default:
-    break;
-  }
-  return false;
+  return type() == intValue;
 }
 
+// This is evaluated with respect to the underlying data storage type
 bool Value::isUInt() const {
-  switch (type()) {
-  case intValue:
-#if defined(JSON_HAS_INT64)
-    return value_.int_ >= 0 && LargestUInt(value_.int_) <= LargestUInt(maxUInt);
-#else
-    return value_.int_ >= 0;
-#endif
-  case uintValue:
-#if defined(JSON_HAS_INT64)
-    return value_.uint_ <= maxUInt;
-#else
-    return true;
-#endif
-  case realValue:
-    return value_.real_ >= 0 && value_.real_ <= maxUInt &&
-           IsIntegral(value_.real_);
-  default:
-    break;
-  }
-  return false;
+  return type() == uintValue;
 }
 
+// This is evaluated with respect to the underlying data storage type
 bool Value::isInt64() const {
 #if defined(JSON_HAS_INT64)
-  switch (type()) {
-  case intValue:
-    return true;
-  case uintValue:
-    return value_.uint_ <= UInt64(maxInt64);
-  case realValue:
-    // Note that maxInt64 (= 2^63 - 1) is not exactly representable as a
-    // double, so double(maxInt64) will be rounded up to 2^63. Therefore we
-    // require the value to be strictly less than the limit.
-    // minInt64 is -2^63 which can be represented as a double, but since double
-    // values in its proximity are also rounded to -2^63, we require the value
-    // to be strictly greater than the limit to avoid returning 'true' for
-    // values that are not in the range
-    return value_.real_ > double(minInt64) && value_.real_ < double(maxInt64) &&
-           IsIntegral(value_.real_);
-  default:
-    break;
-  }
+  return type() == intValue;
 #endif // JSON_HAS_INT64
   return false;
 }
 
+// This is evaluated with respect to the underlying data storage type
 bool Value::isUInt64() const {
 #if defined(JSON_HAS_INT64)
-  switch (type()) {
-  case intValue:
-    return value_.int_ >= 0;
-  case uintValue:
-    return true;
-  case realValue:
-    // Note that maxUInt64 (= 2^64 - 1) is not exactly representable as a
-    // double, so double(maxUInt64) will be rounded up to 2^64. Therefore we
-    // require the value to be strictly less than the limit.
-    return value_.real_ >= 0 && value_.real_ < maxUInt64AsDouble &&
-           IsIntegral(value_.real_);
-  default:
-    break;
-  }
+  return type() == uintValue;
 #endif // JSON_HAS_INT64
   return false;
 }
 
+// This is evaluated with respect to the underlying data storage type
+bool Value::isDouble() const { return type() == realValue; }
+
+// This is evaluated with respect to the definition of a JSON integer
 bool Value::isIntegral() const {
-  switch (type()) {
-  case intValue:
-  case uintValue:
-    return true;
-  case realValue:
-#if defined(JSON_HAS_INT64)
-    // Note that maxUInt64 (= 2^64 - 1) is not exactly representable as a
-    // double, so double(maxUInt64) will be rounded up to 2^64. Therefore we
-    // require the value to be strictly less than the limit.
-    // minInt64 is -2^63 which can be represented as a double, but since double
-    // values in its proximity are also rounded to -2^63, we require the value
-    // to be strictly greater than the limit to avoid returning 'true' for
-    // values that are not in the range
-    return value_.real_ > double(minInt64) &&
-           value_.real_ < maxUInt64AsDouble && IsIntegral(value_.real_);
-#else
-    return value_.real_ >= minInt && value_.real_ <= maxUInt &&
-           IsIntegral(value_.real_);
-#endif // JSON_HAS_INT64
-  default:
-    break;
-  }
-  return false;
+  return type() == intValue || type() == uintValue || (type() == realValue && IsIntegral(value_.real_));
 }
 
-bool Value::isDouble() const {
-  return type() == intValue || type() == uintValue || type() == realValue;
-}
-
-bool Value::isNumeric() const { return isDouble(); }
+// This is evaluated with respect to the definition of a JSON number
+bool Value::isNumeric() const { return type() == intValue || type() == uintValue || type() == realValue; }
 
 bool Value::isString() const { return type() == stringValue; }
 
