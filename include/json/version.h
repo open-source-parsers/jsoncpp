@@ -1,12 +1,13 @@
 #ifndef JSON_VERSION_H_INCLUDED
 #define JSON_VERSION_H_INCLUDED
 
-// Note: version must be updated in three places when doing a release. This
+// Note: version must be updated in four places when doing a release. This
 // annoying process ensures that amalgamate, CMake, and meson all report the
 // correct version.
 // 1. /meson.build
 // 2. /include/json/version.h
 // 3. /CMakeLists.txt
+// 4. /MODULE.bazel
 // IMPORTANT: also update the SOVERSION!!
 
 #define JSONCPP_VERSION_STRING "1.9.7"

@@ -55,3 +55,6 @@ compile_commands.json
 
 # temps
 /version
+
+# Bazel output paths
+/bazel-*
