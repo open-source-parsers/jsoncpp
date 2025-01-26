@@ -58,3 +58,4 @@ compile_commands.json
 
 # Bazel output paths
 /bazel-*
+/MODULE.bazel.lock
