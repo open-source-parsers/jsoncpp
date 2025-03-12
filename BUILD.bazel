@@ -23,7 +23,7 @@ cc_library(
         "include/json/writer.h",
     ],
     copts = [
-        "-DJSON_USE_EXCEPTION=0",
+        "-DJSON_USE_EXCEPTION=1",
         "-DJSON_HAS_INT64",
     ],
     includes = ["include"],
@@ -34,4 +34,23 @@ cc_library(
 cc_library(
     name = "private",
     textual_hdrs = ["src/lib_json/json_valueiterator.inl"],
+)
+
+cc_binary(
+    name = "jsontestrunner",
+    srcs = ["src/jsontestrunner/main.cpp"],
+    includes = ["include"],
+    deps = [":jsoncpp"],
+)
+
+cc_binary(
+    name = "jsoncpp_test",
+    srcs = [
+        "src/test_lib_json/jsontest.cpp",
+        "src/test_lib_json/jsontest.h",
+        "src/test_lib_json/main.cpp",
+        "src/test_lib_json/fuzz.h",
+        "src/test_lib_json/fuzz.cpp",
+        ],
+    deps = [":jsoncpp"],
 )
