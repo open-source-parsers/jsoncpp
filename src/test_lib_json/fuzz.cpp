@@ -11,10 +11,6 @@
 #include <memory>
 #include <string>
 
-namespace Json {
-class Exception;
-}
-
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   Json::CharReaderBuilder builder;
 
@@ -45,10 +41,14 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
   Json::Value root;
   const auto data_str = reinterpret_cast<const char*>(data);
+#if JSON_USE_EXCEPTION
   try {
+#endif // JSON_USE_EXCEPTION
     reader->parse(data_str, data_str + size, &root, nullptr);
+#if JSON_USE_EXCEPTION
   } catch (Json::Exception const&) {
   }
+#endif // JSON_USE_EXCEPTION
   // Whether it succeeded or not doesn't matter.
   return 0;
 }

@@ -1,6 +1,28 @@
 licenses(["unencumbered"])  # Public Domain or MIT
 
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+
 exports_files(["LICENSE"])
+
+bool_flag(
+    name = "use_exception",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "use_exception_cfg",
+    flag_values = {":use_exception": "true"},
+)
+
+bool_flag(
+    name = "has_int64",
+    build_setting_default = True,
+)
+
+config_setting(
+    name = "has_int64_cfg",
+    flag_values = {":has_int64": "true"},
+)
 
 cc_library(
     name = "jsoncpp",
@@ -22,10 +44,13 @@ cc_library(
         "include/json/version.h",
         "include/json/writer.h",
     ],
-    copts = [
-        "-DJSON_USE_EXCEPTION=0",
-        "-DJSON_HAS_INT64",
-    ],
+    defines = select({
+        ":use_exception_cfg": ["JSON_USE_EXCEPTION=1"],
+        "//conditions:default": ["JSON_USE_EXCEPTION=0"],
+    }) + select({
+        ":has_int64_cfg": ["JSON_HAS_INT64"],
+        "//conditions:default": [],
+    }),
     includes = ["include"],
     visibility = ["//visibility:public"],
     deps = [":private"],
