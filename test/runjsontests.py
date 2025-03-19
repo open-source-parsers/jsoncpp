@@ -102,8 +102,8 @@ def runAllTests(jsontest_executable_path, input_path = None,
 
     tests = [
         test for test in tests
-        if os.path.basename(test) not in known and
-            os.path.basename(os.path.dirname(test)) == "jsonchecker"
+        if os.path.basename(test) not in known or
+            os.path.basename(os.path.dirname(test)) != "jsonchecker"
     ]
 
     failed_tests = []

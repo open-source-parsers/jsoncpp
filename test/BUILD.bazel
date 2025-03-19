@@ -3,8 +3,6 @@ filegroup(
     srcs = glob(["data/**", "jsonchecker/**"], exclude=["**/*.json"]),
 )
 
-########
-
 [py_test(
     name = "runjson_%s_test" % "_".join(f.split("/")),
     srcs = ["runjsontests.py"],
