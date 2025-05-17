@@ -39,16 +39,14 @@
 #endif
 #endif
 
-#if __cplusplus >= 201703L
-#define JSONCPP_HAS_STRING_VIEW 1
-#endif
-
 #include <array>
 #include <exception>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "json/configure.h"
 
 #ifdef JSONCPP_HAS_STRING_VIEW
 #include <string_view>
@@ -581,7 +579,7 @@ public:
   /// Do nothing if it did not exist.
   /// \pre type() is objectValue or nullValue
   /// \post type() is unchanged
-#if JSONCPP_HAS_STRING_VIEW
+#ifdef JSONCPP_HAS_STRING_VIEW
   void removeMember(std::string_view key);
 #else
   void removeMember(const char* key);
@@ -595,7 +593,7 @@ public:
    *  \param key may contain embedded nulls.
    *  \return true iff removed (no exceptions)
    */
-#if JSONCPP_HAS_STRING_VIEW
+#ifdef JSONCPP_HAS_STRING_VIEW
   bool removeMember(std::string_view key, Value* removed);
 #else
   bool removeMember(String const& key, Value* removed);

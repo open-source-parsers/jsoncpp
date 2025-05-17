@@ -5,6 +5,7 @@
 
 #if !defined(JSON_IS_AMALGAMATION)
 #include <json/assertions.h>
+#include <json/configure.h>
 #include <json/value.h>
 #include <json/writer.h>
 #endif // if !defined(JSON_IS_AMALGAMATION)
