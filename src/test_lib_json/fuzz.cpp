@@ -9,7 +9,6 @@
 #include <json/config.h>
 #include <json/json.h>
 #include <memory>
-#include <string>
 
 namespace Json {
 class Exception;
