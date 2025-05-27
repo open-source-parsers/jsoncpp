@@ -78,7 +78,7 @@ Reader::Reader() : features_(Features::all()) {}
 
 Reader::Reader(const Features& features) : features_(features) {}
 
-bool Reader::parse(const std::string& document, Value& root,
+bool Reader::parse(std::string_view document, Value& root,
                    bool collectComments) {
   document_.assign(document.begin(), document.end());
   const char* begin = document_.c_str();
@@ -1985,6 +1985,15 @@ bool parseFromStream(CharReader::Factory const& fact, IStream& sin, Value* root,
   OStringStream ssin;
   ssin << sin.rdbuf();
   String doc = std::move(ssin).str();
+  char const* begin = doc.data();
+  char const* end = begin + doc.size();
+  // Note that we do not actually need a null-terminator.
+  CharReaderPtr const reader(fact.newCharReader());
+  return reader->parse(begin, end, root, errs);
+}
+
+bool parseFromString(
+    CharReader::Factory const& fact, std::string_view doc, Value* root, JSONCPP_STRING* errs) {
   char const* begin = doc.data();
   char const* end = begin + doc.size();
   // Note that we do not actually need a null-terminator.

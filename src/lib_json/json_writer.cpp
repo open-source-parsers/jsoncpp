@@ -1170,18 +1170,30 @@ bool StreamWriterBuilder::validate(Json::Value* invalid) const {
 Value& StreamWriterBuilder::operator[](const String& key) {
   return settings_[key];
 }
+
+static Json::Value& global_settings_ = *new Json::Value([] {
+  //! [StreamWriterBuilderDefaults]
+  Json::Value settings;
+  settings["commentStyle"] = "All";
+  settings["indentation"] = "\t";
+  settings["enableYAMLCompatibility"] = false;
+  settings["dropNullPlaceholders"] = false;
+  settings["useSpecialFloats"] = false;
+  settings["emitUTF8"] = false;
+  settings["precision"] = 17;
+  settings["precisionType"] = "significant";
+  //! [StreamWriterBuilderDefaults]
+  return settings;
+}());
+
 // static
 void StreamWriterBuilder::setDefaults(Json::Value* settings) {
-  //! [StreamWriterBuilderDefaults]
-  (*settings)["commentStyle"] = "All";
-  (*settings)["indentation"] = "\t";
-  (*settings)["enableYAMLCompatibility"] = false;
-  (*settings)["dropNullPlaceholders"] = false;
-  (*settings)["useSpecialFloats"] = false;
-  (*settings)["emitUTF8"] = false;
-  (*settings)["precision"] = 17;
-  (*settings)["precisionType"] = "significant";
-  //! [StreamWriterBuilderDefaults]
+  *settings = global_settings_;
+}
+
+// static
+void StreamWriterBuilder::updateDefaults(const Json::Value& settings) {
+  global_settings_ = settings;
 }
 
 String writeString(StreamWriter::Factory const& factory, Value const& root) {
