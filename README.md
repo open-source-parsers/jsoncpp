@@ -52,6 +52,14 @@ You can download and install JsonCpp using the [vcpkg](https://github.com/Micros
 
 The JsonCpp port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 
+### Conan package manager
+
+You can download and install JsonCpp using the [Conan](https://conan.io/) package manager:
+
+    conan install -r conancenter --requires="jsoncpp/[*]"
+
+The JsonCpp package in Conan Center is kept up to date by [ConanCenterIndex](https://github.com/conan-io/conan-center-index) contributors. If the version is out of date, please create an issue or pull request on the Conan Center Index repository.
+
 ### Amalgamated source
 https://github.com/open-source-parsers/jsoncpp/wiki/Amalgamated-(Possibly-outdated)
 
