@@ -16,6 +16,7 @@
 #include <cstring>
 #include <iostream>
 #include <istream>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <set>
