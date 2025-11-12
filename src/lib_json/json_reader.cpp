@@ -16,6 +16,7 @@
 #include <cstring>
 #include <iostream>
 #include <istream>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <set>
@@ -143,7 +144,12 @@ bool Reader::readValue() {
   // after calling readValue(). parse() executes one nodes_.push(), so > instead
   // of >=.
   if (nodes_.size() > stackLimit_g)
+#if JSON_USE_EXCEPTION
     throwRuntimeError("Exceeded stackLimit in readValue().");
+#else
+    // throwRuntimeError aborts. Don't abort here.
+    return false;
+#endif
 
   Token token;
   readTokenSkippingComments(token);

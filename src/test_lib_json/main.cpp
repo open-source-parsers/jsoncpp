@@ -1888,7 +1888,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, typeChecksThrowExceptions) {
   JSONTEST_ASSERT_THROWS(objVal.asBool());
   JSONTEST_ASSERT_THROWS(arrVal.asBool());
 
-#endif
+#endif // JSON_USE_EXCEPTION
 }
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, offsetAccessors) {
@@ -3323,6 +3323,8 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithDetailError) {
 }
 
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithStackLimit) {
+#if JSON_USE_EXCEPTION
+
   Json::CharReaderBuilder b;
   Json::Value root;
   char const doc[] = R"({ "property" : "value" })";
@@ -3342,6 +3344,8 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithStackLimit) {
     JSONTEST_ASSERT_THROWS(
         reader->parse(doc, doc + std::strlen(doc), &root, &errs));
   }
+
+#endif // JSON_USE_EXCEPTION
 }
 
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, testOperator) {
@@ -3961,6 +3965,8 @@ JSONTEST_FIXTURE_LOCAL(IteratorTest, indexes) {
 }
 
 JSONTEST_FIXTURE_LOCAL(IteratorTest, constness) {
+#if JSON_USE_EXCEPTION
+
   Json::Value const v;
   JSONTEST_ASSERT_THROWS(
       Json::Value::iterator it(v.begin())); // Compile, but throw.
@@ -3982,6 +3988,8 @@ JSONTEST_FIXTURE_LOCAL(IteratorTest, constness) {
   }
   Json::String expected = R"(" 9","10","11",)";
   JSONTEST_ASSERT_STRING_EQUAL(expected, out.str());
+
+#endif // JSON_USE_EXCEPTION
 }
 
 struct RValueTest : JsonTest::TestCase {};
