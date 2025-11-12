@@ -1,0 +1,11 @@
+cc_test(
+    name = "jsoncpp_test",
+    srcs = [
+        "jsontest.cpp",
+        "jsontest.h",
+        "main.cpp",
+        "fuzz.h",
+        "fuzz.cpp",
+        ],
+    deps = ["//:jsoncpp"],
+)
