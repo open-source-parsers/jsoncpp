@@ -1,0 +1,6 @@
+cc_binary(
+    name = "jsontestrunner",
+    srcs = ["main.cpp"],
+    deps = ["//:jsoncpp"],
+    visibility = ["//test:__pkg__"],
+)
