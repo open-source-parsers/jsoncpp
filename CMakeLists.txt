@@ -46,6 +46,36 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(JSONCPP_HAS_STRING_VIEW_DEFAULT OFF)
+if (${CMAKE_CXX_STANDARD} GREATER_EQUAL 17)
+    set(JSONCPP_HAS_STRING_VIEW_DEFAULT ON)
+endif()
+
+option(JSONCPP_HAS_STRING_VIEW "Enable support for string view" ${JSONCPP_HAS_STRING_VIEW_DEFAULT})
+
+configure_file(configure/configure.h.in include/json/configure.h)
+
+set(JSONCPP_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+file(
+    COPY include/json
+    DESTINATION ${JSONCPP_INCLUDE_DIR}
+    FILES_MATCHING
+        PATTERN "*.h"
+)
+
+set(PUBLIC_HEADERS
+    ${JSONCPP_INCLUDE_DIR}/json/config.h
+    ${JSONCPP_INCLUDE_DIR}/json/configure.h
+    ${JSONCPP_INCLUDE_DIR}/json/forwards.h
+    ${JSONCPP_INCLUDE_DIR}/json/json_features.h
+    ${JSONCPP_INCLUDE_DIR}/json/value.h
+    ${JSONCPP_INCLUDE_DIR}/json/reader.h
+    ${JSONCPP_INCLUDE_DIR}/json/version.h
+    ${JSONCPP_INCLUDE_DIR}/json/writer.h
+    ${JSONCPP_INCLUDE_DIR}/json/assertions.h
+)
+
 # Ensure that CMAKE_BUILD_TYPE has a value specified for single configuration generators.
 if(NOT DEFINED CMAKE_BUILD_TYPE AND NOT DEFINED CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING

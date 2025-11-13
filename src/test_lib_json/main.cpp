@@ -12,7 +12,6 @@
 
 #include "fuzz.h"
 #include "jsontest.h"
-#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <functional>

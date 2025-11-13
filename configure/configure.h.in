@@ -1,0 +1,1 @@
+#cmakedefine JSONCPP_HAS_STRING_VIEW
