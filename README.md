@@ -43,19 +43,62 @@ into 0.y.z.
 ### The vcpkg dependency manager
 
 You can download and install JsonCpp using the [vcpkg](https://github.com/Microsoft/vcpkg/)
-dependency manager:
+dependency manager, which has installation instruction dependent on your
+build system. For example, if you are in a CMake project, the
+[CMake install tutorial](https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-powershell)
+suggests the follow installation method.
+
+First, clone and set up `vcpkg`.
 
 ```sh
     git clone https://github.com/Microsoft/vcpkg.git
     cd vcpkg
     ./bootstrap-vcpkg.sh
-    ./vcpkg integrate install
-    ./vcpkg install jsoncpp
 ```
 
-The JsonCpp port in vcpkg is kept up to date by Microsoft team members and
-community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg)
-on the vcpkg repository.
+Then, create a [vcpkg.json manifest](https://learn.microsoft.com/en-us/vcpkg/reference/vcpkg-json),
+enabling manifest mode and adding JsonCpp to the manifest's dependencies list.
+
+```sh
+    vcpkg new --application
+    vcpkg add port jsoncpp
+```
+
+> [!NOTE]: you can use vcpkg in either classic mode or manifest mode (recommended).
+
+#### Classic mode
+
+If your project does not have a `vcpkg.json`,
+your project is in [Classic mode](https://learn.microsoft.com/en-us/vcpkg/concepts/classic-mode)
+you can install JsonCpp by directly invoking the `install` command:
+
+```sh
+    vcpkg install jsoncpp
+```
+
+### Manifest mode
+
+If your project *does* have a vcpkg.json manifest, your project is in [Manifest mode](https://learn.microsoft.com/en-us/vcpkg/concepts/manifest-mode)
+and you need to add JsonCpp to your package manifest dependencies, then invoke
+install with no arguments.
+
+```sh
+    vcpkg add port jsoncpp
+    vcpkg install
+```
+
+Example manifest:
+
+```sh
+{
+    "name": "best-app-ever",
+    "dependencies": [ "jsoncpp" ],
+}
+```
+
+> [!NOTE] The JsonCpp port in vcpkg is kept up to date by Microsoft team members and community contributors.
+> If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg)
+> on the vcpkg repository.
 
 ### Conan package manager
 
