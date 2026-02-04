@@ -1,5 +1,3 @@
-file(GLOB INCLUDE_FILES "json/*.h")
 install(FILES
-    ${INCLUDE_FILES}
+    ${PUBLIC_HEADERS}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/json)
-

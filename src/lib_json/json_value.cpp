@@ -5,6 +5,7 @@
 
 #if !defined(JSON_IS_AMALGAMATION)
 #include <json/assertions.h>
+#include <json/configure.h>
 #include <json/value.h>
 #include <json/writer.h>
 #endif // if !defined(JSON_IS_AMALGAMATION)
@@ -13,8 +14,6 @@
 #include <cmath>
 #include <cstddef>
 #include <cstring>
-#include <iostream>
-#include <sstream>
 #include <utility>
 
 #ifdef JSONCPP_HAS_STRING_VIEW
