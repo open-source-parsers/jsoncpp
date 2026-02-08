@@ -74,7 +74,7 @@ public:
    * \return \c true if the document was successfully parsed, \c false if an
    * error occurred.
    */
-  bool parse(const std::string& document, Value& root,
+  bool parse(std::string_view document, Value& root,
              bool collectComments = true);
 
   /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a>
@@ -399,6 +399,9 @@ public:
  */
 bool JSON_API parseFromStream(CharReader::Factory const&, IStream&, Value* root,
                               String* errs);
+
+bool JSON_API parseFromString(CharReader::Factory const&, std::string_view,
+                              Value* root, JSONCPP_STRING* errs);
 
 /** \brief Read from 'sin' into 'root'.
  *
