@@ -10,7 +10,7 @@ project(
   # 3. /CMakeLists.txt
   # 4. /MODULE.bazel
   # IMPORTANT: also update the SOVERSION!!
-  version : '1.9.7',
+  version : '1.9.7.1',
   default_options : [
     'buildtype=release',
     'cpp_std=c++11',
