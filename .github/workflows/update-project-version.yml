@@ -105,3 +105,25 @@ jobs:
       - name: sanity check (cmake configure)
         run: |
           if [ -f CMakeLists.txt ]; then
+            mkdir build_check
+            cd build_check
+            cmake .. -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_POST_BUILD_UNITTEST=OFF
+            cd ..
+            rm -rf build_check
+          fi
+
+      - name: create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: bump version to ${{ github.event.inputs.target_version }}"
+          branch: "bump-to-${{ github.event.inputs.target_version }}"
+          title: "chore: bump version to ${{ github.event.inputs.target_version }}"
+          body: |
+            automated version bump.
+            - new version: `${{ github.event.inputs.target_version }}`
+            - new soversion: `${{ github.event.inputs.target_soversion || 'no change' }}`
+
+            ### header verification
+            ${{ steps.verify.outputs.header_report }}
+          labels: "maintenance"
