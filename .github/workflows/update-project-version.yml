@@ -1,14 +1,14 @@
-name: "Manual Version Bump"
+name: "update project version"
 
 on:
   workflow_dispatch:
     inputs:
       target_version:
-        description: 'Next Version (e.g., 1.9.7)'
+        description: 'next version (e.g., 1.9.7)'
         required: true
         default: '1.9.7'
       target_soversion:
-        description: 'Next SOVERSION (e.g., 28). Leave blank to keep current.'
+        description: 'next SOVERSION (e.g., 28) - leave blank to keep current.'
         required: false
 
 jobs:
@@ -18,10 +18,10 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: Checkout code
+      - name: checkout code
         uses: actions/checkout@v4
 
-      - name: Update Project Files
+      - name: update project files
         id: update_files
         run: |
           VER="${{ github.event.inputs.target_version }}"
