@@ -30,7 +30,7 @@ jobs:
           # 1. cmakelists.txt
           if [ -f CMakeLists.txt ]; then
             echo "updating cmakelists.txt"
-            sed -i "/project[[:space:]]*([[:space:]]*jsoncpp/,/)/ s/VERSION [0-9.]*/VERSION $VER/" CMakeLists.txt
+            sed -i "/project.*jsoncpp/,/)/ s/VERSION [0-9.]*/VERSION $VER/" CMakeLists.txt
             if [ -n "$SOVER" ]; then
               sed -i "s/set(PROJECT_SOVERSION [0-9]*/set(PROJECT_SOVERSION $SOVER/" CMakeLists.txt
             fi
@@ -39,15 +39,17 @@ jobs:
           # 2. meson.build
           if [ -f meson.build ]; then
             echo "updating meson.build"
-            sed -i "s/version[[:space:]]*:[[:space:]]*['][0-9.]*[']/version : '$VER'/" meson.build
+            # match the version line directly
+            sed -i "s/version[[:space:]]*:[[:space:]]*['\"][0-9.]*['\"]/version : '$VER'/" meson.build
             if [ -n "$SOVER" ]; then
-              sed -i "s/soversion[[:space:]]*:[[:space:]]*['][0-9]*[']/soversion : '$SOVER'/" meson.build
+              sed -i "s/soversion[[:space:]]*:[[:space:]]*['\"][0-9]*['\"]/soversion : '$SOVER'/" meson.build
             fi
           fi
 
           # 3. module.bazel
           if [ -f MODULE.bazel ]; then
             echo "updating module.bazel"
+            # surgical update only for the module() version
             sed -i "/module(/,/)/ s/version[[:space:]]*=[[:space:]]*['\"][0-9.]*['\"]/version = \"$VER\"/" MODULE.bazel
           fi
 
@@ -82,24 +84,23 @@ jobs:
         run: |
           FILE="include/json/version.h"
           if [ -f "$FILE" ]; then
-            # Use cut and grep -o to avoid shell-escaping issues with sed
-            V_STR=$(grep "JSONCPP_VERSION_STRING" "$FILE" | cut -d '"' -f 2)
-            V_MAJ=$(grep "JSONCPP_VERSION_MAJOR" "$FILE" | awk '{print $3}' | grep -o '[0-9]*')
-            V_MIN=$(grep "JSONCPP_VERSION_MINOR" "$FILE" | awk '{print $3}' | grep -o '[0-9]*')
-            V_PAT=$(grep "JSONCPP_VERSION_PATCH" "$FILE" | awk '{print $3}' | grep -o '[0-9]*')
-            V_QUA=$(grep "JSONCPP_VERSION_QUALIFIER" "$FILE" | awk '{print $3}' | grep -o '[0-9]*' || echo "")
-            
-            {
-              echo "header_report<<EOF"
-              echo "| Macro | Value |"
-              echo "| :--- | :--- |"
-              echo "| STRING | \`$V_STR\` |"
-              echo "| MAJOR | \`$V_MAJ\` |"
-              echo "| MINOR | \`$V_MIN\` |"
-              echo "| PATCH | \`$V_PAT\` |"
-              echo "| QUALIFIER | \`${V_QUA:-empty}\` |"
-              echo "EOF"
-            } >> "$GITHUB_OUTPUT"
+            # stricter extraction to avoid catching comments or artifacts
+            V_STR=$(grep "JSONCPP_VERSION_STRING" "$FILE" | head -n 1 | cut -d '"' -f 2)
+            V_MAJ=$(grep "JSONCPP_VERSION_MAJOR" "$FILE" | head -n 1 | awk '{print $3}' | tr -cd '0-9')
+            V_MIN=$(grep "JSONCPP_VERSION_MINOR" "$FILE" | head -n 1 | awk '{print $3}' | tr -cd '0-9')
+            V_PAT=$(grep "JSONCPP_VERSION_PATCH" "$FILE" | head -n 1 | awk '{print $3}' | tr -cd '0-9')
+            V_QUA=$(grep "JSONCPP_VERSION_QUALIFIER" "$FILE" | head -n 1 | awk '{print $3}' | tr -cd '0-9')
+
+            # build table safely
+            echo "report<<EOF" >> $GITHUB_OUTPUT
+            echo "| Macro | Value |" >> $GITHUB_OUTPUT
+            echo "| :--- | :--- |" >> $GITHUB_OUTPUT
+            echo "| STRING | \`$V_STR\` |" >> $GITHUB_OUTPUT
+            echo "| MAJOR | \`$V_MAJ\` |" >> $GITHUB_OUTPUT
+            echo "| MINOR | \`$V_MIN\` |" >> $GITHUB_OUTPUT
+            echo "| PATCH | \`$V_PAT\` |" >> $GITHUB_OUTPUT
+            echo "| QUALIFIER | \`${V_QUA:-empty}\` |" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
           fi
 
       - name: sanity check (cmake configure)
@@ -125,5 +126,5 @@ jobs:
             - new soversion: `${{ github.event.inputs.target_soversion || 'no change' }}`
 
             ### header verification
-            ${{ steps.verify.outputs.header_report }}
+            ${{ steps.verify.outputs.report }}
           labels: "maintenance"
