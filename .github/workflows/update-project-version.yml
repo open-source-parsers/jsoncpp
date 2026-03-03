@@ -22,39 +22,103 @@ jobs:
         uses: actions/checkout@v4
 
       - name: update project files
-        id: update_files
         run: |
           VER="${{ github.event.inputs.target_version }}"
           SOVER="${{ github.event.inputs.target_soversion }}"
-          echo "bumping version to $VER"
+          echo "bumping to $VER"
 
-          # 1. CMakeLists.txt: Only update version inside the project() block
+          # 1. cmakelists.txt
           if [ -f CMakeLists.txt ]; then
-            echo "updating cmakelists.txt"
-            sed -i "/project[[:space:]]*([[:space:]]*jsoncpp/,/)/ s/VERSION [0-9.]*/VERSION $VER/" CMakeLists.txt
+            sed -i "/project.*jsoncpp/,/)/ s/VERSION [0-9.]*/VERSION $VER/" CMakeLists.txt
             if [ -n "$SOVER" ]; then
               sed -i "s/set(PROJECT_SOVERSION [0-9]*/set(PROJECT_SOVERSION $SOVER/" CMakeLists.txt
             fi
           fi
 
-          # 2. meson.build: Only update version inside the project() block
+          # 2. meson.build
           if [ -f meson.build ]; then
-            echo "updating meson.build"
-            sed -i "/project('jsoncpp'/,/)/ s/version[[:space:]]*:[[:space:]]*['\"][0-9.]*['\"]/version : '$VER'/" meson.build
+            # targeting the version line directly
+            sed -i "s/version[[:space:]]*:[[:space:]]*['\"][0-9.]*['\"]/version : '$VER'/" meson.build
             if [ -n "$SOVER" ]; then
-              # update soversion only within the library() or where defined
               sed -i "s/soversion[[:space:]]*:[[:space:]]*['\"][0-9]*['\"]/soversion : '$SOVER'/" meson.build
             fi
           fi
 
-          # 3. MODULE.bazel: Only update version inside the module() block
+          # 3. module.bazel
           if [ -f MODULE.bazel ]; then
-            echo "updating MODULE.bazel"
-            # match range from 'module(' to the first ')'
-            sed -i "/module(/,/)/ s/version[[:space:]]*=[[:space:]]*['\"][0-9.]*['\"]/version = \"$VER\"/" MODULE.bazel
+            # match only the first 'version' occurrence in the file (the module version)
+            sed -i "0,/version[[:space:]]*=[[:space:]]*['\"][0-9.]*['\"]/s//version = \"$VER\"/" MODULE.bazel
           fi
 
-          # 4. vcpkg.json: jq is inherently surgical
+          # 4. vcpkg.json
           if [ -f vcpkg.json ]; then
-            echo "updating vcpkg.json"
-            jq ".version = \"$VER\"" vcpkg.json > vcpkg.json.tmp && mv vcpkg.json.
+            jq --arg ver "$VER" '.version = $ver' vcpkg.json > tmp.json && mv tmp.json vcpkg.json
+          fi
+
+          # 5. include/json/version.h
+          if [ -f include/json/version.h ]; then
+            MAJOR=$(echo "$VER" | cut -d. -f1)
+            MINOR=$(echo "$VER" | cut -d. -f2)
+            PATCH=$(echo "$VER" | cut -d. -f3)
+            QUALIFIER=$(echo "$VER" | cut -d. -f4 -s)
+
+            sed -i "s/#define JSONCPP_VERSION_STRING \".*\"/#define JSONCPP_VERSION_STRING \"$VER\"/" include/json/version.h
+            sed -i "s/#define JSONCPP_VERSION_MAJOR [0-9]*/#define JSONCPP_VERSION_MAJOR $MAJOR/" include/json/version.h
+            sed -i "s/#define JSONCPP_VERSION_MINOR [0-9]*/#define JSONCPP_VERSION_MINOR $MINOR/" include/json/version.h
+            sed -i "s/#define JSONCPP_VERSION_PATCH [0-9]*/#define JSONCPP_VERSION_PATCH $PATCH/" include/json/version.h
+            
+            if [ -n "$QUALIFIER" ]; then
+              sed -i "s/#define JSONCPP_VERSION_QUALIFIER.*/#define JSONCPP_VERSION_QUALIFIER $QUALIFIER/" include/json/version.h
+            else
+              sed -i "s/#define JSONCPP_VERSION_QUALIFIER.*/#define JSONCPP_VERSION_QUALIFIER/" include/json/version.h
+            fi
+          fi
+
+      - name: verify version macros
+        id: verify
+        run: |
+          FILE="include/json/version.h"
+          if [ -f "$FILE" ]; then
+            # extract clean values by stripping everything except digits and dots
+            V_STR=$(grep "JSONCPP_VERSION_STRING" "$FILE" | head -n 1 | cut -d '"' -f 2)
+            V_MAJ=$(grep "JSONCPP_VERSION_MAJOR" "$FILE" | head -n 1 | awk '{print $3}' | tr -cd '0-9')
+            V_MIN=$(grep "JSONCPP_VERSION_MINOR" "$FILE" | head -n 1 | awk '{print $3}' | tr -cd '0-9')
+            V_PAT=$(grep "JSONCPP_VERSION_PATCH" "$FILE" | head -n 1 | awk '{print $3}' | tr -cd '0-9')
+            V_QUA=$(grep "JSONCPP_VERSION_QUALIFIER" "$FILE" | head -n 1 | awk '{print $3}' | tr -cd '0-9')
+
+            # create a unique delimiter for the multi-line output
+            DELIM=$(dd if=/dev/urandom bs=15 count=1 2>/dev/null | base64)
+            echo "report<<$DELIM" >> $GITHUB_OUTPUT
+            echo "| Macro | Value |" >> $GITHUB_OUTPUT
+            echo "| :--- | :--- |" >> $GITHUB_OUTPUT
+            echo "| STRING | \`$V_STR\` |" >> $GITHUB_OUTPUT
+            echo "| MAJOR | \`$V_MAJ\` |" >> $GITHUB_OUTPUT
+            echo "| MINOR | \`$V_MIN\` |" >> $GITHUB_OUTPUT
+            echo "| PATCH | \`$V_PAT\` |" >> $GITHUB_OUTPUT
+            echo "| QUALIFIER | \`${V_QUA:-empty}\` |" >> $GITHUB_OUTPUT
+            echo "$DELIM" >> $GITHUB_OUTPUT
+          fi
+
+      - name: sanity check (cmake configure)
+        run: |
+          if [ -f CMakeLists.txt ]; then
+            mkdir build_check && cd build_check
+            cmake .. -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_POST_BUILD_UNITTEST=OFF
+            cd .. && rm -rf build_check
+          fi
+
+      - name: create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: bump version to ${{ github.event.inputs.target_version }}"
+          branch: "bump-to-${{ github.event.inputs.target_version }}"
+          title: "chore: bump version to ${{ github.event.inputs.target_version }}"
+          body: |
+            automated version bump.
+            - new version: `${{ github.event.inputs.target_version }}`
+            - new soversion: `${{ github.event.inputs.target_soversion || 'no change' }}`
+
+            ### header verification
+            ${{ steps.verify.outputs.report }}
+          labels: "maintenance"
