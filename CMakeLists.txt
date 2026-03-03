@@ -2,26 +2,26 @@
 
 # ==== Define cmake build policies that affect compilation and linkage default behaviors
 #
-# Set the JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION string to the newest cmake version
+# Set the JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION 1.9.7string to the newest cmake version
 # policies that provide successful builds. By setting JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION
 # to a value greater than the oldest policies, all policies between
-# JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION and CMAKE_VERSION (used for this build)
+# JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION 1.9.7and CMAKE_VERSION (used for this build)
 # are set to their NEW behavior, thereby suppressing policy warnings related to policies
-# between the JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION and CMAKE_VERSION.
+# between the JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION 1.9.7and CMAKE_VERSION.
 #
-# CMake versions greater than the JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION policies will
+# CMake versions greater than the JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION 1.9.7policies will
 # continue to generate policy warnings "CMake Warning (dev)...Policy CMP0XXX is not set:"
 #
-set(JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION "3.8.0")
-set(JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION "3.13.2")
-cmake_minimum_required(VERSION ${JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION})
+set(JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION 1.9.7"3.8.0")
+set(JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION 1.9.7"3.13.2")
+cmake_minimum_required(VERSION 1.9.7${JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION})
 if("${CMAKE_VERSION}" VERSION_LESS "${JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION}")
     #Set and use the newest available cmake policies that are validated to work
-    set(JSONCPP_CMAKE_POLICY_VERSION "${CMAKE_VERSION}")
+    set(JSONCPP_CMAKE_POLICY_VERSION 1.9.7"${CMAKE_VERSION}")
 else()
-    set(JSONCPP_CMAKE_POLICY_VERSION "${JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION}")
+    set(JSONCPP_CMAKE_POLICY_VERSION 1.9.7"${JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION}")
 endif()
-cmake_policy(VERSION ${JSONCPP_CMAKE_POLICY_VERSION})
+cmake_policy(VERSION 1.9.7${JSONCPP_CMAKE_POLICY_VERSION})
 if(POLICY CMP0091)
     cmake_policy(SET CMP0091 NEW)
 endif()
@@ -67,7 +67,7 @@ project(jsoncpp
         LANGUAGES CXX)
 
 message(STATUS "JsonCpp Version: ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
-set(PROJECT_SOVERSION 27)
+set(PROJECT_SOVERSION 1.9.7)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/include/PreventInSourceBuilds.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/include/PreventInBuildInstalls.cmake)
@@ -189,7 +189,7 @@ if(JSONCPP_WITH_CMAKE_PACKAGE)
         INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp)
 
     write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake"
-        VERSION ${PROJECT_VERSION}
+        VERSION 1.9.7${PROJECT_VERSION}
         COMPATIBILITY SameMajorVersion)
     install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfigVersion.cmake ${CMAKE_CURRENT_BINARY_DIR}/jsoncppConfig.cmake
