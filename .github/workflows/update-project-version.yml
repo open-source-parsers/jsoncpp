@@ -1,0 +1,93 @@
+name: "update project version"
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_version:
+        description: 'Next Version (e.g., 1.9.7 or 1.9.7.123)'
+        required: true
+        default: '1.9.7'
+      target_soversion:
+        description: 'Next SOVERSION (e.g., 28). Leave blank to keep current.'
+        required: false
+
+jobs:
+  bump-and-verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: update project files
+        id: update_files
+        run: |
+          VER="${{ github.event.inputs.target_version }}"
+          SOVER="${{ github.event.inputs.target_soversion }}"
+          echo "bumping version to $VER"
+
+          # 1. CMakeLists.txt
+          if [ -f CMakeLists.txt ]; then
+            echo "updating cmakelists.txt"
+            sed -i "s/project(jsoncpp VERSION [0-9.]*/project(jsoncpp VERSION $VER/" CMakeLists.txt
+            if [ -n "$SOVER" ]; then
+              sed -i "s/set(PROJECT_SOVERSION [0-9]*/set(PROJECT_SOVERSION $SOVER/" CMakeLists.txt
+            fi
+          fi
+
+          # 2. meson.build
+          if [ -f meson.build ]; then
+            echo "updating meson.build"
+            sed -i "s/project('jsoncpp', 'cpp', version : '[0-9.]*'/project('jsoncpp', 'cpp', version : '$VER'/" meson.build
+          fi
+
+          # 3. vcpkg.json
+          if [ -f vcpkg.json ]; then
+            echo "updating vcpkg.json"
+            jq ".version = \"$VER\"" vcpkg.json > vcpkg.json.tmp && mv vcpkg.json.tmp vcpkg.json
+          fi
+
+          # 4. include/json/version.h
+          if [ -f include/json/version.h ]; then
+            echo "updating version.h"
+            # Split version into components (handles 3 or 4 parts)
+            IFS='.' read -r MAJOR MINOR PATCH QUALIFIER <<< "$VER"
+            
+            sed -i "s|#define JSONCPP_VERSION_STRING \"[^\"]*\"|#define JSONCPP_VERSION_STRING \"$VER\"|" include/json/version.h
+            sed -i "s|#define JSONCPP_VERSION_MAJOR [0-9]*|#define JSONCPP_VERSION_MAJOR $MAJOR|" include/json/version.h
+            sed -i "s|#define JSONCPP_VERSION_MINOR [0-9]*|#define JSONCPP_VERSION_MINOR $MINOR|" include/json/version.h
+            sed -i "s|#define JSONCPP_VERSION_PATCH [0-9]*|#define JSONCPP_VERSION_PATCH $PATCH|" include/json/version.h
+            
+            # If QUALIFIER exists, append it; otherwise, leave macro empty
+            if [ -n "$QUALIFIER" ]; then
+              sed -i "s|#define JSONCPP_VERSION_QUALIFIER.*|#define JSONCPP_VERSION_QUALIFIER $QUALIFIER|" include/json/version.h
+            else
+              sed -i "s|#define JSONCPP_VERSION_QUALIFIER.*|#define JSONCPP_VERSION_QUALIFIER|" include/json/version.h
+            fi
+          fi
+
+      - name: sanity check (cmake configure)
+        run: |
+          if [ -f CMakeLists.txt ]; then
+            mkdir build_check
+            cd build_check
+            cmake .. -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_POST_BUILD_UNITTEST=OFF
+            cd ..
+            # CRITICAL: Remove the build folder so it isn't included in the PR
+            rm -rf build_check
+          fi
+
+      - name: create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: bump version to ${{ github.event.inputs.target_version }}"
+          branch: "bump-to-${{ github.event.inputs.target_version }}"
+          title: "chore: bump version to ${{ github.event.inputs.target_version }}"
+          body: |
+            automated version bump.
+            - new version: `${{ github.event.inputs.target_version }}`
+            - new soversion: `${{ github.event.inputs.target_soversion || 'no change' }}`
+          labels: "maintenance"
