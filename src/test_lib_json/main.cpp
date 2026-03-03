@@ -3113,6 +3113,17 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, allowNumericKeysTest) {
   checkParse(R"({ 123 : "abc" })");
 }
 
+JSONTEST_FIXTURE_LOCAL(ReaderTest, allowDroppedNullPlaceholders) {
+  Json::Features features;
+  features.allowDroppedNullPlaceholders_ = true;
+  setFeatures(features);
+  checkParse(R"([1,,2])");
+  JSONTEST_ASSERT_EQUAL(3, root.size());
+  JSONTEST_ASSERT_EQUAL(1, root[0].asInt());
+  JSONTEST_ASSERT(root[1].isNull());
+  JSONTEST_ASSERT_EQUAL(2, root[2].asInt());
+}
+
 struct CharReaderTest : JsonTest::TestCase {};
 
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithNoErrors) {
