@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       target_version:
-        description: 'Next Version (e.g., 1.9.7 or 1.9.7.123)'
+        description: 'next version (e.g., 1.9.7 or 1.9.7.123)'
         required: true
         default: '1.9.7'
       target_soversion:
-        description: 'Next SOVERSION (e.g., 28). Leave blank to keep current.'
+        description: 'next soversion (e.g., 28). leave blank to keep current.'
         required: false
 
 jobs:
@@ -28,19 +28,25 @@ jobs:
           SOVER="${{ github.event.inputs.target_soversion }}"
           echo "bumping version to $VER"
 
-          # 1. CMakeLists.txt
+          # 1. CMakeLists.txt (handles multi-line project() call)
           if [ -f CMakeLists.txt ]; then
             echo "updating cmakelists.txt"
-            sed -i "s/project(jsoncpp VERSION [0-9.]*/project(jsoncpp VERSION $VER/" CMakeLists.txt
+            # match VERSION only if it follows 'project(jsoncpp'
+            sed -i "/project(jsoncpp/,/)/ s/VERSION [0-9.]*/VERSION $VER/" CMakeLists.txt
             if [ -n "$SOVER" ]; then
               sed -i "s/set(PROJECT_SOVERSION [0-9]*/set(PROJECT_SOVERSION $SOVER/" CMakeLists.txt
             fi
           fi
 
-          # 2. meson.build
+          # 2. meson.build (handles multi-line project() and lowercase soversion)
           if [ -f meson.build ]; then
             echo "updating meson.build"
-            sed -i "s/project('jsoncpp', 'cpp', version : '[0-9.]*'/project('jsoncpp', 'cpp', version : '$VER'/" meson.build
+            # update version in project()
+            sed -i "/project('jsoncpp'/,/)/ s/version : '[0-9.]*'/version : '$VER'/" meson.build
+            if [ -n "$SOVER" ]; then
+              # update soversion in library()
+              sed -i "s/soversion : [0-9]*/soversion : $SOVER/" meson.build
+            fi
           fi
 
           # 3. vcpkg.json
@@ -52,7 +58,8 @@ jobs:
           # 4. include/json/version.h
           if [ -f include/json/version.h ]; then
             echo "updating version.h"
-            # Split version into components (handles 3 or 4 parts)
+            # split version into components (e.g., 1.9.7.123 -> MAJOR=1, MINOR=9, PATCH=7, QUALIFIER=123)
+            # if 1.9.7 -> QUALIFIER is empty
             IFS='.' read -r MAJOR MINOR PATCH QUALIFIER <<< "$VER"
             
             sed -i "s|#define JSONCPP_VERSION_STRING \"[^\"]*\"|#define JSONCPP_VERSION_STRING \"$VER\"|" include/json/version.h
@@ -60,7 +67,7 @@ jobs:
             sed -i "s|#define JSONCPP_VERSION_MINOR [0-9]*|#define JSONCPP_VERSION_MINOR $MINOR|" include/json/version.h
             sed -i "s|#define JSONCPP_VERSION_PATCH [0-9]*|#define JSONCPP_VERSION_PATCH $PATCH|" include/json/version.h
             
-            # If QUALIFIER exists, append it; otherwise, leave macro empty
+            # handle qualifier macro
             if [ -n "$QUALIFIER" ]; then
               sed -i "s|#define JSONCPP_VERSION_QUALIFIER.*|#define JSONCPP_VERSION_QUALIFIER $QUALIFIER|" include/json/version.h
             else
@@ -75,7 +82,6 @@ jobs:
             cd build_check
             cmake .. -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_POST_BUILD_UNITTEST=OFF
             cd ..
-            # CRITICAL: Remove the build folder so it isn't included in the PR
             rm -rf build_check
           fi
 
