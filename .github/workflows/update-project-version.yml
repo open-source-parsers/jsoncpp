@@ -28,7 +28,7 @@ jobs:
           SOVER="${{ github.event.inputs.target_soversion }}"
           echo "bumping version to $VER"
 
-          # 1. CMakeLists.txt: Only update version inside the project() block
+          # 1. CMakeLists.txt: surgical update inside project()
           if [ -f CMakeLists.txt ]; then
             echo "updating cmakelists.txt"
             sed -i "/project[[:space:]]*([[:space:]]*jsoncpp/,/)/ s/VERSION [0-9.]*/VERSION $VER/" CMakeLists.txt
@@ -37,24 +37,27 @@ jobs:
             fi
           fi
 
-          # 2. meson.build: Only update version inside the project() block
+          # 2. meson.build: surgical update inside project()
           if [ -f meson.build ]; then
             echo "updating meson.build"
             sed -i "/project('jsoncpp'/,/)/ s/version[[:space:]]*:[[:space:]]*['\"][0-9.]*['\"]/version : '$VER'/" meson.build
             if [ -n "$SOVER" ]; then
-              # update soversion only within the library() or where defined
+              # matches soversion : '26'
               sed -i "s/soversion[[:space:]]*:[[:space:]]*['\"][0-9]*['\"]/soversion : '$SOVER'/" meson.build
             fi
           fi
 
-          # 3. MODULE.bazel: Only update version inside the module() block
+          # 3. MODULE.bazel: surgical update inside module() only
           if [ -f MODULE.bazel ]; then
             echo "updating MODULE.bazel"
-            # match range from 'module(' to the first ')'
             sed -i "/module(/,/)/ s/version[[:space:]]*=[[:space:]]*['\"][0-9.]*['\"]/version = \"$VER\"/" MODULE.bazel
           fi
 
-          # 4. vcpkg.json: jq is inherently surgical
+          # 4. vcpkg.json
           if [ -f vcpkg.json ]; then
             echo "updating vcpkg.json"
-            jq ".version = \"$VER\"" vcpkg.json > vcpkg.json.tmp && mv vcpkg.json.
+            jq ".version = \"$VER\"" vcpkg.json > vcpkg.json.tmp && mv vcpkg.json.tmp vcpkg.json
+          fi
+
+          # 5. include/json/version.h: split 4-part version safely
+          if [ -f include/json/version.h ]; then
