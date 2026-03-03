@@ -50,6 +50,9 @@
 #include <string>
 #include <vector>
 
+// Forward declaration for testing.
+struct ValueTest;
+
 #ifdef JSONCPP_HAS_STRING_VIEW
 #include <string_view>
 #endif
@@ -201,6 +204,7 @@ private:
  */
 class JSON_API Value {
   friend class ValueIteratorBase;
+  friend struct ::ValueTest;
 
 public:
   using Members = std::vector<String>;

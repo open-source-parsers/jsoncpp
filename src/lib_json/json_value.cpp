@@ -301,6 +301,9 @@ Value::CZString& Value::CZString::operator=(const CZString& other) {
 }
 
 Value::CZString& Value::CZString::operator=(CZString&& other) noexcept {
+  if (cstr_ && storage_.policy_ == duplicate) {
+    releasePrefixedStringValue(const_cast<char*>(cstr_));
+  }
   cstr_ = other.cstr_;
   if (other.cstr_) {
     storage_.policy_ = other.storage_.policy_;
