@@ -31,7 +31,6 @@ jobs:
           # 1. CMakeLists.txt
           if [ -f CMakeLists.txt ]; then
             echo "updating cmakelists.txt"
-            # match VERSION only within the project block
             sed -i "/project[[:space:]]*([[:space:]]*jsoncpp/,/)/ s/VERSION [0-9.]*/VERSION $VER/" CMakeLists.txt
             if [ -n "$SOVER" ]; then
               sed -i "s/set(PROJECT_SOVERSION [0-9]*/set(PROJECT_SOVERSION $SOVER/" CMakeLists.txt
@@ -41,24 +40,28 @@ jobs:
           # 2. meson.build
           if [ -f meson.build ]; then
             echo "updating meson.build"
-            # match version : 'x.y.z' with flexible quotes and spacing
             sed -i "s/version[[:space:]]*:[[:space:]]*['\"][0-9.]*['\"]/version : '$VER'/" meson.build
             if [ -n "$SOVER" ]; then
-              # matches soversion : '26'
               sed -i "s/soversion[[:space:]]*:[[:space:]]*['\"][0-9]*['\"]/soversion : '$SOVER'/" meson.build
             fi
           fi
 
-          # 3. vcpkg.json
+          # 3. MODULE.bazel
+          if [ -f MODULE.bazel ]; then
+            echo "updating MODULE.bazel"
+            # matches: version = "1.9.6"
+            sed -i "s/version[[:space:]]*=[[:space:]]*['\"][0-9.]*['\"]/version = \"$VER\"/" MODULE.bazel
+          fi
+
+          # 4. vcpkg.json
           if [ -f vcpkg.json ]; then
             echo "updating vcpkg.json"
             jq ".version = \"$VER\"" vcpkg.json > vcpkg.json.tmp && mv vcpkg.json.tmp vcpkg.json
           fi
 
-          # 4. include/json/version.h
+          # 5. include/json/version.h
           if [ -f include/json/version.h ]; then
             echo "updating version.h"
-            # 1.9.7.12 -> MAJOR=1, MINOR=9, PATCH=7, QUALIFIER=12
             IFS='.' read -r MAJOR MINOR PATCH QUALIFIER <<< "$VER"
             
             sed -i "s|#define JSONCPP_VERSION_STRING \"[^\"]*\"|#define JSONCPP_VERSION_STRING \"$VER\"|" include/json/version.h
@@ -66,6 +69,7 @@ jobs:
             sed -i "s|#define JSONCPP_VERSION_MINOR [0-9]*|#define JSONCPP_VERSION_MINOR $MINOR|" include/json/version.h
             sed -i "s|#define JSONCPP_VERSION_PATCH [0-9]*|#define JSONCPP_VERSION_PATCH $PATCH|" include/json/version.h
             
+            # set qualifier to the number if 4th part exists, otherwise leave blank
             if [ -n "$QUALIFIER" ]; then
               sed -i "s|#define JSONCPP_VERSION_QUALIFIER.*|#define JSONCPP_VERSION_QUALIFIER $QUALIFIER|" include/json/version.h
             else
