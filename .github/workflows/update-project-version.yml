@@ -27,7 +27,7 @@ jobs:
           SOVER="${{ github.event.inputs.target_soversion }}"
           echo "bumping version to $VER"
 
-          # 1. cmakelists.txt
+          # 1. cmakelists.txt: surgical update inside project() block
           if [ -f CMakeLists.txt ]; then
             echo "updating cmakelists.txt"
             sed -i "/project[[:space:]]*([[:space:]]*jsoncpp/,/)/ s/VERSION [0-9.]*/VERSION $VER/" CMakeLists.txt
@@ -36,16 +36,18 @@ jobs:
             fi
           fi
 
-          # 2. meson.build
+          # 2. meson.build: targeting keys directly (safer for multi-line)
           if [ -f meson.build ]; then
             echo "updating meson.build"
-            sed -i "/project('jsoncpp'/,/)/ s/version[[:space:]]*:[[:space:]]*['\"][0-9.]*['\"]/version : '$VER'/" meson.build
+            # matches 'version : '1.9.6''
+            sed -i "s/version[[:space:]]*:[[:space:]]*['][0-9.]*[']/version : '$VER'/" meson.build
             if [ -n "$SOVER" ]; then
-              sed -i "s/soversion[[:space:]]*:[[:space:]]*['\"][0-9]*['\"]/soversion : '$SOVER'/" meson.build
+              # matches 'soversion : '26''
+              sed -i "s/soversion[[:space:]]*:[[:space:]]*['][0-9]*[']/soversion : '$SOVER'/" meson.build
             fi
           fi
 
-          # 3. module.bazel
+          # 3. module.bazel: surgical update inside module() block
           if [ -f MODULE.bazel ]; then
             echo "updating module.bazel"
             sed -i "/module(/,/)/ s/version[[:space:]]*=[[:space:]]*['\"][0-9.]*['\"]/version = \"$VER\"/" MODULE.bazel
