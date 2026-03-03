@@ -449,6 +449,24 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, resizeArray) {
   }
 }
 
+JSONTEST_FIXTURE_LOCAL(ValueTest, copyMoveArray) {
+  Json::Value array;
+  array.append("item1");
+  array.append("item2");
+
+  // Test Copy Constructor (covers CZString(const CZString&) with index)
+  Json::Value copy(array);
+  JSONTEST_ASSERT_EQUAL(copy.size(), 2);
+  JSONTEST_ASSERT_EQUAL(Json::Value("item1"), copy[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("item2"), copy[1]);
+
+  // Test Move Constructor (covers CZString(CZString&&) with index)
+  Json::Value moved(std::move(copy));
+  JSONTEST_ASSERT_EQUAL(moved.size(), 2);
+  JSONTEST_ASSERT_EQUAL(Json::Value("item1"), moved[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("item2"), moved[1]);
+}
+
 JSONTEST_FIXTURE_LOCAL(ValueTest, resizePopulatesAllMissingElements) {
   Json::ArrayIndex n = 10;
   Json::Value v;
