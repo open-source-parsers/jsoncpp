@@ -22,13 +22,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: update project files
-        id: update_files
         run: |
           VER="${{ github.event.inputs.target_version }}"
           SOVER="${{ github.event.inputs.target_soversion }}"
           echo "bumping version to $VER"
 
-          # 1. cmakelists.txt: surgical update inside project() block
+          # 1. cmakelists.txt
           if [ -f CMakeLists.txt ]; then
             echo "updating cmakelists.txt"
             sed -i "/project[[:space:]]*([[:space:]]*jsoncpp/,/)/ s/VERSION [0-9.]*/VERSION $VER/" CMakeLists.txt
@@ -37,7 +36,7 @@ jobs:
             fi
           fi
 
-          # 2. meson.build: targeting keys directly
+          # 2. meson.build
           if [ -f meson.build ]; then
             echo "updating meson.build"
             sed -i "s/version[[:space:]]*:[[:space:]]*['][0-9.]*[']/version : '$VER'/" meson.build
@@ -46,7 +45,7 @@ jobs:
             fi
           fi
 
-          # 3. module.bazel: surgical update inside module() block
+          # 3. module.bazel
           if [ -f MODULE.bazel ]; then
             echo "updating module.bazel"
             sed -i "/module(/,/)/ s/version[[:space:]]*=[[:space:]]*['\"][0-9.]*['\"]/version = \"$VER\"/" MODULE.bazel
@@ -83,57 +82,6 @@ jobs:
         run: |
           FILE="include/json/version.h"
           if [ -f "$FILE" ]; then
-            V_STR=$(grep "JSONCPP_VERSION_STRING" $FILE | awk -F'"' '{print $2}')
-            V_MAJ=$(grep "JSONCPP_VERSION_MAJOR" $FILE | awk '{print $3}')
-            V_MIN=$(grep "JSONCPP_VERSION_MINOR" $FILE | awk '{print $3}')
-            V_PAT=$(grep "JSONCPP_VERSION_PATCH" $FILE | awk '{print $3}')
-            V_QUA=$(grep "JSONCPP_VERSION_QUALIFIER" $FILE | awk '{print $3}')
-            
-            echo "### version.h verification" >> $GITHUB_STEP_SUMMARY
-            echo "| macro | value |" >> $GITHUB_STEP_SUMMARY
-            echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
-            echo "| string | $V_STR |" >> $GITHUB_STEP_SUMMARY
-            echo "| major | $V_MAJ |" >> $GITHUB_STEP_SUMMARY
-            echo "| minor | $V_MIN |" >> $GITHUB_STEP_SUMMARY
-            echo "| patch | $V_PAT |" >> $GITHUB_STEP_SUMMARY
-            echo "| qualifier | ${V_QUA:-*(empty)*} |" >> $GITHUB_STEP_SUMMARY
-            
-            # pass values to the pr body
-            {
-              echo "header_report<<EOF"
-              echo "| Macro | Value |"
-              echo "| :--- | :--- |"
-              echo "| STRING | \`$V_STR\` |"
-              echo "| MAJOR | \`$V_MAJ\` |"
-              echo "| MINOR | \`$V_MIN\` |"
-              echo "| PATCH | \`$V_PAT\` |"
-              echo "| QUALIFIER | \`${V_QUA:-empty}\` |"
-              echo "EOF"
-            } >> $GITHUB_OUTPUT
-          fi
-
-      - name: sanity check (cmake configure)
-        run: |
-          if [ -f CMakeLists.txt ]; then
-            mkdir build_check
-            cd build_check
-            cmake .. -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_POST_BUILD_UNITTEST=OFF
-            cd ..
-            rm -rf build_check
-          fi
-
-      - name: create pull request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: bump version to ${{ github.event.inputs.target_version }}"
-          branch: "bump-to-${{ github.event.inputs.target_version }}"
-          title: "chore: bump version to ${{ github.event.inputs.target_version }}"
-          body: |
-            automated version bump.
-            - new version: `${{ github.event.inputs.target_version }}`
-            - new soversion: `${{ github.event.inputs.target_soversion || 'no change' }}`
-
-            ### header verification
-            ${{ steps.verify.outputs.header_report }}
-          labels: "maintenance"
+            # Extract clean values (strip quotes and trailing artifacts)
+            V_STR=$(grep -w "JSONCPP_VERSION_STRING" $FILE | head -n 1 | sed 's/.*"\(.*\)".*/\1/')
+            V_MAJ=$(grep -w "JSONCPP_VERSION_MAJOR" $FILE | head -n
