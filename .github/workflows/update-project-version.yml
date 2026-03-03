@@ -28,7 +28,7 @@ jobs:
           SOVER="${{ github.event.inputs.target_soversion }}"
           echo "bumping version to $VER"
 
-          # 1. CMakeLists.txt
+          # 1. CMakeLists.txt: Only update version inside the project() block
           if [ -f CMakeLists.txt ]; then
             echo "updating cmakelists.txt"
             sed -i "/project[[:space:]]*([[:space:]]*jsoncpp/,/)/ s/VERSION [0-9.]*/VERSION $VER/" CMakeLists.txt
@@ -37,65 +37,24 @@ jobs:
             fi
           fi
 
-          # 2. meson.build
+          # 2. meson.build: Only update version inside the project() block
           if [ -f meson.build ]; then
             echo "updating meson.build"
-            sed -i "s/version[[:space:]]*:[[:space:]]*['\"][0-9.]*['\"]/version : '$VER'/" meson.build
+            sed -i "/project('jsoncpp'/,/)/ s/version[[:space:]]*:[[:space:]]*['\"][0-9.]*['\"]/version : '$VER'/" meson.build
             if [ -n "$SOVER" ]; then
+              # update soversion only within the library() or where defined
               sed -i "s/soversion[[:space:]]*:[[:space:]]*['\"][0-9]*['\"]/soversion : '$SOVER'/" meson.build
             fi
           fi
 
-          # 3. MODULE.bazel
+          # 3. MODULE.bazel: Only update version inside the module() block
           if [ -f MODULE.bazel ]; then
             echo "updating MODULE.bazel"
-            # matches: version = "1.9.6"
-            sed -i "s/version[[:space:]]*=[[:space:]]*['\"][0-9.]*['\"]/version = \"$VER\"/" MODULE.bazel
+            # match range from 'module(' to the first ')'
+            sed -i "/module(/,/)/ s/version[[:space:]]*=[[:space:]]*['\"][0-9.]*['\"]/version = \"$VER\"/" MODULE.bazel
           fi
 
-          # 4. vcpkg.json
+          # 4. vcpkg.json: jq is inherently surgical
           if [ -f vcpkg.json ]; then
             echo "updating vcpkg.json"
-            jq ".version = \"$VER\"" vcpkg.json > vcpkg.json.tmp && mv vcpkg.json.tmp vcpkg.json
-          fi
-
-          # 5. include/json/version.h
-          if [ -f include/json/version.h ]; then
-            echo "updating version.h"
-            IFS='.' read -r MAJOR MINOR PATCH QUALIFIER <<< "$VER"
-            
-            sed -i "s|#define JSONCPP_VERSION_STRING \"[^\"]*\"|#define JSONCPP_VERSION_STRING \"$VER\"|" include/json/version.h
-            sed -i "s|#define JSONCPP_VERSION_MAJOR [0-9]*|#define JSONCPP_VERSION_MAJOR $MAJOR|" include/json/version.h
-            sed -i "s|#define JSONCPP_VERSION_MINOR [0-9]*|#define JSONCPP_VERSION_MINOR $MINOR|" include/json/version.h
-            sed -i "s|#define JSONCPP_VERSION_PATCH [0-9]*|#define JSONCPP_VERSION_PATCH $PATCH|" include/json/version.h
-            
-            # set qualifier to the number if 4th part exists, otherwise leave blank
-            if [ -n "$QUALIFIER" ]; then
-              sed -i "s|#define JSONCPP_VERSION_QUALIFIER.*|#define JSONCPP_VERSION_QUALIFIER $QUALIFIER|" include/json/version.h
-            else
-              sed -i "s|#define JSONCPP_VERSION_QUALIFIER.*|#define JSONCPP_VERSION_QUALIFIER|" include/json/version.h
-            fi
-          fi
-
-      - name: sanity check (cmake configure)
-        run: |
-          if [ -f CMakeLists.txt ]; then
-            mkdir build_check
-            cd build_check
-            cmake .. -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_POST_BUILD_UNITTEST=OFF
-            cd ..
-            rm -rf build_check
-          fi
-
-      - name: create pull request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: bump version to ${{ github.event.inputs.target_version }}"
-          branch: "bump-to-${{ github.event.inputs.target_version }}"
-          title: "chore: bump version to ${{ github.event.inputs.target_version }}"
-          body: |
-            automated version bump.
-            - new version: `${{ github.event.inputs.target_version }}`
-            - new soversion: `${{ github.event.inputs.target_soversion || 'no change' }}`
-          labels: "maintenance"
+            jq ".version = \"$VER\"" vcpkg.json > vcpkg.json.tmp && mv vcpkg.json.
