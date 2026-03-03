@@ -1,0 +1,33 @@
+cc_binary(
+    name = "readFromStream_ok",
+    srcs = ["readFromStream/readFromStream.cpp"],
+    deps = ["//:jsoncpp"],
+    args = ["$(location :readFromStream/withComment.json)"],
+    data = ["readFromStream/withComment.json"],
+)
+
+cc_binary(
+    name = "readFromStream_err",
+    srcs = ["readFromStream/readFromStream.cpp"],
+    deps = ["//:jsoncpp"],
+    args = ["$(location :readFromStream/errorFormat.json)"],
+    data = ["readFromStream/errorFormat.json"],
+)
+
+cc_binary(
+    name = "readFromString",
+    srcs = ["readFromString/readFromString.cpp"],
+    deps = ["//:jsoncpp"],
+)
+
+cc_binary(
+    name = "streamWrite",
+    srcs = ["streamWrite/streamWrite.cpp"],
+    deps = ["//:jsoncpp"],
+)
+
+cc_binary(
+    name = "stringWrite",
+    srcs = ["stringWrite/stringWrite.cpp"],
+    deps = ["//:jsoncpp"],
+)

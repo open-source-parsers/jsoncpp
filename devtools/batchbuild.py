@@ -9,7 +9,7 @@ import shutil
 import string
 import subprocess
 import sys
-import cgi
+import html
 
 class BuildDesc:
     def __init__(self, prepend_envs=None, variables=None, build_type=None, generator=None):
@@ -195,12 +195,12 @@ def generate_html_report(html_report_path, builds):
     for variable in variables:
         build_types = sorted(build_types_by_variable[variable])
         nb_build_type = len(build_types_by_variable[variable])
-        th_vars.append('<th colspan="%d">%s</th>' % (nb_build_type, cgi.escape(' '.join(variable))))
+        th_vars.append('<th colspan="%d">%s</th>' % (nb_build_type, html.escape(' '.join(variable))))
         for build_type in build_types:
-            th_build_types.append('<th>%s</th>' % cgi.escape(build_type))
+            th_build_types.append('<th>%s</th>' % html.escape(build_type))
     tr_builds = []
     for generator in sorted(builds_by_generator):
-        tds = [ '<td>%s</td>\n' % cgi.escape(generator) ]
+        tds = [ '<td>%s</td>\n' % html.escape(generator) ]
         for variable in variables:
             build_types = sorted(build_types_by_variable[variable])
             for build_type in build_types:

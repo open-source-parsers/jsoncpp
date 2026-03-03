@@ -1,0 +1,20 @@
+filegroup(
+    name = "expected",
+    srcs = glob(["data/**", "jsonchecker/**"], exclude=["**/*.json"]),
+)
+
+[py_test(
+    name = "runjson_%s_test" % "_".join(f.split("/")),
+    srcs = ["runjsontests.py"],
+    main = "runjsontests.py",
+    args = [
+        "--with-json-checker",
+        "$(location //src/jsontestrunner:jsontestrunner)",
+        "$(location :%s)" % f,
+    ],
+    data = [
+        "//src/jsontestrunner:jsontestrunner",
+        ":expected",
+        ":%s" % f,
+    ],
+) for f in glob(["**/*.json"])]
