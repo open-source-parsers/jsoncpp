@@ -16,6 +16,30 @@ serialization and deserialization to and from strings. It can also preserve
 existing comment in deserialization/serialization steps, making it a convenient
 format to store user input files.
 
+## Project Status
+
+JsonCpp is a mature project in maintenance mode. Our priority is providing a stable,
+reliable JSON library for the long tail of C++ development.
+
+### Current Focus
+
+**Security:** Addressing vulnerabilities and fuzzing results.
+
+**Compatibility:** Ensuring the library builds without warnings on the latest versions of GCC,
+Clang, and MSVC.
+
+**Reliability:** Fixing regressions and critical logical bugs.
+
+### Out of Scope
+
+**Performance:** We are not competing with SIMD-accelerated or reflection-based parsers.
+
+**Features:** We are generally not accepting requests for new data formats or major API changes.
+
+JsonCpp remains a primary choice for developers who require comment preservation and support for
+legacy toolchains where modern C++ standards are unavailable. The library is intended to be a
+reliable dependency that does not require frequent updates or major migration efforts.
+
 ## Documentation
 
 [JsonCpp documentation][JsonCpp-documentation] is generated using [Doxygen][].
@@ -30,13 +54,9 @@ format to store user input files.
 * `00.11.z` can be used both in old and new compilers.
 * Major versions maintain binary-compatibility.
 
-### Special note
-
-The branch `00.11.z`is a new branch, its major version number `00` is to show
-that it is different from `0.y.z` and `1.y.z`, the main purpose of this branch
-is to make a balance between the other two branches. Thus, users can use some
-new features in this new branch that introduced in 1.y.z, but can hardly applied
-into 0.y.z.
+> [!NOTE]
+> We are happy to take critical security features for any of these three branches, however at this
+> point in the project only the `1.y.z` is receiving somewhat regular updates.
 
 ## Using JsonCpp in your project
 
