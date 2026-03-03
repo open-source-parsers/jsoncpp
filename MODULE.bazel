@@ -9,11 +9,11 @@ module(
     # 3. /CMakeLists.txt
     # 4. /MODULE.bazel
     # IMPORTANT: also update the SOVERSION!!
-    version = "1.9.7",
+    version = "1.9.7.1",
     compatibility_level = 1,
 )
 
 bazel_dep(
     name = "bazel_skylib",
-    version = "1.7.1",
+    version = "1.9.7.1",
 )
