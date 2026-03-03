@@ -1,4 +1,4 @@
-name: "update project version"
+name: "Manual Version Bump"
 
 on:
   workflow_dispatch:
@@ -7,9 +7,12 @@ on:
         description: 'Next Version (e.g., 1.9.7)'
         required: true
         default: '1.9.7'
+      target_soversion:
+        description: 'Next SOVERSION (e.g., 28). Leave blank to keep current.'
+        required: false
 
 jobs:
-  create-bump-pr:
+  bump-and-verify:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -22,38 +25,26 @@ jobs:
         id: update_files
         run: |
           VER="${{ github.event.inputs.target_version }}"
-          echo "Updating files to $VER"
+          SOVER="${{ github.event.inputs.target_soversion }}"
+          echo "Bumping version to $VER"
 
-          # 1. CMakeLists.txt
-          sed -i "s/VERSION [0-9.]*/VERSION $VER/" CMakeLists.txt
+          # 1. CMakeLists.txt: Match only the project declaration
+          # This prevents touching comments, policies, or SOVERSION
+          sed -i "s/project(jsoncpp VERSION [0-9.]*/project(jsoncpp VERSION $VER/" CMakeLists.txt
+          
+          # Only update SOVERSION if provided
+          if [ -n "$SOVER" ]; then
+            echo "Bumping SOVERSION to $SOVER"
+            sed -i "s/set(PROJECT_SOVERSION [0-9]*/set(PROJECT_SOVERSION $SOVER/" CMakeLists.txt
+          fi
 
-          # 2. meson.build
-          sed -i "s/version : '[0-9.]*'/version : '$VER'/" meson.build
+          # 2. meson.build: Match the project line specifically
+          sed -i "s/project('jsoncpp', 'cpp', version : '[0-9.]*'/project('jsoncpp', 'cpp', version : '$VER'/" meson.build
 
-          # 3. vcpkg.json (Using jq for safety)
+          # 3. vcpkg.json: Using jq for syntax safety
           jq ".version = \"$VER\"" vcpkg.json > vcpkg.json.tmp && mv vcpkg.json.tmp vcpkg.json
 
-          # 4. include/json/version.h
-          # Parse X.Y.Z into separate variables
+          # 4. include/json/version.h: Match specific #define macros
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VER"
-          sed -i "s/# define JSONCPP_VERSION_STRING \"[^\"]*\"/# define JSONCPP_VERSION_STRING \"$VER\"/" include/json/version.h
-          sed -i "s/# define JSONCPP_VERSION_MAJOR [0-9]*/# define JSONCPP_VERSION_MAJOR $MAJOR/" include/json/version.h
-          sed -i "s/# define JSONCPP_VERSION_MINOR [0-9]*/# define JSONCPP_VERSION_MINOR $MINOR/" include/json/version.h
-          sed -i "s/# define JSONCPP_VERSION_PATCH [0-9]*/# define JSONCPP_VERSION_PATCH $PATCH/" include/json/version.h
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: bump version to ${{ github.event.inputs.target_version }}"
-          branch: "bump-to-${{ github.event.inputs.target_version }}"
-          title: "chore: bump version to ${{ github.event.inputs.target_version }}"
-          body: |
-            Manual version bump to `${{ github.event.inputs.target_version }}` to start the next development cycle.
-            
-            **Files updated:**
-            - `CMakeLists.txt`
-            - `meson.build`
-            - `vcpkg.json`
-            - `include/json/version.h`
-          labels: "maintenance"
+          sed -i "s/#define JSONCPP_VERSION_STRING \"[^\"]*\"/#define JSONCPP_VERSION_STRING \"$VER\"/" include/json/version.h
+          sed -i "s/#define JSONCPP_VERSION_MAJOR [0-9]*/
