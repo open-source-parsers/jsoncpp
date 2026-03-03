@@ -67,7 +67,7 @@ project(jsoncpp
         LANGUAGES CXX)
 
 message(STATUS "JsonCpp Version: ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
-set(PROJECT_SOVERSION 27)
+set(PROJECT_SOVERSION 28)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/include/PreventInSourceBuilds.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/include/PreventInBuildInstalls.cmake)
