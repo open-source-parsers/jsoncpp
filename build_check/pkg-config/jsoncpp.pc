@@ -1,0 +1,11 @@
+prefix=/usr/local
+exec_prefix=/usr/local
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: jsoncpp
+Description: A C++ library for interacting with JSON
+Version: 1.9.7
+URL: https://github.com/open-source-parsers/jsoncpp
+Libs: -L${libdir} -ljsoncpp
+Cflags: -I${includedir}
