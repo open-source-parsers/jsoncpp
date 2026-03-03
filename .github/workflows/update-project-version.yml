@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       target_version:
-        description: 'next version (e.g., 1.9.7)'
+        description: 'Next Version (e.g., 1.9.7)'
         required: true
         default: '1.9.7'
       target_soversion:
-        description: 'next SOVERSION (e.g., 28) - leave blank to keep current.'
+        description: 'Next SOVERSION (e.g., 28). Leave blank to keep current.'
         required: false
 
 jobs:
@@ -28,23 +28,57 @@ jobs:
           SOVER="${{ github.event.inputs.target_soversion }}"
           echo "Bumping version to $VER"
 
-          # 1. CMakeLists.txt: Match only the project declaration
-          # This prevents touching comments, policies, or SOVERSION
-          sed -i "s/project(jsoncpp VERSION [0-9.]*/project(jsoncpp VERSION $VER/" CMakeLists.txt
-          
-          # Only update SOVERSION if provided
-          if [ -n "$SOVER" ]; then
-            echo "Bumping SOVERSION to $SOVER"
-            sed -i "s/set(PROJECT_SOVERSION [0-9]*/set(PROJECT_SOVERSION $SOVER/" CMakeLists.txt
+          # 1. CMakeLists.txt
+          if [ -f CMakeLists.txt ]; then
+            echo "updating cmakelists.txt"
+            sed -i "s/project(jsoncpp VERSION [0-9.]*/project(jsoncpp VERSION $VER/" CMakeLists.txt
+            if [ -n "$SOVER" ]; then
+              sed -i "s/set(PROJECT_SOVERSION [0-9]*/set(PROJECT_SOVERSION $SOVER/" CMakeLists.txt
+            fi
           fi
 
-          # 2. meson.build: Match the project line specifically
-          sed -i "s/project('jsoncpp', 'cpp', version : '[0-9.]*'/project('jsoncpp', 'cpp', version : '$VER'/" meson.build
+          # 2. meson.build
+          if [ -f meson.build ]; then
+            echo "updating meson.build"
+            sed -i "s/project('jsoncpp', 'cpp', version : '[0-9.]*'/project('jsoncpp', 'cpp', version : '$VER'/" meson.build
+          fi
 
-          # 3. vcpkg.json: Using jq for syntax safety
-          jq ".version = \"$VER\"" vcpkg.json > vcpkg.json.tmp && mv vcpkg.json.tmp vcpkg.json
+          # 3. vcpkg.json
+          if [ -f vcpkg.json ]; then
+            echo "updating vcpkg.json"
+            jq ".version = \"$VER\"" vcpkg.json > vcpkg.json.tmp && mv vcpkg.json.tmp vcpkg.json
+          else
+            echo "vcpkg.json not found, skipping"
+          fi
 
-          # 4. include/json/version.h: Match specific #define macros
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$VER"
-          sed -i "s/#define JSONCPP_VERSION_STRING \"[^\"]*\"/#define JSONCPP_VERSION_STRING \"$VER\"/" include/json/version.h
-          sed -i "s/#define JSONCPP_VERSION_MAJOR [0-9]*/
+          # 4. include/json/version.h
+          if [ -f include/json/version.h ]; then
+            echo "updating version.h"
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$VER"
+            # Using '|' as delimiter to prevent shell escaping issues
+            sed -i "s|#define JSONCPP_VERSION_STRING \"[^\"]*\"|#define JSONCPP_VERSION_STRING \"$VER\"|" include/json/version.h
+            sed -i "s|#define JSONCPP_VERSION_MAJOR [0-9]*|#define JSONCPP_VERSION_MAJOR $MAJOR|" include/json/version.h
+            sed -i "s|#define JSONCPP_VERSION_MINOR [0-9]*|#define JSONCPP_VERSION_MINOR $MINOR|" include/json/version.h
+            sed -i "s|#define JSONCPP_VERSION_PATCH [0-9]*|#define JSONCPP_VERSION_PATCH $PATCH|" include/json/version.h
+          fi
+
+      - name: sanity check (cmake configure)
+        run: |
+          if [ -f CMakeLists.txt ]; then
+            mkdir build_check
+            cd build_check
+            cmake .. -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_POST_BUILD_UNITTEST=OFF
+          fi
+
+      - name: create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: bump version to ${{ github.event.inputs.target_version }}"
+          branch: "bump-to-${{ github.event.inputs.target_version }}"
+          title: "chore: bump version to ${{ github.event.inputs.target_version }}"
+          body: |
+            automated version bump.
+            - new version: `${{ github.event.inputs.target_version }}`
+            - new soversion: `${{ github.event.inputs.target_soversion || 'no change' }}`
+          labels: "maintenance"
