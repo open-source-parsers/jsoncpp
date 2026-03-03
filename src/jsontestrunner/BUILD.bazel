@@ -1,6 +1,8 @@
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+
 cc_binary(
     name = "jsontestrunner",
     srcs = ["main.cpp"],
-    deps = ["//:jsoncpp"],
     visibility = ["//test:__pkg__"],
+    deps = ["//:jsoncpp"],
 )
