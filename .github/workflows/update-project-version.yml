@@ -82,6 +82,26 @@ jobs:
         run: |
           FILE="include/json/version.h"
           if [ -f "$FILE" ]; then
-            # Extract clean values (strip quotes and trailing artifacts)
-            V_STR=$(grep -w "JSONCPP_VERSION_STRING" $FILE | head -n 1 | sed 's/.*"\(.*\)".*/\1/')
-            V_MAJ=$(grep -w "JSONCPP_VERSION_MAJOR" $FILE | head -n
+            # Use cut and grep -o to avoid shell-escaping issues with sed
+            V_STR=$(grep "JSONCPP_VERSION_STRING" "$FILE" | cut -d '"' -f 2)
+            V_MAJ=$(grep "JSONCPP_VERSION_MAJOR" "$FILE" | awk '{print $3}' | grep -o '[0-9]*')
+            V_MIN=$(grep "JSONCPP_VERSION_MINOR" "$FILE" | awk '{print $3}' | grep -o '[0-9]*')
+            V_PAT=$(grep "JSONCPP_VERSION_PATCH" "$FILE" | awk '{print $3}' | grep -o '[0-9]*')
+            V_QUA=$(grep "JSONCPP_VERSION_QUALIFIER" "$FILE" | awk '{print $3}' | grep -o '[0-9]*' || echo "")
+            
+            {
+              echo "header_report<<EOF"
+              echo "| Macro | Value |"
+              echo "| :--- | :--- |"
+              echo "| STRING | \`$V_STR\` |"
+              echo "| MAJOR | \`$V_MAJ\` |"
+              echo "| MINOR | \`$V_MIN\` |"
+              echo "| PATCH | \`$V_PAT\` |"
+              echo "| QUALIFIER | \`${V_QUA:-empty}\` |"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: sanity check (cmake configure)
+        run: |
+          if [ -f CMakeLists.txt ]; then
