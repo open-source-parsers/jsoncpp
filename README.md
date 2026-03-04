@@ -49,6 +49,9 @@ Major versions maintain binary compatibility. Critical security fixes are accept
 
 ## Integration
 
+> [!NOTE]
+> Package manager ports (vcpkg, Conan, etc.) are community-maintained. Please report outdated versions or missing generators to their respective repositories.
+
 ### vcpkg
 Add `jsoncpp` to your `vcpkg.json` manifest:
 
@@ -66,6 +69,17 @@ Or install via classic mode: `vcpkg install jsoncpp`.
 conan install --requires="jsoncpp/[*]" --build=missing
 ```
 
+If you are using a `conanfile.txt` in a Conan 2 project, ensure you use the appropriate generators:
+
+```ini
+[requires]
+jsoncpp/[*]
+
+[generators]
+CMakeToolchain
+CMakeDeps
+```
+
 ### Meson
 
 ```sh
@@ -74,7 +88,10 @@ meson wrap install jsoncpp
 
 ### Amalgamated source
 
-For projects requiring a single-header approach, see the [Wiki entry](https://github.com/open-source-parsers/jsoncpp/wiki/Amalgamated).
+> [!NOTE]
+> This approach may be outdated.
+
+For projects requiring a single-header approach, see the [Wiki entry](https://github.com/open-source-parsers/jsoncpp/wiki/Amalgamated-(Possibly-outdated)).
 
 ## Documentation
 
