@@ -9,7 +9,7 @@ module(
     # 3. /CMakeLists.txt
     # 4. /MODULE.bazel
     # IMPORTANT: also update the SOVERSION!!
-    version = "1.9.7",
+    version = "1.9.7.1",
     compatibility_level = 1,
 )
 
