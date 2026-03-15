@@ -3362,9 +3362,8 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithStackLimit) {
     Json::String nested(300, '[');
     CharReaderPtr reader(defaultBuilder.newCharReader());
     Json::String errs;
-    JSONTEST_ASSERT_THROWS(
-        reader->parse(nested.data(), nested.data() + nested.size(), &root,
-                      &errs));
+    JSONTEST_ASSERT_THROWS(reader->parse(
+        nested.data(), nested.data() + nested.size(), &root, &errs));
   }
 
 #endif // JSON_USE_EXCEPTION
