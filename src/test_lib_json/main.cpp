@@ -3355,6 +3355,16 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithStackLimit) {
     JSONTEST_ASSERT_THROWS(
         reader->parse(doc, doc + std::strlen(doc), &root, &errs));
   }
+  // Default stack limit should reject deeply nested input (regression test for
+  // stack exhaustion from fuzz input like [[[[...]]]])
+  {
+    Json::CharReaderBuilder defaultBuilder;
+    Json::String nested(300, '[');
+    CharReaderPtr reader(defaultBuilder.newCharReader());
+    Json::String errs;
+    JSONTEST_ASSERT_THROWS(reader->parse(
+        nested.data(), nested.data() + nested.size(), &root, &errs));
+  }
 
 #endif // JSON_USE_EXCEPTION
 }
