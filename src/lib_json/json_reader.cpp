@@ -39,7 +39,7 @@
 // Define JSONCPP_DEPRECATED_STACK_LIMIT as an appropriate integer at compile
 // time to change the stack limit
 #if !defined(JSONCPP_DEPRECATED_STACK_LIMIT)
-#define JSONCPP_DEPRECATED_STACK_LIMIT 1000
+#define JSONCPP_DEPRECATED_STACK_LIMIT 256
 #endif
 
 static size_t const stackLimit_g =
@@ -1932,7 +1932,7 @@ void CharReaderBuilder::strictMode(Json::Value* settings) {
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
   (*settings)["allowSingleQuotes"] = false;
-  (*settings)["stackLimit"] = 1000;
+  (*settings)["stackLimit"] = 256;
   (*settings)["failIfExtra"] = true;
   (*settings)["rejectDupKeys"] = true;
   (*settings)["allowSpecialFloats"] = false;
@@ -1949,7 +1949,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings) {
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
   (*settings)["allowSingleQuotes"] = false;
-  (*settings)["stackLimit"] = 1000;
+  (*settings)["stackLimit"] = 256;
   (*settings)["failIfExtra"] = false;
   (*settings)["rejectDupKeys"] = false;
   (*settings)["allowSpecialFloats"] = false;
@@ -1965,7 +1965,7 @@ void CharReaderBuilder::ecma404Mode(Json::Value* settings) {
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
   (*settings)["allowSingleQuotes"] = false;
-  (*settings)["stackLimit"] = 1000;
+  (*settings)["stackLimit"] = 256;
   (*settings)["failIfExtra"] = true;
   (*settings)["rejectDupKeys"] = false;
   (*settings)["allowSpecialFloats"] = false;
