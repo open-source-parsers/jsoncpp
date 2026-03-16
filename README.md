@@ -16,121 +16,89 @@ serialization and deserialization to and from strings. It can also preserve
 existing comment in deserialization/serialization steps, making it a convenient
 format to store user input files.
 
-## Documentation
+## Project Status
 
-[JsonCpp documentation][JsonCpp-documentation] is generated using [Doxygen][].
+JsonCpp is a mature project in maintenance mode. Our priority is providing a stable,
+reliable JSON library for the long tail of C++ development.
 
-[JsonCpp-documentation]: http://open-source-parsers.github.io/jsoncpp-docs/doxygen/index.html
-[Doxygen]: http://www.doxygen.org
+### Current Focus
+
+* **Security:** Addressing vulnerabilities and fuzzing results.
+* **Compatibility:** Ensuring the library builds without warnings on the latest versions of GCC,
+Clang, and MSVC.
+* **Reliability:** Fixing regressions and critical logical bugs.
+
+### Out of Scope
+
+* **Performance:** We are not competing with SIMD-accelerated or reflection-based parsers.
+* **Features:** We are generally not accepting requests for new data formats or major API changes.
+
+JsonCpp remains a primary choice for developers who require comment preservation and support for
+legacy toolchains where modern C++ standards are unavailable. The library is intended to be a
+reliable dependency that does not require frequent updates or major migration efforts.
 
 ## A note on backward-compatibility
 
-* `1.y.z` is built with C++11.
-* `0.y.z` can be used with older compilers.
-* `00.11.z` can be used both in old and new compilers.
-* Major versions maintain binary-compatibility.
+* **`1.y.z` (master):** Actively maintained. Requires C++11.
 
-### Special note
+* **`0.y.z`:** Legacy support for pre-C++11 compilers. Maintenance is limited to critical security fixes.
 
-The branch `00.11.z`is a new branch, its major version number `00` is to show
-that it is different from `0.y.z` and `1.y.z`, the main purpose of this branch
-is to make a balance between the other two branches. Thus, users can use some
-new features in this new branch that introduced in 1.y.z, but can hardly applied
-into 0.y.z.
+* **`00.11.z`:** Discontinued.
 
-## Using JsonCpp in your project
+Major versions maintain binary compatibility. Critical security fixes are accepted for both the `master` and `0.y.z` branches.
 
-### The vcpkg dependency manager
+## Integration
 
-You can download and install JsonCpp using the [vcpkg](https://github.com/Microsoft/vcpkg/)
-dependency manager, which has installation instruction dependent on your
-build system. For example, if you are in a CMake project, the
-[CMake install tutorial](https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-powershell)
-suggests the follow installation method.
+> [!NOTE]
+> Package manager ports (vcpkg, Conan, etc.) are community-maintained. Please report outdated versions or missing generators to their respective repositories.
 
-First, clone and set up `vcpkg`.
+### vcpkg
+Add `jsoncpp` to your `vcpkg.json` manifest:
 
-```sh
-    git clone https://github.com/Microsoft/vcpkg.git
-    cd vcpkg
-    ./bootstrap-vcpkg.sh
-```
-
-Then, create a [vcpkg.json manifest](https://learn.microsoft.com/en-us/vcpkg/reference/vcpkg-json),
-enabling manifest mode and adding JsonCpp to the manifest's dependencies list.
-
-```sh
-    vcpkg new --application
-    vcpkg add port jsoncpp
-```
-
-> [!NOTE]: you can use vcpkg in either classic mode or manifest mode (recommended).
-
-#### Classic mode
-
-If your project does not have a `vcpkg.json`,
-your project is in [Classic mode](https://learn.microsoft.com/en-us/vcpkg/concepts/classic-mode)
-you can install JsonCpp by directly invoking the `install` command:
-
-```sh
-    vcpkg install jsoncpp
-```
-
-### Manifest mode
-
-If your project *does* have a vcpkg.json manifest, your project is in [Manifest mode](https://learn.microsoft.com/en-us/vcpkg/concepts/manifest-mode)
-and you need to add JsonCpp to your package manifest dependencies, then invoke
-install with no arguments.
-
-```sh
-    vcpkg add port jsoncpp
-    vcpkg install
-```
-
-Example manifest:
-
-```sh
+```json
 {
-    "name": "best-app-ever",
-    "dependencies": [ "jsoncpp" ],
+  "dependencies": ["jsoncpp"]
 }
 ```
 
-> [!NOTE] The JsonCpp port in vcpkg is kept up to date by Microsoft team members and community contributors.
-> If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg)
-> on the vcpkg repository.
+Or install via classic mode: `vcpkg install jsoncpp`.
 
-### Conan package manager
-
-You can download and install JsonCpp using the [Conan](https://conan.io/)
-package manager:
+### Conan
 
 ```sh
-    conan install -r conancenter --requires="jsoncpp/[*]" --build=missing
+conan install --requires="jsoncpp/[*]" --build=missing
 ```
 
-The JsonCpp package in Conan Center is kept up to date by [ConanCenterIndex](https://github.com/conan-io/conan-center-index)
-contributors. If the version is out of date, please create an issue or pull request on the
-Conan Center Index repository.
+If you are using a `conanfile.txt` in a Conan 2 project, ensure you use the appropriate generators:
+
+```ini
+[requires]
+jsoncpp/[*]
+
+[generators]
+CMakeToolchain
+CMakeDeps
+```
+
+### Meson
+
+```sh
+meson wrap install jsoncpp
+```
 
 ### Amalgamated source
 
-See the [Wiki entry on Amalgamated Source](https://github.com/open-source-parsers/jsoncpp/wiki/Amalgamated-(Possibly-outdated)).
+> [!NOTE]
+> This approach may be outdated.
 
-### The Meson Build System
+For projects requiring a single-header approach, see the [Wiki entry](https://github.com/open-source-parsers/jsoncpp/wiki/Amalgamated-(Possibly-outdated)).
 
-If you are using the [Meson Build System](http://mesonbuild.com), then you can
-get a wrap file by downloading it from [Meson WrapDB](https://mesonbuild.com/Wrapdb-projects.html),
-or simply use `meson wrap install jsoncpp`.
+## Documentation
 
-### Other ways
-
-If you have trouble, see the
-[Wiki](https://github.com/open-source-parsers/jsoncpp/wiki), or post a question
-as an Issue.
+Documentation is generated via [Doxygen](http://open-source-parsers.github.io/jsoncpp-docs/doxygen/index.html). 
+Additional information is available on the [Project Wiki](https://github.com/open-source-parsers/jsoncpp/wiki).
 
 ## License
 
-See the [LICENSE](./LICENSE) file for details. In summary, JsonCpp is licensed
-under the MIT license, or public domain if desired and recognized in your
-jurisdiction.
+JsonCpp is licensed under the MIT license, or public domain where recognized.
+See [LICENSE](./LICENSE) for details.

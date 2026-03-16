@@ -39,7 +39,7 @@
 // Define JSONCPP_DEPRECATED_STACK_LIMIT as an appropriate integer at compile
 // time to change the stack limit
 #if !defined(JSONCPP_DEPRECATED_STACK_LIMIT)
-#define JSONCPP_DEPRECATED_STACK_LIMIT 1000
+#define JSONCPP_DEPRECATED_STACK_LIMIT 256
 #endif
 
 static size_t const stackLimit_g =
@@ -88,15 +88,10 @@ bool Reader::parse(const std::string& document, Value& root,
 }
 
 bool Reader::parse(std::istream& is, Value& root, bool collectComments) {
-  // std::istream_iterator<char> begin(is);
-  // std::istream_iterator<char> end;
-  // Those would allow streamed input from a file, if parse() were a
-  // template function.
-
-  // Since String is reference-counted, this at least does not
-  // create an extra copy.
-  String doc(std::istreambuf_iterator<char>(is), {});
-  return parse(doc.data(), doc.data() + doc.size(), root, collectComments);
+  document_.assign(std::istreambuf_iterator<char>(is),
+                   std::istreambuf_iterator<char>());
+  return parse(document_.data(), document_.data() + document_.size(), root,
+               collectComments);
 }
 
 bool Reader::parse(const char* beginDoc, const char* endDoc, Value& root,
@@ -583,6 +578,7 @@ bool Reader::decodeDouble(Token& token) {
 bool Reader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
   IStringStream is(String(token.start_, token.end_));
+  is.imbue(std::locale::classic());
   if (!(is >> value)) {
     if (value == std::numeric_limits<double>::max())
       value = std::numeric_limits<double>::infinity();
@@ -654,6 +650,8 @@ bool Reader::decodeString(Token& token, String& decoded) {
         return addError("Bad escape sequence in string", token, current);
       }
     } else {
+      if (static_cast<unsigned char>(c) < 0x20)
+        return addError("Control character in string", token, current - 1);
       decoded += c;
     }
   }
@@ -1617,6 +1615,7 @@ bool OurReader::decodeDouble(Token& token) {
 bool OurReader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
   IStringStream is(String(token.start_, token.end_));
+  is.imbue(std::locale::classic());
   if (!(is >> value)) {
     if (value == std::numeric_limits<double>::max())
       value = std::numeric_limits<double>::infinity();
@@ -1688,6 +1687,8 @@ bool OurReader::decodeString(Token& token, String& decoded) {
         return addError("Bad escape sequence in string", token, current);
       }
     } else {
+      if (static_cast<unsigned char>(c) < 0x20)
+        return addError("Control character in string", token, current - 1);
       decoded += c;
     }
   }
@@ -1932,7 +1933,7 @@ void CharReaderBuilder::strictMode(Json::Value* settings) {
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
   (*settings)["allowSingleQuotes"] = false;
-  (*settings)["stackLimit"] = 1000;
+  (*settings)["stackLimit"] = 256;
   (*settings)["failIfExtra"] = true;
   (*settings)["rejectDupKeys"] = true;
   (*settings)["allowSpecialFloats"] = false;
@@ -1949,7 +1950,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings) {
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
   (*settings)["allowSingleQuotes"] = false;
-  (*settings)["stackLimit"] = 1000;
+  (*settings)["stackLimit"] = 256;
   (*settings)["failIfExtra"] = false;
   (*settings)["rejectDupKeys"] = false;
   (*settings)["allowSpecialFloats"] = false;
@@ -1965,7 +1966,7 @@ void CharReaderBuilder::ecma404Mode(Json::Value* settings) {
   (*settings)["allowDroppedNullPlaceholders"] = false;
   (*settings)["allowNumericKeys"] = false;
   (*settings)["allowSingleQuotes"] = false;
-  (*settings)["stackLimit"] = 1000;
+  (*settings)["stackLimit"] = 256;
   (*settings)["failIfExtra"] = true;
   (*settings)["rejectDupKeys"] = false;
   (*settings)["allowSpecialFloats"] = false;
