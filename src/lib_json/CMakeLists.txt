@@ -7,6 +7,7 @@ include(CheckIncludeFileCXX)
 include(CheckTypeSize)
 include(CheckStructHasMember)
 include(CheckCXXSymbolExists)
+include(CheckCXXSourceCompiles)
 
 check_include_file_cxx(clocale HAVE_CLOCALE)
 check_cxx_symbol_exists(localeconv clocale HAVE_LOCALECONV)
@@ -24,6 +25,11 @@ if(NOT (HAVE_CLOCALE AND HAVE_LCONV_SIZE AND HAVE_DECIMAL_POINT AND HAVE_LOCALEC
         add_definitions(-DJSONCPP_NO_LOCALE_SUPPORT)
     endif()
 endif()
+
+check_cxx_source_compiles(
+    "#include <string_view>
+     int main() { std::string_view sv; return 0; }"
+    JSONCPP_HAS_STRING_VIEW)
 
 set(JSONCPP_INCLUDE_DIR ../../include)
 
@@ -125,6 +131,10 @@ if(BUILD_SHARED_LIBS)
 
     target_compile_features(${SHARED_LIB} PUBLIC ${REQUIRED_FEATURES})
 
+    if(JSONCPP_HAS_STRING_VIEW)
+        target_compile_definitions(${SHARED_LIB} PUBLIC JSONCPP_HAS_STRING_VIEW=1)
+    endif()
+
     target_include_directories(${SHARED_LIB} PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>
@@ -158,6 +168,10 @@ if(BUILD_STATIC_LIBS)
 
     target_compile_features(${STATIC_LIB} PUBLIC ${REQUIRED_FEATURES})
 
+    if(JSONCPP_HAS_STRING_VIEW)
+        target_compile_definitions(${STATIC_LIB} PUBLIC JSONCPP_HAS_STRING_VIEW=1)
+    endif()
+
     target_include_directories(${STATIC_LIB} PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${JSONCPP_INCLUDE_DIR}>
@@ -183,6 +197,10 @@ if(BUILD_OBJECT_LIBS)
     endif()
 
     target_compile_features(${OBJECT_LIB} PUBLIC ${REQUIRED_FEATURES})
+
+    if(JSONCPP_HAS_STRING_VIEW)
+        target_compile_definitions(${OBJECT_LIB} PUBLIC JSONCPP_HAS_STRING_VIEW=1)
+    endif()
 
     target_include_directories(${OBJECT_LIB} PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>

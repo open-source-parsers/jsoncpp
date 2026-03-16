@@ -39,8 +39,10 @@
 #endif
 #endif
 
+#ifndef JSONCPP_HAS_STRING_VIEW
 #if __cplusplus >= 201703L
 #define JSONCPP_HAS_STRING_VIEW 1
+#endif
 #endif
 
 #include <array>
