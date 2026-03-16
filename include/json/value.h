@@ -39,8 +39,10 @@
 #endif
 #endif
 
+#ifndef JSONCPP_HAS_STRING_VIEW
 #if __cplusplus >= 201703L
 #define JSONCPP_HAS_STRING_VIEW 1
+#endif
 #endif
 
 #include <array>
@@ -49,6 +51,9 @@
 #include <memory>
 #include <string>
 #include <vector>
+
+// Forward declaration for testing.
+struct ValueTest;
 
 #ifdef JSONCPP_HAS_STRING_VIEW
 #include <string_view>
@@ -201,6 +206,7 @@ private:
  */
 class JSON_API Value {
   friend class ValueIteratorBase;
+  friend struct ::ValueTest;
 
 public:
   using Members = std::vector<String>;
@@ -266,7 +272,7 @@ public:
 private:
 #endif
 #ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
-  class CZString {
+  class JSON_API CZString {
   public:
     enum DuplicationPolicy { noDuplication = 0, duplicate, duplicateOnCopy };
     CZString(ArrayIndex index);

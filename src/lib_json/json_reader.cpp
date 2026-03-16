@@ -650,6 +650,8 @@ bool Reader::decodeString(Token& token, String& decoded) {
         return addError("Bad escape sequence in string", token, current);
       }
     } else {
+      if (static_cast<unsigned char>(c) < 0x20)
+        return addError("Control character in string", token, current - 1);
       decoded += c;
     }
   }
@@ -1685,6 +1687,8 @@ bool OurReader::decodeString(Token& token, String& decoded) {
         return addError("Bad escape sequence in string", token, current);
       }
     } else {
+      if (static_cast<unsigned char>(c) < 0x20)
+        return addError("Control character in string", token, current - 1);
       decoded += c;
     }
   }
