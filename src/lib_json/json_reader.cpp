@@ -583,7 +583,6 @@ bool Reader::decodeDouble(Token& token) {
 bool Reader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
   IStringStream is(String(token.start_, token.end_));
-  is.imbue(std::locale::classic());
   if (!(is >> value)) {
     if (value == std::numeric_limits<double>::max())
       value = std::numeric_limits<double>::infinity();
@@ -1620,7 +1619,6 @@ bool OurReader::decodeDouble(Token& token) {
 bool OurReader::decodeDouble(Token& token, Value& decoded) {
   double value = 0;
   IStringStream is(String(token.start_, token.end_));
-  is.imbue(std::locale::classic());
   if (!(is >> value)) {
     if (value == std::numeric_limits<double>::max())
       value = std::numeric_limits<double>::infinity();
