@@ -113,12 +113,6 @@ list(APPEND REQUIRED_FEATURES
 
 
 if(BUILD_SHARED_LIBS)
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12.0)
-        add_compile_definitions(JSON_DLL_BUILD)
-    else()
-        add_definitions(-DJSON_DLL_BUILD)
-    endif()
-
     set(SHARED_LIB ${PROJECT_NAME}_lib)
     add_library(${SHARED_LIB} SHARED ${PUBLIC_HEADERS} ${JSONCPP_SOURCES})
     set_target_properties(${SHARED_LIB} PROPERTIES
@@ -127,6 +121,8 @@ if(BUILD_SHARED_LIBS)
         SOVERSION ${PROJECT_SOVERSION}
         POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS}
     )
+
+    target_compile_definitions(${SHARED_LIB} PRIVATE JSON_DLL_BUILD)
 
     # Set library's runtime search path on OSX
     if(APPLE)
