@@ -1559,14 +1559,18 @@ ptrdiff_t Value::getOffsetStart() const { return start_; }
 
 ptrdiff_t Value::getOffsetLimit() const { return limit_; }
 
-String Value::toStyledString() const {
-  StreamWriterBuilder builder;
-
+String Value::toStyledString(const StreamWriterBuilder& builder) const {
   String out = this->hasComment(commentBefore) ? "\n" : "";
   out += Json::writeString(builder, *this);
   out += '\n';
-
   return out;
+}
+
+String Value::toStyledString(int precision, PrecisionType precisionType) const {
+  StreamWriterBuilder builder;
+  precisionType == PrecisionType::significantDigits?builder.settings_["precisionType"] = "significant":builder.settings_["precisionType"] = "decimal";
+  builder.settings_["precision"] = std::min(precision, 17);
+  return toStyledString(builder);
 }
 
 Value::const_iterator Value::begin() const {
