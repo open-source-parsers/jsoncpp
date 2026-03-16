@@ -25,4 +25,5 @@ filegroup(
         ":%s" % f,
     ],
     main = "runjsontests.py",
+    tags = ["no-sandbox"],
 ) for f in glob(["**/*.json"])]
