@@ -253,20 +253,29 @@ Value::CZString::CZString(const CZString& other) {
   cstr_ = (other.storage_.policy_ != noDuplication && other.cstr_ != nullptr
                ? duplicateStringValue(other.cstr_, other.storage_.length_)
                : other.cstr_);
-  storage_.policy_ =
-      static_cast<unsigned>(
-          other.cstr_
-              ? (static_cast<DuplicationPolicy>(other.storage_.policy_) ==
-                         noDuplication
-                     ? noDuplication
-                     : duplicate)
-              : static_cast<DuplicationPolicy>(other.storage_.policy_)) &
-      3U;
-  storage_.length_ = other.storage_.length_;
+  if (other.cstr_) {
+    storage_.policy_ =
+        static_cast<unsigned>(
+            other.cstr_
+                ? (static_cast<DuplicationPolicy>(other.storage_.policy_) ==
+                           noDuplication
+                       ? noDuplication
+                       : duplicate)
+                : static_cast<DuplicationPolicy>(other.storage_.policy_)) &
+        3U;
+    storage_.length_ = other.storage_.length_;
+  } else {
+    index_ = other.index_;
+  }
 }
 
-Value::CZString::CZString(CZString&& other) noexcept
-    : cstr_(other.cstr_), index_(other.index_) {
+Value::CZString::CZString(CZString&& other) noexcept : cstr_(other.cstr_) {
+  if (other.cstr_) {
+    storage_.policy_ = other.storage_.policy_;
+    storage_.length_ = other.storage_.length_;
+  } else {
+    index_ = other.index_;
+  }
   other.cstr_ = nullptr;
 }
 
@@ -292,8 +301,16 @@ Value::CZString& Value::CZString::operator=(const CZString& other) {
 }
 
 Value::CZString& Value::CZString::operator=(CZString&& other) noexcept {
+  if (cstr_ && storage_.policy_ == duplicate) {
+    releasePrefixedStringValue(const_cast<char*>(cstr_));
+  }
   cstr_ = other.cstr_;
-  index_ = other.index_;
+  if (other.cstr_) {
+    storage_.policy_ = other.storage_.policy_;
+    storage_.length_ = other.storage_.length_;
+  } else {
+    index_ = other.index_;
+  }
   other.cstr_ = nullptr;
   return *this;
 }
