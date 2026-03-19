@@ -4113,8 +4113,8 @@ JSONTEST_FIXTURE_LOCAL(MemberTemplateIs, BehavesSameAsNamedIs) {
 
 class VersionTest : public JsonTest::TestCase {};
 
-#define JSONCPP_FORMAT_MACRO_(x) #x
-#define JSONCPP_FORMAT_MACRO(x) JSONCPP_FORMAT_MACRO_(x)
+#define JSONCPP_FORMAT_MACRO_(...) #__VA_ARGS__
+#define JSONCPP_FORMAT_MACRO(...) JSONCPP_FORMAT_MACRO_(__VA_ARGS__)
 
 JSONTEST_FIXTURE_LOCAL(VersionTest, VersionNumbersMatch) {
   std::ostringstream vstr;
