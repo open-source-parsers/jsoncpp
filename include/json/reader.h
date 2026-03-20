@@ -81,7 +81,10 @@ public:
    * document.
    *
    * \param      beginDoc        Pointer on the beginning of the UTF-8 encoded
-   *                             string of the document to read.
+   *                             string of the document to read. The pointed-to
+   *                             buffer must outlive this Reader if error
+   *                             methods (e.g. getFormattedErrorMessages()) are
+   *                             called after parse() returns.
    * \param      endDoc          Pointer on the end of the UTF-8 encoded string
    *                             of the document to read.  Must be >= beginDoc.
    * \param[out] root            Contains the root value of the document if it

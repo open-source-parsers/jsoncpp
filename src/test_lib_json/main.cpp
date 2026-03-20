@@ -150,6 +150,8 @@ struct ValueTest : JsonTest::TestCase {
   /// Normalize the representation of floating-point number by stripped leading
   /// 0 in exponent.
   static Json::String normalizeFloatingPointStr(const Json::String& s);
+
+  void runCZStringTests();
 };
 
 Json::String ValueTest::normalizeFloatingPointStr(const Json::String& s) {
@@ -166,6 +168,44 @@ Json::String ValueTest::normalizeFloatingPointStr(const Json::String& s) {
   }
   return normalized + exponent;
 }
+
+void ValueTest::runCZStringTests() {
+  // 1. Copy Constructor (Index)
+  Json::Value::CZString idx1(123);
+  Json::Value::CZString idx2(idx1);
+  JSONTEST_ASSERT_EQUAL(idx2.index(), 123);
+
+  // 2. Move Constructor (Index)
+  Json::Value::CZString idx3(std::move(idx1));
+  JSONTEST_ASSERT_EQUAL(idx3.index(), 123);
+
+  // 3. Move Assignment (Index)
+  Json::Value::CZString idx4(456);
+  idx4 = std::move(idx3);
+  JSONTEST_ASSERT_EQUAL(idx4.index(), 123);
+
+  // 4. Copy Constructor (String)
+  Json::Value::CZString str1("param", 5,
+                             Json::Value::CZString::duplicateOnCopy);
+  Json::Value::CZString str2((str1)); // copy makes it duplicate (owning)
+  JSONTEST_ASSERT_STRING_EQUAL(str2.data(), "param");
+
+  // 5. Move Constructor (String)
+  // Move from Owning string (str2)
+  Json::Value::CZString str3(std::move(str2));
+  JSONTEST_ASSERT_STRING_EQUAL(str3.data(), "param");
+
+  // 6. Move Assignment (String)
+  Json::Value::CZString str4("other", 5,
+                             Json::Value::CZString::duplicateOnCopy);
+  Json::Value::CZString str5((str4)); // owning "other"
+  // Move-assign owning "param" (str3) into owning "other" (str5)
+  // This verifies we don't leak "other" (if fixed) and correctly take "param"
+  str5 = std::move(str3);
+  JSONTEST_ASSERT_STRING_EQUAL(str5.data(), "param");
+}
+
+JSONTEST_FIXTURE_LOCAL(ValueTest, CZStringCoverage) { runCZStringTests(); }
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, checkNormalizeFloatingPointStr) {
   struct TestData {
@@ -447,6 +487,24 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, resizeArray) {
     array.clear();
     JSONTEST_ASSERT_EQUAL(array.size(), 0);
   }
+}
+
+JSONTEST_FIXTURE_LOCAL(ValueTest, copyMoveArray) {
+  Json::Value array;
+  array.append("item1");
+  array.append("item2");
+
+  // Test Copy Constructor (covers CZString(const CZString&) with index)
+  Json::Value copy(array);
+  JSONTEST_ASSERT_EQUAL(copy.size(), 2);
+  JSONTEST_ASSERT_EQUAL(Json::Value("item1"), copy[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("item2"), copy[1]);
+
+  // Test Move Constructor (covers CZString(CZString&&) with index)
+  Json::Value moved(std::move(copy));
+  JSONTEST_ASSERT_EQUAL(moved.size(), 2);
+  JSONTEST_ASSERT_EQUAL(Json::Value("item1"), moved[0]);
+  JSONTEST_ASSERT_EQUAL(Json::Value("item2"), moved[1]);
 }
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, resizePopulatesAllMissingElements) {
@@ -3354,6 +3412,16 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithStackLimit) {
     Json::String errs;
     JSONTEST_ASSERT_THROWS(
         reader->parse(doc, doc + std::strlen(doc), &root, &errs));
+  }
+  // Default stack limit should reject deeply nested input (regression test for
+  // stack exhaustion from fuzz input like [[[[...]]]])
+  {
+    Json::CharReaderBuilder defaultBuilder;
+    Json::String nested(300, '[');
+    CharReaderPtr reader(defaultBuilder.newCharReader());
+    Json::String errs;
+    JSONTEST_ASSERT_THROWS(reader->parse(
+        nested.data(), nested.data() + nested.size(), &root, &errs));
   }
 
 #endif // JSON_USE_EXCEPTION

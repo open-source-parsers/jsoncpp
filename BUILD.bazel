@@ -1,6 +1,7 @@
-licenses(["unencumbered"])  # Public Domain or MIT
-
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
+licenses(["unencumbered"])  # Public Domain or MIT
 
 exports_files(["LICENSE"])
 
@@ -36,9 +37,9 @@ cc_library(
         "include/json/allocator.h",
         "include/json/assertions.h",
         "include/json/config.h",
-        "include/json/json_features.h",
         "include/json/forwards.h",
         "include/json/json.h",
+        "include/json/json_features.h",
         "include/json/reader.h",
         "include/json/value.h",
         "include/json/version.h",
