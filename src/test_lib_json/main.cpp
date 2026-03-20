@@ -4113,17 +4113,10 @@ JSONTEST_FIXTURE_LOCAL(MemberTemplateIs, BehavesSameAsNamedIs) {
 
 class VersionTest : public JsonTest::TestCase {};
 
-#define JSONCPP_FORMAT_MACRO_(...) #__VA_ARGS__
-#define JSONCPP_FORMAT_MACRO(...) JSONCPP_FORMAT_MACRO_(__VA_ARGS__)
-
 JSONTEST_FIXTURE_LOCAL(VersionTest, VersionNumbersMatch) {
   std::ostringstream vstr;
   vstr << JSONCPP_VERSION_MAJOR << '.' << JSONCPP_VERSION_MINOR << '.'
        << JSONCPP_VERSION_PATCH;
-  std::string qual = JSONCPP_FORMAT_MACRO(JSONCPP_VERSION_QUALIFIER);
-  if (!qual.empty()) {
-    vstr << '.' << qual;
-  }
   JSONTEST_ASSERT_EQUAL(vstr.str(), std::string(JSONCPP_VERSION_STRING));
 }
 

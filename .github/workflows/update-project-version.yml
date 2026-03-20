@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       target_version:
-        description: 'next version (e.g., 1.9.7 or 1.9.7.12)'
+        description: 'next version (e.g., 1.9.8)'
         required: true
-        default: '1.9.7'
+        default: '1.9.8'
       target_soversion:
         description: 'next soversion (e.g., 28). leave blank to keep current.'
         required: false
@@ -60,18 +60,11 @@ jobs:
             MAJOR=$(echo "$VER" | cut -d. -f1)
             MINOR=$(echo "$VER" | cut -d. -f2)
             PATCH=$(echo "$VER" | cut -d. -f3)
-            QUALIFIER=$(echo "$VER" | cut -d. -f4 -s)
 
             sed -i "s/#define JSONCPP_VERSION_STRING \".*\"/#define JSONCPP_VERSION_STRING \"$VER\"/" include/json/version.h
             sed -i "s/#define JSONCPP_VERSION_MAJOR [0-9]*/#define JSONCPP_VERSION_MAJOR $MAJOR/" include/json/version.h
             sed -i "s/#define JSONCPP_VERSION_MINOR [0-9]*/#define JSONCPP_VERSION_MINOR $MINOR/" include/json/version.h
             sed -i "s/#define JSONCPP_VERSION_PATCH [0-9]*/#define JSONCPP_VERSION_PATCH $PATCH/" include/json/version.h
-            
-            if [ -n "$QUALIFIER" ]; then
-              sed -i "s/#define JSONCPP_VERSION_QUALIFIER.*/#define JSONCPP_VERSION_QUALIFIER $QUALIFIER/" include/json/version.h
-            else
-              sed -i "s/#define JSONCPP_VERSION_QUALIFIER.*/#define JSONCPP_VERSION_QUALIFIER/" include/json/version.h
-            fi
           fi
 
       - name: verify version macros
@@ -84,7 +77,6 @@ jobs:
             V_MAJ=$(grep "JSONCPP_VERSION_MAJOR" "$FILE" | head -n 1 | awk '{print $3}' | tr -cd '0-9')
             V_MIN=$(grep "JSONCPP_VERSION_MINOR" "$FILE" | head -n 1 | awk '{print $3}' | tr -cd '0-9')
             V_PAT=$(grep "JSONCPP_VERSION_PATCH" "$FILE" | head -n 1 | awk '{print $3}' | tr -cd '0-9')
-            V_QUA=$(grep "JSONCPP_VERSION_QUALIFIER" "$FILE" | head -n 1 | awk '{print $3}' | tr -cd '0-9')
 
             # create a unique delimiter for the multi-line output
             DELIM=$(dd if=/dev/urandom bs=15 count=1 2>/dev/null | base64)
@@ -95,7 +87,6 @@ jobs:
             echo "| MAJOR | \`$V_MAJ\` |" >> $GITHUB_OUTPUT
             echo "| MINOR | \`$V_MIN\` |" >> $GITHUB_OUTPUT
             echo "| PATCH | \`$V_PAT\` |" >> $GITHUB_OUTPUT
-            echo "| QUALIFIER | \`${V_QUA:-empty}\` |" >> $GITHUB_OUTPUT
             echo "$DELIM" >> $GITHUB_OUTPUT
           fi
 

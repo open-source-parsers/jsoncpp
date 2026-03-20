@@ -10,7 +10,7 @@ project(
   # 3. /CMakeLists.txt
   # 4. /MODULE.bazel
   # IMPORTANT: also update the SOVERSION!!
-  version : '1.9.7',
+  version : '1.9.8',
   default_options : [
     'buildtype=release',
     'cpp_std=c++11',
@@ -51,7 +51,7 @@ jsoncpp_lib = library(
     'src/lib_json/json_value.cpp',
     'src/lib_json/json_writer.cpp',
   ]),
-  soversion : 27,
+  soversion : 28,
   install : true,
   include_directories : jsoncpp_include_directories,
   cpp_args: dll_export_flag)
