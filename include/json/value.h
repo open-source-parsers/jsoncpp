@@ -1052,7 +1052,8 @@ struct MemberProxy {
   Value& value;
 };
 
-/** \brief Proxy struct to enable range-based for loops over const object members.
+/** \brief Proxy struct to enable range-based for loops over const object
+ * members.
  */
 struct ConstMemberProxy {
   const String name;
@@ -1081,8 +1082,12 @@ public:
     ++*this;
     return temp;
   }
-  bool operator==(ValueMembersIterator const& other) const { return it_ == other.it_; }
-  bool operator!=(ValueMembersIterator const& other) const { return it_ != other.it_; }
+  bool operator==(ValueMembersIterator const& other) const {
+    return it_ == other.it_;
+  }
+  bool operator!=(ValueMembersIterator const& other) const {
+    return it_ != other.it_;
+  }
   MemberProxy operator*() const { return MemberProxy{it_.name(), *it_}; }
 
 private:
@@ -1100,7 +1105,8 @@ public:
   using reference = ConstMemberProxy;
 
   ValueConstMembersIterator() = default;
-  explicit ValueConstMembersIterator(ValueConstIterator const& iter) : it_(iter) {}
+  explicit ValueConstMembersIterator(ValueConstIterator const& iter)
+      : it_(iter) {}
 
   ValueConstMembersIterator& operator++() {
     ++it_;
@@ -1111,9 +1117,15 @@ public:
     ++*this;
     return temp;
   }
-  bool operator==(ValueConstMembersIterator const& other) const { return it_ == other.it_; }
-  bool operator!=(ValueConstMembersIterator const& other) const { return it_ != other.it_; }
-  ConstMemberProxy operator*() const { return ConstMemberProxy{it_.name(), *it_}; }
+  bool operator==(ValueConstMembersIterator const& other) const {
+    return it_ == other.it_;
+  }
+  bool operator!=(ValueConstMembersIterator const& other) const {
+    return it_ != other.it_;
+  }
+  ConstMemberProxy operator*() const {
+    return ConstMemberProxy{it_.name(), *it_};
+  }
 
 private:
   ValueConstIterator it_;
@@ -1123,7 +1135,8 @@ private:
  */
 class ValueMembersView {
 public:
-  ValueMembersView(ValueIterator begin, ValueIterator end) : begin_(begin), end_(end) {}
+  ValueMembersView(ValueIterator begin, ValueIterator end)
+      : begin_(begin), end_(end) {}
   ValueMembersIterator begin() const { return ValueMembersIterator(begin_); }
   ValueMembersIterator end() const { return ValueMembersIterator(end_); }
 
@@ -1136,9 +1149,14 @@ private:
  */
 class ValueConstMembersView {
 public:
-  ValueConstMembersView(ValueConstIterator begin, ValueConstIterator end) : begin_(begin), end_(end) {}
-  ValueConstMembersIterator begin() const { return ValueConstMembersIterator(begin_); }
-  ValueConstMembersIterator end() const { return ValueConstMembersIterator(end_); }
+  ValueConstMembersView(ValueConstIterator begin, ValueConstIterator end)
+      : begin_(begin), end_(end) {}
+  ValueConstMembersIterator begin() const {
+    return ValueConstMembersIterator(begin_);
+  }
+  ValueConstMembersIterator end() const {
+    return ValueConstMembersIterator(end_);
+  }
 
 private:
   ValueConstIterator begin_;

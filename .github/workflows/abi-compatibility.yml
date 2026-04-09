@@ -59,8 +59,8 @@ jobs:
           target_link_libraries(abi_test PRIVATE JsonCpp::JsonCpp)
           EOF
 
-          cp $GITHUB_WORKSPACE/src/test_lib_json/*.cpp example-app/
-          cp $GITHUB_WORKSPACE/src/test_lib_json/*.h example-app/
+          cp src/test_lib_json/*.cpp example-app/
+          cp src/test_lib_json/*.h example-app/
 
       - name: build example app (C++${{ matrix.app_std }})
         shell: bash
