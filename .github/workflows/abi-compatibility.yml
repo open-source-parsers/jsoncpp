@@ -16,9 +16,17 @@ jobs:
         shared_libs: [ON, OFF]
         include:
           - jsoncpp_std: 11
+            app_std: 17
+          - jsoncpp_std: 17
+            app_std: 11
+          - jsoncpp_std: 11
             app_std: 23
           - jsoncpp_std: 23
             app_std: 11
+          - jsoncpp_std: 17
+            app_std: 23
+          - jsoncpp_std: 23
+            app_std: 17
 
     steps:
       - name: checkout project
@@ -47,11 +55,12 @@ jobs:
 
           find_package(jsoncpp REQUIRED CONFIG)
 
-          add_executable(abi_test stringView.cpp)
+          add_executable(abi_test jsontest.cpp fuzz.cpp main.cpp)
           target_link_libraries(abi_test PRIVATE JsonCpp::JsonCpp)
           EOF
 
-          cp $GITHUB_WORKSPACE/example/stringView/stringView.cpp example-app/stringView.cpp
+          cp $GITHUB_WORKSPACE/src/test_lib_json/*.cpp example-app/
+          cp $GITHUB_WORKSPACE/src/test_lib_json/*.h example-app/
 
       - name: build example app (C++${{ matrix.app_std }})
         shell: bash

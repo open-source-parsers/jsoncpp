@@ -3924,6 +3924,54 @@ JSONTEST_FIXTURE_LOCAL(BomTest, notSkipBom) {
 
 struct IteratorTest : JsonTest::TestCase {};
 
+JSONTEST_FIXTURE_LOCAL(IteratorTest, members) {
+  Json::Value j;
+  j["k1"] = "a";
+  j["k2"] = "b";
+
+  std::vector<std::string> keys;
+  std::vector<std::string> values;
+
+  for (const auto& member : j.members()) {
+    keys.push_back(member.name);
+    values.push_back(member.value.asString());
+  }
+
+  JSONTEST_ASSERT((keys == std::vector<std::string>{"k1", "k2"}));
+  JSONTEST_ASSERT((values == std::vector<std::string>{"a", "b"}));
+
+  // Test modification through value reference
+  for (const auto& member : j.members()) {
+    member.value = "c";
+  }
+
+  JSONTEST_ASSERT(j["k1"].asString() == "c");
+
+  // Test const members
+  const Json::Value& cj = j;
+  keys.clear();
+  values.clear();
+
+  for (const auto& member : cj.members()) {
+    keys.push_back(member.name);
+    values.push_back(member.value.asString());
+  }
+
+  JSONTEST_ASSERT((keys == std::vector<std::string>{"k1", "k2"}));
+  JSONTEST_ASSERT((values == std::vector<std::string>{"c", "c"}));
+
+#if __cplusplus >= 201703L
+  keys.clear();
+  values.clear();
+  for (auto const& [k, v] : cj.members()) {
+    keys.push_back(k);
+    values.push_back(v.asString());
+  }
+  JSONTEST_ASSERT((keys == std::vector<std::string>{"k1", "k2"}));
+  JSONTEST_ASSERT((values == std::vector<std::string>{"c", "c"}));
+#endif
+}
+
 JSONTEST_FIXTURE_LOCAL(IteratorTest, convert) {
   Json::Value j;
   const Json::Value& cj = j;

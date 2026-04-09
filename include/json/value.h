@@ -682,6 +682,11 @@ public:
   iterator begin();
   iterator end();
 
+  // \brief Returns a view of member pairs for range-based for loops.
+  ValueMembersView members();
+  // \brief Returns a view of member pairs for range-based for loops.
+  ValueConstMembersView members() const;
+
   /// \brief Returns a reference to the first element in the `Value`.
   /// Requires that this value holds an array or json object, with at least one
   /// element.
@@ -1039,6 +1044,113 @@ public:
   reference operator*() const { return const_cast<reference>(deref()); }
   pointer operator->() const { return const_cast<pointer>(&deref()); }
 };
+
+/** \brief Proxy struct to enable range-based for loops over object members.
+ */
+struct MemberProxy {
+  const String name;
+  Value& value;
+};
+
+/** \brief Proxy struct to enable range-based for loops over const object members.
+ */
+struct ConstMemberProxy {
+  const String name;
+  const Value& value;
+};
+
+/** \brief Iterator adapter for range-based for loops.
+ */
+class ValueMembersIterator {
+public:
+  using iterator_category = std::forward_iterator_tag;
+  using value_type = MemberProxy;
+  using difference_type = int;
+  using pointer = MemberProxy*;
+  using reference = MemberProxy;
+
+  ValueMembersIterator() = default;
+  explicit ValueMembersIterator(ValueIterator const& iter) : it_(iter) {}
+
+  ValueMembersIterator& operator++() {
+    ++it_;
+    return *this;
+  }
+  ValueMembersIterator operator++(int) {
+    ValueMembersIterator temp(*this);
+    ++*this;
+    return temp;
+  }
+  bool operator==(ValueMembersIterator const& other) const { return it_ == other.it_; }
+  bool operator!=(ValueMembersIterator const& other) const { return it_ != other.it_; }
+  MemberProxy operator*() const { return MemberProxy{it_.name(), *it_}; }
+
+private:
+  ValueIterator it_;
+};
+
+/** \brief Iterator adapter for range-based for loops.
+ */
+class ValueConstMembersIterator {
+public:
+  using iterator_category = std::forward_iterator_tag;
+  using value_type = ConstMemberProxy;
+  using difference_type = int;
+  using pointer = ConstMemberProxy*;
+  using reference = ConstMemberProxy;
+
+  ValueConstMembersIterator() = default;
+  explicit ValueConstMembersIterator(ValueConstIterator const& iter) : it_(iter) {}
+
+  ValueConstMembersIterator& operator++() {
+    ++it_;
+    return *this;
+  }
+  ValueConstMembersIterator operator++(int) {
+    ValueConstMembersIterator temp(*this);
+    ++*this;
+    return temp;
+  }
+  bool operator==(ValueConstMembersIterator const& other) const { return it_ == other.it_; }
+  bool operator!=(ValueConstMembersIterator const& other) const { return it_ != other.it_; }
+  ConstMemberProxy operator*() const { return ConstMemberProxy{it_.name(), *it_}; }
+
+private:
+  ValueConstIterator it_;
+};
+
+/** \brief Range-based for loop adapter for object members.
+ */
+class ValueMembersView {
+public:
+  ValueMembersView(ValueIterator begin, ValueIterator end) : begin_(begin), end_(end) {}
+  ValueMembersIterator begin() const { return ValueMembersIterator(begin_); }
+  ValueMembersIterator end() const { return ValueMembersIterator(end_); }
+
+private:
+  ValueIterator begin_;
+  ValueIterator end_;
+};
+
+/** \brief Range-based for loop adapter for object members.
+ */
+class ValueConstMembersView {
+public:
+  ValueConstMembersView(ValueConstIterator begin, ValueConstIterator end) : begin_(begin), end_(end) {}
+  ValueConstMembersIterator begin() const { return ValueConstMembersIterator(begin_); }
+  ValueConstMembersIterator end() const { return ValueConstMembersIterator(end_); }
+
+private:
+  ValueConstIterator begin_;
+  ValueConstIterator end_;
+};
+
+inline ValueMembersView Value::members() {
+  return ValueMembersView(begin(), end());
+}
+inline ValueConstMembersView Value::members() const {
+  return ValueConstMembersView(begin(), end());
+}
 
 inline void swap(Value& a, Value& b) { a.swap(b); }
 

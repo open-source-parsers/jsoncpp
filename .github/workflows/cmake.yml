@@ -12,6 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        cxx_standard: [11, 17]
         
     steps:
       - name: checkout project
@@ -19,4 +20,6 @@ jobs:
 
       - name: build project
         uses: threeal/cmake-action@v2.0.0
+        with:
+          options: CMAKE_CXX_STANDARD=${{ matrix.cxx_standard }}
         
