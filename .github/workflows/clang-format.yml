@@ -12,7 +12,7 @@ jobs:
       matrix:
         path:
           - 'src'
-          - 'examples'
+          - 'example'
           - 'include'
     steps:
     - uses: actions/checkout@v4
