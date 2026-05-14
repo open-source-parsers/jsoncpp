@@ -52,34 +52,6 @@ Major versions maintain binary compatibility. Critical security fixes are accept
 > [!NOTE]
 > Package manager ports (vcpkg, Conan, etc.) are community-maintained. Please report outdated versions or missing generators to their respective repositories.
 
-### vcpkg
-Add `jsoncpp` to your `vcpkg.json` manifest:
-
-```json
-{
-  "dependencies": ["jsoncpp"]
-}
-```
-
-Or install via classic mode: `vcpkg install jsoncpp`.
-
-### Conan
-
-```sh
-conan install --requires="jsoncpp/[*]" --build=missing
-```
-
-If you are using a `conanfile.txt` in a Conan 2 project, ensure you use the appropriate generators:
-
-```ini
-[requires]
-jsoncpp/[*]
-
-[generators]
-CMakeToolchain
-CMakeDeps
-```
-
 ### Meson
 
 ```sh
