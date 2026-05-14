@@ -193,6 +193,32 @@ static inline void releaseStringValue(char* value, unsigned) { free(value); }
 // ValueInternals...
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
+
+namespace Json {
+
+static const char* valueTypeToString(ValueType type) {
+  switch (type) {
+  case nullValue:
+    return "nullValue";
+  case intValue:
+    return "intValue";
+  case uintValue:
+    return "uintValue";
+  case realValue:
+    return "realValue";
+  case stringValue:
+    return "stringValue";
+  case booleanValue:
+    return "booleanValue";
+  case arrayValue:
+    return "arrayValue";
+  case objectValue:
+    return "objectValue";
+  }
+  return "unknown";
+}
+
+} // namespace Json
 // //////////////////////////////////////////////////////////////////
 #if !defined(JSON_IS_AMALGAMATION)
 
@@ -928,8 +954,10 @@ void Value::clear() {
 }
 
 void Value::resize(ArrayIndex newSize) {
-  JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
-                      "in Json::Value::resize(): requires arrayValue");
+  JSON_ASSERT_MESSAGE(
+      type() == nullValue || type() == arrayValue,
+      "in Json::Value::resize(): requires arrayValue, but found "
+          << valueTypeToString(type()));
   if (type() == nullValue)
     *this = Value(arrayValue);
   ArrayIndex oldSize = size();
@@ -1062,7 +1090,8 @@ void Value::dupMeta(const Value& other) {
 Value& Value::resolveReference(const char* key) {
   JSON_ASSERT_MESSAGE(
       type() == nullValue || type() == objectValue,
-      "in Json::Value::resolveReference(): requires objectValue");
+      "in Json::Value::resolveReference(): requires objectValue, but found "
+          << valueTypeToString(type()));
   if (type() == nullValue)
     *this = Value(objectValue);
   CZString actualKey(key, static_cast<unsigned>(strlen(key)),
@@ -1079,9 +1108,10 @@ Value& Value::resolveReference(const char* key) {
 
 // @param key is not null-terminated.
 Value& Value::resolveReference(char const* key, char const* end) {
-  JSON_ASSERT_MESSAGE(
-      type() == nullValue || type() == objectValue,
-      "in Json::Value::resolveReference(key, end): requires objectValue");
+  JSON_ASSERT_MESSAGE(type() == nullValue || type() == objectValue,
+                      "in Json::Value::resolveReference(key, end): requires "
+                      "objectValue, but found "
+                          << valueTypeToString(type()));
   if (type() == nullValue)
     *this = Value(objectValue);
   CZString actualKey(key, static_cast<unsigned>(end - key),
@@ -1192,7 +1222,8 @@ Value& Value::append(const Value& value) { return append(Value(value)); }
 
 Value& Value::append(Value&& value) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
-                      "in Json::Value::append: requires arrayValue");
+                      "in Json::Value::append: requires arrayValue, but found "
+                          << valueTypeToString(type()));
   if (type() == nullValue) {
     *this = Value(arrayValue);
   }
@@ -1251,8 +1282,10 @@ bool Value::removeMember(String const& key, Value* removed) {
 }
 
 void Value::removeMember(const char* key) {
-  JSON_ASSERT_MESSAGE(type() == nullValue || type() == objectValue,
-                      "in Json::Value::removeMember(): requires objectValue");
+  JSON_ASSERT_MESSAGE(
+      type() == nullValue || type() == objectValue,
+      "in Json::Value::removeMember(): requires objectValue, but found "
+          << valueTypeToString(type()));
   if (type() == nullValue)
     return;
 
