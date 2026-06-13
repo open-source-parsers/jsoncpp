@@ -1296,9 +1296,13 @@ bool OurReader::readComment() {
       if (lastValueEnd_ && !containsNewLine(lastValueEnd_, commentBegin)) {
         if (isCppStyleComment || !cStyleWithEmbeddedNewline) {
           placement = commentAfterOnSameLine;
-          lastValueHasAComment_ = true;
         }
       }
+      // The gap between the last value and this comment only grows as more
+      // comments are consumed, so a later comment can never be on the same
+      // line as that value. Mark it handled to avoid re-scanning the same
+      // growing prefix for every following comment (quadratic behavior).
+      lastValueHasAComment_ = true;
     }
 
     addComment(commentBegin, current_, placement);

@@ -13,6 +13,7 @@
 #include "fuzz.h"
 #include "jsontest.h"
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <functional>
@@ -3306,6 +3307,39 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseComment) {
     JSONTEST_ASSERT_EQUAL("value", root[0]);
     JSONTEST_ASSERT_EQUAL(true, root[1]);
   }
+}
+
+JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseCommentsAfterValueNotQuadratic) {
+  // Regression test: a value followed by a long comment (whose only newline is
+  // at its end) and then a large number of trailing comments used to re-scan
+  // the whole gap between the value and each comment, making parsing
+  // O(comments * gap) instead of linear. Build such an input and require that
+  // it parses well under a generous time bound; the quadratic version takes
+  // tens of seconds for these sizes.
+  const int kFiller = 300000;
+  const int kComments = 400000;
+  std::string doc = "[0 /*";
+  doc.append(kFiller, 'a');
+  doc += "\n*/";
+  for (int i = 0; i < kComments; ++i)
+    doc += "/*c*/";
+  doc += "]";
+
+  Json::CharReaderBuilder b;
+  CharReaderPtr reader(b.newCharReader());
+  Json::Value root;
+  Json::String errs;
+
+  const auto start = std::chrono::steady_clock::now();
+  bool ok = reader->parse(doc.data(), doc.data() + doc.size(), &root, &errs);
+  const auto elapsed = std::chrono::steady_clock::now() - start;
+  const auto elapsed_ms =
+      std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
+
+  JSONTEST_ASSERT(ok);
+  JSONTEST_ASSERT(errs.empty());
+  JSONTEST_ASSERT_EQUAL(0, root[0]);
+  JSONTEST_ASSERT(elapsed_ms < 10000);
 }
 
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseObjectWithErrors) {
