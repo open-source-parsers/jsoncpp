@@ -16,7 +16,7 @@ jobs:
         
     steps:
       - name: checkout project
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: build project
         uses: threeal/cmake-action@v2.0.0

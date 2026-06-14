@@ -15,7 +15,7 @@ jobs:
           - 'example'
           - 'include'
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: runs clang-format style check for C/C++/Protobuf programs.
       uses: jidicula/clang-format-action@v4.13.0
       with:
