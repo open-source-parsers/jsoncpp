@@ -975,8 +975,20 @@ private:
 
 // complete copy of Read impl, for OurReader
 
+// Test-only instrumentation: total bytes examined by
+// OurReader::containsNewLine, so unit tests can assert that comment handling
+// stays linear in the input rather than quadratic in the comment count (see
+// CharReaderTest/parseCommentsAfterValueScansLinearly). thread_local so it
+// never races during concurrent parsing; the increment is negligible and only
+// runs while parsing comments. Not part of the supported public API.
+JSON_API size_t& newlineScanByteCountForTesting() {
+  static thread_local size_t count = 0;
+  return count;
+}
+
 bool OurReader::containsNewLine(OurReader::Location begin,
                                 OurReader::Location end) {
+  newlineScanByteCountForTesting() += static_cast<size_t>(end - begin);
   return std::any_of(begin, end, [](char b) { return b == '\n' || b == '\r'; });
 }
 
@@ -1296,9 +1308,13 @@ bool OurReader::readComment() {
       if (lastValueEnd_ && !containsNewLine(lastValueEnd_, commentBegin)) {
         if (isCppStyleComment || !cStyleWithEmbeddedNewline) {
           placement = commentAfterOnSameLine;
-          lastValueHasAComment_ = true;
         }
       }
+      // The gap between the last value and this comment only grows as more
+      // comments are consumed, so a later comment can never be on the same
+      // line as that value. Mark it handled to avoid re-scanning the same
+      // growing prefix for every following comment (quadratic behavior).
+      lastValueHasAComment_ = true;
     }
 
     addComment(commentBegin, current_, placement);
