@@ -13,7 +13,6 @@
 #include "fuzz.h"
 #include "jsontest.h"
 #include <algorithm>
-#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <functional>
@@ -29,6 +28,11 @@
 #include <vector>
 
 using CharReaderPtr = std::unique_ptr<Json::CharReader>;
+
+namespace Json {
+// Defined in json_reader.cpp; test instrumentation seam.
+JSON_API size_t& newlineScanByteCountForTesting();
+} // namespace Json
 
 // Make numeric limits more convenient to talk about.
 // Assumes int type in 32 bits.
@@ -3309,15 +3313,17 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseComment) {
   }
 }
 
-JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseCommentsAfterValueNotQuadratic) {
-  // Regression test: a value followed by a long comment (whose only newline is
-  // at its end) and then a large number of trailing comments used to re-scan
-  // the whole gap between the value and each comment, making parsing
-  // O(comments * gap) instead of linear. Build such an input and require that
-  // it parses well under a generous time bound; the quadratic version takes
-  // tens of seconds for these sizes.
-  const int kFiller = 300000;
-  const int kComments = 400000;
+JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseCommentsAfterValueScansLinearly) {
+  // A value, then a comment whose only newline is at its end, then many
+  // trailing comments. Comment handling should scan the value->comment gap a
+  // bounded number of times (linear in the input), not once per trailing
+  // comment (O(comments * gap)). Assert directly on bytes scanned
+  // (deterministic) rather than wall-clock time (flaky under valgrind/CI).
+  //
+  // Regression test for crbug.com/521541633 (jsoncpp_fuzzer timeout: a 400KB
+  // input scanned 2.24GB across 8384 containsNewLine calls, ~18s).
+  const int kFiller = 256;
+  const int kComments = 1000;
   std::string doc = "[0 /*";
   doc.append(kFiller, 'a');
   doc += "\n*/";
@@ -3330,16 +3336,17 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseCommentsAfterValueNotQuadratic) {
   Json::Value root;
   Json::String errs;
 
-  const auto start = std::chrono::steady_clock::now();
-  bool ok = reader->parse(doc.data(), doc.data() + doc.size(), &root, &errs);
-  const auto elapsed = std::chrono::steady_clock::now() - start;
-  const auto elapsed_ms =
-      std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
+  Json::newlineScanByteCountForTesting() = 0;
+  const bool ok =
+      reader->parse(doc.data(), doc.data() + doc.size(), &root, &errs);
 
   JSONTEST_ASSERT(ok);
   JSONTEST_ASSERT(errs.empty());
   JSONTEST_ASSERT_EQUAL(0, root[0]);
-  JSONTEST_ASSERT(elapsed_ms < 10000);
+  // Quadratic-regression guard. Linear scans ~O(input); the bug scanned
+  // ~kComments * kFiller (~2.7M here vs a few bytes fixed).
+  const size_t scanned = Json::newlineScanByteCountForTesting();
+  JSONTEST_ASSERT(scanned < 4 * doc.size());
 }
 
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseObjectWithErrors) {
