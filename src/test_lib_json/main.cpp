@@ -3241,6 +3241,49 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseNumber) {
   }
 }
 
+JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseSubnormal) {
+  // Regression test for #1427: subnormal doubles make operator>> set failbit
+  // even though it produced the correctly-rounded value, so they used to fail
+  // to parse -- meaning a value jsoncpp had just serialized could fail to read
+  // back. They should now parse to that value.
+  Json::CharReaderBuilder b;
+  CharReaderPtr reader(b.newCharReader());
+  Json::String errs;
+
+  const struct {
+    const char* doc;
+    double expected;
+  } cases[] = {
+      {"[3.2114e-312]", 3.2114e-312}, // subnormal
+      {"[-1e-320]", -1e-320},         // negative subnormal
+      {"[4.9e-324]", 4.9e-324},       // smallest positive subnormal
+  };
+  for (const auto& c : cases) {
+    Json::Value root;
+    bool ok = reader->parse(c.doc, c.doc + std::strlen(c.doc), &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT(errs.empty());
+    JSONTEST_ASSERT_EQUAL(c.expected, root[0].asDouble());
+  }
+
+  // A subnormal also round-trips through the writer.
+  {
+    const Json::String doc = Json::writeString(Json::StreamWriterBuilder(),
+                                               Json::Value(3.2114e-312));
+    Json::Value root;
+    bool ok = reader->parse(doc.data(), doc.data() + doc.size(), &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_EQUAL(3.2114e-312, root.asDouble());
+  }
+
+  // Malformed numbers and non-numbers are still rejected (the failure path
+  // accepts a subnormal value but nothing that parses to zero or junk).
+  for (const char* doc : {"[1abc]", "[0e]", "[0e+]"}) {
+    Json::Value root;
+    JSONTEST_ASSERT(!reader->parse(doc, doc + std::strlen(doc), &root, &errs));
+  }
+}
+
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseString) {
   Json::CharReaderBuilder b;
   CharReaderPtr reader(b.newCharReader());
