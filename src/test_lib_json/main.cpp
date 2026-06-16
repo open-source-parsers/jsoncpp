@@ -524,6 +524,35 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, resizePopulatesAllMissingElements) {
     JSONTEST_ASSERT_EQUAL(e, Json::Value{});
 }
 
+JSONTEST_FIXTURE_LOCAL(ValueTest, assignBeyondEndPopulatesGapsWithNull) {
+  // Regression test for #1611: assigning past the end of an array via
+  // operator[] must fill the intervening indices with null, so that size(),
+  // iteration, and serialization all agree (JSON arrays are dense). Before the
+  // fix, `arr[5] = x` stored a single element while size() reported 6 and
+  // serialization emitted six, and range-for visited only the one element.
+  Json::Value arr(Json::arrayValue);
+  arr[5] = "Hello, World!";
+
+  JSONTEST_ASSERT_EQUAL(6u, arr.size());
+  JSONTEST_ASSERT_EQUAL(6, std::distance(arr.begin(), arr.end()));
+  for (Json::ArrayIndex i = 0; i < 5; ++i)
+    JSONTEST_ASSERT_EQUAL(Json::Value{}, arr[i]);
+  JSONTEST_ASSERT_EQUAL("Hello, World!", arr[5].asString());
+
+  // Iteration count matches size() and the dense serialization.
+  Json::ArrayIndex iterated = 0;
+  for (const Json::Value& e : arr) {
+    (void)e;
+    ++iterated;
+  }
+  JSONTEST_ASSERT_EQUAL(6u, iterated);
+
+  Json::StreamWriterBuilder b;
+  b.settings_["indentation"] = "";
+  JSONTEST_ASSERT_EQUAL("[null,null,null,null,null,\"Hello, World!\"]",
+                        Json::writeString(b, arr));
+}
+
 JSONTEST_FIXTURE_LOCAL(ValueTest, getArrayValue) {
   Json::Value array;
   for (Json::ArrayIndex i = 0; i < 5; i++)
