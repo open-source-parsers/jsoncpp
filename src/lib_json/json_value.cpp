@@ -985,6 +985,15 @@ Value& Value::operator[](ArrayIndex index) {
   if (it != value_.map_->end() && (*it).first == key)
     return (*it).second;
 
+  // JSON arrays are dense: materialize any gap between the current size and
+  // `index` with null so that size(), iteration, and serialization stay
+  // consistent. Without this, `arr[5] = x` on an empty array would store a
+  // single element while size() reported 6 and serialization emitted six
+  // (see issue #1611). resize() already grows arrays this same way.
+  for (ArrayIndex i = size(); i < index; ++i)
+    value_.map_->insert(value_.map_->end(),
+                        ObjectValues::value_type(CZString(i), nullSingleton()));
+
   ObjectValues::value_type defaultValue(key, nullSingleton());
   it = value_.map_->insert(it, defaultValue);
   return (*it).second;
