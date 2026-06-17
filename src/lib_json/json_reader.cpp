@@ -926,6 +926,7 @@ private:
   bool readToken(Token& token);
   bool readTokenSkippingComments(Token& token);
   void skipSpaces();
+  void skipCommentTokens();
   void skipBom(bool skipBom);
   bool match(const Char* pattern, int patternLength);
   bool readComment();
@@ -1269,6 +1270,24 @@ void OurReader::skipSpaces() {
   }
 }
 
+// Skip whitespace and any comments, leaving current_ at the next significant
+// character. Consumed comments are recorded (commentsBefore_) so the next value
+// still receives them; if none follows they are simply not attached. This lets
+// callers peek for a delimiter that is preceded by comments (e.g. a ']' after a
+// trailing comma -- see readArray and issue #1500).
+void OurReader::skipCommentTokens() {
+  skipSpaces();
+  if (!features_.allowComments_)
+    return;
+  while (current_ != end_ && *current_ == '/' && (current_ + 1) != end_ &&
+         (current_[1] == '/' || current_[1] == '*')) {
+    Token comment;
+    if (!readToken(comment))
+      return;
+    skipSpaces();
+  }
+}
+
 void OurReader::skipBom(bool skipBom) {
   // The default behavior is to skip BOM.
   if (skipBom) {
@@ -1501,7 +1520,10 @@ bool OurReader::readArray(Token& token) {
   currentValue().setOffsetStart(token.start_ - begin_);
   int index = 0;
   for (;;) {
-    skipSpaces();
+    // Skip comments too, so a ']' that follows a trailing comma (or comments in
+    // an otherwise empty array) is recognized rather than mistaken for the
+    // start of another value. See issue #1500.
+    skipCommentTokens();
     if (current_ != end_ && *current_ == ']' &&
         (index == 0 ||
          (features_.allowTrailingCommas_ &&

@@ -3385,6 +3385,39 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseComment) {
   }
 }
 
+JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseTrailingCommaWithComment) {
+  // Regression test for #1500: trailing commas and comments are both allowed by
+  // default, so they must compose -- a comment between a trailing comma and the
+  // closing ']' must not turn a valid document into a parse error. (Objects
+  // already handled this; arrays did not.)
+  Json::CharReaderBuilder b;
+  CharReaderPtr reader(b.newCharReader());
+  Json::Value root;
+  Json::String errs;
+
+  for (const char* doc : {
+           "[1,2,\n// trailing\n]",     // line comment after trailing comma
+           "[1,2,/* trailing */]",      // block comment after trailing comma
+           "[{},\n// trailing\n]",      // trailing comma after a nested value
+           "[\n// only a comment\n]",   // empty array containing a comment
+           "{\"a\":1,\n// trailing\n}", // object form (guard the existing case)
+       }) {
+    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT(errs.empty());
+  }
+
+  // A comment before a real (non-closing) element is still attached to it.
+  {
+    char const doc[] = "[1,\n// before two\n2]";
+    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_EQUAL(2u, root.size());
+    JSONTEST_ASSERT_EQUAL(2, root[1]);
+    JSONTEST_ASSERT(root[1].hasComment(Json::commentBefore));
+  }
+}
+
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseCommentsAfterValueScansLinearly) {
   // A value, then a comment whose only newline is at its end, then many
   // trailing comments. Comment handling should scan the value->comment gap a
