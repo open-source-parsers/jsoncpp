@@ -524,6 +524,35 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, resizePopulatesAllMissingElements) {
     JSONTEST_ASSERT_EQUAL(e, Json::Value{});
 }
 
+JSONTEST_FIXTURE_LOCAL(ValueTest, assignBeyondEndPopulatesGapsWithNull) {
+  // Regression test for #1611: assigning past the end of an array via
+  // operator[] must fill the intervening indices with null, so that size(),
+  // iteration, and serialization all agree (JSON arrays are dense). Before the
+  // fix, `arr[5] = x` stored a single element while size() reported 6 and
+  // serialization emitted six, and range-for visited only the one element.
+  Json::Value arr(Json::arrayValue);
+  arr[5] = "Hello, World!";
+
+  JSONTEST_ASSERT_EQUAL(6u, arr.size());
+  JSONTEST_ASSERT_EQUAL(6, std::distance(arr.begin(), arr.end()));
+  for (Json::ArrayIndex i = 0; i < 5; ++i)
+    JSONTEST_ASSERT_EQUAL(Json::Value{}, arr[i]);
+  JSONTEST_ASSERT_EQUAL("Hello, World!", arr[5].asString());
+
+  // Iteration count matches size() and the dense serialization.
+  Json::ArrayIndex iterated = 0;
+  for (const Json::Value& e : arr) {
+    (void)e;
+    ++iterated;
+  }
+  JSONTEST_ASSERT_EQUAL(6u, iterated);
+
+  Json::StreamWriterBuilder b;
+  b.settings_["indentation"] = "";
+  JSONTEST_ASSERT_EQUAL("[null,null,null,null,null,\"Hello, World!\"]",
+                        Json::writeString(b, arr));
+}
+
 JSONTEST_FIXTURE_LOCAL(ValueTest, getArrayValue) {
   Json::Value array;
   for (Json::ArrayIndex i = 0; i < 5; i++)
@@ -3209,6 +3238,49 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseNumber) {
     JSONTEST_ASSERT(ok);
     JSONTEST_ASSERT(errs.empty());
     JSONTEST_ASSERT_EQUAL(1.1111111111111111e+020, root[0]);
+  }
+}
+
+JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseSubnormal) {
+  // Regression test for #1427: subnormal doubles make operator>> set failbit
+  // even though it produced the correctly-rounded value, so they used to fail
+  // to parse -- meaning a value jsoncpp had just serialized could fail to read
+  // back. They should now parse to that value.
+  Json::CharReaderBuilder b;
+  CharReaderPtr reader(b.newCharReader());
+  Json::String errs;
+
+  const struct {
+    const char* doc;
+    double expected;
+  } cases[] = {
+      {"[3.2114e-312]", 3.2114e-312}, // subnormal
+      {"[-1e-320]", -1e-320},         // negative subnormal
+      {"[4.9e-324]", 4.9e-324},       // smallest positive subnormal
+  };
+  for (const auto& c : cases) {
+    Json::Value root;
+    bool ok = reader->parse(c.doc, c.doc + std::strlen(c.doc), &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT(errs.empty());
+    JSONTEST_ASSERT_EQUAL(c.expected, root[0].asDouble());
+  }
+
+  // A subnormal also round-trips through the writer.
+  {
+    const Json::String doc = Json::writeString(Json::StreamWriterBuilder(),
+                                               Json::Value(3.2114e-312));
+    Json::Value root;
+    bool ok = reader->parse(doc.data(), doc.data() + doc.size(), &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_EQUAL(3.2114e-312, root.asDouble());
+  }
+
+  // Malformed numbers and non-numbers are still rejected (the failure path
+  // accepts a subnormal value but nothing that parses to zero or junk).
+  for (const char* doc : {"[1abc]", "[0e]", "[0e+]"}) {
+    Json::Value root;
+    JSONTEST_ASSERT(!reader->parse(doc, doc + std::strlen(doc), &root, &errs));
   }
 }
 

@@ -584,7 +584,13 @@ bool Reader::decodeDouble(Token& token, Value& decoded) {
       value = std::numeric_limits<double>::infinity();
     else if (value == std::numeric_limits<double>::lowest())
       value = -std::numeric_limits<double>::infinity();
-    else if (!std::isinf(value))
+    // operator>> sets failbit for a subnormal result (underflow) even though
+    // it produced the correctly-rounded value, which made such numbers fail to
+    // parse back after jsoncpp serialized them. Keep a subnormal value instead
+    // of rejecting it. See issue #1427. Other failures -- malformed numbers
+    // like "0e" or "0e+", or non-numbers -- leave the value at zero/non-finite
+    // and are still rejected.
+    else if (!std::isinf(value) && std::fpclassify(value) != FP_SUBNORMAL)
       return addError(
           "'" + String(token.start_, token.end_) + "' is not a number.", token);
   }
@@ -1659,7 +1665,13 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
       value = std::numeric_limits<double>::infinity();
     else if (value == std::numeric_limits<double>::lowest())
       value = -std::numeric_limits<double>::infinity();
-    else if (!std::isinf(value))
+    // operator>> sets failbit for a subnormal result (underflow) even though
+    // it produced the correctly-rounded value, which made such numbers fail to
+    // parse back after jsoncpp serialized them. Keep a subnormal value instead
+    // of rejecting it. See issue #1427. Other failures -- malformed numbers
+    // like "0e" or "0e+", or non-numbers -- leave the value at zero/non-finite
+    // and are still rejected.
+    else if (!std::isinf(value) && std::fpclassify(value) != FP_SUBNORMAL)
       return addError(
           "'" + String(token.start_, token.end_) + "' is not a number.", token);
   }
