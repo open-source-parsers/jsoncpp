@@ -678,6 +678,10 @@ bool Reader::decodeUnicodeCodePoint(Token& token, Location& current,
     if (*(current++) == '\\' && *(current++) == 'u') {
       unsigned int surrogatePair;
       if (decodeUnicodeEscapeSequence(token, current, end, surrogatePair)) {
+        if (surrogatePair < 0xDC00 || surrogatePair > 0xDFFF)
+          return addError("expecting a low surrogate (DC00-DFFF) to complete "
+                          "the unicode surrogate pair",
+                          token, current);
         unicode = 0x10000 + ((unicode & 0x3FF) << 10) + (surrogatePair & 0x3FF);
       } else
         return false;
@@ -685,6 +689,10 @@ bool Reader::decodeUnicodeCodePoint(Token& token, Location& current,
       return addError("expecting another \\u token to begin the second half of "
                       "a unicode surrogate pair",
                       token, current);
+  } else if (unicode >= 0xDC00 && unicode <= 0xDFFF) {
+    return addError("unexpected low surrogate (DC00-DFFF); a high surrogate "
+                    "(D800-DBFF) must come first",
+                    token, current);
   }
   return true;
 }
@@ -1759,6 +1767,10 @@ bool OurReader::decodeUnicodeCodePoint(Token& token, Location& current,
     if (*(current++) == '\\' && *(current++) == 'u') {
       unsigned int surrogatePair;
       if (decodeUnicodeEscapeSequence(token, current, end, surrogatePair)) {
+        if (surrogatePair < 0xDC00 || surrogatePair > 0xDFFF)
+          return addError("expecting a low surrogate (DC00-DFFF) to complete "
+                          "the unicode surrogate pair",
+                          token, current);
         unicode = 0x10000 + ((unicode & 0x3FF) << 10) + (surrogatePair & 0x3FF);
       } else
         return false;
@@ -1766,6 +1778,10 @@ bool OurReader::decodeUnicodeCodePoint(Token& token, Location& current,
       return addError("expecting another \\u token to begin the second half of "
                       "a unicode surrogate pair",
                       token, current);
+  } else if (unicode >= 0xDC00 && unicode <= 0xDFFF) {
+    return addError("unexpected low surrogate (DC00-DFFF); a high surrogate "
+                    "(D800-DBFF) must come first",
+                    token, current);
   }
   return true;
 }
