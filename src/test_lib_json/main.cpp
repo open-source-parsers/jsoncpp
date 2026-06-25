@@ -352,7 +352,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, objects) {
 
   const Json::Value* numericFound = object2_.findNumeric("numeric");
   JSONTEST_ASSERT(numericFound != nullptr);
-  JSONTEST_ASSERT_EQUAL(0.12345f, *numericFound);
+  JSONTEST_ASSERT_EQUAL(0.12345f, numericFound->asFloat());
   JSONTEST_ASSERT(object3_.findNumeric("numeric") == nullptr);
 
   const Json::Value* stringFound = object2_.findString("string");
