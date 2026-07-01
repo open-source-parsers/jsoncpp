@@ -3323,6 +3323,24 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseString) {
                             "See Line 1, Column 12 for detail.\n");
   }
   {
+    char const doc[] = R"([ "\uD801\u0041" ])";
+    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
+    JSONTEST_ASSERT(!ok);
+    JSONTEST_ASSERT(errs == "* Line 1, Column 3\n"
+                            "  expecting a low surrogate (DC00-DFFF) to "
+                            "complete the unicode surrogate pair\n"
+                            "See Line 1, Column 16 for detail.\n");
+  }
+  {
+    char const doc[] = R"([ "\uDC00" ])";
+    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
+    JSONTEST_ASSERT(!ok);
+    JSONTEST_ASSERT(errs == "* Line 1, Column 3\n"
+                            "  unexpected low surrogate (DC00-DFFF); a high "
+                            "surrogate (D800-DBFF) must come first\n"
+                            "See Line 1, Column 10 for detail.\n");
+  }
+  {
     char const doc[] = R"([ "\ua3t@" ])";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(!ok);
