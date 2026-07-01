@@ -216,7 +216,7 @@ static String valueToQuotedStringN(const char* value, size_t length,
     return "";
 
   if (!doesAnyCharRequireEscaping(value, length))
-    return String("\"") + value + "\"";
+    return String("\"") + String(value, length) + "\"";
   // We have to walk value and escape any special characters.
   // Appending to String is not efficient, but this should be rare.
   // (Note: forward slashes are *not* rare, but I am not escaping them.)

@@ -2850,6 +2850,16 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, writeZeroes) {
   }
 }
 
+// valueToQuotedString(value, length) must quote exactly `length` bytes and not
+// walk off the end of a buffer that is not NUL-terminated at that length.
+JSONTEST_FIXTURE_LOCAL(StreamWriterTest, quotedStringHonorsLength) {
+  // Bytes past position 5 must not leak into the output. Without honoring
+  // length the buffer is treated as a C-string and " world" is appended.
+  JSONTEST_ASSERT_STRING_EQUAL("\"hello\"",
+                               Json::valueToQuotedString("hello world", 5));
+  JSONTEST_ASSERT_STRING_EQUAL("\"\"", Json::valueToQuotedString("abc", 0));
+}
+
 JSONTEST_FIXTURE_LOCAL(StreamWriterTest, unicode) {
   // Create a Json value containing UTF-8 string with some chars that need
   // escape (tab,newline).
