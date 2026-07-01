@@ -143,6 +143,7 @@ public:
    * \snippet src/lib_json/json_writer.cpp StreamWriterBuilderDefaults
    */
   static void setDefaults(Json::Value* settings);
+  static void updateDefaults(const Json::Value& settings);
 };
 
 /** \brief Abstract class for writers.
