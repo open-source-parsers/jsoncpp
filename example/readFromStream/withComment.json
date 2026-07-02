@@ -1,6 +1,18 @@
 // comment head
-{
+[
     // comment before
-    "key" : "value"
+    {
+        "key" : {
+            "id": 1,
+            "val": "value 1"
+        }
+
+    },
+    {
+       "key" : {
+            "id": 2,
+            "val": "value 2"
+        }
+    }
     // comment after
-}// comment tail
+]// comment tail
