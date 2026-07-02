@@ -2889,6 +2889,31 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, unicode) {
                   "\"\\t\\n\\ud806\\udca1=\\u0133\\ud82c\\udd1b\\uff67\"\n}");
 }
 
+// Malformed UTF-8 must not swallow the bytes that follow a broken sequence.
+JSONTEST_FIXTURE_LOCAL(StreamWriterTest, invalidUtf8) {
+  Json::StreamWriterBuilder b;
+  b.settings_["indentation"] = "";
+
+  // 0xE0 announces a 3-byte sequence, but 'A'/'B' are not continuation bytes:
+  // only the lead byte is replaced, the ASCII must be preserved.
+  Json::Value bad3(std::string("\xE0"
+                               "AB"));
+  JSONTEST_ASSERT_STRING_EQUAL("\"\\ufffdAB\"", Json::writeString(b, bad3));
+
+  // 0xF0 announces a 4-byte sequence with no valid continuation bytes.
+  Json::Value bad4(std::string("\xF0"
+                               "XYZ"));
+  JSONTEST_ASSERT_STRING_EQUAL("\"\\ufffdXYZ\"", Json::writeString(b, bad4));
+
+  // A 4-byte sequence that decodes past U+10FFFF is not a valid codepoint.
+  Json::Value over(std::string("\xF7\xBF\xBF\xBF"));
+  JSONTEST_ASSERT_STRING_EQUAL("\"\\ufffd\"", Json::writeString(b, over));
+
+  // A valid multibyte sequence still round-trips unchanged.
+  Json::Value euro(std::string("\xE2\x82\xAC"));
+  JSONTEST_ASSERT_STRING_EQUAL("\"\\u20ac\"", Json::writeString(b, euro));
+}
+
 // Control chars should be escaped regardless of UTF-8 input encoding.
 JSONTEST_FIXTURE_LOCAL(StreamWriterTest, escapeControlCharacters) {
   auto uEscape = [](unsigned ch) {
