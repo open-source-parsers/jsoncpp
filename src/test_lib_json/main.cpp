@@ -3341,6 +3341,17 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseString) {
                             "See Line 1, Column 10 for detail.\n");
   }
   {
+    // The escape hatch: with rejectInvalidSurrogates off, the lenient path
+    // keeps the pre-existing behaviour of passing lone surrogates through.
+    Json::CharReaderBuilder lenient;
+    lenient["rejectInvalidSurrogates"] = false;
+    CharReaderPtr lenientReader(lenient.newCharReader());
+    char const doc[] = R"([ "\uDC00" ])";
+    bool ok = lenientReader->parse(doc, doc + std::strlen(doc), &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT(errs.empty());
+  }
+  {
     char const doc[] = R"([ "\ua3t@" ])";
     bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
     JSONTEST_ASSERT(!ok);
