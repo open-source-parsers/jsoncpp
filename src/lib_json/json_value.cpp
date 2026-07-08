@@ -317,8 +317,11 @@ void Value::CZString::swap(CZString& other) {
 }
 
 Value::CZString& Value::CZString::operator=(const CZString& other) {
-  cstr_ = other.cstr_;
-  index_ = other.index_;
+  // Copy-and-swap so a duplicate-policy buffer is deep-copied and the old one
+  // released once. The prior shallow copy aliased other.cstr_, double-freeing
+  // an owned string and leaking the overwritten one.
+  CZString temp(other);
+  swap(temp);
   return *this;
 }
 
