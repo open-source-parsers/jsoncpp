@@ -531,10 +531,9 @@ bool Reader::decodeNumber(Token& token, Value& decoded) {
   if (isNegative)
     ++current;
   // A number token that is only a sign (e.g. "-") carries no digits; the loop
-  // below never runs and would otherwise decode it as zero. Reject it via
-  // decodeDouble, matching how a non-digit inside the token is handled.
+  // below never runs and would otherwise decode it as zero. Reject it.
   if (current == token.end_)
-    return decodeDouble(token, decoded);
+    return false;
   // TODO: Help the compiler do the div and mod at compile time or get rid of
   // them.
   Value::LargestUInt maxIntegerValue =
@@ -1581,10 +1580,9 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
     ++current;
   }
   // A number token that is only a sign (e.g. "-") carries no digits; the loop
-  // below never runs and would otherwise decode it as zero. Reject it via
-  // decodeDouble, matching how a non-digit inside the token is handled.
+  // below never runs and would otherwise decode it as zero. Reject it.
   if (current == token.end_)
-    return decodeDouble(token, decoded);
+    return false;
 
   // We assume we can represent the largest and smallest integer types as
   // unsigned integers with separate sign. This is only true if they can fit
