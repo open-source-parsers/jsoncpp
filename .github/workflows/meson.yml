@@ -68,5 +68,9 @@ jobs:
       - name: generate code coverage report
         uses: threeal/gcovr-action@v1.0.0
         with:
-          coveralls-send: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          coveralls-out: coveralls.json
+
+      - name: upload code coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          file: coveralls.json
