@@ -29,6 +29,11 @@
 
 using CharReaderPtr = std::unique_ptr<Json::CharReader>;
 
+namespace Json {
+// Defined in json_reader.cpp; test instrumentation seam.
+JSON_API size_t& newlineScanByteCountForTesting();
+} // namespace Json
+
 // Make numeric limits more convenient to talk about.
 // Assumes int type in 32 bits.
 #define kint32max Json::Value::maxInt
@@ -347,7 +352,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, objects) {
 
   const Json::Value* numericFound = object2_.findNumeric("numeric");
   JSONTEST_ASSERT(numericFound != nullptr);
-  JSONTEST_ASSERT_EQUAL(0.12345f, *numericFound);
+  JSONTEST_ASSERT_EQUAL(0.12345f, numericFound->asFloat());
   JSONTEST_ASSERT(object3_.findNumeric("numeric") == nullptr);
 
   const Json::Value* stringFound = object2_.findString("string");
@@ -517,6 +522,35 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, resizePopulatesAllMissingElements) {
   JSONTEST_ASSERT_EQUAL(v.back(), Json::Value{});
   for (const Json::Value& e : v)
     JSONTEST_ASSERT_EQUAL(e, Json::Value{});
+}
+
+JSONTEST_FIXTURE_LOCAL(ValueTest, assignBeyondEndPopulatesGapsWithNull) {
+  // Regression test for #1611: assigning past the end of an array via
+  // operator[] must fill the intervening indices with null, so that size(),
+  // iteration, and serialization all agree (JSON arrays are dense). Before the
+  // fix, `arr[5] = x` stored a single element while size() reported 6 and
+  // serialization emitted six, and range-for visited only the one element.
+  Json::Value arr(Json::arrayValue);
+  arr[5] = "Hello, World!";
+
+  JSONTEST_ASSERT_EQUAL(6u, arr.size());
+  JSONTEST_ASSERT_EQUAL(6, std::distance(arr.begin(), arr.end()));
+  for (Json::ArrayIndex i = 0; i < 5; ++i)
+    JSONTEST_ASSERT_EQUAL(Json::Value{}, arr[i]);
+  JSONTEST_ASSERT_EQUAL("Hello, World!", arr[5].asString());
+
+  // Iteration count matches size() and the dense serialization.
+  Json::ArrayIndex iterated = 0;
+  for (const Json::Value& e : arr) {
+    (void)e;
+    ++iterated;
+  }
+  JSONTEST_ASSERT_EQUAL(6u, iterated);
+
+  Json::StreamWriterBuilder b;
+  b.settings_["indentation"] = "";
+  JSONTEST_ASSERT_EQUAL("[null,null,null,null,null,\"Hello, World!\"]",
+                        Json::writeString(b, arr));
 }
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, getArrayValue) {
@@ -2816,6 +2850,16 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, writeZeroes) {
   }
 }
 
+// valueToQuotedString(value, length) must quote exactly `length` bytes and not
+// walk off the end of a buffer that is not NUL-terminated at that length.
+JSONTEST_FIXTURE_LOCAL(StreamWriterTest, quotedStringHonorsLength) {
+  // Bytes past position 5 must not leak into the output. Without honoring
+  // length the buffer is treated as a C-string and " world" is appended.
+  JSONTEST_ASSERT_STRING_EQUAL("\"hello\"",
+                               Json::valueToQuotedString("hello world", 5));
+  JSONTEST_ASSERT_STRING_EQUAL("\"\"", Json::valueToQuotedString("abc", 0));
+}
+
 JSONTEST_FIXTURE_LOCAL(StreamWriterTest, unicode) {
   // Create a Json value containing UTF-8 string with some chars that need
   // escape (tab,newline).
@@ -3207,6 +3251,49 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseNumber) {
   }
 }
 
+JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseSubnormal) {
+  // Regression test for #1427: subnormal doubles make operator>> set failbit
+  // even though it produced the correctly-rounded value, so they used to fail
+  // to parse -- meaning a value jsoncpp had just serialized could fail to read
+  // back. They should now parse to that value.
+  Json::CharReaderBuilder b;
+  CharReaderPtr reader(b.newCharReader());
+  Json::String errs;
+
+  const struct {
+    const char* doc;
+    double expected;
+  } cases[] = {
+      {"[3.2114e-312]", 3.2114e-312}, // subnormal
+      {"[-1e-320]", -1e-320},         // negative subnormal
+      {"[4.9e-324]", 4.9e-324},       // smallest positive subnormal
+  };
+  for (const auto& c : cases) {
+    Json::Value root;
+    bool ok = reader->parse(c.doc, c.doc + std::strlen(c.doc), &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT(errs.empty());
+    JSONTEST_ASSERT_EQUAL(c.expected, root[0].asDouble());
+  }
+
+  // A subnormal also round-trips through the writer.
+  {
+    const Json::String doc = Json::writeString(Json::StreamWriterBuilder(),
+                                               Json::Value(3.2114e-312));
+    Json::Value root;
+    bool ok = reader->parse(doc.data(), doc.data() + doc.size(), &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_EQUAL(3.2114e-312, root.asDouble());
+  }
+
+  // Malformed numbers and non-numbers are still rejected (the failure path
+  // accepts a subnormal value but nothing that parses to zero or junk).
+  for (const char* doc : {"[1abc]", "[0e]", "[0e+]"}) {
+    Json::Value root;
+    JSONTEST_ASSERT(!reader->parse(doc, doc + std::strlen(doc), &root, &errs));
+  }
+}
+
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseString) {
   Json::CharReaderBuilder b;
   CharReaderPtr reader(b.newCharReader());
@@ -3306,6 +3393,75 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseComment) {
     JSONTEST_ASSERT_EQUAL("value", root[0]);
     JSONTEST_ASSERT_EQUAL(true, root[1]);
   }
+}
+
+JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseTrailingCommaWithComment) {
+  // Regression test for #1500: trailing commas and comments are both allowed by
+  // default, so they must compose -- a comment between a trailing comma and the
+  // closing ']' must not turn a valid document into a parse error. (Objects
+  // already handled this; arrays did not.)
+  Json::CharReaderBuilder b;
+  CharReaderPtr reader(b.newCharReader());
+  Json::Value root;
+  Json::String errs;
+
+  for (const char* doc : {
+           "[1,2,\n// trailing\n]",     // line comment after trailing comma
+           "[1,2,/* trailing */]",      // block comment after trailing comma
+           "[{},\n// trailing\n]",      // trailing comma after a nested value
+           "[\n// only a comment\n]",   // empty array containing a comment
+           "{\"a\":1,\n// trailing\n}", // object form (guard the existing case)
+       }) {
+    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT(errs.empty());
+  }
+
+  // A comment before a real (non-closing) element is still attached to it.
+  {
+    char const doc[] = "[1,\n// before two\n2]";
+    bool ok = reader->parse(doc, doc + std::strlen(doc), &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_EQUAL(2u, root.size());
+    JSONTEST_ASSERT_EQUAL(2, root[1]);
+    JSONTEST_ASSERT(root[1].hasComment(Json::commentBefore));
+  }
+}
+
+JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseCommentsAfterValueScansLinearly) {
+  // A value, then a comment whose only newline is at its end, then many
+  // trailing comments. Comment handling should scan the value->comment gap a
+  // bounded number of times (linear in the input), not once per trailing
+  // comment (O(comments * gap)). Assert directly on bytes scanned
+  // (deterministic) rather than wall-clock time (flaky under valgrind/CI).
+  //
+  // Regression test for crbug.com/521541633 (jsoncpp_fuzzer timeout: a 400KB
+  // input scanned 2.24GB across 8384 containsNewLine calls, ~18s).
+  const int kFiller = 256;
+  const int kComments = 1000;
+  std::string doc = "[0 /*";
+  doc.append(kFiller, 'a');
+  doc += "\n*/";
+  for (int i = 0; i < kComments; ++i)
+    doc += "/*c*/";
+  doc += "]";
+
+  Json::CharReaderBuilder b;
+  CharReaderPtr reader(b.newCharReader());
+  Json::Value root;
+  Json::String errs;
+
+  Json::newlineScanByteCountForTesting() = 0;
+  const bool ok =
+      reader->parse(doc.data(), doc.data() + doc.size(), &root, &errs);
+
+  JSONTEST_ASSERT(ok);
+  JSONTEST_ASSERT(errs.empty());
+  JSONTEST_ASSERT_EQUAL(0, root[0]);
+  // Quadratic-regression guard. Linear scans ~O(input); the bug scanned
+  // ~kComments * kFiller (~2.7M here vs a few bytes fixed).
+  const size_t scanned = Json::newlineScanByteCountForTesting();
+  JSONTEST_ASSERT(scanned < 4 * doc.size());
 }
 
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseObjectWithErrors) {

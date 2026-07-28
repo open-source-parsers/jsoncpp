@@ -584,7 +584,13 @@ bool Reader::decodeDouble(Token& token, Value& decoded) {
       value = std::numeric_limits<double>::infinity();
     else if (value == std::numeric_limits<double>::lowest())
       value = -std::numeric_limits<double>::infinity();
-    else if (!std::isinf(value))
+    // operator>> sets failbit for a subnormal result (underflow) even though
+    // it produced the correctly-rounded value, which made such numbers fail to
+    // parse back after jsoncpp serialized them. Keep a subnormal value instead
+    // of rejecting it. See issue #1427. Other failures -- malformed numbers
+    // like "0e" or "0e+", or non-numbers -- leave the value at zero/non-finite
+    // and are still rejected.
+    else if (!std::isinf(value) && std::fpclassify(value) != FP_SUBNORMAL)
       return addError(
           "'" + String(token.start_, token.end_) + "' is not a number.", token);
   }
@@ -920,6 +926,7 @@ private:
   bool readToken(Token& token);
   bool readTokenSkippingComments(Token& token);
   void skipSpaces();
+  void skipCommentTokens();
   void skipBom(bool skipBom);
   bool match(const Char* pattern, int patternLength);
   bool readComment();
@@ -975,8 +982,20 @@ private:
 
 // complete copy of Read impl, for OurReader
 
+// Test-only instrumentation: total bytes examined by
+// OurReader::containsNewLine, so unit tests can assert that comment handling
+// stays linear in the input rather than quadratic in the comment count (see
+// CharReaderTest/parseCommentsAfterValueScansLinearly). thread_local so it
+// never races during concurrent parsing; the increment is negligible and only
+// runs while parsing comments. Not part of the supported public API.
+JSON_API size_t& newlineScanByteCountForTesting() {
+  static thread_local size_t count = 0;
+  return count;
+}
+
 bool OurReader::containsNewLine(OurReader::Location begin,
                                 OurReader::Location end) {
+  newlineScanByteCountForTesting() += static_cast<size_t>(end - begin);
   return std::any_of(begin, end, [](char b) { return b == '\n' || b == '\r'; });
 }
 
@@ -1251,6 +1270,24 @@ void OurReader::skipSpaces() {
   }
 }
 
+// Skip whitespace and any comments, leaving current_ at the next significant
+// character. Consumed comments are recorded (commentsBefore_) so the next value
+// still receives them; if none follows they are simply not attached. This lets
+// callers peek for a delimiter that is preceded by comments (e.g. a ']' after a
+// trailing comma -- see readArray and issue #1500).
+void OurReader::skipCommentTokens() {
+  skipSpaces();
+  if (!features_.allowComments_)
+    return;
+  while (current_ != end_ && *current_ == '/' && (current_ + 1) != end_ &&
+         (current_[1] == '/' || current_[1] == '*')) {
+    Token comment;
+    if (!readToken(comment))
+      return;
+    skipSpaces();
+  }
+}
+
 void OurReader::skipBom(bool skipBom) {
   // The default behavior is to skip BOM.
   if (skipBom) {
@@ -1296,9 +1333,13 @@ bool OurReader::readComment() {
       if (lastValueEnd_ && !containsNewLine(lastValueEnd_, commentBegin)) {
         if (isCppStyleComment || !cStyleWithEmbeddedNewline) {
           placement = commentAfterOnSameLine;
-          lastValueHasAComment_ = true;
         }
       }
+      // The gap between the last value and this comment only grows as more
+      // comments are consumed, so a later comment can never be on the same
+      // line as that value. Mark it handled to avoid re-scanning the same
+      // growing prefix for every following comment (quadratic behavior).
+      lastValueHasAComment_ = true;
     }
 
     addComment(commentBegin, current_, placement);
@@ -1479,7 +1520,10 @@ bool OurReader::readArray(Token& token) {
   currentValue().setOffsetStart(token.start_ - begin_);
   int index = 0;
   for (;;) {
-    skipSpaces();
+    // Skip comments too, so a ']' that follows a trailing comma (or comments in
+    // an otherwise empty array) is recognized rather than mistaken for the
+    // start of another value. See issue #1500.
+    skipCommentTokens();
     if (current_ != end_ && *current_ == ']' &&
         (index == 0 ||
          (features_.allowTrailingCommas_ &&
@@ -1621,7 +1665,13 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
       value = std::numeric_limits<double>::infinity();
     else if (value == std::numeric_limits<double>::lowest())
       value = -std::numeric_limits<double>::infinity();
-    else if (!std::isinf(value))
+    // operator>> sets failbit for a subnormal result (underflow) even though
+    // it produced the correctly-rounded value, which made such numbers fail to
+    // parse back after jsoncpp serialized them. Keep a subnormal value instead
+    // of rejecting it. See issue #1427. Other failures -- malformed numbers
+    // like "0e" or "0e+", or non-numbers -- leave the value at zero/non-finite
+    // and are still rejected.
+    else if (!std::isinf(value) && std::fpclassify(value) != FP_SUBNORMAL)
       return addError(
           "'" + String(token.start_, token.end_) + "' is not a number.", token);
   }
