@@ -1048,10 +1048,19 @@ bool OurReader::parse(const char* beginDoc, const char* endDoc, Value& root,
 }
 
 bool OurReader::readValue() {
-  //  To preserve the old behaviour we cast size_t to int.
-  if (nodes_.size() > features_.stackLimit_)
-    throwRuntimeError("Exceeded stackLimit in readValue().");
   Token token;
+  if (nodes_.size() > features_.stackLimit_) {
+#if JSON_USE_EXCEPTION
+    throwRuntimeError("Exceeded stackLimit in readValue().");
+#else
+    // throwRuntimeError aborts. Don't abort here.
+    token.start_ = current_;
+    token.end_ = current_;
+    token.type_ = tokenError;
+    return addError(
+        "Exceeded stackLimit for nested object and/or array values.", token);
+#endif
+  }
   readTokenSkippingComments(token);
   bool successful = true;
 

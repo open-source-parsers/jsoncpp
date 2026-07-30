@@ -467,6 +467,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, arrays) {
   JSONTEST_ASSERT_EQUAL(Json::Value(17), got);
   JSONTEST_ASSERT_EQUAL(false, array1_.removeIndex(2, &got)); // gone now
 }
+
 JSONTEST_FIXTURE_LOCAL(ValueTest, resizeArray) {
   Json::Value array;
   {
@@ -3550,10 +3551,10 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithDetailError) {
 }
 
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithStackLimit) {
-#if JSON_USE_EXCEPTION
-
   Json::CharReaderBuilder b;
   Json::Value root;
+
+#if JSON_USE_EXCEPTION
   char const doc[] = R"({ "property" : "value" })";
   {
     b.settings_["stackLimit"] = 2;
@@ -3581,7 +3582,36 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithStackLimit) {
     JSONTEST_ASSERT_THROWS(reader->parse(
         nested.data(), nested.data() + nested.size(), &root, &errs));
   }
-
+#else
+  b.settings_["stackLimit"] = 10;
+  CharReaderPtr reader(b.newCharReader());
+  {
+    Json::String nested(16, '[');
+    Json::String errs;
+    JSONTEST_ASSERT(!reader->parse(nested.data(), nested.data() + nested.size(),
+                                   &root, &errs));
+    JSONTEST_ASSERT(
+        errs ==
+        "* Line 1, Column 11\n"
+        "  Exceeded stackLimit for nested object and/or array values.\n");
+  }
+  {
+    // even if there are mixed object/array nestings
+    char const mixedNested[] = R"({"property":[[[[[[[[[[[]]]]]]]]]]]})";
+    Json::String errs;
+    JSONTEST_ASSERT(!reader->parse(
+        mixedNested, mixedNested + std::strlen(mixedNested), &root, &errs));
+    JSONTEST_ASSERT(
+        errs ==
+        "* Line 1, Column 22\n"
+        "  Exceeded stackLimit for nested object and/or array values.\n");
+  }
+  { // should succeed: test on the limit
+    Json::String onLimit = Json::String(10, '[') + Json::String(10, ']');
+    Json::String errs;
+    JSONTEST_ASSERT(reader->parse(
+        onLimit.data(), onLimit.data() + onLimit.size(), &root, &errs));
+  }
 #endif // JSON_USE_EXCEPTION
 }
 
