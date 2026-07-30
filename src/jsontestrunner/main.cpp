@@ -328,7 +328,7 @@ int main(int argc, const char* argv[]) {
       return modern_return_code;
     }
 
-    const std::string filename =
+    const Json::String filename =
         opts.path.substr(opts.path.find_last_of("\\/") + 1);
     const bool should_run_legacy = (filename.rfind("legacy_", 0) == 0);
     if (should_run_legacy) {
