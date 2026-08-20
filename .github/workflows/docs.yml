@@ -14,12 +14,20 @@ env:
 permissions:
   contents: read
 
+# One docs build per branch; superseded PR pushes are cancelled. The deploy job
+# has its own non-cancelling "pages" group so an in-flight deployment finishes.
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
 
       - name: install doxygen ${{ env.DOXYGEN_VERSION }} and graphviz
         run: |
@@ -40,7 +48,7 @@ jobs:
           python3 doxybuild.py --with-dot
           mv dist/doxygen/jsoncpp-api-html-* site
 
-      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site
 
@@ -50,8 +58,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      pages: write
-      id-token: write
+      pages: write    # to publish the Pages deployment
+      id-token: write # to verify the deployment originates from this workflow
     concurrency:
       group: pages
       cancel-in-progress: false
@@ -60,4 +68,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0

@@ -100,4 +100,6 @@ DOT_PATH               = %DOT_PATH%
 DOT_IMAGE_FORMAT       = svg
 UML_LOOK               = %UML_LOOK%
 TEMPLATE_RELATIONS     = YES
-CALLER_GRAPH           = YES
+# Graphs that exceed this are skipped with a warning, which WARN_AS_ERROR
+# turns into a build failure; keep comfortable headroom.
+DOT_GRAPH_MAX_NODES    = 200
