@@ -352,6 +352,11 @@ public:
    * - `"allowSpecialFloats": false or true`
    *   - If true, special float values (NaNs and infinities) are allowed and
    *     their values are lossfree restorable.
+   * - `"rejectInvalidSurrogates": false or true`
+   *   - If true, `parse()` returns false when a `\u` escape is a lone or
+   *     mismatched UTF-16 surrogate half (a high surrogate not followed by a
+   *     low surrogate, or a low surrogate with no preceding high surrogate).
+   *   - Disabled by ecma404Mode(), which treats such escapes as conforming.
    * - `"skipBom": false or true`
    *   - If true, if the input starts with the Unicode byte order mark (BOM),
    *     it is skipped.

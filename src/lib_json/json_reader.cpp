@@ -861,6 +861,7 @@ public:
   bool failIfExtra_;
   bool rejectDupKeys_;
   bool allowSpecialFloats_;
+  bool rejectInvalidSurrogates_;
   bool skipBom_;
   size_t stackLimit_;
 }; // OurFeatures
@@ -1768,6 +1769,11 @@ bool OurReader::decodeUnicodeCodePoint(Token& token, Location& current,
     if (*(current++) == '\\' && *(current++) == 'u') {
       unsigned int surrogatePair;
       if (decodeUnicodeEscapeSequence(token, current, end, surrogatePair)) {
+        if (features_.rejectInvalidSurrogates_ &&
+            (surrogatePair < 0xDC00 || surrogatePair > 0xDFFF))
+          return addError("expecting a low surrogate (DC00-DFFF) to complete "
+                          "the unicode surrogate pair",
+                          token, current);
         unicode = 0x10000 + ((unicode & 0x3FF) << 10) + (surrogatePair & 0x3FF);
       } else
         return false;
@@ -1775,6 +1781,11 @@ bool OurReader::decodeUnicodeCodePoint(Token& token, Location& current,
       return addError("expecting another \\u token to begin the second half of "
                       "a unicode surrogate pair",
                       token, current);
+  } else if (features_.rejectInvalidSurrogates_ && unicode >= 0xDC00 &&
+             unicode <= 0xDFFF) {
+    return addError("unexpected low surrogate (DC00-DFFF); a high surrogate "
+                    "(D800-DBFF) must come first",
+                    token, current);
   }
   return true;
 }
@@ -1949,6 +1960,8 @@ CharReader* CharReaderBuilder::newCharReader() const {
   features.failIfExtra_ = settings_["failIfExtra"].asBool();
   features.rejectDupKeys_ = settings_["rejectDupKeys"].asBool();
   features.allowSpecialFloats_ = settings_["allowSpecialFloats"].asBool();
+  features.rejectInvalidSurrogates_ =
+      settings_["rejectInvalidSurrogates"].asBool();
   features.skipBom_ = settings_["skipBom"].asBool();
   return new OurCharReader(collectComments, features);
 }
@@ -1966,6 +1979,7 @@ bool CharReaderBuilder::validate(Json::Value* invalid) const {
       "failIfExtra",
       "rejectDupKeys",
       "allowSpecialFloats",
+      "rejectInvalidSurrogates",
       "skipBom",
   };
   for (auto si = settings_.begin(); si != settings_.end(); ++si) {
@@ -1996,6 +2010,7 @@ void CharReaderBuilder::strictMode(Json::Value* settings) {
   (*settings)["failIfExtra"] = true;
   (*settings)["rejectDupKeys"] = true;
   (*settings)["allowSpecialFloats"] = false;
+  (*settings)["rejectInvalidSurrogates"] = true;
   (*settings)["skipBom"] = true;
   //! [CharReaderBuilderStrictMode]
 }
@@ -2013,6 +2028,7 @@ void CharReaderBuilder::setDefaults(Json::Value* settings) {
   (*settings)["failIfExtra"] = false;
   (*settings)["rejectDupKeys"] = false;
   (*settings)["allowSpecialFloats"] = false;
+  (*settings)["rejectInvalidSurrogates"] = true;
   (*settings)["skipBom"] = true;
   //! [CharReaderBuilderDefaults]
 }
@@ -2029,6 +2045,7 @@ void CharReaderBuilder::ecma404Mode(Json::Value* settings) {
   (*settings)["failIfExtra"] = true;
   (*settings)["rejectDupKeys"] = false;
   (*settings)["allowSpecialFloats"] = false;
+  (*settings)["rejectInvalidSurrogates"] = false;
   (*settings)["skipBom"] = false;
   //! [CharReaderBuilderECMA404Mode]
 }
