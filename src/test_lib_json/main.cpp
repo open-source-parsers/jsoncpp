@@ -3252,6 +3252,24 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseNumber) {
   }
 }
 
+JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseBareSign) {
+  // A lone sign is not a valid number and used to be silently decoded as 0.
+  Json::CharReaderBuilder b;
+  CharReaderPtr reader(b.newCharReader());
+  Json::String errs;
+  for (const char* doc : {"-", "[-]", "{\"a\":-}", "-x"}) {
+    Json::Value root;
+    JSONTEST_ASSERT(!reader->parse(doc, doc + std::strlen(doc), &root, &errs));
+  }
+  // A sign followed by digits still parses.
+  {
+    Json::Value root;
+    char const doc[] = "-0";
+    JSONTEST_ASSERT(reader->parse(doc, doc + std::strlen(doc), &root, &errs));
+    JSONTEST_ASSERT_EQUAL(0, root.asInt());
+  }
+}
+
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseSubnormal) {
   // Regression test for #1427: subnormal doubles make operator>> set failbit
   // even though it produced the correctly-rounded value, so they used to fail
