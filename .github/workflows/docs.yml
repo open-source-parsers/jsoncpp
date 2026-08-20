@@ -54,7 +54,9 @@ jobs:
 
   deploy:
     name: deploy to GitHub Pages
-    if: github.event_name != 'pull_request'
+    # Only master may publish; a workflow_dispatch from any other branch just
+    # builds as a check and must not replace the production documentation.
+    if: github.ref == 'refs/heads/master'
     needs: build
     runs-on: ubuntu-latest
     permissions:

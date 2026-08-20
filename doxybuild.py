@@ -160,8 +160,6 @@ def build_doc(options,  make_release=False):
             output_dir,
             'README.md',
             'LICENSE',
-            'NEWS.txt',
-            'version'
             ]
         tarball_basedir = os.path.join(output_dir, html_output_dirname)
         tarball.make_tarball(tarball_path, tarball_sources, tarball_basedir, html_output_dirname)
