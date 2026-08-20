@@ -258,6 +258,9 @@ JSONCPP_NORETURN void throwLogicError(String const& msg) {
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
+/// \cond
+// CZString is a private implementation detail of Value; hide it from doxygen.
+
 // Notes: policy_ indicates if the string was allocated when
 // a string is stored.
 
@@ -376,6 +379,7 @@ unsigned Value::CZString::length() const { return storage_.length_; }
 bool Value::CZString::isStaticString() const {
   return storage_.policy_ == noDuplication;
 }
+/// \endcond
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////

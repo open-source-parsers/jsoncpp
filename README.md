@@ -2,7 +2,7 @@
 
 [![Conan Center](https://img.shields.io/conan/v/jsoncpp)](https://conan.io/center/recipes/jsoncpp)
 [![badge](https://img.shields.io/badge/license-MIT-blue)](https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE)
-[![badge](https://img.shields.io/badge/document-doxygen-brightgreen)](http://open-source-parsers.github.io/jsoncpp-docs/doxygen/index.html)
+[![badge](https://img.shields.io/badge/document-doxygen-brightgreen)](https://open-source-parsers.github.io/jsoncpp/)
 [![Coverage Status](https://coveralls.io/repos/github/open-source-parsers/jsoncpp/badge.svg?branch=master)](https://coveralls.io/github/open-source-parsers/jsoncpp?branch=master)
 
 [JSON][json-org] is a lightweight data-interchange format. It can represent
@@ -72,10 +72,12 @@ This will generate a `dist` directory containing `jsoncpp.cpp`, `json/json.h`, a
 
 ## Documentation
 
-Documentation is generated via [Doxygen](http://open-source-parsers.github.io/jsoncpp-docs/doxygen/index.html). 
+The [API reference](https://open-source-parsers.github.io/jsoncpp/) is generated with
+Doxygen from the `master` branch on every push. To build it locally, run
+`python3 doxybuild.py --open` from the top-level directory (see `doc/readme.txt`).
 Additional information is available on the [Project Wiki](https://github.com/open-source-parsers/jsoncpp/wiki).
 
 ## License
 
 JsonCpp is licensed under the MIT license, or public domain where recognized.
-See [LICENSE](./LICENSE) for details.
+See [LICENSE](https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE) for details.
