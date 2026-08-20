@@ -324,7 +324,9 @@ Value::CZString& Value::CZString::operator=(const CZString& other) {
 
 Value::CZString& Value::CZString::operator=(CZString&& other) noexcept {
   if (cstr_ && storage_.policy_ == duplicate) {
-    releasePrefixedStringValue(const_cast<char*>(cstr_));
+    // CZString keys come from duplicateStringValue (no length prefix), so
+    // release with the matching non-prefixed variant, as the destructor does.
+    releaseStringValue(const_cast<char*>(cstr_), storage_.length_ + 1U);
   }
   cstr_ = other.cstr_;
   if (other.cstr_) {
