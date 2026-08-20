@@ -10,10 +10,10 @@
 // 4. /MODULE.bazel
 // IMPORTANT: also update the SOVERSION!!
 
-#define JSONCPP_VERSION_STRING "1.9.9"
+#define JSONCPP_VERSION_STRING "1.10.0"
 #define JSONCPP_VERSION_MAJOR 1
-#define JSONCPP_VERSION_MINOR 9
-#define JSONCPP_VERSION_PATCH 9
+#define JSONCPP_VERSION_MINOR 10
+#define JSONCPP_VERSION_PATCH 0
 #define JSONCPP_VERSION_HEXA                                                   \
   ((JSONCPP_VERSION_MAJOR << 24) | (JSONCPP_VERSION_MINOR << 16) |             \
    (JSONCPP_VERSION_PATCH << 8))

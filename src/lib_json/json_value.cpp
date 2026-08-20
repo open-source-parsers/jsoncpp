@@ -327,7 +327,9 @@ Value::CZString& Value::CZString::operator=(const CZString& other) {
 
 Value::CZString& Value::CZString::operator=(CZString&& other) noexcept {
   if (cstr_ && storage_.policy_ == duplicate) {
-    releasePrefixedStringValue(const_cast<char*>(cstr_));
+    // CZString keys come from duplicateStringValue (no length prefix), so
+    // release with the matching non-prefixed variant, as the destructor does.
+    releaseStringValue(const_cast<char*>(cstr_), storage_.length_ + 1U);
   }
   cstr_ = other.cstr_;
   if (other.cstr_) {
@@ -988,6 +990,15 @@ Value& Value::operator[](ArrayIndex index) {
   auto it = value_.map_->lower_bound(key);
   if (it != value_.map_->end() && (*it).first == key)
     return (*it).second;
+
+  // JSON arrays are dense: materialize any gap between the current size and
+  // `index` with null so that size(), iteration, and serialization stay
+  // consistent. Without this, `arr[5] = x` on an empty array would store a
+  // single element while size() reported 6 and serialization emitted six
+  // (see issue #1611). resize() already grows arrays this same way.
+  for (ArrayIndex i = size(); i < index; ++i)
+    value_.map_->insert(value_.map_->end(),
+                        ObjectValues::value_type(CZString(i), nullSingleton()));
 
   ObjectValues::value_type defaultValue(key, nullSingleton());
   it = value_.map_->insert(it, defaultValue);

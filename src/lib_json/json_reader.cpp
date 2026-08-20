@@ -584,7 +584,13 @@ bool Reader::decodeDouble(Token& token, Value& decoded) {
       value = std::numeric_limits<double>::infinity();
     else if (value == std::numeric_limits<double>::lowest())
       value = -std::numeric_limits<double>::infinity();
-    else if (!std::isinf(value))
+    // operator>> sets failbit for a subnormal result (underflow) even though
+    // it produced the correctly-rounded value, which made such numbers fail to
+    // parse back after jsoncpp serialized them. Keep a subnormal value instead
+    // of rejecting it. See issue #1427. Other failures -- malformed numbers
+    // like "0e" or "0e+", or non-numbers -- leave the value at zero/non-finite
+    // and are still rejected.
+    else if (!std::isinf(value) && std::fpclassify(value) != FP_SUBNORMAL)
       return addError(
           "'" + String(token.start_, token.end_) + "' is not a number.", token);
   }
@@ -920,6 +926,7 @@ private:
   bool readToken(Token& token);
   bool readTokenSkippingComments(Token& token);
   void skipSpaces();
+  void skipCommentTokens();
   void skipBom(bool skipBom);
   bool match(const Char* pattern, int patternLength);
   bool readComment();
@@ -1041,10 +1048,19 @@ bool OurReader::parse(const char* beginDoc, const char* endDoc, Value& root,
 }
 
 bool OurReader::readValue() {
-  //  To preserve the old behaviour we cast size_t to int.
-  if (nodes_.size() > features_.stackLimit_)
-    throwRuntimeError("Exceeded stackLimit in readValue().");
   Token token;
+  if (nodes_.size() > features_.stackLimit_) {
+#if JSON_USE_EXCEPTION
+    throwRuntimeError("Exceeded stackLimit in readValue().");
+#else
+    // throwRuntimeError aborts. Don't abort here.
+    token.start_ = current_;
+    token.end_ = current_;
+    token.type_ = tokenError;
+    return addError(
+        "Exceeded stackLimit for nested object and/or array values.", token);
+#endif
+  }
   readTokenSkippingComments(token);
   bool successful = true;
 
@@ -1260,6 +1276,24 @@ void OurReader::skipSpaces() {
       ++current_;
     else
       break;
+  }
+}
+
+// Skip whitespace and any comments, leaving current_ at the next significant
+// character. Consumed comments are recorded (commentsBefore_) so the next value
+// still receives them; if none follows they are simply not attached. This lets
+// callers peek for a delimiter that is preceded by comments (e.g. a ']' after a
+// trailing comma -- see readArray and issue #1500).
+void OurReader::skipCommentTokens() {
+  skipSpaces();
+  if (!features_.allowComments_)
+    return;
+  while (current_ != end_ && *current_ == '/' && (current_ + 1) != end_ &&
+         (current_[1] == '/' || current_[1] == '*')) {
+    Token comment;
+    if (!readToken(comment))
+      return;
+    skipSpaces();
   }
 }
 
@@ -1495,7 +1529,10 @@ bool OurReader::readArray(Token& token) {
   currentValue().setOffsetStart(token.start_ - begin_);
   int index = 0;
   for (;;) {
-    skipSpaces();
+    // Skip comments too, so a ']' that follows a trailing comma (or comments in
+    // an otherwise empty array) is recognized rather than mistaken for the
+    // start of another value. See issue #1500.
+    skipCommentTokens();
     if (current_ != end_ && *current_ == ']' &&
         (index == 0 ||
          (features_.allowTrailingCommas_ &&
@@ -1637,7 +1674,13 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
       value = std::numeric_limits<double>::infinity();
     else if (value == std::numeric_limits<double>::lowest())
       value = -std::numeric_limits<double>::infinity();
-    else if (!std::isinf(value))
+    // operator>> sets failbit for a subnormal result (underflow) even though
+    // it produced the correctly-rounded value, which made such numbers fail to
+    // parse back after jsoncpp serialized them. Keep a subnormal value instead
+    // of rejecting it. See issue #1427. Other failures -- malformed numbers
+    // like "0e" or "0e+", or non-numbers -- leave the value at zero/non-finite
+    // and are still rejected.
+    else if (!std::isinf(value) && std::fpclassify(value) != FP_SUBNORMAL)
       return addError(
           "'" + String(token.start_, token.end_) + "' is not a number.", token);
   }
