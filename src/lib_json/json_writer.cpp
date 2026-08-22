@@ -131,16 +131,25 @@ static unsigned int utf8ToCodepoint(const char*& s, const char* e) {
   if (firstByte < 0x80)
     return firstByte;
 
-  // continuation bytes must be of the form 10xxxxxx
-  const auto isTrailingByte = [](char b) {
-    return (static_cast<unsigned char>(b) & 0xC0) == 0x80;
+  // Checks that the `count` bytes following the lead byte are continuation
+  // bytes (10xxxxxx). On failure `s` is left on the last valid continuation
+  // byte, so the whole malformed prefix is replaced by a single U+FFFD and the
+  // offending byte is decoded on its own.
+  const auto hasTrailingBytes = [&s](int count) {
+    for (int i = 1; i <= count; ++i) {
+      if ((static_cast<unsigned char>(s[i]) & 0xC0) != 0x80) {
+        s += i - 1;
+        return false;
+      }
+    }
+    return true;
   };
 
   if (firstByte < 0xE0) {
     if (e - s < 2)
       return REPLACEMENT_CHARACTER;
     // a malformed continuation byte does not belong to this sequence
-    if (!isTrailingByte(s[1]))
+    if (!hasTrailingBytes(1))
       return REPLACEMENT_CHARACTER;
 
     unsigned int calculated =
@@ -153,7 +162,7 @@ static unsigned int utf8ToCodepoint(const char*& s, const char* e) {
   if (firstByte < 0xF0) {
     if (e - s < 3)
       return REPLACEMENT_CHARACTER;
-    if (!isTrailingByte(s[1]) || !isTrailingByte(s[2]))
+    if (!hasTrailingBytes(2))
       return REPLACEMENT_CHARACTER;
 
     unsigned int calculated = ((firstByte & 0x0F) << 12) |
@@ -171,7 +180,7 @@ static unsigned int utf8ToCodepoint(const char*& s, const char* e) {
   if (firstByte < 0xF8) {
     if (e - s < 4)
       return REPLACEMENT_CHARACTER;
-    if (!isTrailingByte(s[1]) || !isTrailingByte(s[2]) || !isTrailingByte(s[3]))
+    if (!hasTrailingBytes(3))
       return REPLACEMENT_CHARACTER;
 
     unsigned int calculated = ((firstByte & 0x07) << 18) |

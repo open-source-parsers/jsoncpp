@@ -2906,6 +2906,15 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, invalidUtf8) {
                                "XYZ"));
   JSONTEST_ASSERT_STRING_EQUAL("\"\\ufffdXYZ\"", Json::writeString(b, bad4));
 
+  // A valid continuation prefix cut short by a non-continuation byte is one
+  // broken sequence: a single replacement, and the ASCII is preserved.
+  Json::Value prefix3(std::string("\xE2\x82"
+                                  "A"));
+  JSONTEST_ASSERT_STRING_EQUAL("\"\\ufffdA\"", Json::writeString(b, prefix3));
+  Json::Value prefix4(std::string("\xF0\x9F\x98"
+                                  "A"));
+  JSONTEST_ASSERT_STRING_EQUAL("\"\\ufffdA\"", Json::writeString(b, prefix4));
+
   // A 4-byte sequence that decodes past U+10FFFF is not a valid codepoint.
   Json::Value over(std::string("\xF7\xBF\xBF\xBF"));
   JSONTEST_ASSERT_STRING_EQUAL("\"\\ufffd\"", Json::writeString(b, over));
