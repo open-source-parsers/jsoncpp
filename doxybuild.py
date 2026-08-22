@@ -92,16 +92,26 @@ def run_doxygen(doxygen_path, config_file, working_dir, is_silent):
         cmd = [doxygen_path, config_file]
         run_cmd(cmd, is_silent)
 
+def read_version():
+    """Return the project version, e.g. '1.9.9', from include/json/version.h.
+    """
+    with open(os.path.join('include', 'json', 'version.h'), 'rt') as f:
+        contents = f.read()
+    match = re.search(r'^\s*#\s*define\s+JSONCPP_VERSION_STRING\s+"([^"]+)"',
+                      contents, re.MULTILINE)
+    if not match:
+        raise Exception('JSONCPP_VERSION_STRING not found in include/json/version.h')
+    return match.group(1)
+
 def build_doc(options,  make_release=False):
     if make_release:
         options.make_tarball = True
         options.with_dot = True
-        options.with_html_help = True
         options.with_uml_look = True
         options.open = False
         options.silent = True
 
-    version = open('version', 'rt').read().strip()
+    version = read_version()
     output_dir = 'dist/doxygen' # relative to doc/doxyfile location.
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
@@ -114,12 +124,10 @@ def build_doc(options,  make_release=False):
         return bool and 'YES' or 'NO'
     subst_keys = {
         '%JSONCPP_VERSION%': version,
-        '%DOC_TOPDIR%': '',
         '%TOPDIR%': top_dir,
         '%HTML_OUTPUT%': os.path.join('..', output_dir, html_output_dirname),
         '%HAVE_DOT%': yesno(options.with_dot),
         '%DOT_PATH%': os.path.split(options.dot_path)[0],
-        '%HTML_HELP%': yesno(options.with_html_help),
         '%UML_LOOK%': yesno(options.with_uml_look),
         '%WARNING_LOG_PATH%': os.path.join('..', warning_log_path)
         }
@@ -131,9 +139,15 @@ def build_doc(options,  make_release=False):
         os.makedirs(output_dir)
 
     do_subst_in_file('doc/doxyfile', options.doxyfile_input_path, subst_keys)
-    run_doxygen(options.doxygen_path, 'doc/doxyfile', 'doc', is_silent=options.silent)
-    if not options.silent:
-        print(open(warning_log_path, 'r').read())
+    try:
+        run_doxygen(options.doxygen_path, 'doc/doxyfile', 'doc', is_silent=options.silent)
+    finally:
+        # doxygen is configured with WARN_AS_ERROR, so the log explains failures.
+        if os.path.isfile(warning_log_path):
+            warnings = open(warning_log_path, 'r').read()
+            if warnings:
+                print('Doxygen warnings:')
+                print(warnings)
     index_path = os.path.abspath(os.path.join('doc', subst_keys['%HTML_OUTPUT%'], 'index.html'))
     print('Generated documentation can be found in:')
     print(index_path)
@@ -146,8 +160,6 @@ def build_doc(options,  make_release=False):
             output_dir,
             'README.md',
             'LICENSE',
-            'NEWS.txt',
-            'version'
             ]
         tarball_basedir = os.path.join(output_dir, html_output_dirname)
         tarball.make_tarball(tarball_path, tarball_sources, tarball_basedir, html_output_dirname)
@@ -155,10 +167,11 @@ def build_doc(options,  make_release=False):
 
 def main():
     usage = """%prog
-    Generates doxygen documentation in build/doxygen.
+    Generates doxygen documentation in dist/doxygen.
     Optionally makes a tarball of the documentation to dist/.
 
     Must be started in the project top directory.
+    Fails if doxygen reports any warning.
     """
     from optparse import OptionParser
     parser = OptionParser(usage=usage)
@@ -171,8 +184,6 @@ def main():
         help="""Path to Doxygen tool. [Default: %default]""")
     parser.add_option('--in', dest="doxyfile_input_path", action='store', default='doc/doxyfile.in',
         help="""Path to doxygen inputs. [Default: %default]""")
-    parser.add_option('--with-html-help', dest="with_html_help", action='store_true', default=False,
-        help="""Enable generation of Microsoft HTML HELP""")
     parser.add_option('--no-uml-look', dest="with_uml_look", action='store_false', default=True,
         help="""Generates DOT graph without UML look [Default: False]""")
     parser.add_option('--open', dest="open", action='store_true', default=False,

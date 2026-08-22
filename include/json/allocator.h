@@ -43,10 +43,9 @@ public:
     // unlike memset.
 #if defined(HAVE_MEMSET_S)
     memset_s(p, n * sizeof(T), 0, n * sizeof(T));
-#elif defined(_WIN32)
-    RtlSecureZeroMemory(p, n * sizeof(T));
 #else
-    std::fill_n(reinterpret_cast<volatile unsigned char*>(p), n, 0);
+    std::fill_n(reinterpret_cast<volatile unsigned char*>(p), n * sizeof(T),
+                static_cast<unsigned char>(0));
 #endif
 
     // free using "global operator delete"
