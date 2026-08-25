@@ -356,7 +356,7 @@ public:
    *   - If true, if the input starts with the Unicode byte order mark (BOM),
    *     it is skipped.
    *
-   * You can examine 'settings_` yourself to see the defaults. You can also
+   * You can examine `settings_` yourself to see the defaults. You can also
    * write and read them just like any JSON Value.
    * \sa setDefaults()
    */

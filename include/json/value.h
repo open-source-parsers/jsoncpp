@@ -557,6 +557,7 @@ public:
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
   /// \param key may contain embedded nulls.
+  /// \param defaultValue returned if there is no member named key.
   Value get(const String& key, const Value& defaultValue) const;
   /// Return the member named key if it exist, defaultValue otherwise.
   /// \note deep copy
@@ -615,6 +616,7 @@ public:
    *
    *  Update 'removed' iff removed.
    *  \param key may contain embedded nulls.
+   *  \param removed if non-null, receives the removed value.
    *  \return true iff removed (no exceptions)
    */
 #if JSONCPP_HAS_STRING_VIEW

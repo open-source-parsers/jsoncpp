@@ -227,8 +227,8 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, CZStringCoverage) { runCZStringTests(); }
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, checkNormalizeFloatingPointStr) {
   struct TestData {
-    std::string in;
-    std::string out;
+    Json::String in;
+    Json::String out;
   } const testData[] = {
       {"0.0", "0.0"},
       {"0e0", "0e0"},
@@ -308,7 +308,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, objects) {
   JSONTEST_ASSERT(foundId != nullptr);
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), *foundId);
 
-  const std::string stringIdKey = "id";
+  const Json::String stringIdKey = "id";
   const Json::Value* stringFoundId = object1_.find(stringIdKey);
   JSONTEST_ASSERT(stringFoundId != nullptr);
   JSONTEST_ASSERT_EQUAL(Json::Value(1234), *stringFoundId);
@@ -318,7 +318,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, objects) {
       object1_.find(unknownIdKey, unknownIdKey + strlen(unknownIdKey));
   JSONTEST_ASSERT_EQUAL(nullptr, foundUnknownId);
 
-  const std::string stringUnknownIdKey = "unknown id";
+  const Json::String stringUnknownIdKey = "unknown id";
   const Json::Value* stringFoundUnknownId = object1_.find(stringUnknownIdKey);
   JSONTEST_ASSERT_EQUAL(nullptr, stringFoundUnknownId);
 
@@ -370,7 +370,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, objects) {
 
   const Json::Value* stringFound = object2_.findString("string");
   JSONTEST_ASSERT(stringFound != nullptr);
-  JSONTEST_ASSERT_EQUAL(std::string{"string"}, *stringFound);
+  JSONTEST_ASSERT_EQUAL(Json::String{"string"}, *stringFound);
   JSONTEST_ASSERT(object3_.findString("string") == nullptr);
 
   const Json::Value* arrayFound = object2_.findArray("array");
@@ -2041,9 +2041,9 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, StaticString) {
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, WideString) {
   // https://github.com/open-source-parsers/jsoncpp/issues/756
-  const std::string uni =
+  const Json::String uni =
       reinterpret_cast<const char*>(u8"\u5f0f\uff0c\u8fdb"); // "式，进"
-  std::string styled;
+  Json::String styled;
   {
     Json::Value v;
     v["abc"] = uni;
@@ -2052,7 +2052,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, WideString) {
   Json::Value root;
   {
     JSONCPP_STRING errs;
-    std::istringstream iss(styled);
+    Json::IStringStream iss(styled);
     bool ok = parseFromStream(Json::CharReaderBuilder(), iss, &root, &errs);
     JSONTEST_ASSERT(ok);
     if (!ok) {
@@ -2907,7 +2907,7 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, unicode) {
 JSONTEST_FIXTURE_LOCAL(StreamWriterTest, escapeControlCharacters) {
   auto uEscape = [](unsigned ch) {
     static const char h[] = "0123456789abcdef";
-    std::string r = "\\u";
+    Json::String r = "\\u";
     r += h[(ch >> (3 * 4)) & 0xf];
     r += h[(ch >> (2 * 4)) & 0xf];
     r += h[(ch >> (1 * 4)) & 0xf];
@@ -2944,8 +2944,8 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, escapeControlCharacters) {
       if (!emitUTF8 && i >= 0x80)
         break; // The algorithm would try to parse UTF-8, so stop here.
 
-      std::string raw({static_cast<char>(i)});
-      std::string esc = raw;
+      Json::String raw({static_cast<char>(i)});
+      Json::String esc = raw;
       if (i < 0x20)
         esc = uEscape(i);
       if (const char* shEsc = shortEscape(i))
@@ -2957,7 +2957,7 @@ JSONTEST_FIXTURE_LOCAL(StreamWriterTest, escapeControlCharacters) {
       Json::Value root;
       root["test"] = raw;
       JSONTEST_ASSERT_STRING_EQUAL(
-          std::string("{\n\t\"test\" : \"").append(esc).append("\"\n}"),
+          Json::String("{\n\t\"test\" : \"").append(esc).append("\"\n}"),
           Json::writeString(b, root))
           << ", emit=" << emitUTF8 << ", i=" << i << ", raw=\"" << raw << "\""
           << ", esc=\"" << esc << "\"";
@@ -3031,7 +3031,7 @@ struct ReaderTest : JsonTest::TestCase {
   template <typename Input>
   void checkParse(Input&& input,
                   const std::vector<Json::Reader::StructuredError>& structured,
-                  const std::string& formatted) {
+                  const Json::String& formatted) {
     checkParse(input, structured);
     JSONTEST_ASSERT_EQUAL(formatted, reader->getFormattedErrorMessages());
   }
@@ -3806,7 +3806,7 @@ struct CharReaderAllowDropNullTest : JsonTest::TestCase {
     return [=](const Value& root) { JSONTEST_ASSERT_EQUAL(root, v); };
   }
 
-  static ValueCheck objGetAnd(std::string idx, ValueCheck f) {
+  static ValueCheck objGetAnd(Json::String idx, ValueCheck f) {
     return [=](const Value& root) { f(root.get(idx, true)); };
   }
 
@@ -4130,16 +4130,16 @@ JSONTEST_FIXTURE_LOCAL(IteratorTest, members) {
   j["k1"] = "a";
   j["k2"] = "b";
 
-  std::vector<std::string> keys;
-  std::vector<std::string> values;
+  std::vector<Json::String> keys;
+  std::vector<Json::String> values;
 
   for (const auto& member : j.members()) {
     keys.push_back(member.name);
     values.push_back(member.value.asString());
   }
 
-  JSONTEST_ASSERT((keys == std::vector<std::string>{"k1", "k2"}));
-  JSONTEST_ASSERT((values == std::vector<std::string>{"a", "b"}));
+  JSONTEST_ASSERT((keys == std::vector<Json::String>{"k1", "k2"}));
+  JSONTEST_ASSERT((values == std::vector<Json::String>{"a", "b"}));
 
   // Test modification through value reference
   for (const auto& member : j.members()) {
@@ -4158,8 +4158,8 @@ JSONTEST_FIXTURE_LOCAL(IteratorTest, members) {
     values.push_back(member.value.asString());
   }
 
-  JSONTEST_ASSERT((keys == std::vector<std::string>{"k1", "k2"}));
-  JSONTEST_ASSERT((values == std::vector<std::string>{"c", "c"}));
+  JSONTEST_ASSERT((keys == std::vector<Json::String>{"k1", "k2"}));
+  JSONTEST_ASSERT((values == std::vector<Json::String>{"c", "c"}));
 
 #if __cplusplus >= 201703L
   keys.clear();
@@ -4168,8 +4168,8 @@ JSONTEST_FIXTURE_LOCAL(IteratorTest, members) {
     keys.push_back(k);
     values.push_back(v.asString());
   }
-  JSONTEST_ASSERT((keys == std::vector<std::string>{"k1", "k2"}));
-  JSONTEST_ASSERT((values == std::vector<std::string>{"c", "c"}));
+  JSONTEST_ASSERT((keys == std::vector<Json::String>{"k1", "k2"}));
+  JSONTEST_ASSERT((values == std::vector<Json::String>{"c", "c"}));
 #endif
 }
 
@@ -4186,25 +4186,25 @@ JSONTEST_FIXTURE_LOCAL(IteratorTest, decrement) {
   Json::Value json;
   json["k1"] = "a";
   json["k2"] = "b";
-  std::vector<std::string> values;
+  std::vector<Json::String> values;
   for (auto it = json.end(); it != json.begin();) {
     --it;
     values.push_back(it->asString());
   }
-  JSONTEST_ASSERT((values == std::vector<std::string>{"b", "a"}));
+  JSONTEST_ASSERT((values == std::vector<Json::String>{"b", "a"}));
 }
 
 JSONTEST_FIXTURE_LOCAL(IteratorTest, reverseIterator) {
   Json::Value json;
   json["k1"] = "a";
   json["k2"] = "b";
-  std::vector<std::string> values;
+  std::vector<Json::String> values;
   using Iter = decltype(json.begin());
   auto re = std::reverse_iterator<Iter>(json.begin());
   for (auto it = std::reverse_iterator<Iter>(json.end()); it != re; ++it) {
     values.push_back(it->asString());
   }
-  JSONTEST_ASSERT((values == std::vector<std::string>{"b", "a"}));
+  JSONTEST_ASSERT((values == std::vector<Json::String>{"b", "a"}));
 }
 
 JSONTEST_FIXTURE_LOCAL(IteratorTest, distance) {

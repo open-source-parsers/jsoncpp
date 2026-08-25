@@ -1,9 +1,10 @@
 /**
-\mainpage
+\page quickstart Quick start
+
 \section _intro Introduction
 
-<a HREF="http://www.json.org/">JSON (JavaScript Object Notation)</a>
- is a lightweight data-interchange format.
+<a HREF="https://www.json.org/">JSON (JavaScript Object Notation)</a>
+is a lightweight data-interchange format.
 
 Here is an example of JSON data:
 \verbatim
@@ -123,42 +124,17 @@ reader->parse(start, stop, &value2, &errs);
 // etc.
 \endcode
 
-\section _pbuild Build instructions
-The build instructions are located in the file
-<a HREF="https://github.com/open-source-parsers/jsoncpp/blob/master/README.md">README.md</a> in the top-directory of the project.
+See Json::CharReaderBuilder::settings_ and Json::StreamWriterBuilder::settings_
+for the full list of settings.
 
-The latest version of the source is available in the project's GitHub repository:
-<a HREF="https://github.com/open-source-parsers/jsoncpp/">
-jsoncpp</a>
+\section _versioning Versioning
 
-\section _news What's New?
-The description of latest changes can be found in
-<a HREF="https://github.com/open-source-parsers/jsoncpp/wiki/NEWS">
-  the NEWS wiki
-</a>.
+We make strong guarantees about binary-compatibility, consistent with
+<a href="https://apr.apache.org/versioning.html">the Apache versioning scheme</a>.
+\sa version.h
 
 \section _rlinks Related links
-- <a HREF="http://www.json.org/">JSON</a> Specification and alternate language implementations.
-- <a HREF="http://www.yaml.org/">YAML</a> A data format designed for human readability.
-- <a HREF="http://www.cl.cam.ac.uk/~mgk25/unicode.html">UTF-8 and Unicode FAQ</a>.
-
-\section _plinks Old project links
-- <a href="https://sourceforge.net/projects/jsoncpp/">https://sourceforge.net/projects/jsoncpp/</a>
-- <a href="http://jsoncpp.sourceforge.net">http://jsoncpp.sourceforge.net</a>
-- <a href="http://sourceforge.net/projects/jsoncpp/files/">http://sourceforge.net/projects/jsoncpp/files/</a>
-- <a href="http://jsoncpp.svn.sourceforge.net/svnroot/jsoncpp/trunk/">http://jsoncpp.svn.sourceforge.net/svnroot/jsoncpp/trunk/</a>
-- <a href="http://jsoncpp.sourceforge.net/old.html">http://jsoncpp.sourceforge.net/old.html</a>
-
-\section _license License
-See file <a href="https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE"><code>LICENSE</code></a> in the top-directory of the project.
-
-Basically JsonCpp is licensed under MIT license, or public domain if desired
-and recognized in your jurisdiction.
-
-\author Baptiste Lepilleur <blep@users.sourceforge.net> (originator)
-\author Christopher Dunn <cdunn2001@gmail.com> (primary maintainer)
-\version \include version
-We make strong guarantees about binary-compatibility, consistent with
-<a href="http://apr.apache.org/versioning.html">the Apache versioning scheme</a>.
-\sa version.h
+- <a HREF="https://www.json.org/">JSON</a> Specification and alternate language implementations.
+- <a HREF="https://yaml.org/">YAML</a> A data format designed for human readability.
+- <a HREF="https://www.cl.cam.ac.uk/~mgk25/unicode.html">UTF-8 and Unicode FAQ</a>.
 */
