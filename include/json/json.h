@@ -6,10 +6,10 @@
 #ifndef JSON_JSON_H_INCLUDED
 #define JSON_JSON_H_INCLUDED
 
-#include "config.h"
-#include "json_features.h"
-#include "reader.h"
-#include "value.h"
-#include "writer.h"
+#include "config.h"  // IWYU pragma: export
+#include "json_features.h"  // IWYU pragma: export
+#include "reader.h"  // IWYU pragma: export
+#include "value.h"  // IWYU pragma: export
+#include "writer.h"  // IWYU pragma: export
 
 #endif // JSON_JSON_H_INCLUDED
