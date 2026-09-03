@@ -653,7 +653,7 @@ const char* Value::asCString() const {
 #if JSONCPP_USE_SECURE_MEMORY
 unsigned Value::getCStringLength() const {
   JSON_ASSERT_MESSAGE(type() == stringValue,
-                      "in Json::Value::asCString(): requires stringValue");
+                      "in Json::Value::getCStringLength(): requires stringValue");
   if (value_.string_ == 0)
     return 0;
   unsigned this_len;
