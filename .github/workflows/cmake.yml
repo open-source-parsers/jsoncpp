@@ -13,6 +13,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         cxx_standard: [11, 17, 20]
+        secure_memory: [ON, OFF]
         
     steps:
       - name: checkout project
@@ -21,5 +22,13 @@ jobs:
       - name: build project
         uses: threeal/cmake-action@v2.0.0
         with:
-          options: CMAKE_CXX_STANDARD=${{ matrix.cxx_standard }}
+          build-dir: build
+          options: |
+            CMAKE_CXX_STANDARD=${{ matrix.cxx_standard }}
+            CMAKE_BUILD_TYPE=Debug
+            JSONCPP_USE_SECURE_MEMORY=${{ matrix.secure_memory }}
+          build-args: --config Debug
+
+      - name: test project
+        run: ctest --test-dir build --build-config Debug --output-on-failure --no-tests=error
         
