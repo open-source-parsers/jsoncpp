@@ -1050,16 +1050,15 @@ bool OurReader::parse(const char* beginDoc, const char* endDoc, Value& root,
 bool OurReader::readValue() {
   Token token;
   if (nodes_.size() > features_.stackLimit_) {
-#if JSON_USE_EXCEPTION
-    throwRuntimeError("Exceeded stackLimit in readValue().");
-#else
-    // throwRuntimeError aborts. Don't abort here.
+    // Exceeding the nesting limit is a parse failure, not a crash: report it
+    // through the error collection instead of throwing, so that parsing
+    // overly deep input returns false with a message rather than aborting
+    // the process when the exception is not caught.
     token.start_ = current_;
     token.end_ = current_;
     token.type_ = tokenError;
     return addError(
         "Exceeded stackLimit for nested object and/or array values.", token);
-#endif
   }
   readTokenSkippingComments(token);
   bool successful = true;
