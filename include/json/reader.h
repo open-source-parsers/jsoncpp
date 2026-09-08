@@ -339,8 +339,8 @@ public:
    * - `"allowSingleQuotes": false or true`
    *   - true if '' are allowed for strings (both keys and values)
    * - `"stackLimit": integer`
-   *   - Exceeding stackLimit (recursive depth of `readValue()`) will cause an
-   *     exception.
+   *   - Exceeding stackLimit (recursive depth of `readValue()`) makes the
+   *     parse fail with an error message; no exception is thrown.
    *   - This is a security issue (seg-faults caused by deeply nested JSON), so
    *     the default is low.
    * - `"failIfExtra": false or true`

@@ -3554,7 +3554,6 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithStackLimit) {
   Json::CharReaderBuilder b;
   Json::Value root;
 
-#if JSON_USE_EXCEPTION
   char const doc[] = R"({ "property" : "value" })";
   {
     b.settings_["stackLimit"] = 2;
@@ -3569,20 +3568,12 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithStackLimit) {
     b.settings_["stackLimit"] = 1;
     CharReaderPtr reader(b.newCharReader());
     Json::String errs;
-    JSONTEST_ASSERT_THROWS(
-        reader->parse(doc, doc + std::strlen(doc), &root, &errs));
+    JSONTEST_ASSERT(!reader->parse(doc, doc + std::strlen(doc), &root, &errs));
+    JSONTEST_ASSERT(
+        errs ==
+        "* Line 1, Column 15\n"
+        "  Exceeded stackLimit for nested object and/or array values.\n");
   }
-  // Default stack limit should reject deeply nested input (regression test for
-  // stack exhaustion from fuzz input like [[[[...]]]])
-  {
-    Json::CharReaderBuilder defaultBuilder;
-    Json::String nested(300, '[');
-    CharReaderPtr reader(defaultBuilder.newCharReader());
-    Json::String errs;
-    JSONTEST_ASSERT_THROWS(reader->parse(
-        nested.data(), nested.data() + nested.size(), &root, &errs));
-  }
-#else
   b.settings_["stackLimit"] = 10;
   CharReaderPtr reader(b.newCharReader());
   {
@@ -3612,7 +3603,38 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseWithStackLimit) {
     JSONTEST_ASSERT(reader->parse(
         onLimit.data(), onLimit.data() + onLimit.size(), &root, &errs));
   }
-#endif // JSON_USE_EXCEPTION
+  // Default stack limit should reject deeply nested input (regression test for
+  // stack exhaustion from fuzz input like [[[[...]]]])
+  {
+    Json::CharReaderBuilder defaultBuilder;
+    Json::String nested(300, '[');
+    CharReaderPtr defaultReader(defaultBuilder.newCharReader());
+    Json::String errs;
+    JSONTEST_ASSERT(!defaultReader->parse(
+        nested.data(), nested.data() + nested.size(), &root, &errs));
+    JSONTEST_ASSERT(
+        errs ==
+        "* Line 1, Column 257\n"
+        "  Exceeded stackLimit for nested object and/or array values.\n");
+  }
+}
+
+// A nesting depth beyond the configured stackLimit must be reported as a
+// regular parse failure through CharReader::parse, not as an escaping
+// Json::RuntimeError that terminates the process when uncaught.
+JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseDeeplyNestedArrayFailsCleanly) {
+  Json::CharReaderBuilder b;
+  Json::Value root;
+  Json::String nested(1100, '[');
+  CharReaderPtr reader(b.newCharReader());
+  Json::String errs;
+  bool ok =
+      reader->parse(nested.data(), nested.data() + nested.size(), &root, &errs);
+  JSONTEST_ASSERT(!ok);
+  JSONTEST_ASSERT(errs ==
+                  "* Line 1, Column 257\n"
+                  "  Exceeded stackLimit for nested object and/or array "
+                  "values.\n");
 }
 
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, testOperator) {
