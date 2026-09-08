@@ -94,7 +94,11 @@ See the examples `test_complex_01.json` and `test_complex_01.expected` to better
 
 ## Understanding reader/writer test output
 
-When a test is run, output files are generated beside the input test files. Below is a short description of the content of each file:
+When running tests manually, output files are generated beside the input test files by default.
+Pass `--output-dir <directory>` to `runjsontests.py` to keep copied inputs and generated output
+in another directory. Expected results are still read from the original input directory.
+CMake uses this option to keep test artifacts in the build tree, so the source tree can be read-only.
+Below is a short description of the content of each file:
 
 * `test_complex_01.json`: input JSON document.
 * `test_complex_01.expected`: flattened JSON element tree used to check if
