@@ -72,8 +72,8 @@ def runAllTests(jsontest_executable_path, input_path = None,
                  writerClass='StyledWriter', output_path=None):
     if not input_path:
         input_path = os.path.join(os.getcwd(), 'data')
-    if output_path and not os.path.isdir(output_path):
-        os.makedirs(output_path)
+    if output_path:
+        os.makedirs(output_path, exist_ok=True)
 
     if os.path.isdir(input_path):
         tests = [
