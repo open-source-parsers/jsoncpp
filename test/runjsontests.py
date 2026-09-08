@@ -11,6 +11,7 @@ import sys
 import os
 import os.path
 import optparse
+import shutil
 
 VALGRIND_CMD = 'valgrind --tool=memcheck --leak-check=yes --undef-value-errors=yes '
 
@@ -68,9 +69,11 @@ class FailError(Exception):
 
 def runAllTests(jsontest_executable_path, input_path = None,
                  use_valgrind=False, with_json_checker=False,
-                 writerClass='StyledWriter'):
+                 writerClass='StyledWriter', output_path=None):
     if not input_path:
         input_path = os.path.join(os.getcwd(), 'data')
+    if output_path and not os.path.isdir(output_path):
+        os.makedirs(output_path)
 
     if os.path.isdir(input_path):
         tests = [
@@ -113,12 +116,17 @@ def runAllTests(jsontest_executable_path, input_path = None,
         is_json_checker_test = os.path.basename(os.path.dirname(input_path)) == "jsonchecker"
         is_parse_only = is_json_checker_test or expect_failure
         is_strict_test = ('_strict_' in os.path.basename(input_path)) or is_json_checker_test
+        run_input_path = input_path
+        if output_path and not is_parse_only:
+            run_input_path = os.path.join(output_path, os.path.basename(input_path))
+            if not os.path.exists(run_input_path) or not os.path.samefile(input_path, run_input_path):
+                shutil.copyfile(input_path, run_input_path)
         print('TESTING:', input_path, end=' ')
         options = is_parse_only and '--parse-only' or ''
         options += is_strict_test and ' --strict' or ''
         options += ' --json-writer %s'%writerClass
         cmd = '%s%s %s "%s"' % (            valgrind_path, jsontest_executable_path, options,
-            input_path)
+            run_input_path)
         status, process_output = getStatusOutput(cmd)
         if is_parse_only:
             if expect_failure:
@@ -135,7 +143,7 @@ def runAllTests(jsontest_executable_path, input_path = None,
                 else:
                     print('OK')
         else:
-            base_path = os.path.splitext(input_path)[0]
+            base_path = os.path.splitext(run_input_path)[0]
             actual_output = safeReadFile(base_path + '.actual')
             actual_rewrite_output = safeReadFile(base_path + '.actual-rewrite')
             open(base_path + '.process-output', 'wt', encoding = 'utf-8').write(process_output)
@@ -175,6 +183,8 @@ def main():
     parser.add_option("-c", "--with-json-checker",
                   action="store_true", dest="with_json_checker", default=False,
                   help="run all the tests from the official JSONChecker test suite of json.org")
+    parser.add_option("--output-dir", dest="output_path",
+                  help="write reader/writer test artifacts here instead of beside the input files")
     parser.enable_interspersed_args()
     options, args = parser.parse_args()
 
@@ -190,15 +200,15 @@ def main():
     runAllTests(jsontest_executable_path, input_path,
                          use_valgrind=options.valgrind,
                          with_json_checker=options.with_json_checker,
-                         writerClass='StyledWriter')
+                         writerClass='StyledWriter', output_path=options.output_path)
     runAllTests(jsontest_executable_path, input_path,
                          use_valgrind=options.valgrind,
                          with_json_checker=options.with_json_checker,
-                         writerClass='StyledStreamWriter')
+                         writerClass='StyledStreamWriter', output_path=options.output_path)
     runAllTests(jsontest_executable_path, input_path,
                          use_valgrind=options.valgrind,
                          with_json_checker=options.with_json_checker,
-                         writerClass='BuiltStyledStreamWriter')
+                         writerClass='BuiltStyledStreamWriter', output_path=options.output_path)
 
 if __name__ == '__main__':
     try:
