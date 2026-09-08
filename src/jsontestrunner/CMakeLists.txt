@@ -35,18 +35,18 @@ if(PYTHONINTERP_FOUND)
     # Run unit tests in post-build
     # (default cmake workflow hides away the test result into a file, resulting in poor dev workflow?!?)
     add_custom_target(jsoncpp_readerwriter_tests
-        "${PYTHON_EXECUTABLE}" -B "${RUNJSONTESTS_PATH}" --output-dir "${TEST_OUTPUT_DIR}" $<TARGET_FILE:jsontestrunner_exe> "${TEST_DIR}/data"
+        "${PYTHON_EXECUTABLE}" -B "${RUNJSONTESTS_PATH}" --output-dir "${TEST_OUTPUT_DIR}/jsoncpp_check" $<TARGET_FILE:jsontestrunner_exe> "${TEST_DIR}/data"
         DEPENDS jsontestrunner_exe jsoncpp_test
     )
     add_custom_target(jsoncpp_check DEPENDS jsoncpp_readerwriter_tests)
 
     ## Create tests for dashboard submission, allows easy review of CI results https://my.cdash.org/index.php?project=jsoncpp
     add_test(NAME jsoncpp_readerwriter
-        COMMAND "${PYTHON_EXECUTABLE}" -B "${RUNJSONTESTS_PATH}" --output-dir "${TEST_OUTPUT_DIR}" $<TARGET_FILE:jsontestrunner_exe> "${TEST_DIR}/data"
+        COMMAND "${PYTHON_EXECUTABLE}" -B "${RUNJSONTESTS_PATH}" --output-dir "${TEST_OUTPUT_DIR}/ctest" $<TARGET_FILE:jsontestrunner_exe> "${TEST_DIR}/data"
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     )
     add_test(NAME jsoncpp_readerwriter_json_checker
-        COMMAND "${PYTHON_EXECUTABLE}" -B "${RUNJSONTESTS_PATH}" --with-json-checker --output-dir "${TEST_OUTPUT_DIR}" $<TARGET_FILE:jsontestrunner_exe> "${TEST_DIR}/data"
+        COMMAND "${PYTHON_EXECUTABLE}" -B "${RUNJSONTESTS_PATH}" --with-json-checker --output-dir "${TEST_OUTPUT_DIR}/ctest" $<TARGET_FILE:jsontestrunner_exe> "${TEST_DIR}/data"
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     )
 
