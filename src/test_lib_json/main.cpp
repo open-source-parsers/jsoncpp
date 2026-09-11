@@ -14,6 +14,7 @@
 #include "jsontest.h"
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <cstring>
 #include <functional>
 #include <iomanip>
@@ -39,9 +40,15 @@ JSON_API size_t& newlineScanByteCountForTesting();
 #define kint32max Json::Value::maxInt
 #define kint32min Json::Value::minInt
 #define kuint32max Json::Value::maxUInt
+#if defined(JSON_HAS_INT64)
 #define kint64max Json::Value::maxInt64
 #define kint64min Json::Value::minInt64
 #define kuint64max Json::Value::maxUInt64
+#else
+#define kint64max INT64_MAX
+#define kint64min INT64_MIN
+#define kuint64max UINT64_MAX
+#endif
 
 // static const double kdint64max = double(kint64max);
 // static const float kfint64max = float(kint64max);
@@ -54,6 +61,7 @@ static const float kfuint32max = float(kuint32max);
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
 
+#if defined(JSON_HAS_INT64)
 #if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 static inline double uint64ToDouble(Json::UInt64 value) {
   return static_cast<double>(value);
@@ -64,6 +72,7 @@ static inline double uint64ToDouble(Json::UInt64 value) {
          static_cast<double>(Json::Int64(value & 1));
 }
 #endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
+#endif // if defined(JSON_HAS_INT64)
 
 // local_ is the collection for the testcases in this code file.
 static std::deque<JsonTest::TestCaseFactory> local_;
@@ -97,9 +106,9 @@ struct ValueTest : JsonTest::TestCase {
     object2_["null"] = Json::nullValue;
     object2_["bool"] = true;
     object2_["int"] = Json::Int{Json::Value::maxInt};
-    object2_["int64"] = Json::Int64{Json::Value::maxInt64};
+    object2_["int64"] = Json::LargestInt{Json::Value::maxLargestInt};
     object2_["uint"] = Json::UInt{Json::Value::maxUInt};
-    object2_["uint64"] = Json::UInt64{Json::Value::maxUInt64};
+    object2_["uint64"] = Json::LargestUInt{Json::Value::maxLargestUInt};
     object2_["integral"] = 1234;
     object2_["double"] = 1234.56789;
     object2_["numeric"] = 0.12345f;
@@ -326,8 +335,12 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, objects) {
   JSONTEST_ASSERT(object3_.findInt("int") == nullptr);
 
   const Json::Value* int64Found = object2_.findInt64("int64");
+#if defined(JSON_HAS_INT64)
   JSONTEST_ASSERT(int64Found != nullptr);
   JSONTEST_ASSERT_EQUAL(Json::Int64{Json::Value::maxInt64}, *int64Found);
+#else
+  JSONTEST_ASSERT(int64Found == nullptr);
+#endif
   JSONTEST_ASSERT(object3_.findInt64("int64") == nullptr);
 
   const Json::Value* uintFound = object2_.findUInt("uint");
@@ -336,8 +349,12 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, objects) {
   JSONTEST_ASSERT(object3_.findUInt("uint") == nullptr);
 
   const Json::Value* uint64Found = object2_.findUInt64("uint64");
+#if defined(JSON_HAS_INT64)
   JSONTEST_ASSERT(uint64Found != nullptr);
   JSONTEST_ASSERT_EQUAL(Json::UInt64{Json::Value::maxUInt64}, *uint64Found);
+#else
+  JSONTEST_ASSERT(uint64Found == nullptr);
+#endif
   JSONTEST_ASSERT(object3_.findUInt64("uint64") == nullptr);
 
   const Json::Value* integralFound = object2_.findIntegral("integral");
@@ -1151,7 +1168,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, integers) {
   JSONTEST_ASSERT_EQUAL(double(kint64max), val.asDouble());
   JSONTEST_ASSERT_EQUAL(float(kint64max), val.asFloat());
   JSONTEST_ASSERT_EQUAL(true, val.asBool());
-  JSONTEST_ASSERT_STRING_EQUAL("9.22337e+18", val.asString());
+  JSONTEST_ASSERT_STRING_EQUAL("9.2233720368547758e+18", val.asString());
 
   // int64 min
   val = Json::Value(double(kint64min));
@@ -1170,7 +1187,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, integers) {
   JSONTEST_ASSERT_EQUAL(double(kint64min), val.asDouble());
   JSONTEST_ASSERT_EQUAL(float(kint64min), val.asFloat());
   JSONTEST_ASSERT_EQUAL(true, val.asBool());
-  JSONTEST_ASSERT_STRING_EQUAL("-9.22337e+18", val.asString());
+  JSONTEST_ASSERT_STRING_EQUAL("-9.2233720368547758e+18", val.asString());
 
   // uint64 max
   val = Json::Value(double(kuint64max));
@@ -1189,7 +1206,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, integers) {
   JSONTEST_ASSERT_EQUAL(double(kuint64max), val.asDouble());
   JSONTEST_ASSERT_EQUAL(float(kuint64max), val.asFloat());
   JSONTEST_ASSERT_EQUAL(true, val.asBool());
-  JSONTEST_ASSERT_STRING_EQUAL("1.84467e+19", val.asString());
+  JSONTEST_ASSERT_STRING_EQUAL("1.8446744073709552e+19", val.asString());
 #else // ifdef JSON_NO_INT64
   // 2^40 (signed constructor arg)
   val = Json::Value(Json::Int64(1) << 40);
@@ -1961,6 +1978,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, typeChecksThrowExceptions) {
   JSONTEST_ASSERT_THROWS(objVal.asUInt());
   JSONTEST_ASSERT_THROWS(arrVal.asUInt());
 
+#if defined(JSON_HAS_INT64)
   JSONTEST_ASSERT_THROWS(strVal.asInt64());
   JSONTEST_ASSERT_THROWS(objVal.asInt64());
   JSONTEST_ASSERT_THROWS(arrVal.asInt64());
@@ -1968,6 +1986,7 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, typeChecksThrowExceptions) {
   JSONTEST_ASSERT_THROWS(strVal.asUInt64());
   JSONTEST_ASSERT_THROWS(objVal.asUInt64());
   JSONTEST_ASSERT_THROWS(arrVal.asUInt64());
+#endif
 
   JSONTEST_ASSERT_THROWS(strVal.asDouble());
   JSONTEST_ASSERT_THROWS(objVal.asDouble());
@@ -3252,6 +3271,81 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseNumber) {
   }
 }
 
+JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseNegativeIntegers) {
+  Json::CharReaderBuilder builder;
+  CharReaderPtr reader(builder.newCharReader());
+  const Json::LargestInt values[] = {0,
+                                     -1,
+                                     -9,
+                                     -10,
+                                     -11,
+                                     -19,
+                                     -20,
+                                     -99,
+                                     -100,
+                                     Json::Value::minInt,
+                                     Json::Value::minLargestInt + 1,
+                                     Json::Value::minLargestInt};
+  for (const auto expected : values) {
+    const Json::String number =
+        expected == 0 ? "-0" : Json::valueToString(expected);
+    const Json::String documents[] = {number, "[" + number + "]",
+                                      "{\"test\":" + number + "}"};
+    for (const auto& document : documents) {
+      Json::Value root;
+      Json::String errors;
+      const bool ok = reader->parse(
+          document.data(), document.data() + document.size(), &root, &errors);
+      JSONTEST_ASSERT(ok);
+      JSONTEST_ASSERT(errors.empty());
+      if (!ok)
+        continue;
+      const Json::Value& actual = root.isArray()    ? root[0]
+                                  : root.isObject() ? root["test"]
+                                                    : root;
+      JSONTEST_ASSERT_EQUAL(Json::intValue, actual.type());
+      JSONTEST_ASSERT_EQUAL(Json::Value(expected), actual);
+      if (actual.type() == Json::intValue)
+        JSONTEST_ASSERT_EQUAL(expected, actual.asLargestInt());
+    }
+  }
+}
+
+JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseIntegerLimits) {
+  Json::CharReaderBuilder builder;
+  CharReaderPtr reader(builder.newCharReader());
+  const struct {
+    Json::String document;
+    Json::Value expected;
+  } cases[] = {
+      {"0", Json::Value(0)},
+      {"1", Json::Value(1)},
+      {Json::valueToString(Json::Value::maxLargestInt),
+       Json::Value(Json::Value::maxLargestInt)},
+      {Json::valueToString(Json::Value::maxLargestUInt),
+       Json::Value(Json::Value::maxLargestUInt)},
+#if defined(JSON_HAS_INT64)
+      {"9223372036854775808", Json::Value(Json::UInt64(1) << 63)},
+      {"-9223372036854775809", Json::Value(-9223372036854775809.0)},
+      {"18446744073709551616", Json::Value(18446744073709551616.0)},
+#else
+      {"2147483648", Json::Value(Json::UInt(1) << 31)},
+      {"-2147483649", Json::Value(-2147483649.0)},
+      {"4294967296", Json::Value(4294967296.0)},
+#endif
+  };
+  for (const auto& c : cases) {
+    Json::Value root;
+    Json::String errors;
+    JSONTEST_ASSERT(reader->parse(c.document.data(),
+                                  c.document.data() + c.document.size(), &root,
+                                  &errors));
+    JSONTEST_ASSERT(errors.empty());
+    JSONTEST_ASSERT_EQUAL(c.expected.type(), root.type());
+    JSONTEST_ASSERT_EQUAL(c.expected, root);
+  }
+}
+
 JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseSubnormal) {
   // Regression test for #1427: subnormal doubles make operator>> set failbit
   // even though it produced the correctly-rounded value, so they used to fail
@@ -4407,9 +4501,11 @@ JSONTEST_FIXTURE_LOCAL(MemberTemplateIs, BehavesSameAsNamedIs) {
   for (const Json::Value& j : values) {
     JSONTEST_ASSERT_EQUAL(j.is<bool>(), j.isBool());
     JSONTEST_ASSERT_EQUAL(j.is<Json::Int>(), j.isInt());
-    JSONTEST_ASSERT_EQUAL(j.is<Json::Int64>(), j.isInt64());
     JSONTEST_ASSERT_EQUAL(j.is<Json::UInt>(), j.isUInt());
+#if defined(JSON_HAS_INT64)
+    JSONTEST_ASSERT_EQUAL(j.is<Json::Int64>(), j.isInt64());
     JSONTEST_ASSERT_EQUAL(j.is<Json::UInt64>(), j.isUInt64());
+#endif
     JSONTEST_ASSERT_EQUAL(j.is<double>(), j.isDouble());
     JSONTEST_ASSERT_EQUAL(j.is<Json::String>(), j.isString());
   }
