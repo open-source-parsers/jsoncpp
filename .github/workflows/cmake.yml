@@ -25,9 +25,13 @@ jobs:
 
   cmake-no-int64:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: checkout project
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
 
       - name: build without 64-bit integer storage
         run: |
