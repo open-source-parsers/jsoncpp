@@ -22,4 +22,25 @@ jobs:
         uses: threeal/cmake-action@v2.0.0
         with:
           options: CMAKE_CXX_STANDARD=${{ matrix.cxx_standard }}
-        
+
+  cmake-no-int64:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: checkout project
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: build without 64-bit integer storage
+        run: |
+          cmake -S . -B build-no-int64 \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_STANDARD=11 \
+            -DCMAKE_CXX_FLAGS=-DJSON_NO_INT64 \
+            -DJSONCPP_WITH_POST_BUILD_UNITTEST=OFF
+          cmake --build build-no-int64 --parallel 2
+
+      - name: test without 64-bit integer storage
+        run: ctest --test-dir build-no-int64 --output-on-failure

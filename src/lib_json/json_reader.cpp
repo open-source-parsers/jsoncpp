@@ -1644,7 +1644,8 @@ bool OurReader::decodeNumber(Token& token, Value& decoded) {
 
   if (isNegative) {
     // We use the same magnitude assumption here, just in case.
-    const auto last_digit = static_cast<Value::UInt>(value % 10);
+    // Keep the subtraction signed when JSON_NO_INT64 makes LargestInt an int.
+    const auto last_digit = static_cast<Value::LargestInt>(value % 10);
     decoded = -Value::LargestInt(value / 10) * 10 - last_digit;
   } else if (value <= Value::LargestUInt(Value::maxLargestInt)) {
     decoded = Value::LargestInt(value);
