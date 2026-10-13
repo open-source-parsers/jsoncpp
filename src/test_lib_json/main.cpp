@@ -4109,6 +4109,28 @@ JSONTEST_FIXTURE_LOCAL(BomTest, notSkipBom) {
   JSONTEST_ASSERT(!ok);
   JSONTEST_ASSERT(!errs.empty());
 }
+JSONTEST_FIXTURE_LOCAL(BomTest, strictRootErrorOffsetAfterSkipBom) {
+  // A skipped BOM must not leave the strictRoot error pointing before the
+  // start of the document.
+  for (const Json::String doc : {"\xEF\xBB\xBF", "\xEF\xBB\xBF"
+                                                 "1"}) {
+    Json::CharReaderBuilder b;
+    Json::CharReaderBuilder::strictMode(&b.settings_);
+    CharReaderPtr reader(b.newCharReader());
+    Json::Value root;
+    Json::String errs;
+    bool ok = reader->parse(doc.data(), doc.data() + doc.size(), &root, &errs);
+    JSONTEST_ASSERT(!ok);
+    auto errors = reader->getStructuredErrors();
+    JSONTEST_ASSERT(!errors.empty());
+    for (const auto& error : errors) {
+      JSONTEST_ASSERT(error.offset_start >= 0);
+      JSONTEST_ASSERT(error.offset_start <= error.offset_limit);
+      JSONTEST_ASSERT(error.offset_limit <=
+                      static_cast<std::ptrdiff_t>(doc.size()));
+    }
+  }
+}
 
 struct IteratorTest : JsonTest::TestCase {};
 

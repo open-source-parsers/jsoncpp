@@ -122,8 +122,8 @@ bool Reader::parse(const char* beginDoc, const char* endDoc, Value& root,
       // Set error location to start of doc, ideally should be first token found
       // in doc
       token.type_ = tokenError;
-      token.start_ = beginDoc;
-      token.end_ = endDoc;
+      token.start_ = begin_;
+      token.end_ = end_;
       addError(
           "A valid JSON document must be either an array or an object value.",
           token);
@@ -1036,8 +1036,8 @@ bool OurReader::parse(const char* beginDoc, const char* endDoc, Value& root,
       // Set error location to start of doc, ideally should be first token found
       // in doc
       token.type_ = tokenError;
-      token.start_ = beginDoc;
-      token.end_ = endDoc;
+      token.start_ = begin_;
+      token.end_ = end_;
       addError(
           "A valid JSON document must be either an array or an object value.",
           token);
