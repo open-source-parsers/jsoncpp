@@ -33,6 +33,7 @@ class JsonProtoConverter {
   std::stringstream data_;
 
   void AppendArray(const json_proto::ArrayValue&);
+  void AppendEscapedString(const std::string& str);
   void AppendNumber(const json_proto::NumberValue&);
   void AppendObject(const json_proto::JsonObject&);
   void AppendValue(const json_proto::JsonValue&);

@@ -37,16 +37,15 @@ void FuzzJson(std::string data_str, int32_t hash_settings) {
   Json::CharReaderBuilder builder;
 
   builder.settings_["failIfExtra"] = hash_settings & (1 << 0);
-  builder.settings_["allowComments_"] = hash_settings & (1 << 1);
-  builder.settings_["strictRoot_"] = hash_settings & (1 << 2);
-  builder.settings_["allowDroppedNullPlaceholders_"] = hash_settings & (1 << 3);
-  builder.settings_["allowNumericKeys_"] = hash_settings & (1 << 4);
-  builder.settings_["allowSingleQuotes_"] = hash_settings & (1 << 5);
-  builder.settings_["failIfExtra_"] = hash_settings & (1 << 6);
-  builder.settings_["rejectDupKeys_"] = hash_settings & (1 << 7);
-  builder.settings_["allowSpecialFloats_"] = hash_settings & (1 << 8);
-  builder.settings_["collectComments"] = hash_settings & (1 << 9);
-  builder.settings_["allowTrailingCommas_"] = hash_settings & (1 << 10);
+  builder.settings_["allowComments"] = hash_settings & (1 << 1);
+  builder.settings_["strictRoot"] = hash_settings & (1 << 2);
+  builder.settings_["allowDroppedNullPlaceholders"] = hash_settings & (1 << 3);
+  builder.settings_["allowNumericKeys"] = hash_settings & (1 << 4);
+  builder.settings_["allowSingleQuotes"] = hash_settings & (1 << 5);
+  builder.settings_["rejectDupKeys"] = hash_settings & (1 << 6);
+  builder.settings_["allowSpecialFloats"] = hash_settings & (1 << 7);
+  builder.settings_["collectComments"] = hash_settings & (1 << 8);
+  builder.settings_["allowTrailingCommas"] = hash_settings & (1 << 9);
 
   std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
   

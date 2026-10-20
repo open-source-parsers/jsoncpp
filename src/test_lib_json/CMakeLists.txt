@@ -1,5 +1,7 @@
 # vim: et ts=4 sts=4 sw=4 tw=0
 
+if(JSONCPP_WITH_TESTS)
+
 add_executable(jsoncpp_test
     jsontest.cpp
     jsontest.h
@@ -38,12 +40,23 @@ if(JSONCPP_WITH_POST_BUILD_UNITTEST)
     )
 endif()
 
-# Standalone fuzz target (used by OSS-Fuzz). Requires a fuzzing engine, e.g.
-#   cmake -DJSONCPP_WITH_FUZZING=ON -DCMAKE_CXX_FLAGS="-fsanitize=fuzzer" ..
+endif()  # JSONCPP_WITH_TESTS
+
+# Standalone fuzz target (used by OSS-Fuzz). The JSONCPP_WITH_FUZZING option
+# is declared in the top-level CMakeLists.txt, so the fuzz target can also be
+# built with -DJSONCPP_WITH_TESTS=OFF.
+#
+# Requires a fuzzing engine: compile everything with the engine's coverage
+# instrumentation only (e.g. -DCMAKE_CXX_FLAGS="-fsanitize=fuzzer-no-link")
+# and link the engine itself into the fuzz target
+# (e.g. -DJSONCPP_FUZZ_ENGINE="-fsanitize=fuzzer"), so that the engine's
+# main() is not pulled into compiler checks and other executables.
+#
 # The libprotobuf-mutator based fuzzer (jsoncpp_fuzz_proto.cc, json.proto,
-# json_proto_converter.*) is built by OSS-Fuzz separately with LPM; the sources
-# are kept here so they live with the other jsoncpp fuzzers.
-option(JSONCPP_WITH_FUZZING "Build the jsoncpp_fuzzer fuzz target (needs a fuzzing engine)" OFF)
+# json_proto_converter.*) is built by OSS-Fuzz separately with LPM; the
+# sources are kept here so they live with the other jsoncpp fuzzers.
+set(JSONCPP_FUZZ_ENGINE "" CACHE STRING
+    "Fuzzing engine link flags for jsoncpp_fuzzer, e.g. -fsanitize=fuzzer")
 if(JSONCPP_WITH_FUZZING)
     add_executable(jsoncpp_fuzzer
         fuzz.cpp
@@ -53,6 +66,11 @@ if(JSONCPP_WITH_FUZZING)
         target_link_libraries(jsoncpp_fuzzer jsoncpp_lib)
     else()
         target_link_libraries(jsoncpp_fuzzer jsoncpp_static)
+    endif()
+    if(JSONCPP_FUZZ_ENGINE)
+        set_target_properties(jsoncpp_fuzzer PROPERTIES
+            LINK_FLAGS "${JSONCPP_FUZZ_ENGINE}"
+        )
     endif()
     # Ship the dictionary next to the fuzzer binary.
     add_custom_command(TARGET jsoncpp_fuzzer

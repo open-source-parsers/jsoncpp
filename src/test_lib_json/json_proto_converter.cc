@@ -18,6 +18,47 @@
 
 namespace json_proto {
 
+// Writes str as a quoted, JSON-escaped string, so that generated quotes,
+// backslashes and control characters cannot break the surrounding structure.
+void JsonProtoConverter::AppendEscapedString(const std::string& str) {
+  static const char kHexDigits[] = "0123456789abcdef";
+  data_ << '"';
+  for (char c : str) {
+    switch (c) {
+      case '"':
+        data_ << "\\\"";
+        break;
+      case '\\':
+        data_ << "\\\\";
+        break;
+      case '\b':
+        data_ << "\\b";
+        break;
+      case '\f':
+        data_ << "\\f";
+        break;
+      case '\n':
+        data_ << "\\n";
+        break;
+      case '\r':
+        data_ << "\\r";
+        break;
+      case '\t':
+        data_ << "\\t";
+        break;
+      default:
+        if (static_cast<unsigned char>(c) < 0x20) {
+          data_ << "\\u00" << kHexDigits[(c >> 4) & 0xF]
+                << kHexDigits[c & 0xF];
+        } else {
+          data_ << c;
+        }
+        break;
+    }
+  }
+  data_ << '"';
+}
+
 void JsonProtoConverter::AppendArray(const ArrayValue& array_value) {
   data_ << '[';
   bool need_comma = false;
@@ -42,7 +83,7 @@ void JsonProtoConverter::AppendNumber(const NumberValue& number_value) {
     data_ << (value.use_uppercase() ? 'E' : 'e');
     data_ << value.exponent();
   } else if (number_value.has_exponent_frac_value()) {
-    auto value = number_value.exponent_value();
+    auto value = number_value.exponent_frac_value();
     data_ << value.base();
     data_ << (value.use_uppercase() ? 'E' : 'e');
     data_ << value.exponent();
@@ -52,7 +93,9 @@ void JsonProtoConverter::AppendNumber(const NumberValue& number_value) {
 }
 
 void JsonProtoConverter::AppendObject(const JsonObject& json_object) {
-  data_ << '{' << '"' << json_object.name() << '"' << ':';
+  data_ << '{';
+  AppendEscapedString(json_object.name());
+  data_ << ':';
   AppendValue(json_object.value());
   data_ << '}';
 }
@@ -65,7 +108,7 @@ void JsonProtoConverter::AppendValue(const JsonValue& json_value) {
   } else if (json_value.has_number_value()) {
     AppendNumber(json_value.number_value());
   } else if (json_value.has_string_value()) {
-    data_ << '"' << json_value.string_value().value() << '"';
+    AppendEscapedString(json_value.string_value().value());
   } else if (json_value.has_boolean_value()) {
     data_ << (json_value.boolean_value().value() ? "true" : "false");
   } else {
