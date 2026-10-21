@@ -16,6 +16,7 @@
 
 #include "json_proto_converter.h"
 
+#include <charconv>
 #include <cmath>
 
 namespace json_proto {
@@ -76,18 +77,27 @@ void JsonProtoConverter::AppendArray(const ArrayValue& array_value) {
   data_ << ']';
 }
 
-// Writes value in fixed-point notation. The stream would otherwise render
-// large values in scientific notation ("1e+20"), which would add a stray
-// exponent to the generated number (e.g. "1e+20e3"). Non-finite values would
-// be written as "inf"/"nan" text; write 0 instead so the number always stays
-// a valid JSON token and the rest of the generated structure remains
-// parseable.
+// Writes value as a decimal number without an exponent: scientific notation
+// would add a stray exponent to the generated number (e.g. "1e+20e3"), while
+// std::fixed with the stream's default precision would truncate small values
+// ("0.0001004" -> "0.000100"), collapsing distinct mutations. to_chars with
+// chars_format::fixed writes the shortest fixed-point string that round-trips
+// the value, avoiding both. Non-finite values have no decimal form; write 0
+// instead ("inf"/"nan" text would not be a valid JSON token) so the rest of
+// the generated structure remains parseable.
 void JsonProtoConverter::AppendPlainFloat(float value) {
   if (!std::isfinite(value)) {
     data_ << '0';
     return;
   }
-  data_ << std::fixed << value << std::defaultfloat;
+  char buf[96];  // shortest round-trip fixed form of a float fits comfortably
+  const auto result =
+      std::to_chars(buf, buf + sizeof(buf), value, std::chars_format::fixed);
+  if (result.ec == std::errc()) {
+    data_.write(buf, result.ptr - buf);
+  } else {
+    data_ << '0';
+  }
 }
 
 void JsonProtoConverter::AppendNumber(const NumberValue& number_value) {
