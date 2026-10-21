@@ -35,6 +35,7 @@ class JsonProtoConverter {
   void AppendArray(const json_proto::ArrayValue&);
   void AppendEscapedString(const std::string& str);
   void AppendNumber(const json_proto::NumberValue&);
+  void AppendPlainFloat(float value);
   void AppendObject(const json_proto::JsonObject&);
   void AppendValue(const json_proto::JsonValue&);
 };

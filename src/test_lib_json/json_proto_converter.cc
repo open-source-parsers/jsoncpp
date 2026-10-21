@@ -16,6 +16,8 @@
 
 #include "json_proto_converter.h"
 
+#include <cmath>
+
 namespace json_proto {
 
 // Writes str as a quoted, JSON-escaped string, so that generated quotes,
@@ -74,9 +76,25 @@ void JsonProtoConverter::AppendArray(const ArrayValue& array_value) {
   data_ << ']';
 }
 
+// Writes value in fixed-point notation. The stream would otherwise render
+// large values in scientific notation ("1e+20"), which would add a stray
+// exponent to the generated number (e.g. "1e+20e3"). Non-finite values would
+// be written as "inf"/"nan" text; write 0 instead so the number always stays
+// a valid JSON token and the rest of the generated structure remains
+// parseable.
+void JsonProtoConverter::AppendPlainFloat(float value) {
+  if (!std::isfinite(value)) {
+    data_ << '0';
+    return;
+  }
+  data_ << std::fixed << value << std::defaultfloat;
+}
+
 void JsonProtoConverter::AppendNumber(const NumberValue& number_value) {
   if (number_value.has_float_value()) {
-    data_ << number_value.float_value().value();
+    const double value = number_value.float_value().value();
+    // Keep "inf"/"nan" out of the output; they are not valid JSON numbers.
+    data_ << (std::isfinite(value) ? value : 0.0);
   } else if (number_value.has_exponent_value()) {
     auto value = number_value.exponent_value();
     data_ << value.base();
@@ -84,7 +102,7 @@ void JsonProtoConverter::AppendNumber(const NumberValue& number_value) {
     data_ << value.exponent();
   } else if (number_value.has_exponent_frac_value()) {
     auto value = number_value.exponent_frac_value();
-    data_ << value.base();
+    AppendPlainFloat(value.base());
     data_ << (value.use_uppercase() ? 'E' : 'e');
     data_ << value.exponent();
   } else {
