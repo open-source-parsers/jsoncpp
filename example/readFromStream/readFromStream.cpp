@@ -44,8 +44,8 @@ int main(int argc, char* argv[]) {
   std::cout << root << std::endl;
 
   for (Json::Value::const_iterator it = root.begin(); it != root.end(); ++it) {
-    int id = it->get("key", "").get("id", "").asInt();
-    std::string val = it->get("key", "").get("val", "").asString();
+    int id = it->get("key", Json::Value()).get("id", 0).asInt();
+    std::string val = it->get("key", Json:Value()).get("val", "").asString();
 
     std::cout << id << std::endl;
     std::cout << val << std::endl;
