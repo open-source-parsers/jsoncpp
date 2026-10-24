@@ -1,0 +1,73 @@
+name: docs
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  DOXYGEN_VERSION: 1.18.0
+  DOXYGEN_SHA256: 14fa81bdc34171edb5f1f02b1d60e74802f0439b77fa44e592565d517d72df90
+
+permissions:
+  contents: read
+
+# One docs build per branch; superseded PR pushes are cancelled. The deploy job
+# has its own non-cancelling "pages" group so an in-flight deployment finishes.
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: install doxygen ${{ env.DOXYGEN_VERSION }} and graphviz
+        run: |
+          set -euo pipefail
+          tag="Release_${DOXYGEN_VERSION//./_}"
+          curl -fsSL -o doxygen.tar.gz \
+            "https://github.com/doxygen/doxygen/releases/download/${tag}/doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz"
+          echo "${DOXYGEN_SHA256}  doxygen.tar.gz" | sha256sum --check
+          sudo tar -xzf doxygen.tar.gz -C /opt
+          echo "/opt/doxygen-${DOXYGEN_VERSION}/bin" >> "$GITHUB_PATH"
+          sudo apt-get update -q
+          sudo apt-get install -y -q graphviz
+
+      # doxygen runs with WARN_AS_ERROR, so any documentation warning fails here.
+      - name: generate documentation
+        run: |
+          doxygen --version
+          python3 doxybuild.py --with-dot
+          mv dist/doxygen/jsoncpp-api-html-* site
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site
+
+  deploy:
+    name: deploy to GitHub Pages
+    # Only master may publish; a workflow_dispatch from any other branch just
+    # builds as a check and must not replace the production documentation.
+    if: github.ref == 'refs/heads/master'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write    # to publish the Pages deployment
+      id-token: write # to verify the deployment originates from this workflow
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0

@@ -37,6 +37,8 @@ class Value;
 class ValueIteratorBase;
 class ValueIterator;
 class ValueConstIterator;
+class ValueMembersView;
+class ValueConstMembersView;
 
 } // namespace Json
 

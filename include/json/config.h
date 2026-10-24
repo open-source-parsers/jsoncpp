@@ -105,6 +105,7 @@ extern JSON_API int msvc_pre1900_c99_snprintf(char* outBuf, size_t size,
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
 namespace Json {
+JSON_API const char* version();
 using Int = int;
 using UInt = unsigned int;
 #if defined(JSON_NO_INT64)
@@ -122,7 +123,9 @@ using UInt64 = uint64_t;
 #endif                // if defined(_MSC_VER)
 using LargestInt = Int64;
 using LargestUInt = UInt64;
+#ifndef JSON_HAS_INT64
 #define JSON_HAS_INT64
+#endif // ifndef JSON_HAS_INT64
 #endif // if defined(JSON_NO_INT64)
 
 template <typename T>

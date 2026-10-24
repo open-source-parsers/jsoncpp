@@ -1,1 +1,1 @@
-find src -name '*.cpp' -or -name '*.h' | xargs clang-format -i
+find src include example -name '*.cpp' -or -name '*.h' -or -name '*.inl' | xargs clang-format -i

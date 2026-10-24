@@ -4,6 +4,7 @@ set(EXAMPLES
     readFromStream
     stringWrite
     streamWrite
+    stringView
 )
 add_definitions(-D_GLIBCXX_USE_CXX11_ABI)
 

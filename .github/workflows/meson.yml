@@ -2,6 +2,9 @@ name: meson build and test
 run-name: update pushed to ${{ github.ref }}
 on: [check_run, push, pull_request]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   meson-publish:
     runs-on: ${{ matrix.os }}
@@ -13,10 +16,12 @@ jobs:
 
     steps:     
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         
       - name: setup python
         uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
       
       - name: meson build
         uses: BSFishy/meson-build@v1.0.3
@@ -37,10 +42,12 @@ jobs:
     
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         
       - name: setup python
         uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
       
       - name: meson build
         uses: BSFishy/meson-build@v1.0.3
@@ -61,5 +68,9 @@ jobs:
       - name: generate code coverage report
         uses: threeal/gcovr-action@v1.0.0
         with:
-          coveralls-send: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          coveralls-out: coveralls.json
+
+      - name: upload code coverage to Coveralls
+        uses: coverallsapp/github-action@8d6379e14d29928660c4ba802d8e85393440b329 # v2.3.8
+        with:
+          file: coveralls.json

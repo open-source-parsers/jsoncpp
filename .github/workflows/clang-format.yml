@@ -1,6 +1,9 @@
 name: clang-format check
 on: [check_run, pull_request, push]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   formatting-check:
     name: formatting check
@@ -9,10 +12,10 @@ jobs:
       matrix:
         path:
           - 'src'
-          - 'examples'
+          - 'example'
           - 'include'
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: runs clang-format style check for C/C++/Protobuf programs.
       uses: jidicula/clang-format-action@v4.13.0
       with:

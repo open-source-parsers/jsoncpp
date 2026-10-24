@@ -1,0 +1,39 @@
+name: Amalgamation
+
+on: [check_run, push, pull_request]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  amalgamation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout project
+        uses: actions/checkout@v5
+
+      - name: setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: run amalgamate script
+        run: |
+          python amalgamate.py
+
+      - name: test compile amalgamated source
+        run: |
+          cat << 'EOF' > test_amalgamation.cpp
+          #include "json/json.h"
+          #include <iostream>
+
+          int main() {
+              Json::Value root;
+              root["hello"] = "world";
+              std::cout << root.toStyledString() << std::endl;
+              return 0;
+          }
+          EOF
+          c++ -std=c++11 -I dist dist/jsoncpp.cpp test_amalgamation.cpp -o test_amalgamation
+          ./test_amalgamation

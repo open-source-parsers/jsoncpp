@@ -1,0 +1,88 @@
+name: ABI Compatibility
+
+on: [check_run, push, pull_request]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  abi-compatibility:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        shared_libs: [ON, OFF]
+        include:
+          - jsoncpp_std: 11
+            app_std: 17
+          - jsoncpp_std: 17
+            app_std: 11
+          - jsoncpp_std: 11
+            app_std: 23
+          - jsoncpp_std: 23
+            app_std: 11
+          - jsoncpp_std: 17
+            app_std: 23
+          - jsoncpp_std: 23
+            app_std: 17
+
+    steps:
+      - name: checkout project
+        uses: actions/checkout@v5
+
+      - name: build and install JsonCpp (C++${{ matrix.jsoncpp_std }})
+        shell: bash
+        run: |
+          mkdir build-jsoncpp
+          cd build-jsoncpp
+          cmake .. -DCMAKE_CXX_STANDARD=${{ matrix.jsoncpp_std }} \
+                   -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+                   -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/install-jsoncpp \
+                   -DBUILD_SHARED_LIBS=${{ matrix.shared_libs }} \
+                   -DJSONCPP_WITH_TESTS=OFF
+          cmake --build . --config Release
+          cmake --install . --config Release
+
+      - name: create example app
+        shell: bash
+        run: |
+          mkdir example-app
+          cat << 'EOF' > example-app/CMakeLists.txt
+          cmake_minimum_required(VERSION 3.10)
+          project(abi_test)
+
+          find_package(jsoncpp REQUIRED CONFIG)
+
+          add_executable(abi_test jsontest.cpp fuzz.cpp main.cpp)
+          target_link_libraries(abi_test PRIVATE JsonCpp::JsonCpp)
+          EOF
+
+          cp src/test_lib_json/*.cpp example-app/
+          cp src/test_lib_json/*.h example-app/
+
+      - name: build example app (C++${{ matrix.app_std }})
+        shell: bash
+        run: |
+          cd example-app
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_CXX_STANDARD=${{ matrix.app_std }} \
+                   -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+                   -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/install-jsoncpp
+          cmake --build . --config Release
+
+      - name: run example app
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            export PATH=$GITHUB_WORKSPACE/install-jsoncpp/bin:$PATH
+            ./example-app/build/Release/abi_test.exe
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            export DYLD_LIBRARY_PATH=$GITHUB_WORKSPACE/install-jsoncpp/lib:$DYLD_LIBRARY_PATH
+            ./example-app/build/abi_test
+          else
+            export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/install-jsoncpp/lib:$LD_LIBRARY_PATH
+            ./example-app/build/abi_test
+          fi

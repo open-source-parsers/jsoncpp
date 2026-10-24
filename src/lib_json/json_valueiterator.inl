@@ -122,8 +122,8 @@ ValueConstIterator::ValueConstIterator(
 ValueConstIterator::ValueConstIterator(ValueIterator const& other)
     : ValueIteratorBase(other) {}
 
-ValueConstIterator& ValueConstIterator::
-operator=(const ValueIteratorBase& other) {
+ValueConstIterator&
+ValueConstIterator::operator=(const ValueIteratorBase& other) {
   copy(other);
   return *this;
 }

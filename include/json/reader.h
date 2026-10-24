@@ -81,7 +81,10 @@ public:
    * document.
    *
    * \param      beginDoc        Pointer on the beginning of the UTF-8 encoded
-   *                             string of the document to read.
+   *                             string of the document to read. The pointed-to
+   *                             buffer must outlive this Reader if error
+   *                             methods (e.g. getFormattedErrorMessages()) are
+   *                             called after parse() returns.
    * \param      endDoc          Pointer on the end of the UTF-8 encoded string
    *                             of the document to read.  Must be >= beginDoc.
    * \param[out] root            Contains the root value of the document if it
@@ -353,7 +356,7 @@ public:
    *   - If true, if the input starts with the Unicode byte order mark (BOM),
    *     it is skipped.
    *
-   * You can examine 'settings_` yourself to see the defaults. You can also
+   * You can examine `settings_` yourself to see the defaults. You can also
    * write and read them just like any JSON Value.
    * \sa setDefaults()
    */

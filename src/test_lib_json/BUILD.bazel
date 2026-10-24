@@ -1,11 +1,13 @@
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 cc_test(
     name = "jsoncpp_test",
     srcs = [
+        "fuzz.cpp",
+        "fuzz.h",
         "jsontest.cpp",
         "jsontest.h",
         "main.cpp",
-        "fuzz.h",
-        "fuzz.cpp",
-        ],
+    ],
     deps = ["//:jsoncpp"],
 )
