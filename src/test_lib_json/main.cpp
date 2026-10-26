@@ -4415,11 +4415,28 @@ struct FuzzTest : JsonTest::TestCase {};
 // Build and run the fuzz test without any fuzzer, so that it's guaranteed not
 // go out of date, even if it's never run as an actual fuzz test.
 JSONTEST_FIXTURE_LOCAL(FuzzTest, fuzzDoesntCrash) {
-  const std::string example = "{}";
-  JSONTEST_ASSERT_EQUAL(
-      0,
-      LLVMFuzzerTestOneInput(reinterpret_cast<const uint8_t*>(example.c_str()),
-                             example.size()));
+  // The first four bytes select the reader settings (little-endian).
+  const auto withSettings = [](uint32_t settings, const std::string& doc) {
+    std::string input;
+    for (int i = 0; i < 4; ++i) {
+      input += static_cast<char>((settings >> (8 * i)) & 0xFF);
+    }
+    return input + doc;
+  };
+  const std::string examples[] = {
+      "{}",
+      withSettings(0, "{\"a\":[1,2]}"),
+      // Every boolean setting on, with a stack limit of 16.
+      withSettings(0x0010FFFF, "{\"a\":[1,2,],} // comment"),
+      // A stack limit of 1, so the nested arrays exceed it.
+      withSettings(0x00010800, "[[[[1]]]]"),
+  };
+  for (const auto& example : examples) {
+    JSONTEST_ASSERT_EQUAL(
+        0,
+        LLVMFuzzerTestOneInput(reinterpret_cast<const uint8_t*>(example.data()),
+                               example.size()));
+  }
 }
 
 struct ParseWithStructuredErrorsTest : JsonTest::TestCase {
