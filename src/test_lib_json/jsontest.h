@@ -91,8 +91,10 @@ public:
   // Specialized versions.
   TestResult& operator<<(bool value);
   // std:ostream does not support 64bits integers on all STL implementation
+#if defined(JSON_HAS_INT64)
   TestResult& operator<<(Json::Int64 value);
   TestResult& operator<<(Json::UInt64 value);
+#endif
 
 private:
   TestResult& addToLastFailure(const Json::String& message);

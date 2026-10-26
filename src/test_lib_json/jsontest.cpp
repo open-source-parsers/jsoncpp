@@ -187,6 +187,7 @@ TestResult& TestResult::addToLastFailure(const Json::String& message) {
   return *this;
 }
 
+#if defined(JSON_HAS_INT64)
 TestResult& TestResult::operator<<(Json::Int64 value) {
   return addToLastFailure(Json::valueToString(value));
 }
@@ -194,6 +195,7 @@ TestResult& TestResult::operator<<(Json::Int64 value) {
 TestResult& TestResult::operator<<(Json::UInt64 value) {
   return addToLastFailure(Json::valueToString(value));
 }
+#endif
 
 TestResult& TestResult::operator<<(bool value) {
   return addToLastFailure(value ? "true" : "false");

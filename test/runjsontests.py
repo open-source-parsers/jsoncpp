@@ -11,6 +11,7 @@ import sys
 import os
 import os.path
 import optparse
+import subprocess
 
 VALGRIND_CMD = 'valgrind --tool=memcheck --leak-check=yes --undef-value-errors=yes '
 
@@ -66,9 +67,22 @@ class FailError(Exception):
     def __init__(self, msg):
         super(Exception, self).__init__(msg)
 
+def isInt64Enabled(jsontest_executable_path):
+    process = subprocess.Popen([jsontest_executable_path, '--json-config'],
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, errors = process.communicate()
+    configuration = output.decode('utf-8').strip()
+    # The existing --json-config command exits with the usage status (3).
+    if process.returncode not in (0, 3) or configuration not in (
+            'JSON_NO_INT64=0', 'JSON_NO_INT64=1'):
+        raise FailError('Could not read JsonCpp integer configuration: %s' %
+                        errors.decode('utf-8', 'replace'))
+    return configuration == 'JSON_NO_INT64=0'
+
 def runAllTests(jsontest_executable_path, input_path = None,
                  use_valgrind=False, with_json_checker=False,
                  writerClass='StyledWriter'):
+    int64_enabled = isInt64Enabled(jsontest_executable_path)
     if not input_path:
         input_path = os.path.join(os.getcwd(), 'data')
 
@@ -144,6 +158,8 @@ def runAllTests(jsontest_executable_path, input_path = None,
                 failed_tests.append((input_path, 'Parsing failed:\n' + process_output))
             else:
                 expected_output_path = os.path.splitext(input_path)[0] + '.expected'
+                if not int64_enabled and os.path.isfile(expected_output_path + '-no-int64'):
+                    expected_output_path += '-no-int64'
                 expected_output = open(expected_output_path, 'rt', encoding = 'utf-8').read()
                 detail = (compareOutputs(expected_output, actual_output, 'input')
                             or compareOutputs(expected_output, actual_rewrite_output, 'rewrite'))
