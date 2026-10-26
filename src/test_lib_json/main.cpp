@@ -3008,6 +3008,11 @@ struct ReaderTest : JsonTest::TestCase {
   }
 
   template <typename Input>
+  void checkParse(Input&& input, bool collectComments) {
+    JSONTEST_ASSERT(reader->parse(input, root, collectComments));
+  }
+
+  template <typename Input>
   void
   checkParse(Input&& input,
              const std::vector<Json::Reader::StructuredError>& structured) {
@@ -3021,6 +3026,11 @@ struct ReaderTest : JsonTest::TestCase {
                   const Json::String& formatted) {
     checkParse(input, structured);
     JSONTEST_ASSERT_EQUAL(formatted, reader->getFormattedErrorMessages());
+  }
+
+  template <typename Input>
+  void checkParseFailure(Input&& input, bool collectComments) {
+    JSONTEST_ASSERT(!reader->parse(input, root, collectComments));
   }
 
   std::unique_ptr<Json::Reader> reader{new Json::Reader()};
@@ -3093,6 +3103,87 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseComment) {
       R"({ /*commentBeforeValue*/ "property" : "value" }//commentAfterValue)"
       "\n");
   checkParse(" true //comment1\n//comment2\r//comment3\r\n");
+}
+
+JSONTEST_FIXTURE_LOCAL(ReaderTest, parseEmptyArrayWithComments) {
+  for (bool collectComments : {false, true}) {
+    for (const auto& doc :
+         {std::string("[ // line\n]"), std::string("[ /* block */ ]"),
+          std::string("[ // one\n/* two */ ]"),
+          std::string("{\"list\":[ // line\n]}"),
+          std::string("{\"list\":[ /* block */ ]}"),
+          std::string("{\"list\":[ // one\n/* two */ ]}")}) {
+      root = Json::Value();
+      checkParse(doc, collectComments);
+
+      const Json::Value& arrayValue =
+          doc[0] == '[' ? root : root[Json::StaticString("list")];
+      const std::size_t arrayStart = doc.find('[');
+      const std::size_t arrayLimit = doc.rfind(']') + 1;
+      JSONTEST_ASSERT(arrayValue.isArray());
+      JSONTEST_ASSERT_EQUAL(0U, arrayValue.size());
+      JSONTEST_ASSERT(!arrayValue.isValidIndex(0));
+      JSONTEST_ASSERT_EQUAL(static_cast<int>(arrayStart),
+                            arrayValue.getOffsetStart());
+      JSONTEST_ASSERT_EQUAL(static_cast<int>(arrayLimit),
+                            arrayValue.getOffsetLimit());
+    }
+  }
+}
+
+JSONTEST_FIXTURE_LOCAL(ReaderTest, parseArrayCommentBehaviorUnchanged) {
+  {
+    std::string doc = "[ /* before one */ 1 ]";
+    const std::size_t valueStart = doc.find('1');
+    const std::size_t valueLimit = valueStart + 1;
+    for (bool collectComments : {false, true}) {
+      root = Json::Value();
+      checkParse(doc, collectComments);
+      JSONTEST_ASSERT_EQUAL(1U, root.size());
+      JSONTEST_ASSERT_EQUAL(1, root[0].asInt());
+      JSONTEST_ASSERT_EQUAL(static_cast<int>(valueStart),
+                            root[0].getOffsetStart());
+      JSONTEST_ASSERT_EQUAL(static_cast<int>(valueLimit),
+                            root[0].getOffsetLimit());
+      JSONTEST_ASSERT_EQUAL(collectComments,
+                            root[0].hasComment(Json::commentBefore));
+      if (collectComments) {
+        JSONTEST_ASSERT_STRING_EQUAL("/* before one */",
+                                     root[0].getComment(Json::commentBefore));
+      }
+    }
+  }
+  {
+    std::string doc = "// before\n[]// after\n";
+    root = Json::Value();
+    checkParse(doc, true);
+    JSONTEST_ASSERT(root.hasComment(Json::commentBefore));
+    JSONTEST_ASSERT_STRING_EQUAL("// before",
+                                 root.getComment(Json::commentBefore));
+    JSONTEST_ASSERT(root.hasComment(Json::commentAfterOnSameLine));
+    JSONTEST_ASSERT_STRING_EQUAL("// after",
+                                 root.getComment(Json::commentAfterOnSameLine));
+  }
+}
+
+JSONTEST_FIXTURE_LOCAL(ReaderTest, parseEmptyArrayCommentsDisallowed) {
+  Json::Features features = Json::Features::all();
+  features.allowComments_ = false;
+  setFeatures(features);
+
+  root = Json::Value();
+  checkParseFailure("[ // comment\n]", true);
+
+  root = Json::Value();
+  checkParseFailure("[ /* comment */ ]", false);
+}
+
+JSONTEST_FIXTURE_LOCAL(ReaderTest, parseEmptyArrayWithUnterminatedComment) {
+  root = Json::Value();
+  checkParseFailure("[ /*", true);
+  JSONTEST_ASSERT(root.isArray());
+  JSONTEST_ASSERT_EQUAL(0U, root.size());
+  JSONTEST_ASSERT(!root.isValidIndex(0));
 }
 
 JSONTEST_FIXTURE_LOCAL(ReaderTest, streamParseWithNoErrors) {

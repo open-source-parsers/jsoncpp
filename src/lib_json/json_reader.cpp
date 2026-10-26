@@ -482,6 +482,18 @@ bool Reader::readArray(Token& token) {
   currentValue().swapPayload(init);
   currentValue().setOffsetStart(token.start_ - begin_);
   skipSpaces();
+  if (features_.allowComments_) {
+    while (current_ != end_ && *current_ == '/' && (current_ + 1) != end_ &&
+           (current_[1] == '/' || current_[1] == '*')) {
+      Token comment;
+      if (!readToken(comment)) {
+        return addErrorAndRecover(
+            "Syntax error: value, object or array expected.", comment,
+            tokenArrayEnd);
+      }
+      skipSpaces();
+    }
+  }
   if (current_ != end_ && *current_ == ']') // empty array
   {
     Token endArray;
