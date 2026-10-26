@@ -1,9 +1,9 @@
 #include "json/json.h"
 #include <fstream>
 #include <iostream>
-/** \brief Parse from stream, collect comments, access data, and capture error info.
- * Example Usage:
- * $g++ readFromStream.cpp -ljsoncpp -std=c++11 -o readFromStream
+/** \brief Parse from stream, collect comments, access data, and capture error
+ * info. Example Usage: $g++ readFromStream.cpp -ljsoncpp -std=c++11 -o
+ * readFromStream
  * $./readFromStream
  * // comment head
  * [
