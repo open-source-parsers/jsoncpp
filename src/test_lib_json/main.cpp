@@ -1946,6 +1946,9 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, typeChecksThrowExceptions) {
   JSONTEST_ASSERT_THROWS(intVal.removeMember("test"));
   JSONTEST_ASSERT_THROWS(strVal.removeMember("test"));
   JSONTEST_ASSERT_THROWS(arrVal.removeMember("test"));
+  JSONTEST_ASSERT_THROWS(intVal.removeMember(Json::String("test")));
+  JSONTEST_ASSERT_THROWS(strVal.removeMember(Json::String("test")));
+  JSONTEST_ASSERT_THROWS(arrVal.removeMember(Json::String("test")));
 
   JSONTEST_ASSERT_THROWS(intVal.getMemberNames());
   JSONTEST_ASSERT_THROWS(strVal.getMemberNames());
@@ -2158,6 +2161,44 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, zeroesInKeys) {
     JSONTEST_ASSERT_STRING_EQUAL(
         "", root.get(binary, Json::Value::nullSingleton()).asString());
   }
+}
+
+JSONTEST_FIXTURE_LOCAL(ValueTest, removeMemberWithEmbeddedNull) {
+  const Json::String keys[] = {Json::String("\0ab", 3), Json::String("a\0b", 3),
+                               Json::String("ab\0", 3)};
+  for (const auto& key : keys) {
+    const Json::String prefix(key.c_str());
+    Json::Value root;
+    root[prefix] = "keep";
+    root[key] = "remove";
+
+    root.removeMember(key);
+    JSONTEST_ASSERT(!root.isMember(key));
+    JSONTEST_ASSERT(root.isMember(prefix));
+    JSONTEST_ASSERT_STRING_EQUAL("keep", root.get(prefix, "").asString());
+    JSONTEST_ASSERT_EQUAL(1U, root.size());
+
+    root.removeMember(key);
+    JSONTEST_ASSERT(root.isMember(prefix));
+    JSONTEST_ASSERT_EQUAL(1U, root.size());
+  }
+}
+
+JSONTEST_FIXTURE_LOCAL(ValueTest, removeMemberStringOnNullAndEmptyKey) {
+  Json::Value root;
+  root.removeMember("missing");
+  JSONTEST_ASSERT(root.isNull());
+  root.removeMember(Json::String("a\0b", 3));
+  JSONTEST_ASSERT(root.isNull());
+
+  root[""] = "remove";
+  root.removeMember(Json::String());
+  JSONTEST_ASSERT(root.isObject());
+  JSONTEST_ASSERT(root.empty());
+
+  root["ordinary"] = "remove";
+  root.removeMember("ordinary");
+  JSONTEST_ASSERT(root.empty());
 }
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, specialFloats) {

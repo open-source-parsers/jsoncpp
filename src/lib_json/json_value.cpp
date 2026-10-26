@@ -1310,7 +1310,13 @@ void Value::removeMember(const char* key) {
   CZString actualKey(key, unsigned(strlen(key)), CZString::noDuplication);
   value_.map_->erase(actualKey);
 }
-void Value::removeMember(const String& key) { removeMember(key.c_str()); }
+void Value::removeMember(const String& key) {
+  JSON_ASSERT_MESSAGE(
+      type() == nullValue || type() == objectValue,
+      "in Json::Value::removeMember(): requires objectValue, but found "
+          << valueTypeToString(type()));
+  removeMember(key, nullptr);
+}
 
 bool Value::removeIndex(ArrayIndex index, Value* removed) {
   if (type() != arrayValue) {
