@@ -208,6 +208,19 @@ void ValueTest::runCZStringTests() {
   // This verifies we don't leak "other" (if fixed) and correctly take "param"
   str5 = std::move(str3);
   JSONTEST_ASSERT_STRING_EQUAL(str5.data(), "param");
+
+  // 7. Copy Assignment (String)
+  // Copy-assign one owning string over another. The source must remain valid
+  // (deep copy) and the destination's old buffer must be released once, with no
+  // double free of the shared buffer at scope exit.
+  Json::Value::CZString str6("alpha", 5,
+                             Json::Value::CZString::duplicateOnCopy);
+  Json::Value::CZString str7((str6)); // owning "alpha"
+  Json::Value::CZString str8("beta", 4, Json::Value::CZString::duplicateOnCopy);
+  Json::Value::CZString str9((str8)); // owning "beta"
+  str9 = str7;
+  JSONTEST_ASSERT_STRING_EQUAL(str9.data(), "alpha");
+  JSONTEST_ASSERT_STRING_EQUAL(str7.data(), "alpha");
 }
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, CZStringCoverage) { runCZStringTests(); }
