@@ -6,6 +6,7 @@
 #include "fuzz.h"
 
 #include <cstdint>
+#include <cstdlib>
 #include <json/config.h>
 #include <json/json.h>
 #include <memory>
@@ -25,17 +26,29 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   data += sizeof(uint32_t);
   size -= sizeof(uint32_t);
 
-  builder.settings_["failIfExtra"] = hash_settings & (1 << 0);
-  builder.settings_["allowComments_"] = hash_settings & (1 << 1);
-  builder.settings_["strictRoot_"] = hash_settings & (1 << 2);
-  builder.settings_["allowDroppedNullPlaceholders_"] = hash_settings & (1 << 3);
-  builder.settings_["allowNumericKeys_"] = hash_settings & (1 << 4);
-  builder.settings_["allowSingleQuotes_"] = hash_settings & (1 << 5);
-  builder.settings_["failIfExtra_"] = hash_settings & (1 << 6);
-  builder.settings_["rejectDupKeys_"] = hash_settings & (1 << 7);
-  builder.settings_["allowSpecialFloats_"] = hash_settings & (1 << 8);
-  builder.settings_["collectComments"] = hash_settings & (1 << 9);
-  builder.settings_["allowTrailingCommas_"] = hash_settings & (1 << 10);
+  builder.settings_["failIfExtra"] = (hash_settings & (1 << 0)) != 0;
+  builder.settings_["allowComments"] = (hash_settings & (1 << 1)) != 0;
+  builder.settings_["strictRoot"] = (hash_settings & (1 << 2)) != 0;
+  builder.settings_["allowDroppedNullPlaceholders"] =
+      (hash_settings & (1 << 3)) != 0;
+  builder.settings_["allowNumericKeys"] = (hash_settings & (1 << 4)) != 0;
+  builder.settings_["allowSingleQuotes"] = (hash_settings & (1 << 5)) != 0;
+  builder.settings_["skipBom"] = (hash_settings & (1 << 6)) != 0;
+  builder.settings_["rejectDupKeys"] = (hash_settings & (1 << 7)) != 0;
+  builder.settings_["allowSpecialFloats"] = (hash_settings & (1 << 8)) != 0;
+  builder.settings_["collectComments"] = (hash_settings & (1 << 9)) != 0;
+  builder.settings_["allowTrailingCommas"] = (hash_settings & (1 << 10)) != 0;
+  // Bit 11 selects a small stack limit taken from the upper 16 bits, so that
+  // the depth-limit error paths are reachable without huge inputs.
+  if (hash_settings & (1 << 11)) {
+    builder.settings_["stackLimit"] = (hash_settings >> 16) & 0x3FF;
+  }
+
+  // An unknown key is silently ignored by newCharReader(), so a typo here
+  // would quietly stop the fuzzer from exercising that setting.
+  if (!builder.validate(nullptr)) {
+    std::abort();
+  }
 
   std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
 
