@@ -322,8 +322,11 @@ void Value::CZString::swap(CZString& other) {
 }
 
 Value::CZString& Value::CZString::operator=(const CZString& other) {
-  cstr_ = other.cstr_;
-  index_ = other.index_;
+  // Copy-and-swap so a duplicate-policy buffer is deep-copied and the old one
+  // released once. The prior shallow copy aliased other.cstr_, double-freeing
+  // an owned string and leaking the overwritten one.
+  CZString temp(other);
+  swap(temp);
   return *this;
 }
 
@@ -1309,7 +1312,13 @@ void Value::removeMember(const char* key) {
   CZString actualKey(key, unsigned(strlen(key)), CZString::noDuplication);
   value_.map_->erase(actualKey);
 }
-void Value::removeMember(const String& key) { removeMember(key.c_str()); }
+void Value::removeMember(const String& key) {
+  JSON_ASSERT_MESSAGE(
+      type() == nullValue || type() == objectValue,
+      "in Json::Value::removeMember(): requires objectValue, but found "
+          << valueTypeToString(type()));
+  removeMember(key, nullptr);
+}
 
 bool Value::removeIndex(ArrayIndex index, Value* removed) {
   if (type() != arrayValue) {
