@@ -7,3 +7,7 @@ if (NOT TARGET JsonCpp::JsonCpp)
         set_target_properties(JsonCpp::JsonCpp PROPERTIES INTERFACE_LINK_LIBRARIES "jsoncpp_lib")
     endif ()
 endif ()
+
+if (TARGET jsoncpp_module AND NOT TARGET jsoncpp::module)
+    add_library(jsoncpp::module ALIAS jsoncpp_module)
+endif ()

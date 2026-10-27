@@ -10,6 +10,12 @@ target_sources(jsoncpp_module
 
 target_compile_features(jsoncpp_module PUBLIC cxx_std_20)
 
+if(BUILD_SHARED_LIBS)
+    target_link_libraries(jsoncpp_module PUBLIC jsoncpp_lib)
+elseif(BUILD_STATIC_LIBS)
+    target_link_libraries(jsoncpp_module PUBLIC jsoncpp_static)
+endif()
+
 target_include_directories(jsoncpp_module PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
@@ -18,10 +24,18 @@ target_include_directories(jsoncpp_module PUBLIC
 add_library(jsoncpp::module ALIAS jsoncpp_module)
 
 # Installation
-install(TARGETS jsoncpp_module
-    EXPORT ${PROJECT_NAME}Targets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    FILE_SET CXX_MODULES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/jsoncpp/modules
-)
+if(JSONCPP_WITH_CMAKE_PACKAGE)
+    set(MODULE_INSTALL_EXPORT EXPORT jsoncpp)
+else()
+    set(MODULE_INSTALL_EXPORT)
+endif()
+
+if(JSONCPP_WITH_INSTALL)
+    install(TARGETS jsoncpp_module
+        ${MODULE_INSTALL_EXPORT}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        FILE_SET CXX_MODULES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/jsoncpp/modules
+    )
+endif()

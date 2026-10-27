@@ -47,8 +47,10 @@ export namespace Json {
     using Json::version;
     using Json::Int;
     using Json::UInt;
+    #ifdef JSON_HAS_INT64
     using Json::Int64;
     using Json::UInt64;
+    #endif
     using Json::LargestInt;
     using Json::LargestUInt;
     using Json::Allocator;
@@ -74,5 +76,20 @@ export namespace Json {
     using Json::PrecisionType;
     using Json::MemberProxy;
     using Json::ConstMemberProxy;
+    using Json::nullValue;
+    using Json::intValue;
+    using Json::uintValue;
+    using Json::realValue;
+    using Json::stringValue;
+    using Json::booleanValue;
+    using Json::arrayValue;
+    using Json::objectValue;
+    using Json::commentBefore;
+    using Json::commentAfterOnSameLine;
+    using Json::commentAfter;
+    using Json::numberOfCommentPlacement;
+    using Json::significantDigits;
+    using Json::decimalPlaces;
     using Json::swap;
+    using Json::writeString;
 } // namespace Json
