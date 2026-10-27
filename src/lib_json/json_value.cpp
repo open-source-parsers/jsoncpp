@@ -1038,6 +1038,7 @@ const Value& Value::operator[](int index) const {
 void Value::initBasic(ValueType type, bool allocated) {
   setType(type);
   setIsAllocated(allocated);
+  value_.uint_ = 0;
   comments_ = Comments{};
   start_ = 0;
   limit_ = 0;
