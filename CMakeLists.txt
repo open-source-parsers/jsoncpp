@@ -73,7 +73,7 @@ option(JSONCPP_WITH_STRICT_ISO "Issue all the warnings demanded by strict ISO C 
 option(JSONCPP_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" ON)
 option(JSONCPP_WITH_CMAKE_PACKAGE "Generate and install cmake package files" ON)
 option(JSONCPP_WITH_EXAMPLE "Compile JsonCpp example" OFF)
-option(JSONCPP_WITH_INSTALL "Include JsonCpp header and binaries in the install target" ON)
+option(JSONCPP_WITH_INSTALL "Include JsonCpp files in the install target" ON)
 option(JSONCPP_STATIC_WINDOWS_RUNTIME "Use static (MT/MTd) Windows runtime" OFF)
 option(BUILD_SHARED_LIBS "Build jsoncpp_lib as a shared library." ON)
 option(BUILD_STATIC_LIBS "Build jsoncpp_lib as a static library." ON)
@@ -161,7 +161,7 @@ if(JSONCPP_WITH_WARNING_AS_ERROR)
     use_compilation_warning_as_error()
 endif()
 
-if(JSONCPP_WITH_PKGCONFIG_SUPPORT)
+if(JSONCPP_WITH_INSTALL AND JSONCPP_WITH_PKGCONFIG_SUPPORT)
     include(JoinPaths)
 
     join_paths(libdir_for_pc_file "\${exec_prefix}" "${CMAKE_INSTALL_LIBDIR}")
@@ -175,7 +175,7 @@ if(JSONCPP_WITH_PKGCONFIG_SUPPORT)
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()
 
-if(JSONCPP_WITH_CMAKE_PACKAGE)
+if(JSONCPP_WITH_INSTALL AND JSONCPP_WITH_CMAKE_PACKAGE)
     include(CMakePackageConfigHelpers)
     install(EXPORT jsoncpp
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jsoncpp
