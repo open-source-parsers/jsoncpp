@@ -131,8 +131,25 @@ static unsigned int utf8ToCodepoint(const char*& s, const char* e) {
   if (firstByte < 0x80)
     return firstByte;
 
+  // Checks that the `count` bytes following the lead byte are continuation
+  // bytes (10xxxxxx). On failure `s` is left on the last valid continuation
+  // byte, so the whole malformed prefix is replaced by a single U+FFFD and the
+  // offending byte is decoded on its own.
+  const auto hasTrailingBytes = [&s](int count) {
+    for (int i = 1; i <= count; ++i) {
+      if ((static_cast<unsigned char>(s[i]) & 0xC0) != 0x80) {
+        s += i - 1;
+        return false;
+      }
+    }
+    return true;
+  };
+
   if (firstByte < 0xE0) {
     if (e - s < 2)
+      return REPLACEMENT_CHARACTER;
+    // a malformed continuation byte does not belong to this sequence
+    if (!hasTrailingBytes(1))
       return REPLACEMENT_CHARACTER;
 
     unsigned int calculated =
@@ -144,6 +161,8 @@ static unsigned int utf8ToCodepoint(const char*& s, const char* e) {
 
   if (firstByte < 0xF0) {
     if (e - s < 3)
+      return REPLACEMENT_CHARACTER;
+    if (!hasTrailingBytes(2))
       return REPLACEMENT_CHARACTER;
 
     unsigned int calculated = ((firstByte & 0x0F) << 12) |
@@ -161,12 +180,17 @@ static unsigned int utf8ToCodepoint(const char*& s, const char* e) {
   if (firstByte < 0xF8) {
     if (e - s < 4)
       return REPLACEMENT_CHARACTER;
+    if (!hasTrailingBytes(3))
+      return REPLACEMENT_CHARACTER;
 
     unsigned int calculated = ((firstByte & 0x07) << 18) |
                               ((static_cast<unsigned int>(s[1]) & 0x3F) << 12) |
                               ((static_cast<unsigned int>(s[2]) & 0x3F) << 6) |
                               (static_cast<unsigned int>(s[3]) & 0x3F);
     s += 3;
+    // codepoints beyond U+10FFFF are invalid
+    if (calculated > 0x10FFFF)
+      return REPLACEMENT_CHARACTER;
     // oversized encoded characters are invalid
     return calculated < 0x10000 ? REPLACEMENT_CHARACTER : calculated;
   }
