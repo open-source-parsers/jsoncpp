@@ -677,6 +677,11 @@ public:
   String getComment(CommentPlacement placement) const;
 
   String toStyledString() const;
+  /// Serialize using the settings of \p builder.
+  String toStyledString(const StreamWriterBuilder& builder) const;
+  /// Serialize with the given floating-point precision (capped at 17).
+  String toStyledString(unsigned int precision,
+                        PrecisionType precisionType = PrecisionType::decimalPlaces) const;
 
   const_iterator begin() const;
   const_iterator end() const;

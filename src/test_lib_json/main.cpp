@@ -2109,6 +2109,32 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, CommentBefore) {
   }
 }
 
+JSONTEST_FIXTURE_LOCAL(ValueTest, toStyledStringWithBuilder) {
+  Json::Value val(1);
+  val.setComment(Json::String("// comment"), Json::commentBefore);
+  Json::StreamWriterBuilder wbuilder;
+  JSONTEST_ASSERT_STRING_EQUAL("\n// comment\n1\n",
+                               val.toStyledString(wbuilder));
+  wbuilder.settings_["commentStyle"] = "None";
+  JSONTEST_ASSERT_STRING_EQUAL("1\n", val.toStyledString(wbuilder));
+
+  Json::Value obj;
+  obj["a"] = 1;
+  wbuilder.settings_["indentation"] = "";
+  JSONTEST_ASSERT_STRING_EQUAL("{\"a\":1}\n", obj.toStyledString(wbuilder));
+}
+
+JSONTEST_FIXTURE_LOCAL(ValueTest, toStyledStringWithPrecision) {
+  Json::Value val(3.14159265);
+  JSONTEST_ASSERT_STRING_EQUAL(
+      "3.14\n", val.toStyledString(2, Json::PrecisionType::decimalPlaces));
+  JSONTEST_ASSERT_STRING_EQUAL(
+      "3.1\n", val.toStyledString(2, Json::PrecisionType::significantDigits));
+  JSONTEST_ASSERT_STRING_EQUAL(
+      val.toStyledString(17, Json::PrecisionType::significantDigits),
+      val.toStyledString(100, Json::PrecisionType::significantDigits));
+}
+
 JSONTEST_FIXTURE_LOCAL(ValueTest, zeroes) {
   char const cstr[] = "h\0i";
   Json::String binary(cstr, sizeof(cstr)); // include trailing 0

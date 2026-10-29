@@ -1565,12 +1565,27 @@ ptrdiff_t Value::getOffsetLimit() const { return limit_; }
 
 String Value::toStyledString() const {
   StreamWriterBuilder builder;
+  return toStyledString(builder);
+}
 
-  String out = this->hasComment(commentBefore) ? "\n" : "";
+String Value::toStyledString(const StreamWriterBuilder& builder) const {
+  const bool emitComments =
+      builder.settings_["commentStyle"].asString() != "None";
+  String out = (emitComments && this->hasComment(commentBefore)) ? "\n" : "";
   out += Json::writeString(builder, *this);
   out += '\n';
 
   return out;
+}
+
+String Value::toStyledString(unsigned int precision,
+                             PrecisionType precisionType) const {
+  StreamWriterBuilder builder;
+  builder.settings_["precisionType"] =
+      precisionType == PrecisionType::significantDigits ? "significant"
+                                                        : "decimal";
+  builder.settings_["precision"] = precision;
+  return toStyledString(builder);
 }
 
 Value::const_iterator Value::begin() const {
