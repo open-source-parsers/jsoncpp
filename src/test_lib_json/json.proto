@@ -1,18 +1,7 @@
-// Copyright 2020 Google Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-////////////////////////////////////////////////////////////////////////////////
+// Copyright 2026 Google LLC and The JsonCpp Authors
+// Distributed under MIT license, or public domain if desired and
+// recognized in your jurisdiction.
+// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
 // The proto definition for JSON format has been written based on
 // http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf
@@ -26,10 +15,16 @@ message JsonParseAPI {
   required JsonObject object_value = 2;
 }
 
+message JsonMember {
+  required string name = 1;
+  required JsonValue value = 2;
+}
+
 message JsonObject {
-  required int32 settings = 1;
-  required string name = 2;
-  required JsonValue value = 3;
+  // An object holds any number of members (including none), so that mutations
+  // can generate multi-member objects and duplicate keys (which exercise the
+  // rejectDupKeys parser setting).
+  repeated JsonMember member = 1;
 }
 
 message JsonValue {

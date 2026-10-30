@@ -1,23 +1,14 @@
-// Copyright 2020 Google Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-////////////////////////////////////////////////////////////////////////////////
+// Copyright 2026 Google LLC and The JsonCpp Authors
+// Distributed under MIT license, or public domain if desired and
+// recognized in your jurisdiction.
+// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
 #include "json_proto_converter.h"
 
-#include <charconv>
 #include <cmath>
+#include <iomanip>
+#include <limits>
+#include <locale>
 
 namespace json_proto {
 
@@ -79,32 +70,49 @@ void JsonProtoConverter::AppendArray(const ArrayValue& array_value) {
 
 // Writes value as a decimal number without an exponent: scientific notation
 // would add a stray exponent to the generated number (e.g. "1e+20e3"), while
-// std::fixed with the stream's default precision would truncate small values
-// ("0.0001004" -> "0.000100"), collapsing distinct mutations. to_chars with
-// chars_format::fixed writes the shortest fixed-point string that round-trips
-// the value, avoiding both. Non-finite values have no decimal form; write 0
-// instead ("inf"/"nan" text would not be a valid JSON token) so the rest of
-// the generated structure remains parseable.
+// the stream's default formatting would truncate small values
+// ("0.0001004" -> "0.000100"), collapsing distinct mutations. Fixed notation
+// with 50 digits after the decimal point round-trips every finite float
+// (subnormal floats go down to ~1e-45). Non-finite values have no decimal
+// form; write 0 instead ("inf"/"nan" text would not be a valid JSON token) so
+// the rest of the generated structure remains parseable.
 void JsonProtoConverter::AppendPlainFloat(float value) {
   if (!std::isfinite(value)) {
     data_ << '0';
     return;
   }
-  char buf[96];  // shortest round-trip fixed form of a float fits comfortably
-  const auto result =
-      std::to_chars(buf, buf + sizeof(buf), value, std::chars_format::fixed);
-  if (result.ec == std::errc()) {
-    data_.write(buf, result.ptr - buf);
-  } else {
-    data_ << '0';
+  // Format in a scratch stream so the fixed/precision state does not leak
+  // into data_, and pin the classic ("C") locale so the decimal point is '.'.
+  std::ostringstream out;
+  out.imbue(std::locale::classic());
+  out << std::fixed << std::setprecision(50) << value;
+  std::string digits = out.str();
+  // Trim redundant trailing zeros ("0.0001004000..." -> "0.0001004"), keeping
+  // one digit after the decimal point so the token stays a float ("1.0").
+  const std::size_t last_significant = digits.find_last_not_of('0');
+  if (last_significant != std::string::npos) {
+    digits.erase(last_significant + (digits[last_significant] == '.' ? 2 : 1));
   }
+  data_ << digits;
 }
 
 void JsonProtoConverter::AppendNumber(const NumberValue& number_value) {
   if (number_value.has_float_value()) {
     const double value = number_value.float_value().value();
     // Keep "inf"/"nan" out of the output; they are not valid JSON numbers.
-    data_ << (std::isfinite(value) ? value : 0.0);
+    // Print with max_digits10 significant digits (the stream default of 6
+    // would collapse distinct generated doubles onto the same text). The
+    // result may carry an exponent, which is fine: no exponent gets appended
+    // to this value afterwards.
+    if (!std::isfinite(value)) {
+      data_ << '0';
+    } else {
+      std::ostringstream out;
+      out.imbue(std::locale::classic());
+      out << std::setprecision(std::numeric_limits<double>::max_digits10)
+          << value;
+      data_ << out.str();
+    }
   } else if (number_value.has_exponent_value()) {
     auto value = number_value.exponent_value();
     data_ << value.base();
@@ -122,9 +130,18 @@ void JsonProtoConverter::AppendNumber(const NumberValue& number_value) {
 
 void JsonProtoConverter::AppendObject(const JsonObject& json_object) {
   data_ << '{';
-  AppendEscapedString(json_object.name());
-  data_ << ':';
-  AppendValue(json_object.value());
+  bool need_comma = false;
+  for (const JsonMember& member : json_object.member()) {
+    // Trailing comma inside of an object makes JSON invalid, avoid adding it.
+    if (need_comma)
+      data_ << ',';
+    else
+      need_comma = true;
+
+    AppendEscapedString(member.name());
+    data_ << ':';
+    AppendValue(member.value());
+  }
   data_ << '}';
 }
 
