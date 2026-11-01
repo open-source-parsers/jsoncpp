@@ -3198,6 +3198,25 @@ JSONTEST_FIXTURE_LOCAL(ReaderTest, parseSpecialFloat) {
              "expected.\n");
 }
 
+JSONTEST_FIXTURE_LOCAL(ReaderTest, parseOverflow) {
+  // The legacy Reader has the same overflow handling as CharReader;
+  // out-of-range numbers must parse to +/-infinity (see #1446, #1405).
+  {
+    std::string doc = "[-1e+9999, 1e+9999]";
+    JSONTEST_ASSERT(reader->parse(doc, root));
+    JSONTEST_ASSERT_EQUAL(root.size(), 2u);
+    JSONTEST_ASSERT(std::isinf(root[0].asDouble()));
+    JSONTEST_ASSERT(root[0].asDouble() < 0);
+    JSONTEST_ASSERT(std::isinf(root[1].asDouble()));
+    JSONTEST_ASSERT(root[1].asDouble() > 0);
+  }
+  {
+    // Malformed numbers are still rejected.
+    std::string doc = "[0e]";
+    JSONTEST_ASSERT(!reader->parse(doc, root));
+  }
+}
+
 JSONTEST_FIXTURE_LOCAL(ReaderTest, strictModeParseNumber) {
   setStrictMode();
   checkParse(
@@ -3346,6 +3365,67 @@ JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseSubnormal) {
   for (const char* doc : {"[1abc]", "[0e]", "[0e+]"}) {
     Json::Value root;
     JSONTEST_ASSERT(!reader->parse(doc, doc + std::strlen(doc), &root, &errs));
+  }
+}
+
+JSONTEST_FIXTURE_LOCAL(CharReaderTest, parseOverflow) {
+  // Regression test for #1446/#1405: out-of-range numbers must parse to
+  // +/-infinity on every platform. Some standard libraries (e.g. MSVC) report
+  // overflow as a failed extraction without writing the max()/lowest()
+  // sentinels, which used to make tokens like "-1e+9999" fail to parse.
+  Json::CharReaderBuilder b;
+  CharReaderPtr reader(b.newCharReader());
+  Json::String errs;
+
+  const struct {
+    const char* doc;
+    double expected;
+  } cases[] = {
+      {"[1e+9999]", std::numeric_limits<double>::infinity()},
+      {"[-1e+9999]", -std::numeric_limits<double>::infinity()},
+      {"[1e309]", std::numeric_limits<double>::infinity()},
+      {"[-1e309]", -std::numeric_limits<double>::infinity()},
+      // An integer too large for any integral or floating-point type maps to
+      // infinity as well.
+      {"[9e99999999999999999999999999999999999999999999999999999999999999]",
+       std::numeric_limits<double>::infinity()},
+  };
+  for (const auto& c : cases) {
+    Json::Value root;
+    bool ok = reader->parse(c.doc, c.doc + std::strlen(c.doc), &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT(errs.empty());
+    JSONTEST_ASSERT(std::isinf(root[0].asDouble()));
+    JSONTEST_ASSERT_EQUAL(c.expected, root[0].asDouble());
+  }
+
+  // The exact shape of test/data/legacy_test_real_13.json.
+  {
+    Json::Value root;
+    char const doc[] = "[-1e+9999, 1e+9999]";
+    bool ok = reader->parse(doc, doc + sizeof(doc) - 1, &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT_EQUAL(root.size(), 2u);
+    JSONTEST_ASSERT(std::isinf(root[0].asDouble()));
+    JSONTEST_ASSERT(root[0].asDouble() < 0);
+    JSONTEST_ASSERT(std::isinf(root[1].asDouble()));
+    JSONTEST_ASSERT(root[1].asDouble() > 0);
+  }
+
+  // Infinity written by the default writer (useSpecialFloats=false)
+  // round-trips.
+  {
+    Json::Value v(Json::arrayValue);
+    v[0] = std::numeric_limits<double>::infinity();
+    v[1] = -std::numeric_limits<double>::infinity();
+    const Json::String doc = Json::writeString(Json::StreamWriterBuilder(), v);
+    Json::Value root;
+    bool ok = reader->parse(doc.data(), doc.data() + doc.size(), &root, &errs);
+    JSONTEST_ASSERT(ok);
+    JSONTEST_ASSERT(std::isinf(root[0].asDouble()));
+    JSONTEST_ASSERT(root[0].asDouble() > 0);
+    JSONTEST_ASSERT(std::isinf(root[1].asDouble()));
+    JSONTEST_ASSERT(root[1].asDouble() < 0);
   }
 }
 
