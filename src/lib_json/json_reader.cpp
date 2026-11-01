@@ -49,6 +49,36 @@ namespace Json {
 
 using CharReaderPtr = std::unique_ptr<CharReader>;
 
+// Returns true when [begin, end) is a well-formed JSON number token. Used by
+// decodeDouble() to distinguish floating-point overflow from malformed tokens
+// like "0e" or "0e+".
+bool isWellFormedJsonNumber(const char* begin, const char* end) {
+  const char* p = begin;
+  if (p != end && *p == '-')
+    ++p;
+  if (p == end || *p < '0' || *p > '9')
+    return false;
+  while (p != end && *p >= '0' && *p <= '9')
+    ++p;
+  if (p != end && *p == '.') {
+    ++p;
+    if (p == end || *p < '0' || *p > '9')
+      return false;
+    while (p != end && *p >= '0' && *p <= '9')
+      ++p;
+  }
+  if (p != end && (*p == 'e' || *p == 'E')) {
+    ++p;
+    if (p != end && (*p == '+' || *p == '-'))
+      ++p;
+    if (p == end || *p < '0' || *p > '9')
+      return false;
+    while (p != end && *p >= '0' && *p <= '9')
+      ++p;
+  }
+  return p == end;
+}
+
 // Implementation of class Features
 // ////////////////////////////////
 
@@ -587,12 +617,22 @@ bool Reader::decodeDouble(Token& token, Value& decoded) {
     // operator>> sets failbit for a subnormal result (underflow) even though
     // it produced the correctly-rounded value, which made such numbers fail to
     // parse back after jsoncpp serialized them. Keep a subnormal value instead
-    // of rejecting it. See issue #1427. Other failures -- malformed numbers
-    // like "0e" or "0e+", or non-numbers -- leave the value at zero/non-finite
-    // and are still rejected.
-    else if (!std::isinf(value) && std::fpclassify(value) != FP_SUBNORMAL)
+    // of rejecting it. See issue #1427.
+    else if (std::fpclassify(value) == FP_SUBNORMAL) {
+      // keep the correctly-rounded subnormal value
+    }
+    // Some standard libraries (e.g. MSVC) set failbit on overflow without
+    // writing the max()/lowest() sentinels, leaving `value` untouched. If the
+    // token is a well-formed number, a failed conversion means it is out of
+    // range: map it to +/-infinity so parsing behaves identically everywhere
+    // (see issues #1446 and #1405).
+    else if (isWellFormedJsonNumber(token.start_, token.end_)) {
+      value = *token.start_ == '-' ? -std::numeric_limits<double>::infinity()
+                                   : std::numeric_limits<double>::infinity();
+    } else {
       return addError(
           "'" + String(token.start_, token.end_) + "' is not a number.", token);
+    }
   }
   decoded = value;
   return true;
@@ -1678,12 +1718,22 @@ bool OurReader::decodeDouble(Token& token, Value& decoded) {
     // operator>> sets failbit for a subnormal result (underflow) even though
     // it produced the correctly-rounded value, which made such numbers fail to
     // parse back after jsoncpp serialized them. Keep a subnormal value instead
-    // of rejecting it. See issue #1427. Other failures -- malformed numbers
-    // like "0e" or "0e+", or non-numbers -- leave the value at zero/non-finite
-    // and are still rejected.
-    else if (!std::isinf(value) && std::fpclassify(value) != FP_SUBNORMAL)
+    // of rejecting it. See issue #1427.
+    else if (std::fpclassify(value) == FP_SUBNORMAL) {
+      // keep the correctly-rounded subnormal value
+    }
+    // Some standard libraries (e.g. MSVC) set failbit on overflow without
+    // writing the max()/lowest() sentinels, leaving `value` untouched. If the
+    // token is a well-formed number, a failed conversion means it is out of
+    // range: map it to +/-infinity so parsing behaves identically everywhere
+    // (see issues #1446 and #1405).
+    else if (isWellFormedJsonNumber(token.start_, token.end_)) {
+      value = *token.start_ == '-' ? -std::numeric_limits<double>::infinity()
+                                   : std::numeric_limits<double>::infinity();
+    } else {
       return addError(
           "'" + String(token.start_, token.end_) + "' is not a number.", token);
+    }
   }
   decoded = value;
   return true;
