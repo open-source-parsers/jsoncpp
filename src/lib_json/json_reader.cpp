@@ -988,6 +988,7 @@ private:
 // CharReaderTest/parseCommentsAfterValueScansLinearly). thread_local so it
 // never races during concurrent parsing; the increment is negligible and only
 // runs while parsing comments. Not part of the supported public API.
+JSON_API size_t& newlineScanByteCountForTesting();
 JSON_API size_t& newlineScanByteCountForTesting() {
   static thread_local size_t count = 0;
   return count;
