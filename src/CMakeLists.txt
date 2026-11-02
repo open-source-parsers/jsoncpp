@@ -1,5 +1,7 @@
 add_subdirectory(lib_json)
 if(JSONCPP_WITH_TESTS)
     add_subdirectory(jsontestrunner)
+endif()
+if(JSONCPP_WITH_TESTS OR JSONCPP_WITH_FUZZING)
     add_subdirectory(test_lib_json)
 endif()

@@ -1,0 +1,94 @@
+// Copyright 2026 Google LLC and The JsonCpp Authors
+// Distributed under MIT license, or public domain if desired and
+// recognized in your jurisdiction.
+// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+
+// The proto definition for JSON format has been written based on
+// http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf
+
+syntax = "proto2";
+
+package json_proto;
+
+message JsonParseAPI {
+  required int32 settings = 1;
+  required JsonObject object_value = 2;
+}
+
+message JsonMember {
+  required string name = 1;
+  required JsonValue value = 2;
+}
+
+message JsonObject {
+  // An object holds any number of members (including none), so that mutations
+  // can generate multi-member objects and duplicate keys (which exercise the
+  // rejectDupKeys parser setting).
+  repeated JsonMember member = 1;
+}
+
+message JsonValue {
+  oneof value {
+    // Json value types:
+
+    // null: null, will be used when 'oneof' contains nothing
+
+    // object: another json object of any type
+    JsonObject object_value = 1;
+
+    // array: an array of values
+    ArrayValue array_value = 2;
+
+    // number: can be an integer, a float, an exponent
+    NumberValue number_value = 3;
+
+    // string: unicode string
+    StringValue string_value = 4;
+
+    // boolean: true or talse
+    BooleanValue boolean_value = 5;
+  }
+}
+
+message ArrayValue {
+  repeated JsonValue value = 1;
+}
+
+message NumberInteger {
+  required int64 value = 1;
+}
+
+message NumberFloat {
+  required double value = 1;
+}
+
+message NumberExponent {
+  required int32 base = 1;
+  required int32 exponent = 2;
+  required bool use_uppercase = 3;
+}
+
+message NumberExponentFrac {
+  required float base = 1;
+  required int32 exponent = 2;
+  required bool use_uppercase = 3;
+}
+
+message NumberValue {
+  required NumberInteger integer_value = 1;
+
+  // integer_value is used when oneof field below has nothing.
+  oneof value {
+    NumberFloat float_value = 2;
+    NumberExponent exponent_value = 3;
+    NumberExponentFrac exponent_frac_value = 4;
+  }
+}
+
+message StringValue {
+  required string value = 1;
+}
+
+message BooleanValue {
+  required bool value = 1;
+}
