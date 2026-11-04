@@ -14,6 +14,8 @@
 #include "jsontest.h"
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <functional>
 #include <iomanip>
@@ -2182,6 +2184,37 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, removeMemberWithEmbeddedNull) {
     JSONTEST_ASSERT(root.isMember(prefix));
     JSONTEST_ASSERT_EQUAL(1U, root.size());
   }
+}
+
+JSONTEST_FIXTURE_LOCAL(ValueTest, lengthsTooLongToStoreAreNotTruncated) {
+#if JSON_USE_EXCEPTION
+  // Lengths are checked before anything is read, so most of this buffer stays
+  // untouched and costs address space, not memory.
+  const std::uint64_t stringLength = (std::uint64_t{1} << 32) + 1;
+  const size_t keyLength = (size_t{1} << 30) + 1;
+  if (stringLength > std::numeric_limits<size_t>::max())
+    return;
+  std::unique_ptr<char, decltype(&std::free)> buffer(
+      static_cast<char*>(std::malloc(static_cast<size_t>(stringLength))),
+      &std::free);
+  if (!buffer)
+    return;
+  buffer.get()[0] = 'x';
+  const char* begin = buffer.get();
+
+  JSONTEST_ASSERT_THROWS(
+      Json::Value(begin, begin + static_cast<size_t>(stringLength)));
+
+  Json::Value root(Json::objectValue);
+  JSONTEST_ASSERT_THROWS(root.demand(begin, begin + keyLength));
+  JSONTEST_ASSERT(root.empty());
+
+  // Must not alias the key made of the low bits of the length.
+  root["x"] = "keep";
+  JSONTEST_ASSERT(root.find(begin, begin + keyLength) == nullptr);
+  JSONTEST_ASSERT(!root.removeMember(begin, begin + keyLength, nullptr));
+  JSONTEST_ASSERT_EQUAL(1U, root.size());
+#endif
 }
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, removeMemberStringOnNullAndEmptyKey) {
