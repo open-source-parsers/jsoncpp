@@ -133,20 +133,20 @@ static inline char* duplicateStringValue(const char* value, size_t length) {
 /* Record the length as a prefix.
  */
 static inline char* duplicateAndPrefixStringValue(const char* value,
-                                                  unsigned int length) {
+                                                  size_t length) {
   // Avoid an integer overflow in the call to malloc below by limiting length
-  // to a sane value.
+  // to a sane value. This also keeps it within the unsigned prefix.
   JSON_ASSERT_MESSAGE(length <= static_cast<unsigned>(Value::maxInt) -
                                     sizeof(unsigned) - 1U,
                       "in Json::Value::duplicateAndPrefixStringValue(): "
                       "length too big for prefixing");
-  size_t actualLength = sizeof(length) + length + 1;
+  size_t actualLength = sizeof(unsigned) + length + 1;
   auto newString = static_cast<char*>(malloc(actualLength));
   if (newString == nullptr) {
     throwRuntimeError("in Json::Value::duplicateAndPrefixStringValue(): "
                       "Failed to allocate string value buffer");
   }
-  *reinterpret_cast<unsigned*>(newString) = length;
+  *reinterpret_cast<unsigned*>(newString) = static_cast<unsigned>(length);
   memcpy(newString + sizeof(unsigned), value, length);
   newString[actualLength - 1U] =
       0; // to avoid buffer over-run accidents by users later
@@ -263,6 +263,11 @@ JSONCPP_NORETURN void throwLogicError(String const& msg) {
 
 // Notes: policy_ indicates if the string was allocated when
 // a string is stored.
+
+// A longer key doesn't fit in CZString::StringStorage::length_.
+static inline bool isValidKeyLength(size_t length) {
+  return length < (1U << 30);
+}
 
 Value::CZString::CZString(ArrayIndex index) : cstr_(nullptr), index_(index) {}
 
@@ -456,20 +461,18 @@ Value::Value(const char* value) {
   initBasic(stringValue, true);
   JSON_ASSERT_MESSAGE(value != nullptr,
                       "Null Value Passed to Value Constructor");
-  value_.string_ = duplicateAndPrefixStringValue(
-      value, static_cast<unsigned>(strlen(value)));
+  value_.string_ = duplicateAndPrefixStringValue(value, strlen(value));
 }
 
 Value::Value(const char* begin, const char* end) {
   initBasic(stringValue, true);
   value_.string_ =
-      duplicateAndPrefixStringValue(begin, static_cast<unsigned>(end - begin));
+      duplicateAndPrefixStringValue(begin, static_cast<size_t>(end - begin));
 }
 
 Value::Value(const String& value) {
   initBasic(stringValue, true);
-  value_.string_ = duplicateAndPrefixStringValue(
-      value.data(), static_cast<unsigned>(value.length()));
+  value_.string_ = duplicateAndPrefixStringValue(value.data(), value.length());
 }
 
 Value::Value(const StaticString& value) {
@@ -1112,7 +1115,10 @@ Value& Value::resolveReference(const char* key) {
           << valueTypeToString(type()));
   if (type() == nullValue)
     *this = Value(objectValue);
-  CZString actualKey(key, static_cast<unsigned>(strlen(key)),
+  const size_t keyLength = strlen(key);
+  JSON_ASSERT_MESSAGE(isValidKeyLength(keyLength),
+                      "in Json::Value::resolveReference(): key too long");
+  CZString actualKey(key, static_cast<unsigned>(keyLength),
                      CZString::noDuplication); // NOTE!
   auto it = value_.map_->lower_bound(actualKey);
   if (it != value_.map_->end() && (*it).first == actualKey)
@@ -1132,7 +1138,11 @@ Value& Value::resolveReference(char const* key, char const* end) {
                           << valueTypeToString(type()));
   if (type() == nullValue)
     *this = Value(objectValue);
-  CZString actualKey(key, static_cast<unsigned>(end - key),
+  const size_t keyLength = static_cast<size_t>(end - key);
+  JSON_ASSERT_MESSAGE(
+      isValidKeyLength(keyLength),
+      "in Json::Value::resolveReference(key, end): key too long");
+  CZString actualKey(key, static_cast<unsigned>(keyLength),
                      CZString::duplicateOnCopy);
   auto it = value_.map_->lower_bound(actualKey);
   if (it != value_.map_->end() && (*it).first == actualKey)
@@ -1157,7 +1167,10 @@ Value const* Value::find(char const* begin, char const* end) const {
                       "objectValue or nullValue");
   if (type() == nullValue)
     return nullptr;
-  CZString actualKey(begin, static_cast<unsigned>(end - begin),
+  const size_t keyLength = static_cast<size_t>(end - begin);
+  if (!isValidKeyLength(keyLength))
+    return nullptr;
+  CZString actualKey(begin, static_cast<unsigned>(keyLength),
                      CZString::noDuplication);
   ObjectValues::const_iterator it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
@@ -1282,7 +1295,10 @@ bool Value::removeMember(const char* begin, const char* end, Value* removed) {
   if (type() != objectValue) {
     return false;
   }
-  CZString actualKey(begin, static_cast<unsigned>(end - begin),
+  const size_t keyLength = static_cast<size_t>(end - begin);
+  if (!isValidKeyLength(keyLength))
+    return false;
+  CZString actualKey(begin, static_cast<unsigned>(keyLength),
                      CZString::noDuplication);
   auto it = value_.map_->find(actualKey);
   if (it == value_.map_->end())
