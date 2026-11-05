@@ -14,6 +14,7 @@
 #include <cstddef>
 #include <cstring>
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include <utility>
 
@@ -85,10 +86,14 @@ Value const& Value::nullRef = Value::nullSingleton();
 #if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 template <typename T, typename U>
 static inline bool InRange(double d, T min, U max) {
-  // The casts can lose precision, but we are looking only for
-  // an approximate range. Might fail on edge cases though. ~cdunn
-  return d >= static_cast<double>(min) && d <= static_cast<double>(max) &&
-         !(static_cast<U>(d) == min && d != static_cast<double>(min));
+  // A 64-bit max is not exactly representable as a double: it rounds up to 2^63
+  // or 2^64, which is out of range. Casting that to U is undefined behavior, so
+  // it has to be rejected here.
+  const double upper = static_cast<double>(max);
+  const bool upperIsExact =
+      std::numeric_limits<U>::digits <= std::numeric_limits<double>::digits;
+  return d >= static_cast<double>(min) &&
+         (upperIsExact ? d <= upper : d < upper);
 }
 #else  // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 static inline double integerToDouble(Json::UInt64 value) {
@@ -102,8 +107,11 @@ template <typename T> static inline double integerToDouble(T value) {
 
 template <typename T, typename U>
 static inline bool InRange(double d, T min, U max) {
-  return d >= integerToDouble(min) && d <= integerToDouble(max) &&
-         !(static_cast<U>(d) == min && d != integerToDouble(min));
+  // See the comment on the other InRange().
+  const double upper = integerToDouble(max);
+  const bool upperIsExact =
+      std::numeric_limits<U>::digits <= std::numeric_limits<double>::digits;
+  return d >= integerToDouble(min) && (upperIsExact ? d <= upper : d < upper);
 }
 #endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 
