@@ -1532,6 +1532,13 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, nonIntegers) {
   JSONTEST_ASSERT_EQUAL(true, val.asBool());
   JSONTEST_ASSERT_EQUAL("1.5", val.asString());
 
+  // Below one: truncates to the lowest unsigned value, like 1.5 truncates to 1
+  val = Json::Value(0.5);
+
+  JSONTEST_ASSERT(val.isConvertibleTo(Json::uintValue));
+  JSONTEST_ASSERT_EQUAL(0, val.asUInt());
+  JSONTEST_ASSERT_EQUAL(0, val.asLargestUInt());
+
   // Small negative number
   val = Json::Value(-1.5);
 
@@ -1999,6 +2006,32 @@ JSONTEST_FIXTURE_LOCAL(ValueTest, typeChecksThrowExceptions) {
 
 #endif // JSON_USE_EXCEPTION
 }
+
+#if defined(JSON_HAS_INT64)
+JSONTEST_FIXTURE_LOCAL(ValueTest, doubleConversionEdges) {
+  // The largest doubles in range convert exactly.
+  const double belowTwoTo63 = 9223372036854774784.0;
+  const double belowTwoTo64 = 18446744073709549568.0;
+  JSONTEST_ASSERT_EQUAL(Json::Int64(9223372036854774784),
+                        Json::Value(belowTwoTo63).asInt64());
+  JSONTEST_ASSERT_EQUAL(Json::UInt64(18446744073709549568U),
+                        Json::Value(belowTwoTo64).asUInt64());
+  JSONTEST_ASSERT_EQUAL(Json::UInt64(9223372036854775808U),
+                        Json::Value(9223372036854775808.0).asUInt64());
+
+#if JSON_USE_EXCEPTION
+  // 2^63 and 2^64 are one past the limits. They used to reach a cast with no
+  // defined result, and asUInt64() of 2^64 gave 2^63 when built with clang on
+  // x86-64.
+  const double twoTo63 = 9223372036854775808.0;
+  const double twoTo64 = 18446744073709551616.0;
+  JSONTEST_ASSERT_THROWS(Json::Value(twoTo63).asInt64());
+  JSONTEST_ASSERT_THROWS(Json::Value(twoTo63).asLargestInt());
+  JSONTEST_ASSERT_THROWS(Json::Value(twoTo64).asUInt64());
+  JSONTEST_ASSERT_THROWS(Json::Value(twoTo64).asLargestUInt());
+#endif // JSON_USE_EXCEPTION
+}
+#endif // defined(JSON_HAS_INT64)
 
 JSONTEST_FIXTURE_LOCAL(ValueTest, offsetAccessors) {
   Json::Value x;
