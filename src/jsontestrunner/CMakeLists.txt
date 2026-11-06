@@ -49,6 +49,10 @@ if(PYTHONINTERP_FOUND)
         WORKING_DIRECTORY "${TEST_DIR}/data"
     )
 
+    add_test(NAME jsoncpp_runner_arguments
+        COMMAND "${PYTHON_EXECUTABLE}" -B "${TEST_DIR}/test_runjsontests.py"
+    )
+
     # Both tests write .actual/.actual-rewrite along with test data, need to prevent collision when running tests via ctest -j
     set_tests_properties(jsoncpp_readerwriter jsoncpp_readerwriter_json_checker
         PROPERTIES RESOURCE_LOCK "test_data_files"
