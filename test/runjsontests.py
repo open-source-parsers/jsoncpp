@@ -11,26 +11,23 @@ import sys
 import os
 import os.path
 import optparse
+import subprocess
 
 VALGRIND_CMD = 'valgrind --tool=memcheck --leak-check=yes --undef-value-errors=yes '
 
 def getStatusOutput(cmd):
     """
-    Return int, unicode (for both Python 2 and 3).
-    Note: os.popen().close() would return None for 0.
+    Return exit status and text output. Zero means success.
     """
     print(cmd, file=sys.stderr)
-    pipe = os.popen(cmd)
-    process_output = pipe.read()
     try:
-        # We have been using os.popen(). When we read() the result
-        # we get 'str' (bytes) in py2, and 'str' (unicode) in py3.
-        # Ugh! There must be a better way to handle this.
-        process_output = process_output.decode('utf-8')
-    except AttributeError:
-        pass  # python3
-    status = pipe.close()
-    return status, process_output
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                   universal_newlines=True)
+    except OSError as error:
+        print(error, file=sys.stderr)
+        return 1, ''
+    process_output = process.communicate()[0]
+    return process.returncode, process_output
 def compareOutputs(expected, actual, message):
     expected = expected.strip().replace('\r','').split('\n')
     actual = actual.strip().replace('\r','').split('\n')
@@ -107,18 +104,19 @@ def runAllTests(jsontest_executable_path, input_path = None,
     ]
 
     failed_tests = []
-    valgrind_path = use_valgrind and VALGRIND_CMD or ''
+    valgrind_args = VALGRIND_CMD.split() if use_valgrind else []
     for input_path in tests:
         expect_failure = os.path.basename(input_path).startswith('fail')
         is_json_checker_test = os.path.basename(os.path.dirname(input_path)) == "jsonchecker"
         is_parse_only = is_json_checker_test or expect_failure
         is_strict_test = ('_strict_' in os.path.basename(input_path)) or is_json_checker_test
         print('TESTING:', input_path, end=' ')
-        options = is_parse_only and '--parse-only' or ''
-        options += is_strict_test and ' --strict' or ''
-        options += ' --json-writer %s'%writerClass
-        cmd = '%s%s %s "%s"' % (            valgrind_path, jsontest_executable_path, options,
-            input_path)
+        cmd = valgrind_args + [jsontest_executable_path]
+        if is_parse_only:
+            cmd.append('--parse-only')
+        if is_strict_test:
+            cmd.append('--strict')
+        cmd.extend(['--json-writer', writerClass, input_path])
         status, process_output = getStatusOutput(cmd)
         if is_parse_only:
             if expect_failure:
