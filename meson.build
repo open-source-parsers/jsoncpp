@@ -155,3 +155,9 @@ test(
     join_paths(meson.current_source_dir(), 'test/data')],
     workdir : join_paths(meson.current_source_dir(), 'test/data'),
   )
+
+test(
+  'runner_arguments',
+  python,
+  args : ['-B', join_paths(meson.current_source_dir(), 'test/test_runjsontests.py')],
+  )
